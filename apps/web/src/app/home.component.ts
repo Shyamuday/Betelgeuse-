@@ -1,44 +1,33 @@
 import { Component } from '@angular/core';
 import { AppFooterComponent } from './app-footer.component';
 import { AppHeaderComponent } from './app-header.component';
+import { HomeFinalCtaSectionComponent } from './home-final-cta-section.component';
+import { HomeHeroSectionComponent } from './home-hero-section.component';
+import { HomeHowItWorksSectionComponent } from './home-how-it-works-section.component';
+import { HomeSafetyFaqSectionComponent } from './home-safety-faq-section.component';
+import { HomeTreatmentsSectionComponent } from './home-treatments-section.component';
 
 @Component({
   selector: 'app-home',
-  imports: [AppHeaderComponent, AppFooterComponent],
+  imports: [
+    AppHeaderComponent,
+    AppFooterComponent,
+    HomeHeroSectionComponent,
+    HomeTreatmentsSectionComponent,
+    HomeHowItWorksSectionComponent,
+    HomeSafetyFaqSectionComponent,
+    HomeFinalCtaSectionComponent
+  ],
   template: `
     <section class="public-shell">
       <app-header subtitle="Digital clinic" [whatsappLink]="whatsappLink" />
 
-      <main class="auth-page">
-        <div class="home-hero">
-          <p class="eyebrow">Vitalis Clinic</p>
-          <h1>Doctor-led care for your health concerns.</h1>
-          <p class="hero-copy">
-            Choose your health concern, complete a short intake, pay securely, and get assigned to our internal doctor panel.
-          </p>
-
-          <div class="home-actions">
-            <a class="primary home-action" href="/login">Book consultation</a>
-            <a class="whatsapp-action" [href]="whatsappLink" target="_blank" rel="noopener">
-              Chat on WhatsApp
-            </a>
-          </div>
-
-          <div class="trust-grid">
-            <div>
-              <strong>₹499</strong>
-              <span>Hair fall consult</span>
-            </div>
-            <div>
-              <strong>Chat-first</strong>
-              <span>Low data usage</span>
-            </div>
-            <div>
-              <strong>Private</strong>
-              <span>No public doctor listings</span>
-            </div>
-          </div>
-        </div>
+      <main class="content-page">
+        <app-home-hero-section [whatsappLink]="whatsappLink" />
+        <app-home-treatments-section />
+        <app-home-how-it-works-section />
+        <app-home-safety-faq-section />
+        <app-home-final-cta-section [whatsappLink]="whatsappLink" />
       </main>
 
       <app-footer [whatsappLink]="whatsappLink" />
