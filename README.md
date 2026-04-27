@@ -7,9 +7,11 @@ Hybrid MVP for a single-brand clinic platform.
 - Angular app: `apps/web`
 - TypeScript Node API: `apps/api`
 - Supabase: auth, PostgreSQL, realtime-ready chat tables, prescription storage, RLS
-- Node API responsibility in hybrid mode: Razorpay and other server-only privileged logic
+- Node API responsibility in hybrid mode: Razorpay order creation, signature verification, webhooks, and other server-only privileged logic
 
 ## Supabase Setup
+
+Detailed steps are in `docs/supabase-setup.md`.
 
 1. Create a Supabase project.
 2. Run `supabase/schema.sql` in the Supabase SQL editor.

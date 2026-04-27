@@ -9,6 +9,7 @@ import { ConsultationStatus, PaymentStatus, Role } from '@prisma/client';
 import { z } from 'zod';
 import { allowRoles, authRequired, signToken } from './auth.js';
 import { prisma } from './db.js';
+import { supabaseAdmin } from './supabase.js';
 
 const app = express();
 const port = Number(process.env.PORT || 4000);
@@ -16,8 +17,12 @@ const webOrigin = process.env.WEB_ORIGIN || 'http://localhost:4200';
 const devOtp = process.env.DEV_OTP || '123456';
 const googleClientId = process.env.GOOGLE_CLIENT_ID || '';
 const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null;
+const razorpayKeyId = process.env.RAZORPAY_KEY_ID || '';
+const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET || '';
+const razorpayWebhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || '';
 
 app.use(cors({ origin: webOrigin, credentials: true }));
+app.use('/payments/razorpay-webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
 const asyncRoute =
@@ -71,6 +76,27 @@ function hashToken(token: string) {
 
 function randomToken() {
   return crypto.randomBytes(32).toString('hex');
+}
+
+function getRazorpayClient() {
+  if (!razorpayKeyId || !razorpayKeySecret) {
+    throw new Error('Razorpay is not configured. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.');
+  }
+
+  return new Razorpay({ key_id: razorpayKeyId, key_secret: razorpayKeySecret });
+}
+
+function verifyRazorpaySignature(payload: {
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+}) {
+  const digest = crypto
+    .createHmac('sha256', razorpayKeySecret)
+    .update(`${payload.razorpayOrderId}|${payload.razorpayPaymentId}`)
+    .digest('hex');
+
+  return crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(payload.razorpaySignature));
 }
 
 app.get('/health', (_req, res) => {
@@ -517,71 +543,206 @@ app.post(
 
 app.post(
   '/payments/:consultationId/create-order',
-  authRequired,
-  allowRoles(Role.PATIENT),
   asyncRoute(async (req, res) => {
-    const consultation = await prisma.consultation.findUniqueOrThrow({
-      where: { id: routeParam(req, 'consultationId') },
-      include: { payment: true }
-    });
-
-    if (consultation.patientId !== req.user!.id) {
-      return res.status(403).json({ message: 'Access denied' });
+    if (!supabaseAdmin) {
+      return res.status(503).json({ message: 'Supabase service role is not configured.' });
     }
 
-    const keyId = process.env.RAZORPAY_KEY_ID;
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
-    let providerOrderId = `order_dev_${consultation.id}`;
+    const body = z.object({ patientId: z.string().uuid() }).parse(req.body);
+    const consultationId = routeParam(req, 'consultationId');
 
-    if (keyId && keySecret) {
-      const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
-      const order = await razorpay.orders.create({
-        amount: consultation.payment!.amountInPaise,
-        currency: 'INR',
-        receipt: consultation.id
-      });
-      providerOrderId = order.id;
+    const { data: consultation, error: consultationError } = await supabaseAdmin
+      .from('consultations')
+      .select('id, patient_id, payments(id, amount_in_paise, status)')
+      .eq('id', consultationId)
+      .single();
+
+    if (consultationError || !consultation) {
+      return res.status(404).json({ message: 'Consultation not found.' });
     }
 
-    const payment = await prisma.payment.update({
-      where: { consultationId: consultation.id },
-      data: { providerOrderId }
+    if (consultation.patient_id !== body.patientId) {
+      return res.status(403).json({ message: 'Access denied.' });
+    }
+
+    const payment = Array.isArray(consultation.payments) ? consultation.payments[0] : consultation.payments;
+    if (!payment) {
+      return res.status(400).json({ message: 'Payment record is missing for this consultation.' });
+    }
+
+    if (payment.status === 'PAID') {
+      return res.status(400).json({ message: 'Payment is already completed.' });
+    }
+
+    const razorpay = getRazorpayClient();
+    const order = await razorpay.orders.create({
+      amount: payment.amount_in_paise,
+      currency: 'INR',
+      receipt: consultation.id,
+      notes: {
+        consultationId: consultation.id,
+        patientId: body.patientId
+      }
     });
 
-    res.json({ payment, razorpayKeyId: keyId || 'dev_key' });
+    const { error: paymentError } = await supabaseAdmin
+      .from('payments')
+      .update({ provider_order_id: order.id, status: 'CREATED' })
+      .eq('id', payment.id);
+
+    if (paymentError) {
+      return res.status(500).json({ message: paymentError.message });
+    }
+
+    res.json({
+      orderId: order.id,
+      amountInPaise: payment.amount_in_paise,
+      currency: 'INR',
+      razorpayKeyId
+    });
   })
 );
 
 app.post(
   '/payments/:consultationId/verify',
-  authRequired,
-  allowRoles(Role.PATIENT),
   asyncRoute(async (req, res) => {
-    const body = z.object({ providerPaymentId: z.string().min(1).default('pay_dev_success') }).parse(req.body);
-    const consultation = await prisma.consultation.findUniqueOrThrow({
-      where: { id: routeParam(req, 'consultationId') },
-      include: { payment: true }
-    });
-
-    if (consultation.patientId !== req.user!.id) {
-      return res.status(403).json({ message: 'Access denied' });
+    if (!supabaseAdmin) {
+      return res.status(503).json({ message: 'Supabase service role is not configured.' });
     }
 
-    const payment = await prisma.payment.update({
-      where: { consultationId: consultation.id },
-      data: {
-        providerPaymentId: body.providerPaymentId,
-        status: PaymentStatus.PAID
-      }
-    });
+    const body = z
+      .object({
+        patientId: z.string().uuid(),
+        razorpayOrderId: z.string().min(1),
+        razorpayPaymentId: z.string().min(1),
+        razorpaySignature: z.string().min(1)
+      })
+      .parse(req.body);
+    const consultationId = routeParam(req, 'consultationId');
 
-    const updated = await prisma.consultation.update({
-      where: { id: consultation.id },
-      data: { status: ConsultationStatus.PAID },
-      include: includeConsultationRelations()
-    });
+    const { data: consultation, error: consultationError } = await supabaseAdmin
+      .from('consultations')
+      .select('id, patient_id, payments(id, provider_order_id)')
+      .eq('id', consultationId)
+      .single();
 
-    res.json({ payment, consultation: updated });
+    if (consultationError || !consultation) {
+      return res.status(404).json({ message: 'Consultation not found.' });
+    }
+
+    if (consultation.patient_id !== body.patientId) {
+      return res.status(403).json({ message: 'Access denied.' });
+    }
+
+    const payment = Array.isArray(consultation.payments) ? consultation.payments[0] : consultation.payments;
+    if (!payment || payment.provider_order_id !== body.razorpayOrderId) {
+      return res.status(400).json({ message: 'Payment order does not match consultation.' });
+    }
+
+    if (!verifyRazorpaySignature(body)) {
+      return res.status(400).json({ message: 'Invalid Razorpay signature.' });
+    }
+
+    const { error: paymentError } = await supabaseAdmin
+      .from('payments')
+      .update({
+        status: 'PAID',
+        provider_payment_id: body.razorpayPaymentId
+      })
+      .eq('id', payment.id);
+
+    if (paymentError) {
+      return res.status(500).json({ message: paymentError.message });
+    }
+
+    const { error: updateError } = await supabaseAdmin
+      .from('consultations')
+      .update({ status: 'PAID' })
+      .eq('id', consultation.id);
+
+    if (updateError) {
+      return res.status(500).json({ message: updateError.message });
+    }
+
+    res.json({ ok: true });
+  })
+);
+
+app.post(
+  '/payments/razorpay-webhook',
+  asyncRoute(async (req, res) => {
+    if (!supabaseAdmin) {
+      return res.status(503).json({ message: 'Supabase service role is not configured.' });
+    }
+
+    if (!razorpayWebhookSecret) {
+      return res.status(503).json({ message: 'Razorpay webhook secret is not configured.' });
+    }
+
+    const signature = req.header('x-razorpay-signature') || '';
+    const rawBody = Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body));
+    const expectedSignature = crypto.createHmac('sha256', razorpayWebhookSecret).update(rawBody).digest('hex');
+
+    if (
+      expectedSignature.length !== signature.length ||
+      !crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(signature))
+    ) {
+      return res.status(400).json({ message: 'Invalid webhook signature.' });
+    }
+
+    const event = JSON.parse(rawBody.toString()) as {
+      event: string;
+      payload?: {
+        payment?: {
+          entity?: {
+            id: string;
+            order_id: string;
+          };
+        };
+      };
+    };
+
+    if (event.event !== 'payment.captured') {
+      return res.json({ ok: true, ignored: true });
+    }
+
+    const paymentEntity = event.payload?.payment?.entity;
+    if (!paymentEntity?.order_id) {
+      return res.status(400).json({ message: 'Webhook payment payload is missing order id.' });
+    }
+
+    const { data: payment, error: paymentLookupError } = await supabaseAdmin
+      .from('payments')
+      .select('id, consultation_id')
+      .eq('provider_order_id', paymentEntity.order_id)
+      .single();
+
+    if (paymentLookupError || !payment) {
+      return res.status(404).json({ message: 'Payment record not found for Razorpay order.' });
+    }
+
+    const { error: paymentError } = await supabaseAdmin
+      .from('payments')
+      .update({
+        status: 'PAID',
+        provider_payment_id: paymentEntity.id
+      })
+      .eq('id', payment.id);
+
+    if (paymentError) {
+      return res.status(500).json({ message: paymentError.message });
+    }
+
+    const { error: consultationError } = await supabaseAdmin
+      .from('consultations')
+      .update({ status: 'PAID' })
+      .eq('id', payment.consultation_id);
+
+    if (consultationError) {
+      return res.status(500).json({ message: consultationError.message });
+    }
+
+    res.json({ ok: true });
   })
 );
 

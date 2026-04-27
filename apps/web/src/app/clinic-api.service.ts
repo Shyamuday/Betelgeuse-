@@ -3,6 +3,26 @@ import { from, map } from 'rxjs';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { Consultation, Disease, Doctor } from './models';
 import { supabase } from './supabase.client';
+import { environment } from '../environments/environment';
+
+type RazorpayOrderResponse = {
+  orderId: string;
+  amountInPaise: number;
+  currency: string;
+  razorpayKeyId: string;
+};
+
+type RazorpayCheckoutResponse = {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+};
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+  }
+}
 
 @Injectable({ providedIn: 'root' })
 export class ClinicApiService {
@@ -19,11 +39,11 @@ export class ClinicApiService {
   }
 
   createPaymentOrder(consultationId: string) {
-    return from(Promise.resolve({ consultationId }));
+    return from(this.createRazorpayOrder(consultationId));
   }
 
-  verifyPayment(consultationId: string) {
-    return from(this.markPaymentPaid(consultationId));
+  verifyPayment(consultationId: string, payment: RazorpayCheckoutResponse) {
+    return from(this.verifyRazorpayPayment(consultationId, payment));
   }
 
   sendMessage(consultationId: string, body: string) {
@@ -183,6 +203,98 @@ export class ClinicApiService {
     }
 
     return { consultation: { id: consultationId } as Consultation };
+  }
+
+  async openRazorpayCheckout(consultation: Consultation, order: RazorpayOrderResponse) {
+    await this.loadRazorpayScript();
+
+    const user = (await supabase.auth.getUser()).data.user;
+    return new Promise<RazorpayCheckoutResponse>((resolve, reject) => {
+      if (!window.Razorpay) {
+        reject(new Error('Razorpay checkout script failed to load.'));
+        return;
+      }
+
+      const checkout = new window.Razorpay({
+        key: order.razorpayKeyId,
+        amount: order.amountInPaise,
+        currency: order.currency,
+        name: 'Betelgeuse Clinic',
+        description: consultation.disease.name,
+        order_id: order.orderId,
+        prefill: {
+          name: consultation.patient.name,
+          email: user?.email || '',
+          contact: consultation.patient.mobile || ''
+        },
+        theme: {
+          color: '#0f62fe'
+        },
+        handler: (response: RazorpayCheckoutResponse) => resolve(response),
+        modal: {
+          ondismiss: () => reject(new Error('Payment was cancelled.'))
+        }
+      });
+
+      checkout.open();
+    });
+  }
+
+  private async createRazorpayOrder(consultationId: string) {
+    const user = (await supabase.auth.getUser()).data.user;
+    if (!user) {
+      throw new Error('Login required.');
+    }
+
+    const response = await fetch(`${environment.apiUrl}/payments/${consultationId}/create-order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ patientId: user.id })
+    });
+
+    if (!response.ok) {
+      throw new Error((await response.json()).message || 'Could not create Razorpay order.');
+    }
+
+    return (await response.json()) as RazorpayOrderResponse;
+  }
+
+  private async verifyRazorpayPayment(consultationId: string, payment: RazorpayCheckoutResponse) {
+    const user = (await supabase.auth.getUser()).data.user;
+    if (!user) {
+      throw new Error('Login required.');
+    }
+
+    const response = await fetch(`${environment.apiUrl}/payments/${consultationId}/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        patientId: user.id,
+        razorpayOrderId: payment.razorpay_order_id,
+        razorpayPaymentId: payment.razorpay_payment_id,
+        razorpaySignature: payment.razorpay_signature
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error((await response.json()).message || 'Could not verify Razorpay payment.');
+    }
+
+    return response.json();
+  }
+
+  private loadRazorpayScript() {
+    if (window.Razorpay) {
+      return Promise.resolve();
+    }
+
+    return new Promise<void>((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Unable to load Razorpay Checkout.'));
+      document.body.appendChild(script);
+    });
   }
 
   private async insertMessage(consultationId: string, body: string) {

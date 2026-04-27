@@ -288,21 +288,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
   pay(consultation: Consultation) {
     this.isProcessing.set(true);
     this.api.createPaymentOrder(consultation.id).subscribe({
-      next: () =>
-        this.api.verifyPayment(consultation.id).subscribe({
-          next: () => {
-            this.showNotice('Payment marked as paid. Admin can assign doctor now.');
-            this.loadConsultations();
-          },
-          error: (error) => {
+      next: (order) =>
+        this.api
+          .openRazorpayCheckout(consultation, order)
+          .then((payment) => {
+            this.api.verifyPayment(consultation.id, payment).subscribe({
+              next: () => {
+                this.showNotice('Payment verified. Admin can assign doctor now.');
+                this.loadConsultations();
+              },
+              error: (error) => {
+                this.isProcessing.set(false);
+                this.showNotice(error.error?.message || error.message || 'Payment verification failed.');
+              },
+              complete: () => this.isProcessing.set(false)
+            });
+          })
+          .catch((error) => {
             this.isProcessing.set(false);
-            this.showNotice(error.error?.message || error.message || 'Payment verification failed.');
-          },
-          complete: () => this.isProcessing.set(false)
-        }),
-      error: () => {
+            this.showNotice(error.message || 'Payment was not completed.');
+          }),
+      error: (error) => {
         this.isProcessing.set(false);
-        this.showNotice('Payment failed.');
+        this.showNotice(error.error?.message || error.message || 'Payment failed.');
       }
     });
   }
