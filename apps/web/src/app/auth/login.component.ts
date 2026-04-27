@@ -17,7 +17,7 @@ import { AppHeaderComponent } from '../app-header.component';
 
       <main class="auth-page">
         <div class="home-hero">
-          <p class="eyebrow">Betelgeuse Clinic</p>
+          <p class="eyebrow">Vitalis Clinic</p>
           <h1>Doctor-led care for hair fall, skin, and wellness concerns.</h1>
           <p class="hero-copy">
             Choose your health concern, complete a short intake, pay securely, and get assigned to our internal doctor panel.
@@ -48,7 +48,7 @@ import { AppHeaderComponent } from '../app-header.component';
 
         <div class="auth-card">
           <span id="login-card"></span>
-          <p class="eyebrow">Betelgeuse Clinic</p>
+          <p class="eyebrow">Vitalis Clinic</p>
           <h2>Login to continue</h2>
           <p class="muted">Patients use mobile OTP. Doctors and admins use internal credentials.</p>
 
@@ -86,7 +86,7 @@ import { AppHeaderComponent } from '../app-header.component';
             <form (ngSubmit)="loginStaff()">
               <label>
                 Email
-                <input name="email" [(ngModel)]="staff.email" placeholder="doctor@betelgeuseclinic.local" />
+                <input name="email" [(ngModel)]="staff.email" placeholder="doctor@vitalisclinic.local" />
               </label>
               <label>
                 Password
@@ -99,7 +99,7 @@ import { AppHeaderComponent } from '../app-header.component';
               <h3>Forgot password</h3>
               <label>
                 Staff email
-                <input name="forgotEmail" [(ngModel)]="forgot.email" placeholder="doctor@betelgeuseclinic.local" />
+                <input name="forgotEmail" [(ngModel)]="forgot.email" placeholder="doctor@vitalisclinic.local" />
               </label>
               <button class="secondary" type="button" [disabled]="isProcessing()" (click)="forgotPassword()">Send reset link</button>
               <p class="muted">Open the email reset link, then enter a new password below.</p>
@@ -142,7 +142,7 @@ export class LoginComponent {
   readonly isProcessing = signal(false);
   readonly processLabel = signal('Processing...');
   readonly whatsappLink =
-    'https://wa.me/919876543210?text=Hi%20Betelgeuse%20Clinic%2C%20I%20want%20to%20book%20a%20consultation';
+    'https://wa.me/919876543210?text=Hi%20Vitalis%20Clinic%2C%20I%20want%20to%20book%20a%20consultation';
 
   patient = {
     name: 'Patient',
@@ -151,12 +151,12 @@ export class LoginComponent {
   };
 
   staff = {
-    email: 'admin@betelgeuseclinic.local',
+    email: 'admin@vitalisclinic.local',
     password: 'Password@123'
   };
 
   forgot = {
-    email: 'admin@betelgeuseclinic.local',
+    email: 'admin@vitalisclinic.local',
     password: 'Password@123'
   };
 

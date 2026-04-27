@@ -1,4 +1,4 @@
-# Betelgeuse Clinic Platform
+# Vitalis Clinic Platform
 
 Hybrid MVP for a single-brand clinic platform.
 

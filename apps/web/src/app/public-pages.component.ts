@@ -7,7 +7,7 @@ import { diseaseInfos } from './disease/disease-info.constants';
 import { homeopathyApproaches } from './treatment-approach/homeopathy-approaches.constants';
 
 const whatsappLink =
-  'https://wa.me/919876543210?text=Hi%20Betelgeuse%20Clinic%2C%20I%20want%20to%20know%20more';
+  'https://wa.me/919876543210?text=Hi%20Vitalis%20Clinic%2C%20I%20want%20to%20know%20more';
 
 @Component({
   selector: 'app-treatments',
@@ -20,7 +20,7 @@ const whatsappLink =
           <p class="eyebrow">Treatments</p>
           <h1>Focused care programs for chronic, recurring, and lifestyle-linked concerns.</h1>
           <p>
-            Betelgeuse Clinic starts with focused online consultations and gradually builds treatment plans around
+            Vitalis Clinic starts with focused online consultations and gradually builds treatment plans around
             follow-up, symptom tracking, and doctor-led guidance.
           </p>
         </section>
@@ -438,7 +438,7 @@ export class ChronicCareComponent {
           <h1>Common questions before booking.</h1>
         </section>
         <section class="faq-list">
-          <article class="panel"><h2>Can I choose my doctor?</h2><p>No. Betelgeuse assigns from the internal doctor panel based on your concern and availability.</p></article>
+          <article class="panel"><h2>Can I choose my doctor?</h2><p>No. Vitalis assigns from the internal doctor panel based on your concern and availability.</p></article>
           <article class="panel"><h2>Is this emergency care?</h2><p>No. This platform is not for emergencies or critical symptoms.</p></article>
           <article class="panel"><h2>Do you use homeopathy?</h2><p>Our approach is homeopathy-led and low-medicine where suitable, guided by doctor assessment.</p></article>
           <article class="panel"><h2>Will I get a prescription?</h2><p>Yes, after consultation if the doctor finds it appropriate.</p></article>
@@ -519,7 +519,7 @@ export class PrivacyTermsComponent {
           <p class="eyebrow">Safety / Trust</p>
           <h1>Not for emergency care.</h1>
           <p>
-            Betelgeuse Clinic is for planned online consultation and follow-up. If you have severe symptoms, sudden
+            Vitalis Clinic is for planned online consultation and follow-up. If you have severe symptoms, sudden
             worsening, breathing difficulty, chest pain, fainting, heavy bleeding, severe allergic reaction, high fever,
             or any emergency, seek immediate offline medical care.
           </p>

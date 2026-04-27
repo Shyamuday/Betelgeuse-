@@ -12,22 +12,22 @@ async function main() {
   const passwordHash = await bcrypt.hash('Password@123', 10);
 
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@betelgeuseclinic.local' },
+    where: { email: 'admin@vitalisclinic.local' },
     update: {},
     create: {
       name: 'Clinic Admin',
-      email: 'admin@betelgeuseclinic.local',
+      email: 'admin@vitalisclinic.local',
       passwordHash,
       role: Role.ADMIN
     }
   });
 
   const doctorUser = await prisma.user.upsert({
-    where: { email: 'doctor@betelgeuseclinic.local' },
+    where: { email: 'doctor@vitalisclinic.local' },
     update: {},
     create: {
       name: 'Dr. Meera Sharma',
-      email: 'doctor@betelgeuseclinic.local',
+      email: 'doctor@vitalisclinic.local',
       mobile: '9000000001',
       passwordHash,
       role: Role.DOCTOR

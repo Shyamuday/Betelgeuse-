@@ -10,7 +10,7 @@ import { User } from './models';
       <a class="brand" href="/">
         <span class="brand-mark">B</span>
         <span>
-          <strong>Betelgeuse Clinic</strong>
+          <strong>Vitalis Clinic</strong>
           <small>{{ subtitle }}</small>
         </span>
       </a>

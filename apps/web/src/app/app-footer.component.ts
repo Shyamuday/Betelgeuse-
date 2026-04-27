@@ -5,7 +5,7 @@ import { Component, Input } from '@angular/core';
   template: `
     <footer class="app-footer">
       <div>
-        <strong>Betelgeuse Clinic</strong>
+        <strong>Vitalis Clinic</strong>
         <p>Doctor-led online consultations under one trusted clinic brand.</p>
       </div>
 
