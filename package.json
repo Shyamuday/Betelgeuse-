@@ -1,0 +1,17 @@
+{
+  "name": "betelgeuse-clinic-platform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix apps/api",
+    "dev:web": "npm start --prefix apps/web",
+    "dev:api": "npm run dev --prefix apps/api",
+    "build": "npm run build --prefix apps/api && npm run build --prefix apps/web",
+    "build:web": "npm run build --prefix apps/web",
+    "build:api": "npm run build --prefix apps/api",
+    "lint": "npm run lint --prefix apps/api",
+    "prisma:generate": "npm run prisma:generate --prefix apps/api",
+    "prisma:migrate": "npm run prisma:migrate --prefix apps/api",
+    "seed": "npm run seed --prefix apps/api"
+  }
+}

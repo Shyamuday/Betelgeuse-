@@ -1,0 +1,82 @@
+# Dependencies
+node_modules/
+apps/*/node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+apps/*/dist/
+build/
+apps/*/build/
+out-tsc/
+apps/*/out-tsc/
+.output/
+apps/*/.output/
+
+# Environment files
+.env
+.env.*
+!.env.example
+apps/*/.env
+apps/*/.env.*
+!apps/*/.env.example
+*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# Angular and TypeScript cache
+.angular/cache/
+.angular/
+apps/*/.angular/
+*.tsbuildinfo
+
+# Test and coverage output
+coverage/
+apps/*/coverage/
+.nyc_output/
+junit.xml
+
+# Tool caches
+.cache/
+apps/*/.cache/
+.eslintcache
+.stylelintcache
+.turbo/
+.nx/
+
+# Prisma and generated local output
+apps/api/dist/
+apps/api/prisma/migrations/dev.db*
+
+# Supabase local state
+.branches/
+.temp/
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+supabase/.env.*
+
+# Deployment output
+.vercel/
+.netlify/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
