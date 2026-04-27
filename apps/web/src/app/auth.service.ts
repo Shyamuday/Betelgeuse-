@@ -21,6 +21,10 @@ export class AuthService {
     void this.supabaseAuth.bootstrapSession();
   }
 
+  bootstrapSession() {
+    return this.supabaseAuth.bootstrapSession();
+  }
+
   get token() {
     return localStorage.getItem(tokenKey);
   }
@@ -64,11 +68,10 @@ export class AuthService {
     );
   }
 
-  googleLogin(_idToken: string) {
+  googleLogin() {
     return from(this.supabaseAuth.signInWithGoogle()).pipe(
       map(() => {
-        const user = this.user() || { id: 'google-redirect', name: 'Google user', role: 'PATIENT' as Role };
-        return { token: '', user };
+        return { message: 'Redirecting to Google...' };
       })
     );
   }

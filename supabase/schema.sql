@@ -110,6 +110,33 @@ as $$
     or public.is_admin()
 $$;
 
+create or replace function public.bootstrap_admin(admin_email text, admin_name text default 'Clinic Admin')
+returns void
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+declare
+  target_user_id uuid;
+begin
+  select id into target_user_id
+  from auth.users
+  where email = admin_email
+  limit 1;
+
+  if target_user_id is null then
+    raise exception 'No Supabase auth user found for email %', admin_email;
+  end if;
+
+  insert into public.profiles (id, name, role)
+  values (target_user_id, admin_name, 'ADMIN')
+  on conflict (id) do update
+    set role = 'ADMIN',
+        name = excluded.name,
+        updated_at = now();
+end;
+$$;
+
 alter table public.profiles enable row level security;
 alter table public.doctors enable row level security;
 alter table public.diseases enable row level security;
@@ -243,3 +270,28 @@ on conflict (name) do nothing;
 insert into storage.buckets (id, name, public)
 values ('prescriptions', 'prescriptions', false)
 on conflict (id) do nothing;
+
+create policy "prescription files readable by authenticated users"
+on storage.objects for select
+to authenticated
+using (bucket_id = 'prescriptions');
+
+create policy "prescription files writable by doctors and admins"
+on storage.objects for insert
+to authenticated
+with check (
+  bucket_id = 'prescriptions'
+  and public.current_role() in ('DOCTOR', 'ADMIN')
+);
+
+create policy "prescription files updatable by doctors and admins"
+on storage.objects for update
+to authenticated
+using (
+  bucket_id = 'prescriptions'
+  and public.current_role() in ('DOCTOR', 'ADMIN')
+)
+with check (
+  bucket_id = 'prescriptions'
+  and public.current_role() in ('DOCTOR', 'ADMIN')
+);

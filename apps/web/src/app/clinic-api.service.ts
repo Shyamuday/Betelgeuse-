@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { from, map } from 'rxjs';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { Consultation, Disease, Doctor } from './models';
 import { supabase } from './supabase.client';
 
@@ -66,6 +67,16 @@ export class ClinicApiService {
 
   reports() {
     return from(this.fetchReports());
+  }
+
+  watchClinicChanges(onChange: () => void): RealtimeChannel {
+    return supabase
+      .channel('clinic-dashboard-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'consultations' }, onChange)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, onChange)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'prescriptions' }, onChange)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'payments' }, onChange)
+      .subscribe();
   }
 
   private async fetchDiseases() {

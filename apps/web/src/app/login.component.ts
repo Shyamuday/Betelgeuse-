@@ -42,12 +42,8 @@ import { AuthService } from './auth.service';
 
           <div class="divider-text">or</div>
           <form (ngSubmit)="loginWithGoogle()">
-            <label>
-              Google ID token
-              <input name="googleToken" [(ngModel)]="googleIdToken" placeholder="Paste Google Identity token" />
-            </label>
             <button class="secondary" type="submit" [disabled]="isProcessing()">Continue with Google</button>
-            <p class="muted">Set GOOGLE_CLIENT_ID in the API environment before using Google sign-in.</p>
+            <p class="muted">Uses the Google provider configured in Supabase Auth.</p>
           </form>
         } @else {
           <form (ngSubmit)="loginStaff()">
@@ -68,12 +64,9 @@ import { AuthService } from './auth.service';
               Staff email
               <input name="forgotEmail" [(ngModel)]="forgot.email" placeholder="doctor@betelgeuseclinic.local" />
             </label>
-            <button class="secondary" type="button" [disabled]="isProcessing()" (click)="forgotPassword()">Generate reset token</button>
+            <button class="secondary" type="button" [disabled]="isProcessing()" (click)="forgotPassword()">Send reset link</button>
+            <p class="muted">Open the email reset link, then enter a new password below.</p>
 
-            <label>
-              Reset token
-              <input name="resetToken" [(ngModel)]="forgot.token" placeholder="Paste reset token" />
-            </label>
             <label>
               New password
               <input name="newPassword" type="password" [(ngModel)]="forgot.password" placeholder="New password" />
@@ -118,11 +111,8 @@ export class LoginComponent {
 
   forgot = {
     email: 'admin@betelgeuseclinic.local',
-    token: '',
     password: 'Password@123'
   };
-
-  googleIdToken = '';
 
   constructor(
     private readonly auth: AuthService,
@@ -151,25 +141,24 @@ export class LoginComponent {
   }
 
   forgotPassword() {
-    this.process('Generating reset token...', this.auth.forgotPassword(this.forgot.email)).subscribe({
+    this.process('Sending reset link...', this.auth.forgotPassword(this.forgot.email)).subscribe({
       next: (response) => {
-        this.forgot.token = response.resetToken || '';
-        this.message.set(response.resetToken ? `Development reset token: ${response.resetToken}` : response.message);
+        this.message.set(response.message);
       },
-      error: () => this.message.set('Could not generate reset token.')
+      error: () => this.message.set('Could not send reset link.')
     });
   }
 
   resetPassword() {
-    this.process('Resetting password...', this.auth.resetPassword({ token: this.forgot.token, password: this.forgot.password })).subscribe({
+    this.process('Resetting password...', this.auth.resetPassword({ token: '', password: this.forgot.password })).subscribe({
       next: ({ user }) => this.router.navigateByUrl(this.auth.dashboardFor(user.role)),
       error: (error) => this.message.set(error.error?.message || 'Password reset failed.')
     });
   }
 
   loginWithGoogle() {
-    this.process('Signing in with Google...', this.auth.googleLogin(this.googleIdToken)).subscribe({
-      next: ({ user }) => this.router.navigateByUrl(this.auth.dashboardFor(user.role)),
+    this.process('Signing in with Google...', this.auth.googleLogin()).subscribe({
+      next: (response) => this.message.set(response.message),
       error: (error) => this.message.set(error.error?.message || 'Google login failed.')
     });
   }

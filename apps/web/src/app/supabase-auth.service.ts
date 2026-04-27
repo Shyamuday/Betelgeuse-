@@ -13,7 +13,10 @@ export class SupabaseAuthService {
       return null;
     }
 
-    return this.loadProfile(data.user.id);
+    return this.loadProfile(data.user.id, {
+      name: data.user.user_metadata['full_name'] || data.user.email || 'Patient',
+      email: data.user.email
+    });
   }
 
   async signInPatientWithOtp(mobile: string) {
@@ -42,7 +45,7 @@ export class SupabaseAuthService {
       role: 'PATIENT'
     });
 
-    return this.loadProfile(data.user.id);
+    return this.loadProfile(data.user.id, { name, mobile });
   }
 
   async signInWithEmail(email: string, password: string) {
@@ -99,12 +102,35 @@ export class SupabaseAuthService {
     return '/patient/dashboard';
   }
 
-  private async loadProfile(id: string) {
+  private async loadProfile(id: string, fallback?: { name?: string; mobile?: string; email?: string }) {
     const { data, error } = await supabase.from('profiles').select('*').eq('id', id).single();
+    if (error?.code === 'PGRST116' && fallback) {
+      const { data: created, error: createError } = await supabase
+        .from('profiles')
+        .insert({
+          id,
+          name: fallback.name || fallback.email || 'Patient',
+          mobile: fallback.mobile || null,
+          role: 'PATIENT'
+        })
+        .select('*')
+        .single();
+
+      if (createError) {
+        throw createError;
+      }
+
+      return this.setUserFromProfile(created);
+    }
+
     if (error) {
       throw error;
     }
 
+    return this.setUserFromProfile(data);
+  }
+
+  private setUserFromProfile(data: { id: string; name: string; mobile: string | null; role: Role }) {
     const user: User = {
       id: data.id,
       name: data.name,

@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { AuthService } from './auth.service';
 import { ClinicApiService } from './clinic-api.service';
 import { Consultation, Disease, Doctor } from './models';
@@ -23,6 +24,12 @@ import { Consultation, Disease, Doctor } from './models';
     </header>
 
     <main class="dashboard">
+      @if (isLoading()) {
+        <section class="panel">
+          <p class="muted">Loading clinic data...</p>
+        </section>
+      }
+
       @if (auth.user()?.role === 'PATIENT') {
         <section class="panel hero">
           <div>
@@ -52,7 +59,7 @@ import { Consultation, Disease, Doctor } from './models';
               </label>
             }
 
-            <button class="primary" (click)="bookConsultation()">Create consultation</button>
+            <button class="primary" [disabled]="isProcessing()" (click)="bookConsultation()">Create consultation</button>
             <p class="muted">After booking, use the payment button in consultation history to mark Razorpay dev payment as paid.</p>
           </div>
 
@@ -137,7 +144,7 @@ import { Consultation, Disease, Doctor } from './models';
                 <small>{{ consultation.status }}</small>
               </button>
               @if (auth.user()?.role === 'PATIENT' && consultation.status === 'PAYMENT_PENDING') {
-                <button class="primary" (click)="pay(consultation)">Pay now</button>
+                <button class="primary" [disabled]="isProcessing()" (click)="pay(consultation)">Pay now</button>
               }
               @if (consultation.prescription) {
                 <p class="success">Prescription uploaded</p>
@@ -173,7 +180,7 @@ import { Consultation, Disease, Doctor } from './models';
             New message
             <textarea [(ngModel)]="messageBody"></textarea>
           </label>
-          <button class="secondary" (click)="sendMessage(consultation)">Send message</button>
+          <button class="secondary" [disabled]="isProcessing()" (click)="sendMessage(consultation)">Send message</button>
 
           @if (auth.user()?.role !== 'PATIENT') {
             <h3>Prescription</h3>
@@ -185,8 +192,8 @@ import { Consultation, Disease, Doctor } from './models';
               File URL
               <input [(ngModel)]="prescription.fileUrl" placeholder="https://..." />
             </label>
-            <button class="primary" (click)="uploadPrescription(consultation)">Upload prescription</button>
-            <button class="secondary" (click)="completeConsultation(consultation)">Mark complete</button>
+            <button class="primary" [disabled]="isProcessing()" (click)="uploadPrescription(consultation)">Upload prescription</button>
+            <button class="secondary" [disabled]="isProcessing()" (click)="completeConsultation(consultation)">Mark complete</button>
           }
 
           @if (consultation.prescription) {
@@ -209,14 +216,17 @@ import { Consultation, Disease, Doctor } from './models';
     }
   `
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   readonly diseases = signal<Disease[]>([]);
   readonly consultations = signal<Consultation[]>([]);
   readonly doctors = signal<Doctor[]>([]);
   readonly report = signal<{ revenueInPaise: number; activeDoctors: number; consultations: unknown[] } | null>(null);
   readonly activeConsultation = signal<Consultation | null>(null);
   readonly notice = signal('');
+  readonly isLoading = signal(false);
+  readonly isProcessing = signal(false);
   readonly title = computed(() => `${this.auth.user()?.role?.toLowerCase()} dashboard`);
+  private realtimeChannel?: RealtimeChannel;
 
   selectedDiseaseId = '';
   intakeAnswers: Record<string, string> = {};
@@ -239,6 +249,13 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     this.loadBaseData();
+    this.realtimeChannel = this.api.watchClinicChanges(() => this.loadConsultations());
+  }
+
+  ngOnDestroy() {
+    if (this.realtimeChannel) {
+      void this.realtimeChannel.unsubscribe();
+    }
   }
 
   selectedDisease() {
@@ -254,25 +271,39 @@ export class DashboardComponent implements OnInit {
       return this.showNotice('Select a disease first.');
     }
 
+    this.isProcessing.set(true);
     this.api.createConsultation({ diseaseId: this.selectedDiseaseId, intakeAnswers: this.intakeAnswers }).subscribe({
       next: () => {
         this.showNotice('Consultation created. Complete payment to continue.');
         this.loadConsultations();
       },
-      error: (error) => this.showNotice(error.error?.message || 'Could not create consultation.')
+      error: (error) => {
+        this.isProcessing.set(false);
+        this.showNotice(error.error?.message || error.message || 'Could not create consultation.');
+      },
+      complete: () => this.isProcessing.set(false)
     });
   }
 
   pay(consultation: Consultation) {
+    this.isProcessing.set(true);
     this.api.createPaymentOrder(consultation.id).subscribe({
       next: () =>
         this.api.verifyPayment(consultation.id).subscribe({
           next: () => {
             this.showNotice('Payment marked as paid. Admin can assign doctor now.');
             this.loadConsultations();
-          }
+          },
+          error: (error) => {
+            this.isProcessing.set(false);
+            this.showNotice(error.error?.message || error.message || 'Payment verification failed.');
+          },
+          complete: () => this.isProcessing.set(false)
         }),
-      error: () => this.showNotice('Payment failed.')
+      error: () => {
+        this.isProcessing.set(false);
+        this.showNotice('Payment failed.');
+      }
     });
   }
 
@@ -287,39 +318,62 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
+    this.isProcessing.set(true);
     this.api.sendMessage(consultation.id, this.messageBody).subscribe({
       next: () => {
         this.messageBody = '';
         this.loadConsultations();
-      }
+      },
+      error: (error) => {
+        this.isProcessing.set(false);
+        this.showNotice(error.error?.message || error.message || 'Could not send message.');
+      },
+      complete: () => this.isProcessing.set(false)
     });
   }
 
   uploadPrescription(consultation: Consultation) {
+    this.isProcessing.set(true);
     this.api.uploadPrescription(consultation.id, this.prescription).subscribe({
       next: () => {
         this.showNotice('Prescription uploaded.');
         this.loadConsultations();
-      }
+      },
+      error: (error) => {
+        this.isProcessing.set(false);
+        this.showNotice(error.error?.message || error.message || 'Could not upload prescription.');
+      },
+      complete: () => this.isProcessing.set(false)
     });
   }
 
   completeConsultation(consultation: Consultation) {
+    this.isProcessing.set(true);
     this.api.completeConsultation(consultation.id).subscribe({
       next: () => {
         this.showNotice('Consultation completed.');
         this.loadConsultations();
-      }
+      },
+      error: (error) => {
+        this.isProcessing.set(false);
+        this.showNotice(error.error?.message || error.message || 'Could not complete consultation.');
+      },
+      complete: () => this.isProcessing.set(false)
     });
   }
 
   createDoctor() {
+    this.isProcessing.set(true);
     this.api.createDoctor(this.doctorForm).subscribe({
       next: () => {
         this.showNotice('Doctor created.');
         this.loadAdminData();
       },
-      error: (error) => this.showNotice(error.error?.message || 'Could not create doctor.')
+      error: (error) => {
+        this.isProcessing.set(false);
+        this.showNotice(error.error?.message || error.message || 'Could not create doctor.');
+      },
+      complete: () => this.isProcessing.set(false)
     });
   }
 
@@ -328,11 +382,17 @@ export class DashboardComponent implements OnInit {
       return this.showNotice('Select consultation and doctor.');
     }
 
+    this.isProcessing.set(true);
     this.api.assignDoctor(this.assignment.consultationId, this.assignment.doctorId).subscribe({
       next: () => {
         this.showNotice('Doctor assigned.');
         this.loadConsultations();
-      }
+      },
+      error: (error) => {
+        this.isProcessing.set(false);
+        this.showNotice(error.error?.message || error.message || 'Could not assign doctor.');
+      },
+      complete: () => this.isProcessing.set(false)
     });
   }
 
@@ -342,9 +402,17 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadBaseData() {
-    this.api.diseases().subscribe(({ diseases }) => {
-      this.diseases.set(diseases);
-      this.selectedDiseaseId = diseases[0]?.id || '';
+    this.isLoading.set(true);
+    this.api.diseases().subscribe({
+      next: ({ diseases }) => {
+        this.diseases.set(diseases);
+        this.selectedDiseaseId = diseases[0]?.id || '';
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.isLoading.set(false);
+        this.showNotice(error.error?.message || error.message || 'Could not load diseases.');
+      }
     });
     this.loadConsultations();
 
@@ -354,23 +422,32 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadConsultations() {
-    this.api.consultations().subscribe(({ consultations }) => {
-      this.consultations.set(consultations);
-      this.activeConsultation.set(
-        this.activeConsultation()
-          ? consultations.find((consultation) => consultation.id === this.activeConsultation()?.id) || null
-          : consultations[0] || null
-      );
-      this.assignment.consultationId = consultations[0]?.id || this.assignment.consultationId;
+    this.api.consultations().subscribe({
+      next: ({ consultations }) => {
+        this.consultations.set(consultations);
+        this.activeConsultation.set(
+          this.activeConsultation()
+            ? consultations.find((consultation) => consultation.id === this.activeConsultation()?.id) || null
+            : consultations[0] || null
+        );
+        this.assignment.consultationId = consultations[0]?.id || this.assignment.consultationId;
+      },
+      error: (error) => this.showNotice(error.error?.message || error.message || 'Could not load consultations.')
     });
   }
 
   private loadAdminData() {
-    this.api.doctors().subscribe(({ doctors }) => {
-      this.doctors.set(doctors);
-      this.assignment.doctorId = doctors[0]?.id || this.assignment.doctorId;
+    this.api.doctors().subscribe({
+      next: ({ doctors }) => {
+        this.doctors.set(doctors);
+        this.assignment.doctorId = doctors[0]?.id || this.assignment.doctorId;
+      },
+      error: (error) => this.showNotice(error.error?.message || error.message || 'Could not load doctors.')
     });
-    this.api.reports().subscribe((report) => this.report.set(report));
+    this.api.reports().subscribe({
+      next: (report) => this.report.set(report),
+      error: (error) => this.showNotice(error.error?.message || error.message || 'Could not load reports.')
+    });
   }
 
   private showNotice(message: string) {

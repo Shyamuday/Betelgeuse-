@@ -3,10 +3,10 @@ import { inject } from '@angular/core';
 import { AuthService } from './auth.service';
 import { Role } from './models';
 
-export const roleGuard: CanActivateFn = (route) => {
+export const roleGuard: CanActivateFn = async (route) => {
   const auth = inject(AuthService);
   const router = inject(Router);
-  const user = auth.user();
+  const user = auth.user() || (await auth.bootstrapSession());
   const roles = route.data['roles'] as Role[] | undefined;
 
   if (!user) {
