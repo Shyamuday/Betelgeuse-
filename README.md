@@ -13,6 +13,8 @@ Hybrid MVP for a single-brand clinic platform.
 
 Detailed steps are in `docs/supabase-setup.md`.
 
+Razorpay payment setup steps are in `docs/razorpay-setup.md`.
+
 1. Create a Supabase project.
 2. Run `supabase/schema.sql` in the Supabase SQL editor.
 3. Replace placeholder values in `apps/web/src/app/supabase.client.ts`:
