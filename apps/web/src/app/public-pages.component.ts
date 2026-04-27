@@ -3,112 +3,10 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AppFooterComponent } from './app-footer.component';
 import { AppHeaderComponent } from './app-header.component';
+import { diseaseInfos } from './disease-info.constants';
 
 const whatsappLink =
   'https://wa.me/919876543210?text=Hi%20Betelgeuse%20Clinic%2C%20I%20want%20to%20know%20more';
-
-type DiseaseInfo = {
-  slug: string;
-  name: string;
-  shortName: string;
-  imageUrl: string;
-  imageAlt: string;
-  about: string;
-  summary: string;
-  symptoms: string[];
-  careApproach: string[];
-  details: string[];
-  warning?: string;
-};
-
-export const diseaseInfos: DiseaseInfo[] = [
-  {
-    slug: 'hair-fall',
-    name: 'Hair Fall Treatment',
-    shortName: 'Hair Fall Care',
-    imageUrl:
-      'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1200&q=80',
-    imageAlt: 'Hair care consultation',
-    about: 'Structured care for hair fall, thinning, dandruff, and scalp health.',
-    summary:
-      'We look at duration, scalp condition, family history, stress, illness, diet, and medication history before suggesting a treatment path.',
-    symptoms: [
-      'Hair fall after fever, stress, weight loss, or lifestyle changes',
-      'Dandruff, itching, oily scalp, or scalp infection tendency',
-      'Pattern thinning and family history of baldness',
-      'Recurring hair fall despite trying multiple products'
-    ],
-    careApproach: [
-      'Short symptom intake before consultation',
-      'Doctor-led chat consultation',
-      'Homeopathy-led, low-medicine care where suitable',
-      'Prescription and follow-up guidance'
-    ],
-    details: [
-      'Hair fall often needs pattern tracking rather than only product changes.',
-      'Your doctor may ask for scalp photos, lifestyle history, recent illness history, and family history.',
-      'Follow-up helps track shedding, density changes, dandruff, and treatment response.'
-    ]
-  },
-  {
-    slug: 'skin-care',
-    name: 'Skin Care',
-    shortName: 'Skin Care',
-    imageUrl:
-      'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1200&q=80',
-    imageAlt: 'Skin care consultation',
-    about: 'Care for recurring skin issues, sensitivity, acne, pigmentation, and allergies.',
-    summary:
-      'Skin concerns often need history, triggers, routine review, and follow-up. We focus on practical care with a gentle treatment approach.',
-    symptoms: [
-      'Acne and recurring breakouts',
-      'Rashes, itching, and allergy tendency',
-      'Pigmentation and uneven skin tone',
-      'Sensitive skin and product reactions'
-    ],
-    careApproach: [
-      'Understand triggers and previous product/medicine use',
-      'Review severity, duration, and recurring patterns',
-      'Use low-medicine care where appropriate',
-      'Guide follow-up and routine correction'
-    ],
-    details: [
-      'Skin problems can be linked to routine, sensitivity, hormones, stress, diet, and weather.',
-      'Clear photos and timeline help the doctor understand the case better.',
-      'The goal is long-term control, not only short-term suppression.'
-    ],
-    warning:
-      'Severe swelling, breathing difficulty, spreading infection, high fever, burns, or rapidly worsening skin symptoms need urgent offline medical care.'
-  },
-  {
-    slug: 'chronic-care',
-    name: 'Chronic and Rare Care',
-    shortName: 'Chronic Care',
-    imageUrl:
-      'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1200&q=80',
-    imageAlt: 'Chronic care consultation',
-    about: 'For long-running symptoms that need patience, pattern tracking, and follow-up.',
-    summary:
-      'Chronic and rare concerns often cannot be understood in one line. We focus on detailed history, symptom patterns, triggers, and continuity of care.',
-    symptoms: [
-      'Recurring symptoms over weeks, months, or years',
-      'Symptoms that keep returning after temporary relief',
-      'Confusing or rare complaints that need deeper history',
-      'Cases where follow-up and tracking are important'
-    ],
-    careApproach: [
-      'Listen deeply to the full case history',
-      'Track triggers, timing, recurrence, and response',
-      'Create a care plan with follow-up',
-      'Use homeopathy-led, low-medicine support where suitable'
-    ],
-    details: [
-      'Chronic cases need continuity and structured notes.',
-      'The doctor may ask about sleep, stress, appetite, past illness, family tendency, and previous treatments.',
-      'Progress is reviewed over follow-ups rather than judged from a single interaction.'
-    ]
-  }
-];
 
 @Component({
   selector: 'app-treatments',
@@ -160,9 +58,33 @@ export class TreatmentsComponent {
               <p class="eyebrow">Treatment detail</p>
               <h1>{{ disease.name }}</h1>
               <p>{{ disease.summary }}</p>
+              <div class="disease-meta">
+                @if (disease.category) {
+                  <span>{{ disease.category }}</span>
+                }
+                @if (disease.diseaseType) {
+                  <span>{{ disease.diseaseType }}</span>
+                }
+                @if (disease.icdCode) {
+                  <span>ICD: {{ disease.icdCode }}</span>
+                }
+              </div>
             </div>
             <img [src]="disease.imageUrl" [alt]="disease.imageAlt" />
           </section>
+
+          @if (disease.ourApproach) {
+            <section class="panel root-cause-panel">
+              <p class="eyebrow">Our approach</p>
+              <h2>{{ disease.ourApproach.title }}</h2>
+              <p>{{ disease.ourApproach.intro }}</p>
+              <div class="values-list">
+                @for (point of disease.ourApproach.points; track point) {
+                  <span>{{ point }}</span>
+                }
+              </div>
+            </section>
+          }
 
           <section class="content-grid two">
             <article class="panel">
@@ -186,6 +108,94 @@ export class TreatmentsComponent {
           </section>
 
           <section class="content-grid two">
+            @if (disease.causes?.length) {
+              <article class="panel">
+                <h2>Possible causes</h2>
+                <ul>
+                  @for (cause of disease.causes; track cause) {
+                    <li>{{ cause }}</li>
+                  }
+                </ul>
+              </article>
+            }
+
+            @if (disease.riskFactors?.length) {
+              <article class="panel">
+                <h2>Risk factors</h2>
+                <ul>
+                  @for (risk of disease.riskFactors; track risk) {
+                    <li>{{ risk }}</li>
+                  }
+                </ul>
+              </article>
+            }
+          </section>
+
+          <section class="content-grid two">
+            @if (disease.diagnosis) {
+              <article class="panel">
+                <h2>Diagnosis approach</h2>
+                <p>{{ disease.diagnosis }}</p>
+              </article>
+            }
+
+            @if (disease.tests?.length) {
+              <article class="panel">
+                <h2>Tests, if needed</h2>
+                <ul>
+                  @for (test of disease.tests; track test) {
+                    <li>{{ test }}</li>
+                  }
+                </ul>
+              </article>
+            }
+          </section>
+
+          @if (disease.treatmentOptions) {
+            <section class="panel">
+              <h2>Treatment options</h2>
+              <div class="treatment-options">
+                @if (disease.treatmentOptions.allopathy) {
+                  <div><strong>Allopathy</strong><p>{{ disease.treatmentOptions.allopathy }}</p></div>
+                }
+                @if (disease.treatmentOptions.ayurveda) {
+                  <div><strong>Ayurveda</strong><p>{{ disease.treatmentOptions.ayurveda }}</p></div>
+                }
+                @if (disease.treatmentOptions.homeopathy) {
+                  <div><strong>Homeopathy</strong><p>{{ disease.treatmentOptions.homeopathy }}</p></div>
+                }
+                @if (disease.treatmentOptions.lifestyle) {
+                  <div><strong>Lifestyle</strong><p>{{ disease.treatmentOptions.lifestyle }}</p></div>
+                }
+              </div>
+            </section>
+          }
+
+          <section class="content-grid two">
+            @if (disease.homeCare?.length) {
+              <article class="panel">
+                <h2>Home care</h2>
+                <ul>
+                  @for (item of disease.homeCare; track item) {
+                    <li>{{ item }}</li>
+                  }
+                </ul>
+              </article>
+            }
+
+            @if (disease.prevention?.length) {
+              <article class="panel">
+                <h2>Prevention</h2>
+                <ul>
+                  @for (item of disease.prevention; track item) {
+                    <li>{{ item }}</li>
+                  }
+                </ul>
+              </article>
+            }
+          </section>
+
+          <section class="content-grid two">
             <article class="panel">
               <h2>Our care approach</h2>
               <ul>
@@ -198,7 +208,76 @@ export class TreatmentsComponent {
             <article class="panel warning-panel">
               <h2>Safety note</h2>
               <p>{{ disease.warning || defaultWarning }}</p>
+              @if (disease.emergencySigns?.length) {
+                <h3>Emergency signs</h3>
+                <ul>
+                  @for (sign of disease.emergencySigns; track sign) {
+                    <li>{{ sign }}</li>
+                  }
+                </ul>
+              }
             </article>
+          </section>
+
+          <section class="content-grid three">
+            @if (disease.severityLevel) {
+              <article class="panel"><h2>Severity</h2><p>{{ disease.severityLevel }}</p></article>
+            }
+            @if (disease.whenToSeeDoctor) {
+              <article class="panel"><h2>When to see doctor</h2><p>{{ disease.whenToSeeDoctor }}</p></article>
+            }
+            @if (disease.duration) {
+              <article class="panel"><h2>Expected duration</h2><p>{{ disease.duration }}</p></article>
+            }
+          </section>
+
+          <section class="content-grid two">
+            @if (disease.stages?.length) {
+              <article class="panel">
+                <h2>Care stages</h2>
+                <ul>
+                  @for (stage of disease.stages; track stage) {
+                    <li>{{ stage }}</li>
+                  }
+                </ul>
+              </article>
+            }
+
+            @if (disease.commonIn) {
+              <article class="panel">
+                <h2>Common in</h2>
+                @if (disease.commonIn.ageGroup) {
+                  <p><strong>Age group:</strong> {{ disease.commonIn.ageGroup }}</p>
+                }
+                @if (disease.commonIn.gender) {
+                  <p><strong>Gender:</strong> {{ disease.commonIn.gender }}</p>
+                }
+              </article>
+            }
+          </section>
+
+          @if (disease.faq?.length) {
+            <section class="faq-list">
+              <h2>FAQ</h2>
+              @for (item of disease.faq; track item.question) {
+                <article class="panel">
+                  <h3>{{ item.question }}</h3>
+                  <p>{{ item.answer }}</p>
+                </article>
+              }
+            </section>
+          }
+
+          <section class="panel review-panel">
+            @if (disease.reviewedBy) {
+              <p><strong>Reviewed by:</strong> {{ disease.reviewedBy }}</p>
+            }
+            @if (disease.lastUpdated) {
+              <p><strong>Last updated:</strong> {{ disease.lastUpdated }}</p>
+            }
+            @if (disease.references && disease.references.length) {
+              <p><strong>References:</strong> {{ disease.references.join(', ') }}</p>
+            }
           </section>
 
           <section class="about-cta panel">

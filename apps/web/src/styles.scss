@@ -295,6 +295,52 @@ p {
   padding-left: 0.75rem;
 }
 
+.disease-meta,
+.treatment-options {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.disease-meta {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.disease-meta span {
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #174ea6;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.treatment-options {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.treatment-options div {
+  border-radius: 18px;
+  background: #f7faff;
+  padding: 1rem;
+}
+
+.review-panel {
+  color: #64748b;
+}
+
+.root-cause-panel {
+  border-color: rgba(19, 164, 95, 0.24);
+  background:
+    linear-gradient(135deg, rgba(232, 248, 239, 0.92), rgba(255, 255, 255, 0.94));
+}
+
+.root-cause-panel p {
+  color: #526070;
+  line-height: 1.7;
+}
+
 .home-hero h1 {
   margin-bottom: 0;
   color: #102033;
@@ -695,7 +741,8 @@ p {
   .about-cta,
   .content-grid.two,
   .content-grid.three,
-  .disease-hero {
+  .disease-hero,
+  .treatment-options {
     grid-template-columns: 1fr;
   }
 
