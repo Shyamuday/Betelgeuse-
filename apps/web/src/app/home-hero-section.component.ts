@@ -7,14 +7,14 @@ import { AppOverlayService } from './overlay.service';
   template: `
     <section class="panel">
       <div class="home-hero">
-        <p class="eyebrow">Vitalis Care</p>
-        <h1>Doctor-led care for your health concerns.</h1>
+        <p class="eyebrow">Vitalis Care | Chronic care focus</p>
+        <h1>Doctor-led chronic care for long-running health concerns.</h1>
         <p class="hero-copy">
-          Choose your health concern, complete a short intake, pay securely, and get assigned to our internal doctor panel.
+          Our primary focus is chronic and recurring conditions that need deeper history, pattern tracking, and consistent follow-up.
         </p>
 
         <div class="home-actions">
-          <a class="primary home-action" href="/login" (click)="openAuthOverlay($event)">Book consultation</a>
+          <a class="primary home-action" href="/login" (click)="openAuthOverlay($event)">Start chronic care consultation</a>
           <a class="whatsapp-action" [href]="whatsappLink" target="_blank" rel="noopener">
             Chat on WhatsApp
           </a>

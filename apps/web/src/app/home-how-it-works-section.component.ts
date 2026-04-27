@@ -6,18 +6,18 @@ import { Component } from '@angular/core';
     <section class="content-grid three">
       <article class="panel">
         <p class="eyebrow">Step 1</p>
-        <h2>Share your concern</h2>
-        <p>Start with a short symptom intake so our team understands your case quickly.</p>
+        <h2>Share chronic history</h2>
+        <p>Tell us duration, recurrence, triggers, and previous treatment details through a structured intake.</p>
       </article>
       <article class="panel">
         <p class="eyebrow">Step 2</p>
-        <h2>Get doctor guidance</h2>
-        <p>Internal assignment ensures the right doctor picks up your consultation and follows through.</p>
+        <h2>Doctor reviews patterns</h2>
+        <p>Our internal doctor panel reviews history and symptom patterns before planning the care path.</p>
       </article>
       <article class="panel">
         <p class="eyebrow">Step 3</p>
-        <h2>Continue follow-up</h2>
-        <p>Track progress through secure chat, prescription notes, and planned follow-up.</p>
+        <h2>Continue planned follow-up</h2>
+        <p>Track progress with secure chat, prescription updates, and continuity-focused follow-up.</p>
       </article>
     </section>
   `

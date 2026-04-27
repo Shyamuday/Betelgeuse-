@@ -5,14 +5,16 @@ import { Component } from '@angular/core';
   template: `
     <section class="content-grid two">
       <article class="panel treatment-card">
-        <h2>Chronic care</h2>
-        <p>Long-running symptom support with deeper history review and continuity-focused guidance.</p>
-        <a href="/chronic-care">Explore care path</a>
+        <p class="eyebrow">Primary focus</p>
+        <h2>Chronic and recurring care</h2>
+        <p>Dedicated support for long-running symptoms with deeper case history, continuity, and guided follow-up.</p>
+        <a href="/chronic-care">Explore chronic care</a>
       </article>
       <article class="panel treatment-card">
-        <h2>All treatments</h2>
-        <p>Browse all available consultation categories and pick the care path that fits your concern.</p>
-        <a href="/treatments">Explore all treatments</a>
+        <p class="eyebrow">Also available</p>
+        <h2>Other treatment categories</h2>
+        <p>You can still explore our broader care programs for skin, lifestyle-linked, and condition-specific concerns.</p>
+        <a href="/treatments">View all treatments</a>
       </article>
     </section>
   `

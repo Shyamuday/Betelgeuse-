@@ -7,12 +7,12 @@ import { AppOverlayService } from './overlay.service';
   template: `
     <section class="about-cta panel">
       <div>
-        <p class="eyebrow">Ready to begin?</p>
-        <h2>Start your consultation with Vitalis Care.</h2>
-        <p>Book online in minutes, or chat with us first on WhatsApp for guidance.</p>
+        <p class="eyebrow">Start chronic care</p>
+        <h2>Begin your chronic care plan with Vitalis Care.</h2>
+        <p>Book a consultation now, or chat on WhatsApp first to see if your case fits our chronic-care path.</p>
       </div>
       <div class="home-actions">
-        <a class="primary home-action" href="/login" (click)="openAuthOverlay($event)">Book consultation</a>
+        <a class="primary home-action" href="/login" (click)="openAuthOverlay($event)">Book chronic care consult</a>
         <a class="whatsapp-action" [href]="whatsappLink" target="_blank" rel="noopener">Chat on WhatsApp</a>
       </div>
     </section>
