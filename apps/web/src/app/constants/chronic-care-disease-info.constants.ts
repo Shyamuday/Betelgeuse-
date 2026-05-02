@@ -59,7 +59,7 @@ export const chronicCareDiseaseInfo: DiseaseInfo = {
       answer: 'Online care can support history review and follow-up, but some cases may require offline examination or tests.'
     }
   ],
-  reviewedBy: 'Vitalis Care care team',
+  reviewedBy: 'Vitalis Care and Research Centre care team',
   lastUpdated: '2026-04-27',
   references: ['Patient history', 'Previous medical records when shared', 'Doctor consultation review'],
   careApproach: [
