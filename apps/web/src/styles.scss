@@ -234,6 +234,51 @@ p {
   color: #06693c;
 }
 
+.header-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(36, 52, 77, 0.14);
+  background: #fff;
+  color: #172033;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.header-menu-toggle:hover {
+  background: #eef4ff;
+  border-color: rgba(15, 98, 254, 0.28);
+}
+
+.header-menu-toggle:focus-visible {
+  outline: 2px solid #0f62fe;
+  outline-offset: 2px;
+}
+
+.header-menu-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.header-nav-backdrop {
+  display: none;
+}
+
+html.header-menu-no-scroll,
+body.header-menu-no-scroll {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 .app-footer {
   align-items: flex-start;
   border-top: 1px solid #e3e9f2;
@@ -1206,6 +1251,18 @@ p {
   }
 }
 
+@keyframes header-nav-link-in {
+  from {
+    opacity: 0;
+    transform: translate3d(-12px, 4px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
 @media (max-width: 860px) {
   body {
     background:
@@ -1219,11 +1276,131 @@ p {
     padding: 1rem;
   }
 
-  .app-header,
   .app-footer {
     align-items: flex-start;
     flex-direction: column;
     padding: 1rem;
+  }
+
+  .app-header {
+    padding: 1rem;
+    gap: 0.65rem 0.75rem;
+  }
+
+  .app-header:not(.app-header--guest) {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .app-header.app-header--guest {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    position: relative;
+    transition:
+      box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+      border-color 0.25s ease;
+  }
+
+  .app-header.app-header--guest.menu-open {
+    z-index: 12;
+    border-bottom-color: rgba(227, 233, 242, 0.65);
+    box-shadow:
+      0 10px 40px rgba(15, 23, 42, 0.12),
+      0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  }
+
+  .app-header.app-header--guest .brand {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .app-header.app-header--guest .header-menu-toggle {
+    display: inline-flex;
+    transition:
+      transform 0.28s cubic-bezier(0.34, 1.3, 0.64, 1),
+      background-color 0.2s ease,
+      border-color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .app-header.app-header--guest.menu-open .header-menu-toggle {
+    background: #eef4ff;
+    border-color: rgba(15, 98, 254, 0.22);
+  }
+
+  .app-header.app-header--guest .header-nav-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    margin: 0;
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+      visibility 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .app-header.app-header--guest.menu-open .header-nav-backdrop {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .app-header.app-header--guest .header-actions.header-nav-sheet {
+    position: relative;
+    z-index: 11;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: calc(100% + 2rem);
+    max-width: none;
+    order: 4;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    gap: 0.4rem;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transform: translate3d(0, -8px, 0);
+    pointer-events: none;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    border-top: 1px solid transparent;
+    border-radius: 0 0 22px 22px;
+    background: transparent;
+    box-shadow: none;
+    transition:
+      max-height 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.42s cubic-bezier(0.34, 1.1, 0.64, 1),
+      padding-top 0.35s ease,
+      padding-bottom 0.35s ease,
+      border-color 0.25s ease,
+      background 0.35s ease,
+      box-shadow 0.35s ease;
+  }
+
+  .app-header.app-header--guest.menu-open .header-actions.header-nav-sheet {
+    max-height: min(78vh, 520px);
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    pointer-events: auto;
+    padding-top: 0.85rem;
+    padding-bottom: 1.05rem;
+    border-top-color: rgba(210, 220, 235, 0.95);
+    background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+    box-shadow: 0 24px 56px rgba(15, 23, 42, 0.1);
   }
 
   .header-actions,
@@ -1232,10 +1409,70 @@ p {
     justify-content: flex-start;
   }
 
-  .header-actions > a {
+  .app-header:not(.app-header--guest) .header-actions > a {
     min-height: 36px;
     padding: 0.35rem 0.7rem;
     font-size: 0.84rem;
+  }
+
+  .app-header.app-header--guest .header-actions > a {
+    min-height: 46px;
+    padding: 0.62rem 1rem;
+    font-size: 0.93rem;
+    font-weight: 650;
+    letter-spacing: 0.01em;
+    border-radius: 14px;
+    justify-content: flex-start;
+    width: 100%;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      transform 0.15s ease;
+  }
+
+  @media (hover: hover) {
+    .app-header.app-header--guest .header-actions > a:hover {
+      transform: translateY(-1px);
+    }
+  }
+
+  .app-header.app-header--guest .header-actions > a:active {
+    transform: scale(0.985);
+  }
+
+  .app-header.app-header--guest.menu-open .header-actions > a {
+    animation: header-nav-link-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  @for $i from 1 through 8 {
+    .app-header.app-header--guest.menu-open .header-actions > a:nth-child(#{$i}) {
+      animation-delay: #{0.035 + ($i - 1) * 0.045}s;
+    }
+  }
+
+  .app-header.app-header--guest .header-actions .icon-link {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    justify-content: center;
+    gap: 0.55rem;
+    border-radius: 14px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .app-header.app-header--guest .header-actions.header-nav-sheet,
+    .app-header.app-header--guest .header-nav-backdrop {
+      transition-duration: 0.01ms !important;
+    }
+
+    .app-header.app-header--guest.menu-open .header-actions > a {
+      animation: none !important;
+    }
+
+    .app-header.app-header--guest .header-actions > a:active {
+      transform: none;
+    }
   }
 
   .home-hero {
