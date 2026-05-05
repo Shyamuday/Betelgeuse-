@@ -14,15 +14,15 @@ apps/*/out-tsc/
 apps/*/.output/
 
 # Environment files
-.env
-.env.*
-!.env.example
-apps/*/.env
-apps/*/.env.*
-!apps/*/.env.example
-!apps/api/.env
-!apps/api/.env.*
-*.local
+# .env
+# .env.*
+# !.env.example
+# apps/*/.env
+# apps/*/.env.*
+# !apps/*/.env.example
+# !apps/api/.env
+# !apps/api/.env.*
+# *.local
 
 # Logs
 *.log
