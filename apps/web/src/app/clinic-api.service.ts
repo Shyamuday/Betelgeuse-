@@ -3,7 +3,7 @@ import { from, map } from 'rxjs';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { supabase } from './supabase.client';
 import { environment } from '../environments/environment';
-import { Consultation, Disease, Doctor } from './models';
+import { Consultation, Disease, Doctor, DoseEvent, Prescription } from './models';
 
 type RazorpayOrderResponse = {
   orderId: string;
@@ -87,6 +87,22 @@ export class ClinicApiService {
 
   reports() {
     return from(this.fetchReports());
+  }
+
+  patientPrescriptions() {
+    return from(this.fetchPatientPrescriptions());
+  }
+
+  todayDoseEvents() {
+    return from(this.fetchTodayDoseEvents());
+  }
+
+  markDoseTaken(doseEventId: string) {
+    return from(this.updateDoseEventStatus(doseEventId, 'TAKEN'));
+  }
+
+  skipDose(doseEventId: string, note?: string) {
+    return from(this.updateDoseEventStatus(doseEventId, 'SKIPPED', note));
   }
 
   watchClinicChanges(onChange: () => void): RealtimeChannel {
@@ -400,6 +416,120 @@ export class ClinicApiService {
       activeDoctors: doctors.filter((doctor) => doctor.isActive).length,
       consultations
     };
+  }
+
+  private async fetchPatientPrescriptions() {
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      throw new Error('Login required.');
+    }
+
+    const { data, error } = await supabase
+      .from('prescriptions')
+      .select(
+        `
+          *,
+          method_option:prescription_options!prescriptions_method_option_id_fkey(label),
+          diagnosed_disease_option:prescription_options!prescriptions_diagnosed_disease_option_id_fkey(label),
+          items:prescription_items(*)
+        `
+      )
+      .eq('patient_id', user.id)
+      .eq('status', 'PUBLISHED')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    const prescriptions: Prescription[] = (data || []).map((row: Record<string, any>) => ({
+      id: row['id'],
+      version: row['version'],
+      diagnosis: row['diagnosis'],
+      advice: row['advice'],
+      notes: row['notes'],
+      fileUrl: row['file_url'],
+      status: row['status'],
+      followUpDate: row['follow_up_date'],
+      method: row['method_option']?.label || null,
+      diagnosedDisease: row['diagnosed_disease_option']?.label || null,
+      items: (row['items'] || []).map((item: Record<string, any>) => ({
+        id: item['id'],
+        medicineName: item['medicine_name'],
+        strength: item['strength'],
+        dose: item['dose'],
+        frequency: item['frequency'],
+        duration: item['duration'],
+        instructions: item['instructions']
+      })),
+      createdAt: row['created_at']
+    }));
+
+    return { prescriptions };
+  }
+
+  private async fetchTodayDoseEvents() {
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      throw new Error('Login required.');
+    }
+
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 1);
+
+    const { data, error } = await supabase
+      .from('medicine_dose_events')
+      .select('*, prescription_item:prescription_items(*)')
+      .eq('patient_id', user.id)
+      .gte('scheduled_for', start.toISOString())
+      .lt('scheduled_for', end.toISOString())
+      .order('scheduled_for', { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    const doseEvents: DoseEvent[] = (data || []).map((row: Record<string, any>) => ({
+      id: row['id'],
+      scheduledFor: row['scheduled_for'],
+      status: row['status'],
+      note: row['note'],
+      takenAt: row['taken_at'],
+      skippedAt: row['skipped_at'],
+      prescriptionItem: {
+        id: row['prescription_item']?.id || '',
+        medicineName: row['prescription_item']?.medicine_name || 'Medicine',
+        strength: row['prescription_item']?.strength,
+        dose: row['prescription_item']?.dose,
+        frequency: row['prescription_item']?.frequency,
+        duration: row['prescription_item']?.duration,
+        instructions: row['prescription_item']?.instructions
+      }
+    }));
+
+    return { doseEvents };
+  }
+
+  private async updateDoseEventStatus(doseEventId: string, status: 'TAKEN' | 'SKIPPED', note?: string) {
+    const payload =
+      status === 'TAKEN'
+        ? { status, taken_at: new Date().toISOString(), skipped_at: null }
+        : { status, skipped_at: new Date().toISOString(), note: note || null };
+    const { error } = await supabase.from('medicine_dose_events').update(payload).eq('id', doseEventId);
+
+    if (error) {
+      throw error;
+    }
+
+    return { ok: true };
   }
 
   private toDisease(row: Record<string, any>): Disease {

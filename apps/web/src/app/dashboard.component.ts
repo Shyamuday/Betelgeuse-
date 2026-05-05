@@ -7,7 +7,7 @@ import { AppFooterComponent } from './app-footer.component';
 import { AppHeaderComponent } from './app-header.component';
 import { ClinicApiService } from './clinic-api.service';
 import { AuthService } from './auth/auth.service';
-import { Disease, Consultation, Doctor } from './models';
+import { Disease, Consultation, Doctor, DoseEvent, Prescription } from './models';
 
 @Component({
   selector: 'app-dashboard',
@@ -56,6 +56,53 @@ import { Disease, Consultation, Doctor } from './models';
           </div>
 
           <ng-container *ngTemplateOutlet="consultationList"></ng-container>
+        </section>
+
+        <section class="grid two">
+          <div class="panel">
+            <h2>Today&apos;s Medicines</h2>
+            <div class="cards">
+              @for (dose of todayDoseEvents(); track dose.id) {
+                <article class="consult-card">
+                  <strong>{{ dose.prescriptionItem.medicineName }}</strong>
+                  <span>
+                    {{ dose.scheduledFor | date: 'shortTime' }} |
+                    {{ dose.prescriptionItem.dose || 'Dose as advised' }}
+                  </span>
+                  <small>Status: {{ dose.status }}</small>
+                  @if (dose.status === 'PENDING') {
+                    <div class="actions">
+                      <button class="primary" [disabled]="isProcessing()" (click)="markDoseTaken(dose.id)">Taken</button>
+                      <button class="secondary" [disabled]="isProcessing()" (click)="skipDose(dose.id)">Skip</button>
+                    </div>
+                  }
+                </article>
+              } @empty {
+                <p class="muted">No medicine reminders for today.</p>
+              }
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2>Prescription History</h2>
+            <div class="cards">
+              @for (prescription of patientPrescriptions(); track prescription.id) {
+                <article class="consult-card">
+                  <strong>{{ prescription.diagnosis || 'Prescription' }} (v{{ prescription.version || 1 }})</strong>
+                  <span>{{ prescription.createdAt | date: 'medium' }}</span>
+                  <small>{{ prescription.method || 'Method not specified' }}</small>
+                  @if (prescription.items?.length) {
+                    <p class="muted">
+                      Medicines:
+                      {{ prescription.items?.length }}
+                    </p>
+                  }
+                </article>
+              } @empty {
+                <p class="muted">No prescriptions published yet.</p>
+              }
+            </div>
+          </div>
         </section>
       }
 
@@ -138,7 +185,7 @@ import { Disease, Consultation, Doctor } from './models';
               @if (auth.user()?.role === 'PATIENT' && consultation.status === 'PAYMENT_PENDING') {
                 <button class="primary" [disabled]="isProcessing()" (click)="pay(consultation)">Pay now</button>
               }
-              @if (consultation.prescription) {
+              @if (consultation.prescription || consultation.prescriptions?.length) {
                 <p class="success">Prescription uploaded</p>
               }
             </article>
@@ -216,6 +263,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly doctors = signal<Doctor[]>([]);
   readonly report = signal<{ revenueInPaise: number; activeDoctors: number; consultations: unknown[] } | null>(null);
   readonly activeConsultation = signal<Consultation | null>(null);
+  readonly patientPrescriptions = signal<Prescription[]>([]);
+  readonly todayDoseEvents = signal<DoseEvent[]>([]);
   readonly notice = signal('');
   readonly isLoading = signal(false);
   readonly isProcessing = signal(false);
@@ -366,6 +415,36 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  markDoseTaken(doseEventId: string) {
+    this.isProcessing.set(true);
+    this.api.markDoseTaken(doseEventId).subscribe({
+      next: () => {
+        this.showNotice('Marked as taken.');
+        this.loadPatientMedicationData();
+      },
+      error: (error) => {
+        this.isProcessing.set(false);
+        this.showNotice(error.error?.message || error.message || 'Could not mark dose as taken.');
+      },
+      complete: () => this.isProcessing.set(false)
+    });
+  }
+
+  skipDose(doseEventId: string) {
+    this.isProcessing.set(true);
+    this.api.skipDose(doseEventId).subscribe({
+      next: () => {
+        this.showNotice('Dose skipped.');
+        this.loadPatientMedicationData();
+      },
+      error: (error) => {
+        this.isProcessing.set(false);
+        this.showNotice(error.error?.message || error.message || 'Could not skip dose.');
+      },
+      complete: () => this.isProcessing.set(false)
+    });
+  }
+
   createDoctor() {
     this.isProcessing.set(true);
     this.api.createDoctor(this.doctorForm).subscribe({
@@ -419,6 +498,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     });
     this.loadConsultations();
+    if (this.auth.user()?.role === 'PATIENT') {
+      this.loadPatientMedicationData();
+    }
 
     if (this.auth.user()?.role === 'ADMIN') {
       this.loadAdminData();
@@ -451,6 +533,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.api.reports().subscribe({
       next: (report) => this.report.set(report),
       error: (error) => this.showNotice(error.error?.message || error.message || 'Could not load reports.')
+    });
+  }
+
+  private loadPatientMedicationData() {
+    this.api.patientPrescriptions().subscribe({
+      next: ({ prescriptions }) => this.patientPrescriptions.set(prescriptions),
+      error: (error) => this.showNotice(error.error?.message || error.message || 'Could not load prescriptions.')
+    });
+
+    this.api.todayDoseEvents().subscribe({
+      next: ({ doseEvents }) => this.todayDoseEvents.set(doseEvents),
+      error: (error) => this.showNotice(error.error?.message || error.message || 'Could not load today medicines.')
     });
   }
 

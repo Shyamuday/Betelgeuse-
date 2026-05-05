@@ -114,9 +114,37 @@ export type Message = {
 
 export type Prescription = {
   id: string;
+  version?: number;
+  diagnosis?: string;
+  advice?: string | null;
   notes: string;
   fileUrl?: string | null;
+  status?: 'DRAFT' | 'PUBLISHED' | 'CANCELLED';
+  followUpDate?: string | null;
+  method?: string | null;
+  diagnosedDisease?: string | null;
+  items?: PrescriptionItem[];
   createdAt: string;
+};
+
+export type PrescriptionItem = {
+  id: string;
+  medicineName: string;
+  strength?: string | null;
+  dose?: string | null;
+  frequency?: string | null;
+  duration?: string | null;
+  instructions?: string | null;
+};
+
+export type DoseEvent = {
+  id: string;
+  scheduledFor: string;
+  status: 'PENDING' | 'TAKEN' | 'SKIPPED' | 'MISSED';
+  note?: string | null;
+  takenAt?: string | null;
+  skippedAt?: string | null;
+  prescriptionItem: PrescriptionItem;
 };
 
 export type Consultation = {
@@ -137,6 +165,7 @@ export type Consultation = {
   payment?: Payment | null;
   messages: Message[];
   prescription?: Prescription | null;
+  prescriptions?: Prescription[];
 };
 
 export type Doctor = User & {
