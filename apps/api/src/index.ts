@@ -7,6 +7,7 @@ import crypto from 'node:crypto';
 import { OAuth2Client } from 'google-auth-library';
 import {
   ConsultationStatus,
+  DoseEventStatus,
   PaymentStatus,
   PrescriptionOptionType,
   PrescriptionStatus,
@@ -63,7 +64,14 @@ function includeConsultationRelations() {
     assignedDoctor: { select: publicUserSelect },
     disease: true,
     payment: true,
-    prescription: true,
+    prescriptions: {
+      include: {
+        items: { orderBy: { sortOrder: 'asc' as const } },
+        methodOption: true,
+        diagnosedDiseaseOption: true
+      },
+      orderBy: { version: 'desc' as const }
+    },
     messages: {
       include: { sender: { select: publicUserSelect } },
       orderBy: { createdAt: 'asc' as const }
@@ -76,6 +84,8 @@ function includePrescriptionRelations() {
     consultation: {
       select: {
         id: true,
+        patientId: true,
+        assignedDoctorId: true,
         disease: { select: { id: true, name: true } }
       }
     },
@@ -89,6 +99,64 @@ function includePrescriptionRelations() {
 
 function normalizeOptionLabel(label: string) {
   return label.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function fallbackIntakeTimesFromFrequency(frequency?: string | null) {
+  const value = (frequency || '').toLowerCase();
+  if (value.includes('three') || value.includes('thrice') || value.includes('3')) {
+    return ['08:00', '14:00', '20:00'];
+  }
+
+  if (value.includes('twice') || value.includes('2')) {
+    return ['09:00', '21:00'];
+  }
+
+  return ['09:00'];
+}
+
+function buildDoseScheduleEvents(input: {
+  patientId: string;
+  prescriptionId: string;
+  prescriptionItems: Array<{ id: string; frequency?: string | null; durationDays?: number | null; intakeTimes?: unknown }>;
+}) {
+  const today = new Date();
+  const dayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const events: Array<{
+    patientId: string;
+    prescriptionId: string;
+    prescriptionItemId: string;
+    scheduledFor: Date;
+  }> = [];
+
+  for (const item of input.prescriptionItems) {
+    const rawTimes = Array.isArray(item.intakeTimes) ? item.intakeTimes.filter((time) => typeof time === 'string') : [];
+    const times = rawTimes.length ? (rawTimes as string[]) : fallbackIntakeTimesFromFrequency(item.frequency);
+    const durationDays = Math.min(Math.max(item.durationDays || 1, 1), 120);
+
+    for (let dayOffset = 0; dayOffset < durationDays; dayOffset += 1) {
+      for (const time of times) {
+        const [hourText, minuteText] = time.split(':');
+        const hour = Number(hourText);
+        const minute = Number(minuteText);
+        if (Number.isNaN(hour) || Number.isNaN(minute)) {
+          continue;
+        }
+
+        const scheduledFor = new Date(dayStart);
+        scheduledFor.setDate(dayStart.getDate() + dayOffset);
+        scheduledFor.setHours(hour, minute, 0, 0);
+
+        events.push({
+          patientId: input.patientId,
+          prescriptionId: input.prescriptionId,
+          prescriptionItemId: item.id,
+          scheduledFor
+        });
+      }
+    }
+  }
+
+  return events;
 }
 
 function routeParam(req: express.Request, key: string) {
@@ -586,7 +654,9 @@ app.post(
               dose: z.string().min(1).optional(),
               frequency: z.string().min(1).optional(),
               duration: z.string().min(1).optional(),
-              instructions: z.string().min(1).optional()
+              instructions: z.string().min(1).optional(),
+              durationDays: z.number().int().min(1).max(120).optional(),
+              intakeTimes: z.array(z.string().regex(/^\d{2}:\d{2}$/)).min(1).max(6).optional()
             })
           )
           .min(1)
@@ -612,23 +682,24 @@ app.post(
     }
 
     const prescription = await prisma.$transaction(async (tx) => {
-      const upserted = await tx.prescription.upsert({
+      const previous = await tx.prescription.findFirst({
         where: { consultationId: consultation.id },
-        update: {
-          methodOptionId: methodOption.id,
-          diagnosedDiseaseOptionId: diagnosedDiseaseOption.id,
-          diagnosis: body.diagnosis,
-          advice: body.advice || null,
-          notes: body.notes,
-          fileUrl: body.fileUrl || null,
-          followUpDate: body.followUpDate || null,
-          status: body.status,
-          uploadedById: req.user!.id
-        },
-        create: {
+        orderBy: { version: 'desc' }
+      });
+
+      const nextVersion = (previous?.version || 0) + 1;
+      await tx.prescription.updateMany({
+        where: { consultationId: consultation.id, isLatest: true },
+        data: { isLatest: false }
+      });
+
+      const created = await tx.prescription.create({
+        data: {
           consultationId: consultation.id,
           uploadedById: req.user!.id,
           patientId: consultation.patientId,
+          version: nextVersion,
+          isLatest: true,
           methodOptionId: methodOption.id,
           diagnosedDiseaseOptionId: diagnosedDiseaseOption.id,
           diagnosis: body.diagnosis,
@@ -640,22 +711,42 @@ app.post(
         }
       });
 
-      await tx.prescriptionItem.deleteMany({ where: { prescriptionId: upserted.id } });
-      await tx.prescriptionItem.createMany({
-        data: body.items.map((item, index) => ({
-          prescriptionId: upserted.id,
-          medicineName: item.medicineName,
-          strength: item.strength,
-          dose: item.dose,
-          frequency: item.frequency,
-          duration: item.duration,
-          instructions: item.instructions,
-          sortOrder: index
-        }))
-      });
+      const createdItems = [];
+      for (const [index, item] of body.items.entries()) {
+        const createdItem = await tx.prescriptionItem.create({
+          data: {
+            prescriptionId: created.id,
+            medicineName: item.medicineName,
+            strength: item.strength,
+            dose: item.dose,
+            frequency: item.frequency,
+            duration: item.duration,
+            instructions: item.instructions,
+            durationDays: item.durationDays,
+            intakeTimes: item.intakeTimes,
+            sortOrder: index
+          }
+        });
+
+        createdItems.push(createdItem);
+      }
+
+      if (body.status === PrescriptionStatus.PUBLISHED) {
+        const scheduleEvents = buildDoseScheduleEvents({
+          patientId: consultation.patientId,
+          prescriptionId: created.id,
+          prescriptionItems: createdItems
+        });
+
+        if (scheduleEvents.length) {
+          await tx.medicineDoseEvent.createMany({
+            data: scheduleEvents
+          });
+        }
+      }
 
       return tx.prescription.findUniqueOrThrow({
-        where: { id: upserted.id },
+        where: { id: created.id },
         include: includePrescriptionRelations()
       });
     });
@@ -688,7 +779,7 @@ app.get(
       return res.status(404).json({ message: 'Prescription not found' });
     }
 
-    if (req.user!.role === Role.DOCTOR && prescription.uploadedById !== req.user!.id) {
+    if (req.user!.role === Role.DOCTOR && prescription.consultation.assignedDoctorId !== req.user!.id) {
       return res.status(403).json({ message: 'Access denied' });
     }
 
@@ -729,6 +820,122 @@ app.get(
     }
 
     res.json({ prescription });
+  })
+);
+
+app.get(
+  '/patient/today-doses',
+  authRequired,
+  allowRoles(Role.PATIENT),
+  asyncRoute(async (req, res) => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const end = new Date(start);
+    end.setDate(end.getDate() + 1);
+
+    const doses = await prisma.medicineDoseEvent.findMany({
+      where: {
+        patientId: req.user!.id,
+        scheduledFor: { gte: start, lt: end }
+      },
+      include: {
+        prescriptionItem: true,
+        prescription: {
+          include: {
+            methodOption: true,
+            diagnosedDiseaseOption: true
+          }
+        }
+      },
+      orderBy: { scheduledFor: 'asc' }
+    });
+
+    res.json({ doses });
+  })
+);
+
+app.post(
+  '/patient/dose-events/:id/take',
+  authRequired,
+  allowRoles(Role.PATIENT),
+  asyncRoute(async (req, res) => {
+    const event = await prisma.medicineDoseEvent.findUnique({
+      where: { id: routeParam(req, 'id') }
+    });
+
+    if (!event || event.patientId !== req.user!.id) {
+      return res.status(404).json({ message: 'Dose event not found' });
+    }
+
+    const updated = await prisma.medicineDoseEvent.update({
+      where: { id: event.id },
+      data: {
+        status: DoseEventStatus.TAKEN,
+        takenAt: new Date()
+      }
+    });
+
+    res.json({ doseEvent: updated });
+  })
+);
+
+app.post(
+  '/patient/dose-events/:id/skip',
+  authRequired,
+  allowRoles(Role.PATIENT),
+  asyncRoute(async (req, res) => {
+    const body = z.object({ note: z.string().max(300).optional() }).parse(req.body);
+    const event = await prisma.medicineDoseEvent.findUnique({
+      where: { id: routeParam(req, 'id') }
+    });
+
+    if (!event || event.patientId !== req.user!.id) {
+      return res.status(404).json({ message: 'Dose event not found' });
+    }
+
+    const updated = await prisma.medicineDoseEvent.update({
+      where: { id: event.id },
+      data: {
+        status: DoseEventStatus.SKIPPED,
+        skippedAt: new Date(),
+        note: body.note
+      }
+    });
+
+    res.json({ doseEvent: updated });
+  })
+);
+
+app.get(
+  '/doctor/patients/:id/adherence-summary',
+  authRequired,
+  allowRoles(Role.DOCTOR, Role.ADMIN),
+  asyncRoute(async (req, res) => {
+    const patientId = routeParam(req, 'id');
+    if (req.user!.role === Role.DOCTOR) {
+      const linkedConsultation = await prisma.consultation.findFirst({
+        where: { patientId, assignedDoctorId: req.user!.id },
+        select: { id: true }
+      });
+
+      if (!linkedConsultation) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+    }
+
+    const [total, taken, skipped, missed] = await Promise.all([
+      prisma.medicineDoseEvent.count({ where: { patientId } }),
+      prisma.medicineDoseEvent.count({ where: { patientId, status: DoseEventStatus.TAKEN } }),
+      prisma.medicineDoseEvent.count({ where: { patientId, status: DoseEventStatus.SKIPPED } }),
+      prisma.medicineDoseEvent.count({ where: { patientId, status: DoseEventStatus.MISSED } })
+    ]);
+
+    const adherencePercent = total ? Math.round((taken / total) * 100) : 0;
+    res.json({
+      patientId,
+      totals: { total, taken, skipped, missed },
+      adherencePercent
+    });
   })
 );
 

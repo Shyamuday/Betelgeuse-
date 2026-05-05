@@ -39,6 +39,13 @@ enum PrescriptionOptionType {
   DIAGNOSED_DISEASE
 }
 
+enum DoseEventStatus {
+  PENDING
+  TAKEN
+  SKIPPED
+  MISSED
+}
+
 model User {
   id                  String         @id @default(cuid())
   name                String
@@ -54,6 +61,7 @@ model User {
   uploadedPrescriptions Prescription[]
   patientPrescriptions Prescription[] @relation("PatientPrescriptions")
   createdPrescriptionOptions PrescriptionOption[] @relation("PrescriptionOptionCreator")
+  doseEvents           MedicineDoseEvent[] @relation("PatientDoseEvents")
   passwordResetTokens PasswordResetToken[]
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
@@ -104,7 +112,7 @@ model Consultation {
   assignedDoctor  User?              @relation("DoctorConsultations", fields: [assignedDoctorId], references: [id])
   payment         Payment?
   messages        Message[]
-  prescription    Prescription?
+  prescriptions   Prescription[]
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 }
@@ -134,9 +142,11 @@ model Message {
 
 model Prescription {
   id             String             @id @default(cuid())
-  consultationId String             @unique
+  consultationId String
   uploadedById   String
   patientId      String
+  version        Int
+  isLatest       Boolean            @default(true)
   methodOptionId String?
   diagnosedDiseaseOptionId String?
   diagnosis      String
@@ -153,6 +163,9 @@ model Prescription {
   items          PrescriptionItem[]
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
+
+  @@unique([consultationId, version])
+  @@index([consultationId, isLatest])
 }
 
 model PrescriptionOption {
@@ -180,8 +193,31 @@ model PrescriptionItem {
   frequency   String?
   duration    String?
   instructions String?
+  durationDays Int?
+  intakeTimes  Json?
   sortOrder   Int          @default(0)
   prescription Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+  doseEvents   MedicineDoseEvent[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+}
+
+model MedicineDoseEvent {
+  id                 String          @id @default(cuid())
+  patientId          String
+  prescriptionId     String
+  prescriptionItemId String
+  scheduledFor       DateTime
+  status             DoseEventStatus @default(PENDING)
+  takenAt            DateTime?
+  skippedAt          DateTime?
+  note               String?
+  patient            User            @relation("PatientDoseEvents", fields: [patientId], references: [id])
+  prescription       Prescription    @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+  prescriptionItem   PrescriptionItem @relation(fields: [prescriptionItemId], references: [id], onDelete: Cascade)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@unique([prescriptionItemId, scheduledFor])
+  @@index([patientId, scheduledFor])
 }
