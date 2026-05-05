@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient, PrescriptionOptionType, Role } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import bcrypt from 'bcryptjs';
 
@@ -76,6 +76,65 @@ async function main() {
       ]
     }
   });
+
+  const defaultMethods = [
+    'Classical Homeopathy',
+    'Clinical Homeopathy',
+    'Constitutional Approach',
+    'Miasmatic Approach',
+    'Kentian Method',
+    'Boenninghausen Method',
+    'Boger Method',
+    'Sensation Method',
+    'Scholten Method',
+    'Banerji Protocols',
+    'Predictive Homeopathy',
+    'Protocol-Based Prescribing',
+    'Integrated Hybrid Approach'
+  ];
+
+  const defaultDiagnoses = [
+    'Hair Fall',
+    'Dandruff',
+    'Alopecia',
+    'Acne',
+    'Eczema',
+    'Psoriasis',
+    'Migraine',
+    'Sinusitis',
+    'Hypertension',
+    'Diabetes Mellitus',
+    'Piles',
+    'Chronic Gastritis'
+  ];
+
+  for (const label of defaultMethods) {
+    await prisma.prescriptionOption.upsert({
+      where: { type_normalizedLabel: { type: PrescriptionOptionType.METHOD, normalizedLabel: label.toLowerCase() } },
+      update: {},
+      create: {
+        type: PrescriptionOptionType.METHOD,
+        label,
+        normalizedLabel: label.toLowerCase(),
+        isSystem: true
+      }
+    });
+  }
+
+  for (const label of defaultDiagnoses) {
+    await prisma.prescriptionOption.upsert({
+      where: {
+        type_normalizedLabel: { type: PrescriptionOptionType.DIAGNOSED_DISEASE, normalizedLabel: label.toLowerCase() }
+      },
+      update: {},
+      create: {
+        type: PrescriptionOptionType.DIAGNOSED_DISEASE,
+        label,
+        normalizedLabel: label.toLowerCase(),
+        isSystem: true
+      }
+    });
+  }
 
   console.log('Seeded demo admin, doctor, and disease catalog.');
   console.log(`Admin login: ${admin.email} / Password@123`);

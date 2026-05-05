@@ -1,0 +1,47 @@
+.grid {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 720px;
+}
+
+input,
+select,
+textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+}
+
+textarea {
+  min-height: 90px;
+}
+
+.inline {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.inline input {
+  flex: 1;
+}
+
+.actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  cursor: pointer;
+}
+
+.message {
+  color: #166534;
+}
+
+.error {
+  color: #b91c1c;
+}

@@ -5,7 +5,13 @@ import bcrypt from 'bcryptjs';
 import Razorpay from 'razorpay';
 import crypto from 'node:crypto';
 import { OAuth2Client } from 'google-auth-library';
-import { ConsultationStatus, PaymentStatus, PrescriptionStatus, Role } from '@prisma/client';
+import {
+  ConsultationStatus,
+  PaymentStatus,
+  PrescriptionOptionType,
+  PrescriptionStatus,
+  Role
+} from '@prisma/client';
 import { z } from 'zod';
 import { allowRoles, authRequired, signToken } from './auth.js';
 import { prisma } from './db.js';
@@ -75,8 +81,14 @@ function includePrescriptionRelations() {
     },
     uploadedBy: { select: publicUserSelect },
     patient: { select: publicUserSelect },
+    methodOption: true,
+    diagnosedDiseaseOption: true,
     items: { orderBy: { sortOrder: 'asc' as const } }
   };
+}
+
+function normalizeOptionLabel(label: string) {
+  return label.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
 function routeParam(req: express.Request, key: string) {
@@ -495,12 +507,71 @@ app.post(
 );
 
 app.post(
+  '/doctor/prescription-options',
+  authRequired,
+  allowRoles(Role.DOCTOR, Role.ADMIN),
+  asyncRoute(async (req, res) => {
+    const body = z
+      .object({
+        type: z.nativeEnum(PrescriptionOptionType),
+        label: z.string().min(2)
+      })
+      .parse(req.body);
+
+    const normalizedLabel = normalizeOptionLabel(body.label);
+
+    const option = await prisma.prescriptionOption.upsert({
+      where: {
+        type_normalizedLabel: {
+          type: body.type,
+          normalizedLabel
+        }
+      },
+      update: {
+        label: body.label.trim()
+      },
+      create: {
+        type: body.type,
+        label: body.label.trim(),
+        normalizedLabel,
+        isSystem: false,
+        createdById: req.user!.id
+      }
+    });
+
+    res.status(201).json({ option });
+  })
+);
+
+app.get(
+  '/doctor/prescription-options',
+  authRequired,
+  allowRoles(Role.DOCTOR, Role.ADMIN),
+  asyncRoute(async (req, res) => {
+    const query = z
+      .object({
+        type: z.nativeEnum(PrescriptionOptionType)
+      })
+      .parse(req.query);
+
+    const options = await prisma.prescriptionOption.findMany({
+      where: { type: query.type },
+      orderBy: [{ isSystem: 'desc' }, { label: 'asc' }]
+    });
+
+    res.json({ options });
+  })
+);
+
+app.post(
   '/doctor/appointments/:id/prescriptions',
   authRequired,
   allowRoles(Role.DOCTOR, Role.ADMIN),
   asyncRoute(async (req, res) => {
     const body = z
       .object({
+        methodOptionId: z.string().min(1),
+        diagnosedDiseaseOptionId: z.string().min(1),
         diagnosis: z.string().min(3),
         advice: z.string().min(3).optional(),
         notes: z.string().min(5),
@@ -527,10 +598,25 @@ app.post(
       return res.status(403).json({ message: 'Only the assigned doctor can manage prescription' });
     }
 
+    const [methodOption, diagnosedDiseaseOption] = await Promise.all([
+      prisma.prescriptionOption.findFirst({
+        where: { id: body.methodOptionId, type: PrescriptionOptionType.METHOD }
+      }),
+      prisma.prescriptionOption.findFirst({
+        where: { id: body.diagnosedDiseaseOptionId, type: PrescriptionOptionType.DIAGNOSED_DISEASE }
+      })
+    ]);
+
+    if (!methodOption || !diagnosedDiseaseOption) {
+      return res.status(400).json({ message: 'Invalid prescription method or diagnosed disease option.' });
+    }
+
     const prescription = await prisma.$transaction(async (tx) => {
       const upserted = await tx.prescription.upsert({
         where: { consultationId: consultation.id },
         update: {
+          methodOptionId: methodOption.id,
+          diagnosedDiseaseOptionId: diagnosedDiseaseOption.id,
           diagnosis: body.diagnosis,
           advice: body.advice || null,
           notes: body.notes,
@@ -543,6 +629,8 @@ app.post(
           consultationId: consultation.id,
           uploadedById: req.user!.id,
           patientId: consultation.patientId,
+          methodOptionId: methodOption.id,
+          diagnosedDiseaseOptionId: diagnosedDiseaseOption.id,
           diagnosis: body.diagnosis,
           advice: body.advice || null,
           notes: body.notes,

@@ -19,10 +19,10 @@ export class Login {
     private readonly router: Router
   ) {}
 
-  submit() {
-    const ok = this.auth.login(this.email, this.password);
+  async submit() {
+    const ok = await this.auth.login(this.email, this.password);
     if (!ok) {
-      this.error = 'Email and password are required.';
+      this.error = 'Invalid login or API unavailable.';
       return;
     }
 

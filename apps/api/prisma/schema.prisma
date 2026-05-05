@@ -34,6 +34,11 @@ enum PrescriptionStatus {
   CANCELLED
 }
 
+enum PrescriptionOptionType {
+  METHOD
+  DIAGNOSED_DISEASE
+}
+
 model User {
   id                  String         @id @default(cuid())
   name                String
@@ -48,6 +53,7 @@ model User {
   messages            Message[]
   uploadedPrescriptions Prescription[]
   patientPrescriptions Prescription[] @relation("PatientPrescriptions")
+  createdPrescriptionOptions PrescriptionOption[] @relation("PrescriptionOptionCreator")
   passwordResetTokens PasswordResetToken[]
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
@@ -131,6 +137,8 @@ model Prescription {
   consultationId String             @unique
   uploadedById   String
   patientId      String
+  methodOptionId String?
+  diagnosedDiseaseOptionId String?
   diagnosis      String
   advice         String?
   notes          String
@@ -140,9 +148,27 @@ model Prescription {
   consultation   Consultation       @relation(fields: [consultationId], references: [id])
   uploadedBy     User               @relation(fields: [uploadedById], references: [id])
   patient        User               @relation("PatientPrescriptions", fields: [patientId], references: [id])
+  methodOption   PrescriptionOption? @relation("PrescriptionMethod", fields: [methodOptionId], references: [id])
+  diagnosedDiseaseOption PrescriptionOption? @relation("PrescriptionDiagnosedDisease", fields: [diagnosedDiseaseOptionId], references: [id])
   items          PrescriptionItem[]
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
+}
+
+model PrescriptionOption {
+  id              String                @id @default(cuid())
+  type            PrescriptionOptionType
+  label           String
+  normalizedLabel String
+  isSystem        Boolean               @default(false)
+  createdById     String?
+  createdBy       User?                 @relation("PrescriptionOptionCreator", fields: [createdById], references: [id])
+  methodPrescriptions Prescription[]    @relation("PrescriptionMethod")
+  diagnosedDiseasePrescriptions Prescription[] @relation("PrescriptionDiagnosedDisease")
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@unique([type, normalizedLabel])
 }
 
 model PrescriptionItem {

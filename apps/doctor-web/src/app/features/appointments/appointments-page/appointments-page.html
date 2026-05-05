@@ -1,2 +1,52 @@
-<h2>Appointments</h2>
-<p>Placeholder page for doctor appointment queue and schedule management.</p>
+<h2>Create Prescription</h2>
+<p>Fast entry with dropdowns for method and diagnosed disease.</p>
+
+<div class="grid">
+  <label for="consultationId">Consultation ID</label>
+  <input id="consultationId" name="consultationId" [(ngModel)]="consultationId" />
+
+  <label for="method">Homeopathy Method</label>
+  <select id="method" name="method" [(ngModel)]="methodOptionId">
+    <option value="">Select method</option>
+    @for (item of methods; track item.id) {
+      <option [value]="item.id">{{ item.label }}</option>
+    }
+  </select>
+  <div class="inline">
+    <input name="newMethod" [(ngModel)]="newMethod" placeholder="Add new method" />
+    <button type="button" (click)="addOption('METHOD')">Add</button>
+  </div>
+
+  <label for="diagnosedDisease">Diagnosed Disease</label>
+  <select id="diagnosedDisease" name="diagnosedDisease" [(ngModel)]="diagnosedDiseaseOptionId">
+    <option value="">Select diagnosed disease</option>
+    @for (item of diagnosedDiseases; track item.id) {
+      <option [value]="item.id">{{ item.label }}</option>
+    }
+  </select>
+  <div class="inline">
+    <input name="newDiagnosedDisease" [(ngModel)]="newDiagnosedDisease" placeholder="Add diagnosed disease" />
+    <button type="button" (click)="addOption('DIAGNOSED_DISEASE')">Add</button>
+  </div>
+
+  <label for="diagnosis">Diagnosis Summary</label>
+  <input id="diagnosis" name="diagnosis" [(ngModel)]="diagnosis" />
+
+  <label for="advice">Advice (optional)</label>
+  <textarea id="advice" name="advice" [(ngModel)]="advice"></textarea>
+
+  <label for="notes">Prescription Notes</label>
+  <textarea id="notes" name="notes" [(ngModel)]="notes"></textarea>
+</div>
+
+<div class="actions">
+  <button type="button" (click)="loadOptions()">Reload options</button>
+  <button type="button" (click)="createPrescription()">Save Prescription</button>
+</div>
+
+@if (message) {
+  <p class="message">{{ message }}</p>
+}
+@if (error) {
+  <p class="error">{{ error }}</p>
+}
