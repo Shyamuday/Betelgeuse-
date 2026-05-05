@@ -26,6 +26,7 @@ type LoadedPrescription = {
   id: string;
   version: number;
   status: 'DRAFT' | 'PUBLISHED' | 'CANCELLED';
+  createdAt?: string;
   diagnosis: string;
   advice?: string | null;
   notes: string;
@@ -222,6 +223,51 @@ export class AppointmentsPage {
     }
 
     this.selectPrescription(selected);
+  }
+
+  openVersion(prescription: LoadedPrescription) {
+    this.selectPrescription(prescription);
+    this.message = `Opened version v${prescription.version}.`;
+    this.error = '';
+  }
+
+  canEditVersion(prescription: LoadedPrescription) {
+    return prescription.id === this.loadedPrescriptions[0]?.id && prescription.status !== 'PUBLISHED';
+  }
+
+  startFollowUpFrom(prescription: LoadedPrescription) {
+    this.editingPrescriptionId = '';
+    this.methodOptionId = prescription.methodOptionId || '';
+    this.diagnosedDiseaseOptionId = prescription.diagnosedDiseaseOptionId || '';
+    this.diagnosis = prescription.diagnosis || '';
+    this.advice = prescription.advice || '';
+    this.notes = prescription.notes || '';
+    this.status = 'DRAFT';
+    this.medicineRows = (prescription.items || []).length
+      ? (prescription.items || []).map((item) => ({
+          medicineName: item.medicineName || '',
+          strength: item.strength || '',
+          dose: item.dose || '',
+          frequency: item.frequency || '',
+          duration: item.duration || '',
+          durationDays: item.durationDays || 7,
+          instructions: item.instructions || '',
+          intakeTimesText: (item.intakeTimes || ['09:00']).join(',')
+        }))
+      : [this.newMedicineRow()];
+    this.message = `Follow-up draft started from v${prescription.version}.`;
+    this.error = '';
+  }
+
+  versionBadgeClass(status: LoadedPrescription['status']) {
+    if (status === 'PUBLISHED') {
+      return 'badge published';
+    }
+    if (status === 'DRAFT') {
+      return 'badge draft';
+    }
+
+    return 'badge cancelled';
   }
 
   resetEditorForFollowUp() {

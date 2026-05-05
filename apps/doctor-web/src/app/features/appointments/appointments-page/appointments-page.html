@@ -10,6 +10,24 @@
   </div>
 
   @if (loadedPrescriptions.length) {
+    <div class="timeline">
+      @for (item of loadedPrescriptions; track item.id) {
+        <article class="timeline-card" [class.active]="editingPrescriptionId === item.id">
+          <div class="timeline-head">
+            <strong>v{{ item.version }}</strong>
+            <span [class]="versionBadgeClass(item.status)">{{ item.status }}</span>
+          </div>
+          <p>{{ item.diagnosis || 'No diagnosis summary' }}</p>
+          <small>{{ item.createdAt ? (item.createdAt | date: 'medium') : '' }}</small>
+          <div class="actions">
+            <button type="button" (click)="openVersion(item)">Open</button>
+            <button type="button" [disabled]="!canEditVersion(item)" (click)="openVersion(item)">Edit</button>
+            <button type="button" (click)="startFollowUpFrom(item)">Follow-up</button>
+          </div>
+        </article>
+      }
+    </div>
+
     <label for="existingVersion">Existing Versions</label>
     <select
       id="existingVersion"
