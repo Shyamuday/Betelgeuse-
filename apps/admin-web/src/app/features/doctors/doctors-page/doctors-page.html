@@ -1,10 +1,37 @@
 <section class="panel">
   <h2>Pending Doctor Approvals</h2>
-  @for (doctor of pendingDoctors; track doctor.id) {
+  <div class="toolbar">
+    <input
+      placeholder="Search pending doctors..."
+      name="pendingSearchTerm"
+      [(ngModel)]="pendingSearchTerm"
+      (ngModelChange)="setPendingPage(1)"
+    />
+    <label class="select-all">
+      <input
+        type="checkbox"
+        [checked]="allVisiblePendingSelected()"
+        (change)="toggleSelectAllVisiblePending($any($event.target).checked)"
+      />
+      Select visible
+    </label>
+    <button type="button" (click)="bulkApproveSelected()">Bulk Approve</button>
+    <button type="button" (click)="bulkRejectSelected()">Bulk Keep Pending</button>
+  </div>
+
+  @for (doctor of visiblePendingDoctors(); track doctor.id) {
     <article class="card">
+      <label class="select-doctor">
+        <input
+          type="checkbox"
+          [checked]="isPendingDoctorSelected(doctor.id)"
+          (change)="togglePendingDoctorSelection(doctor.id, $any($event.target).checked)"
+        />
+        Select
+      </label>
       <strong>{{ doctor.name }}</strong>
-      <p>{{ doctor.email }}</p>
-      <small>{{ doctor.doctorProfile?.specialty || 'Specialty not set' }}</small>
+      <p>{{ doctor.email }} | {{ doctor.mobile || 'No mobile' }}</p>
+      <small>{{ doctor.doctorProfile?.specialty || 'Specialty not set' }} | {{ doctor.doctorProfile?.registrationNo || 'No registration no.' }}</small>
       <div class="actions">
         <button type="button" (click)="approveDoctor(doctor.id)">Approve</button>
         <button type="button" (click)="rejectDoctor(doctor.id)">Keep Pending</button>
@@ -13,18 +40,63 @@
   } @empty {
     <p>No pending doctor enrollments.</p>
   }
+  <div class="pagination">
+    @for (page of pendingPages(); track page) {
+      <button type="button" [class.active]="pendingPage === page" (click)="setPendingPage(page)">{{ page }}</button>
+    }
+  </div>
 </section>
 
 <section class="panel">
   <h2>All Doctors</h2>
-  @for (doctor of doctors; track doctor.id) {
+  <div class="toolbar">
+    <input placeholder="Search doctors..." name="searchTerm" [(ngModel)]="searchTerm" (ngModelChange)="setDoctorsPage(1)" />
+    <select name="statusFilter" [(ngModel)]="statusFilter" (ngModelChange)="setDoctorsPage(1)">
+      <option value="ALL">All status</option>
+      <option value="ACTIVE">Active only</option>
+      <option value="INACTIVE">Inactive only</option>
+    </select>
+    <select name="sortBy" [(ngModel)]="sortBy">
+      <option value="name">Sort by name</option>
+      <option value="createdAt">Sort by created time</option>
+      <option value="status">Sort by status</option>
+    </select>
+    <select name="sortDirection" [(ngModel)]="sortDirection">
+      <option value="asc">Asc</option>
+      <option value="desc">Desc</option>
+    </select>
+  </div>
+
+  @for (doctor of visibleDoctors(); track doctor.id) {
     <article class="card">
-      <strong>{{ doctor.name }}</strong>
-      <p>{{ doctor.email }}</p>
+      <strong>{{ doctor.name }}</strong> <button type="button" class="link" (click)="selectedDoctorId = doctor.id">View details</button>
+      <p>{{ doctor.email }} | {{ doctor.mobile || 'No mobile' }}</p>
       <small>{{ doctor.doctorProfile?.specialty || 'Specialty not set' }} | {{ doctor.isActive ? 'Active' : 'Inactive' }}</small>
     </article>
   } @empty {
     <p>No doctors found.</p>
+  }
+  <div class="pagination">
+    @for (page of doctorsPages(); track page) {
+      <button type="button" [class.active]="doctorsPage === page" (click)="setDoctorsPage(page)">{{ page }}</button>
+    }
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Doctor Profile Details</h2>
+  @if (selectedDoctorDetails(); as selectedDoctor) {
+    <article class="card">
+      <strong>{{ selectedDoctor.name }}</strong>
+      <p>Email: {{ selectedDoctor.email || 'N/A' }}</p>
+      <p>Mobile: {{ selectedDoctor.mobile || 'N/A' }}</p>
+      <p>Specialty: {{ selectedDoctor.doctorProfile?.specialty || 'N/A' }}</p>
+      <p>Registration No: {{ selectedDoctor.doctorProfile?.registrationNo || 'N/A' }}</p>
+      <p>Status: {{ selectedDoctor.isActive ? 'Active' : 'Inactive' }}</p>
+      <p>Available: {{ selectedDoctor.doctorProfile?.isAvailable ? 'Yes' : 'No' }}</p>
+    </article>
+  } @else {
+    <p>Select a doctor from the list to view profile details.</p>
   }
 </section>
 

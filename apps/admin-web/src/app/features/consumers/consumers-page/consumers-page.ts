@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../../../core/services/admin-api';
 
 type Consumer = {
@@ -12,12 +13,17 @@ type Consumer = {
 
 @Component({
   selector: 'app-consumers-page',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './consumers-page.html',
   styleUrl: './consumers-page.scss'
 })
 export class ConsumersPage {
   consumers: Consumer[] = [];
+  searchTerm = '';
+  sortBy: 'name' | 'consultations' = 'consultations';
+  sortDirection: 'asc' | 'desc' = 'desc';
+  pageSize = 8;
+  page = 1;
   error = '';
 
   constructor(private readonly api: AdminApi) {
@@ -56,5 +62,43 @@ export class ConsumersPage {
     } catch {
       this.error = 'Could not load consumers.';
     }
+  }
+
+  setPage(page: number) {
+    this.page = page;
+  }
+
+  visibleConsumers() {
+    const filtered = this.filteredConsumers();
+    const start = (Math.max(this.page, 1) - 1) * this.pageSize;
+    return filtered.slice(start, start + this.pageSize);
+  }
+
+  totalPages() {
+    return Math.max(1, Math.ceil(this.filteredConsumers().length / this.pageSize));
+  }
+
+  pages() {
+    return Array.from({ length: this.totalPages() }, (_, index) => index + 1);
+  }
+
+  private filteredConsumers() {
+    const search = this.searchTerm.trim().toLowerCase();
+    const filtered = this.consumers.filter((consumer) => {
+      if (!search) {
+        return true;
+      }
+
+      return [consumer.name, consumer.email || '', consumer.mobile || ''].join(' ').toLowerCase().includes(search);
+    });
+
+    filtered.sort((a, b) => {
+      const left = this.sortBy === 'name' ? a.name : String(a.consultations);
+      const right = this.sortBy === 'name' ? b.name : String(b.consultations);
+      const compare = left.localeCompare(right, undefined, { numeric: true });
+      return this.sortDirection === 'asc' ? compare : -compare;
+    });
+
+    return filtered;
   }
 }

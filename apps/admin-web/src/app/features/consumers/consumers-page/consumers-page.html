@@ -1,6 +1,17 @@
 <section class="panel">
   <h2>Consumers (Patients)</h2>
-  @for (consumer of consumers; track consumer.id) {
+  <div class="toolbar">
+    <input placeholder="Search consumers..." name="searchTerm" [(ngModel)]="searchTerm" (ngModelChange)="setPage(1)" />
+    <select name="sortBy" [(ngModel)]="sortBy">
+      <option value="consultations">Sort by consultations</option>
+      <option value="name">Sort by name</option>
+    </select>
+    <select name="sortDirection" [(ngModel)]="sortDirection">
+      <option value="desc">Desc</option>
+      <option value="asc">Asc</option>
+    </select>
+  </div>
+  @for (consumer of visibleConsumers(); track consumer.id) {
     <article class="card">
       <strong>{{ consumer.name }}</strong>
       <p>{{ consumer.email || 'No email' }} | {{ consumer.mobile || 'No mobile' }}</p>
@@ -9,6 +20,11 @@
   } @empty {
     <p>No consumers found.</p>
   }
+  <div class="pagination">
+    @for (p of pages(); track p) {
+      <button type="button" [class.active]="page === p" (click)="setPage(p)">{{ p }}</button>
+    }
+  </div>
 </section>
 
 @if (error) {

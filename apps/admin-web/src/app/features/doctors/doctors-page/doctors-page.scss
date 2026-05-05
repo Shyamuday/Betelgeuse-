@@ -6,6 +6,20 @@
   margin-bottom: 1rem;
 }
 
+.toolbar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.toolbar input,
+.toolbar select {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+}
+
 .card {
   border: 1px solid #e5e7eb;
   border-radius: 10px;
@@ -24,6 +38,30 @@ button {
   border-radius: 8px;
   padding: 0.45rem 0.65rem;
   cursor: pointer;
+}
+
+.pagination {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.pagination button.active {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.select-doctor,
+.select-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.link {
+  background: transparent;
+  color: #2563eb;
+  padding: 0;
 }
 
 .success {
