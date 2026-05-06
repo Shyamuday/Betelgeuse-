@@ -16,6 +16,7 @@ import {
 import { z } from 'zod';
 import { allowRoles, authRequired, signToken } from './auth.js';
 import { prisma } from './db.js';
+import { ConsoleNotificationProvider, NotificationService } from './notifications.js';
 import { supabaseAdmin } from './supabase.js';
 
 const app = express();
@@ -29,6 +30,9 @@ const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET || '';
 const razorpayWebhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || '';
 const doseOverdueSweepEnabled = (process.env.DOSE_OVERDUE_SWEEP_ENABLED || 'true').toLowerCase() !== 'false';
 const doseOverdueSweepIntervalMs = Math.max(60_000, Number(process.env.DOSE_OVERDUE_SWEEP_INTERVAL_MS || 5 * 60_000));
+const doseReminderSweepEnabled = (process.env.DOSE_REMINDER_SWEEP_ENABLED || 'true').toLowerCase() !== 'false';
+const doseReminderWindowMinutes = Math.max(5, Number(process.env.DOSE_REMINDER_WINDOW_MINUTES || 30));
+const notificationService = new NotificationService(new ConsoleNotificationProvider());
 
 app.use(cors({ origin: webOrigin, credentials: true }));
 app.use('/payments/razorpay-webhook', express.raw({ type: 'application/json' }));
@@ -222,19 +226,89 @@ function verifyRazorpaySignature(payload: {
 
 async function markOverdueDosesAsMissed() {
   const now = new Date();
-  const result = await prisma.medicineDoseEvent.updateMany({
+  const overdueEvents = await prisma.medicineDoseEvent.findMany({
     where: {
       status: DoseEventStatus.PENDING,
       scheduledFor: { lt: now }
     },
-    data: {
-      status: DoseEventStatus.MISSED
-    }
+    select: {
+      id: true,
+      patientId: true,
+      scheduledFor: true,
+      patient: { select: { name: true, mobile: true, email: true } },
+      prescriptionItem: { select: { medicineName: true } }
+    },
+    take: 1000
   });
 
-  if (result.count > 0) {
-    console.info(`[scheduler] Marked ${result.count} overdue dose event(s) as MISSED`);
+  if (!overdueEvents.length) {
+    return;
   }
+
+  const result = await prisma.medicineDoseEvent.updateMany({
+    where: { id: { in: overdueEvents.map((event) => event.id) } },
+    data: { status: DoseEventStatus.MISSED }
+  });
+
+  console.info(`[scheduler] Marked ${result.count} overdue dose event(s) as MISSED`);
+  await notificationService.sendBatch(
+    overdueEvents.map((event) => ({
+      eventType: 'DOSE_MISSED' as const,
+      channel: 'IN_APP' as const,
+      recipientId: event.patientId,
+      recipientName: event.patient?.name,
+      recipientMobile: event.patient?.mobile,
+      recipientEmail: event.patient?.email,
+      title: 'Dose marked missed',
+      body: `${event.prescriptionItem?.medicineName || 'Medicine'} dose at ${event.scheduledFor.toISOString()} was marked missed.`,
+      metadata: { doseEventId: event.id, scheduledFor: event.scheduledFor.toISOString() }
+    }))
+  );
+}
+
+async function emitUpcomingDoseReminders() {
+  if (!doseReminderSweepEnabled) {
+    return;
+  }
+
+  const now = new Date();
+  const windowEnd = new Date(now.getTime() + doseReminderWindowMinutes * 60 * 1000);
+  const upcomingEvents = await prisma.medicineDoseEvent.findMany({
+    where: {
+      status: DoseEventStatus.PENDING,
+      scheduledFor: { gte: now, lte: windowEnd }
+    },
+    select: {
+      id: true,
+      patientId: true,
+      scheduledFor: true,
+      patient: { select: { name: true, mobile: true, email: true } },
+      prescriptionItem: { select: { medicineName: true } }
+    },
+    take: 1000
+  });
+
+  if (!upcomingEvents.length) {
+    return;
+  }
+
+  await notificationService.sendBatch(
+    upcomingEvents.map((event) => ({
+      eventType: 'DOSE_REMINDER' as const,
+      channel: 'IN_APP' as const,
+      recipientId: event.patientId,
+      recipientName: event.patient?.name,
+      recipientMobile: event.patient?.mobile,
+      recipientEmail: event.patient?.email,
+      title: 'Medicine reminder',
+      body: `Upcoming dose for ${event.prescriptionItem?.medicineName || 'medicine'} at ${event.scheduledFor.toISOString()}.`,
+      metadata: { doseEventId: event.id, scheduledFor: event.scheduledFor.toISOString() }
+    }))
+  );
+}
+
+async function runDoseSchedulers() {
+  await Promise.all([markOverdueDosesAsMissed(), emitUpcomingDoseReminders()]);
 }
 
 app.get('/health', (_req, res) => {
@@ -1862,17 +1936,21 @@ app.listen(port, () => {
   console.log(`Clinic API running on http://localhost:${port}`);
   if (!doseOverdueSweepEnabled) {
     console.log('[scheduler] Overdue dose sweep disabled');
-    return;
+  } else {
+    console.log(`[scheduler] Overdue dose sweep enabled (interval: ${doseOverdueSweepIntervalMs}ms)`);
   }
-
-  console.log(`[scheduler] Overdue dose sweep enabled (interval: ${doseOverdueSweepIntervalMs}ms)`);
-  void markOverdueDosesAsMissed().catch((error) => {
-    console.error('[scheduler] Initial overdue sweep failed', error);
+  if (!doseReminderSweepEnabled) {
+    console.log('[scheduler] Dose reminder sweep disabled');
+  } else {
+    console.log(`[scheduler] Dose reminder sweep enabled (window: ${doseReminderWindowMinutes} minutes)`);
+  }
+  void runDoseSchedulers().catch((error) => {
+    console.error('[scheduler] Initial dose scheduler run failed', error);
   });
 
   const timer = setInterval(() => {
-    void markOverdueDosesAsMissed().catch((error) => {
-      console.error('[scheduler] Overdue sweep failed', error);
+    void runDoseSchedulers().catch((error) => {
+      console.error('[scheduler] Dose scheduler run failed', error);
     });
   }, doseOverdueSweepIntervalMs);
   timer.unref();
