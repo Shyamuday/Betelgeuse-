@@ -1512,6 +1512,96 @@ app.get(
   })
 );
 
+app.get(
+  '/doctor/patients/:id/adherence-trend',
+  authRequired,
+  allowRoles(Role.DOCTOR, Role.ADMIN),
+  asyncRoute(async (req, res) => {
+    const patientId = routeParam(req, 'id');
+    const days = queryPositiveInt(req, 'days', 7, 1, 30);
+    if (req.user!.role === Role.DOCTOR) {
+      const linkedConsultation = await prisma.consultation.findFirst({
+        where: { patientId, assignedDoctorId: req.user!.id },
+        select: { id: true }
+      });
+
+      if (!linkedConsultation) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+    }
+
+    const end = new Date();
+    const start = new Date(end);
+    start.setDate(start.getDate() - (days - 1));
+    start.setHours(0, 0, 0, 0);
+
+    const events = await prisma.medicineDoseEvent.findMany({
+      where: {
+        patientId,
+        scheduledFor: { gte: start, lte: end }
+      },
+      select: { scheduledFor: true, status: true }
+    });
+
+    const trendMap = new Map<
+      string,
+      { date: string; total: number; taken: number; skipped: number; missed: number; pending: number; adherencePercent: number }
+    >();
+    for (let index = 0; index < days; index += 1) {
+      const date = new Date(start);
+      date.setDate(start.getDate() + index);
+      const key = date.toISOString().slice(0, 10);
+      trendMap.set(key, {
+        date: key,
+        total: 0,
+        taken: 0,
+        skipped: 0,
+        missed: 0,
+        pending: 0,
+        adherencePercent: 0
+      });
+    }
+
+    for (const event of events) {
+      const key = event.scheduledFor.toISOString().slice(0, 10);
+      const day = trendMap.get(key);
+      if (!day) {
+        continue;
+      }
+
+      day.total += 1;
+      if (event.status === DoseEventStatus.TAKEN) day.taken += 1;
+      else if (event.status === DoseEventStatus.SKIPPED) day.skipped += 1;
+      else if (event.status === DoseEventStatus.MISSED) day.missed += 1;
+      else day.pending += 1;
+    }
+
+    const trend = Array.from(trendMap.values()).map((day) => ({
+      ...day,
+      adherencePercent: day.total ? Math.round((day.taken / day.total) * 100) : 0
+    }));
+    const totals = trend.reduce(
+      (acc, day) => {
+        acc.total += day.total;
+        acc.taken += day.taken;
+        acc.skipped += day.skipped;
+        acc.missed += day.missed;
+        acc.pending += day.pending;
+        return acc;
+      },
+      { total: 0, taken: 0, skipped: 0, missed: 0, pending: 0 }
+    );
+
+    res.json({
+      patientId,
+      days,
+      totals,
+      adherencePercent: totals.total ? Math.round((totals.taken / totals.total) * 100) : 0,
+      trend
+    });
+  })
+);
+
 app.post(
   '/consultations/:id/complete',
   authRequired,

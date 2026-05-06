@@ -1,2 +1,53 @@
-<h2>Patients</h2>
-<p>Placeholder page for patient list, active cases, and follow-up actions.</p>
+<section class="panel">
+  <h2>Patient Adherence Trend</h2>
+  <div class="toolbar">
+    <input placeholder="Enter patient ID" name="patientId" [(ngModel)]="patientId" />
+    <select name="days" [(ngModel)]="days">
+      <option [ngValue]="7">Last 7 days</option>
+      <option [ngValue]="30">Last 30 days</option>
+    </select>
+    <button type="button" (click)="loadTrend()" [disabled]="loading">{{ loading ? 'Loading...' : 'Load Trend' }}</button>
+  </div>
+</section>
+
+<section class="panel">
+  <h3>Summary</h3>
+  @if (summary; as data) {
+    <article class="card">
+      <strong>Patient: {{ data.patientId }}</strong>
+      <p>Window: {{ data.days }} days</p>
+      <p>Adherence: {{ data.adherencePercent }}%</p>
+      <small>
+        Total: {{ data.totals.total }} | Taken: {{ data.totals.taken }} | Skipped: {{ data.totals.skipped }} | Missed:
+        {{ data.totals.missed }} | Pending: {{ data.totals.pending }}
+      </small>
+    </article>
+  } @else {
+    <p>Enter a patient ID and load trend.</p>
+  }
+</section>
+
+<section class="panel">
+  <h3>Daily Trend</h3>
+  @if (summary?.trend?.length) {
+    @for (day of summary!.trend; track day.date) {
+      <article class="card">
+        <strong>{{ day.date }}</strong>
+        <p>Adherence: {{ day.adherencePercent }}%</p>
+        <small>
+          Total: {{ day.total }} | Taken: {{ day.taken }} | Skipped: {{ day.skipped }} | Missed: {{ day.missed }} |
+          Pending: {{ day.pending }}
+        </small>
+      </article>
+    }
+  } @else {
+    <p>No trend data to display.</p>
+  }
+</section>
+
+@if (message) {
+  <p class="success">{{ message }}</p>
+}
+@if (error) {
+  <p class="error">{{ error }}</p>
+}
