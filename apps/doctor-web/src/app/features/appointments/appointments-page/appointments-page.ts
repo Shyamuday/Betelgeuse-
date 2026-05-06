@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { Auth } from '../../../core/services/auth';
 
@@ -75,9 +76,14 @@ export class AppointmentsPage {
 
   constructor(
     private readonly http: HttpClient,
-    private readonly auth: Auth
+    private readonly auth: Auth,
+    private readonly route: ActivatedRoute
   ) {
+    this.consultationId = this.route.snapshot.queryParamMap.get('consultationId') || '';
     void this.loadOptions();
+    if (this.consultationId) {
+      void this.loadConsultationPrescriptions();
+    }
   }
 
   private headers() {

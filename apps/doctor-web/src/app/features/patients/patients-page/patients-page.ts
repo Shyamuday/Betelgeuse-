@@ -1,17 +1,37 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
+import { Router } from '@angular/router';
 import { Auth } from '../../../core/services/auth';
+
+type WorklistConsultation = {
+  id: string;
+  status: 'ASSIGNED' | 'IN_PROGRESS' | 'PRESCRIPTION_UPLOADED' | 'COMPLETED' | string;
+  createdAt: string;
+  patient?: { id: string; name: string; mobile?: string | null };
+  disease?: { name?: string };
+  prescriptions?: Array<{
+    id: string;
+    version: number;
+    status: 'DRAFT' | 'PUBLISHED' | 'CANCELLED';
+    followUpDate?: string | null;
+    createdAt: string;
+  }>;
+};
 
 @Component({
   selector: 'app-patients-page',
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule, DatePipe],
   templateUrl: './patients-page.html',
   styleUrl: './patients-page.scss'
 })
 export class PatientsPage {
   private readonly apiBase = 'http://localhost:4000';
+  worklistLoading = false;
+  worklistError = '';
+  consultations: WorklistConsultation[] = [];
 
   patientId = '';
   days: 7 | 30 = 7;
@@ -37,8 +57,11 @@ export class PatientsPage {
 
   constructor(
     private readonly http: HttpClient,
-    private readonly auth: Auth
-  ) {}
+    private readonly auth: Auth,
+    private readonly router: Router
+  ) {
+    void this.loadWorklist();
+  }
 
   private headers() {
     return new HttpHeaders({
@@ -71,5 +94,50 @@ export class PatientsPage {
     } finally {
       this.loading = false;
     }
+  }
+
+  async loadWorklist() {
+    this.worklistError = '';
+    this.worklistLoading = true;
+    try {
+      const response = await firstValueFrom(
+        this.http.get<{ consultations: WorklistConsultation[] }>(`${this.apiBase}/consultations`, {
+          headers: this.headers()
+        })
+      );
+      this.consultations = response.consultations || [];
+    } catch {
+      this.worklistError = 'Could not load doctor worklist.';
+    } finally {
+      this.worklistLoading = false;
+    }
+  }
+
+  assignedCases() {
+    return this.consultations.filter((item) => item.status === 'ASSIGNED');
+  }
+
+  inProgressCases() {
+    return this.consultations.filter((item) => item.status === 'IN_PROGRESS' || item.status === 'PRESCRIPTION_UPLOADED');
+  }
+
+  followUpDueCases() {
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    return this.consultations.filter((item) => {
+      const published = (item.prescriptions || []).find((p) => p.status === 'PUBLISHED');
+      if (!published?.followUpDate) {
+        return false;
+      }
+      return new Date(published.followUpDate) <= today && item.status !== 'COMPLETED';
+    });
+  }
+
+  publishedFollowUpDate(item: WorklistConsultation) {
+    return (item.prescriptions || []).find((p) => p.status === 'PUBLISHED')?.followUpDate || null;
+  }
+
+  openInAppointments(consultationId: string) {
+    void this.router.navigate(['/appointments'], { queryParams: { consultationId } });
   }
 }

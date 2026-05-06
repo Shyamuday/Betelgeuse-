@@ -1,4 +1,61 @@
 <section class="panel">
+  <h2>Doctor Worklist</h2>
+  <div class="toolbar">
+    <button type="button" (click)="loadWorklist()" [disabled]="worklistLoading">
+      {{ worklistLoading ? 'Refreshing...' : 'Refresh Worklist' }}
+    </button>
+  </div>
+  @if (worklistError) {
+    <p class="error">{{ worklistError }}</p>
+  }
+</section>
+
+<section class="panel">
+  <h3>Assigned</h3>
+  @for (item of assignedCases(); track item.id) {
+    <article class="card">
+      <strong>{{ item.patient?.name || 'Patient' }} - {{ item.disease?.name || 'Consultation' }}</strong>
+      <p>Status: {{ item.status }} | Created: {{ item.createdAt | date: 'medium' }}</p>
+      <small>Patient ID: {{ item.patient?.id }}</small>
+      <div class="actions"><button type="button" (click)="openInAppointments(item.id)">Open in Appointments</button></div>
+    </article>
+  } @empty {
+    <p>No assigned cases.</p>
+  }
+</section>
+
+<section class="panel">
+  <h3>In Progress</h3>
+  @for (item of inProgressCases(); track item.id) {
+    <article class="card">
+      <strong>{{ item.patient?.name || 'Patient' }} - {{ item.disease?.name || 'Consultation' }}</strong>
+      <p>Status: {{ item.status }} | Created: {{ item.createdAt | date: 'medium' }}</p>
+      <small>Patient ID: {{ item.patient?.id }}</small>
+      <div class="actions"><button type="button" (click)="openInAppointments(item.id)">Open in Appointments</button></div>
+    </article>
+  } @empty {
+    <p>No in-progress cases.</p>
+  }
+</section>
+
+<section class="panel">
+  <h3>Follow-up Due</h3>
+  @for (item of followUpDueCases(); track item.id) {
+    <article class="card">
+      <strong>{{ item.patient?.name || 'Patient' }} - {{ item.disease?.name || 'Consultation' }}</strong>
+      <p>Status: {{ item.status }} | Created: {{ item.createdAt | date: 'medium' }}</p>
+      <small>
+        Follow-up date:
+        {{ (publishedFollowUpDate(item) || item.createdAt) | date: 'mediumDate' }}
+      </small>
+      <div class="actions"><button type="button" (click)="openInAppointments(item.id)">Open in Appointments</button></div>
+    </article>
+  } @empty {
+    <p>No follow-up due cases.</p>
+  }
+</section>
+
+<section class="panel">
   <h2>Patient Adherence Trend</h2>
   <div class="toolbar">
     <input placeholder="Enter patient ID" name="patientId" [(ngModel)]="patientId" />
