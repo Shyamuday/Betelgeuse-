@@ -1,4 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -46,7 +47,7 @@ type LoadedPrescription = {
 
 @Component({
   selector: 'app-appointments-page',
-  imports: [FormsModule],
+  imports: [FormsModule, DatePipe],
   templateUrl: './appointments-page.html',
   styleUrl: './appointments-page.scss'
 })

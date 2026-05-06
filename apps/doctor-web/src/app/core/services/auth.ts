@@ -17,7 +17,7 @@ export class Auth {
 
   async login(email: string, password: string) {
     if (!email || !password) {
-      return false;
+      return { ok: false as const, message: 'Email and password are required.' };
     }
 
     try {
