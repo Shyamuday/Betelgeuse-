@@ -961,6 +961,59 @@ app.post(
   })
 );
 
+app.put(
+  '/admin/doctors/:id',
+  authRequired,
+  allowRoles(Role.ADMIN),
+  asyncRoute(async (req, res) => {
+    const doctorId = routeParam(req, 'id');
+    const body = z
+      .object({
+        name: z.string().min(2),
+        email: z.string().email(),
+        mobile: z.string().min(8).optional().or(z.literal('')),
+        specialty: z.string().min(2),
+        registrationNo: z.string().optional().or(z.literal('')),
+        isAvailable: z.boolean().optional().default(true)
+      })
+      .parse(req.body);
+
+    const existing = await prisma.user.findFirst({
+      where: { id: doctorId, role: Role.DOCTOR },
+      select: { id: true }
+    });
+    if (!existing) {
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
+
+    const doctor = await prisma.user.update({
+      where: { id: doctorId },
+      data: {
+        name: body.name,
+        email: body.email,
+        mobile: body.mobile || null,
+        doctorProfile: {
+          upsert: {
+            create: {
+              specialty: body.specialty,
+              registrationNo: body.registrationNo || null,
+              isAvailable: body.isAvailable
+            },
+            update: {
+              specialty: body.specialty,
+              registrationNo: body.registrationNo || null,
+              isAvailable: body.isAvailable
+            }
+          }
+        }
+      },
+      select: { ...publicUserSelect, isActive: true, doctorProfile: true }
+    });
+
+    res.json({ doctor, message: 'Doctor profile updated successfully.' });
+  })
+);
+
 app.post(
   '/consultations',
   authRequired,

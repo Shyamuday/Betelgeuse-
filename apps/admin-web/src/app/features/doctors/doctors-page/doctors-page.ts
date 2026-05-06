@@ -43,6 +43,18 @@ export class DoctorsPage {
 
   error = '';
   message = '';
+  editName = '';
+  editEmail = '';
+  editMobile = '';
+  editSpecialty = '';
+  editRegistrationNo = '';
+  editIsAvailable = true;
+  createName = '';
+  createEmail = '';
+  createMobile = '';
+  createPassword = '';
+  createSpecialty = '';
+  createRegistrationNo = '';
 
   constructor(private readonly api: AdminApi) {
     void this.load();
@@ -71,7 +83,8 @@ export class DoctorsPage {
       this.doctorsTotalPagesCount = Math.max(1, Number(allDoctors.pagination?.totalPages || 1));
       this.pendingTotalPagesCount = Math.max(1, Number(pending.pagination?.totalPages || 1));
       this.selectedPendingDoctorIds = [];
-      this.selectedDoctorId = this.visibleDoctors()[0]?.id || '';
+      this.selectedDoctorId = this.selectedDoctorId || this.visibleDoctors()[0]?.id || '';
+      this.syncEditFormFromSelectedDoctor();
     } catch {
       this.error = 'Could not load doctors.';
     }
@@ -109,8 +122,60 @@ export class DoctorsPage {
       this.message = makeActive ? 'Doctor activated.' : 'Doctor deactivated.';
       await this.load();
       this.selectedDoctorId = doctorId;
+      this.syncEditFormFromSelectedDoctor();
     } catch {
       this.error = 'Could not update doctor status.';
+    }
+  }
+
+  async saveDoctorEdits() {
+    this.message = '';
+    this.error = '';
+    const doctorId = this.selectedDoctorId;
+    if (!doctorId) {
+      return;
+    }
+
+    try {
+      await this.api.updateDoctor(doctorId, {
+        name: this.editName.trim(),
+        email: this.editEmail.trim(),
+        mobile: this.editMobile.trim(),
+        specialty: this.editSpecialty.trim(),
+        registrationNo: this.editRegistrationNo.trim(),
+        isAvailable: this.editIsAvailable
+      });
+      this.message = 'Doctor profile updated.';
+      await this.load();
+      this.selectedDoctorId = doctorId;
+      this.syncEditFormFromSelectedDoctor();
+    } catch {
+      this.error = 'Could not update doctor profile.';
+    }
+  }
+
+  async createDoctor() {
+    this.message = '';
+    this.error = '';
+    try {
+      await this.api.createDoctor({
+        name: this.createName.trim(),
+        email: this.createEmail.trim(),
+        mobile: this.createMobile.trim(),
+        password: this.createPassword,
+        specialty: this.createSpecialty.trim(),
+        registrationNo: this.createRegistrationNo.trim()
+      });
+      this.message = 'Doctor created successfully.';
+      this.createName = '';
+      this.createEmail = '';
+      this.createMobile = '';
+      this.createPassword = '';
+      this.createSpecialty = '';
+      this.createRegistrationNo = '';
+      await this.load();
+    } catch {
+      this.error = 'Could not create doctor.';
     }
   }
 
@@ -216,6 +281,25 @@ export class DoctorsPage {
 
   selectedDoctorDetails() {
     return this.doctors.find((doctor) => doctor.id === this.selectedDoctorId) || null;
+  }
+
+  setSelectedDoctor(doctorId: string) {
+    this.selectedDoctorId = doctorId;
+    this.syncEditFormFromSelectedDoctor();
+  }
+
+  private syncEditFormFromSelectedDoctor() {
+    const selected = this.selectedDoctorDetails();
+    if (!selected) {
+      return;
+    }
+
+    this.editName = selected.name || '';
+    this.editEmail = selected.email || '';
+    this.editMobile = selected.mobile || '';
+    this.editSpecialty = selected.doctorProfile?.specialty || '';
+    this.editRegistrationNo = selected.doctorProfile?.registrationNo || '';
+    this.editIsAvailable = selected.doctorProfile?.isAvailable ?? true;
   }
 
 }

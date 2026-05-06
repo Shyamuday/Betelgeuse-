@@ -1,4 +1,17 @@
 <section class="panel">
+  <h2>Create Doctor</h2>
+  <div class="toolbar">
+    <input placeholder="Name" name="createName" [(ngModel)]="createName" />
+    <input placeholder="Email" name="createEmail" [(ngModel)]="createEmail" />
+    <input placeholder="Mobile" name="createMobile" [(ngModel)]="createMobile" />
+    <input placeholder="Password" name="createPassword" type="password" [(ngModel)]="createPassword" />
+    <input placeholder="Specialty" name="createSpecialty" [(ngModel)]="createSpecialty" />
+    <input placeholder="Registration No" name="createRegistrationNo" [(ngModel)]="createRegistrationNo" />
+    <button type="button" (click)="createDoctor()">Create</button>
+  </div>
+</section>
+
+<section class="panel">
   <h2>Pending Doctor Approvals</h2>
   <div class="toolbar">
     <input
@@ -69,7 +82,7 @@
 
   @for (doctor of visibleDoctors(); track doctor.id) {
     <article class="card">
-      <strong>{{ doctor.name }}</strong> <button type="button" class="link" (click)="selectedDoctorId = doctor.id">View details</button>
+      <strong>{{ doctor.name }}</strong> <button type="button" class="link" (click)="setSelectedDoctor(doctor.id)">View details</button>
       <p>{{ doctor.email }} | {{ doctor.mobile || 'No mobile' }}</p>
       <small>{{ doctor.doctorProfile?.specialty || 'Specialty not set' }} | {{ doctor.isActive ? 'Active' : 'Inactive' }}</small>
     </article>
@@ -100,6 +113,21 @@
         } @else {
           <button type="button" (click)="toggleDoctorStatus(selectedDoctor.id, true)">Activate</button>
         }
+      </div>
+    </article>
+    <article class="card">
+      <h3>Edit Doctor</h3>
+      <div class="toolbar">
+        <input placeholder="Name" name="editName" [(ngModel)]="editName" />
+        <input placeholder="Email" name="editEmail" [(ngModel)]="editEmail" />
+        <input placeholder="Mobile" name="editMobile" [(ngModel)]="editMobile" />
+        <input placeholder="Specialty" name="editSpecialty" [(ngModel)]="editSpecialty" />
+        <input placeholder="Registration No" name="editRegistrationNo" [(ngModel)]="editRegistrationNo" />
+        <label>
+          <input type="checkbox" name="editIsAvailable" [(ngModel)]="editIsAvailable" />
+          Available
+        </label>
+        <button type="button" (click)="saveDoctorEdits()">Save</button>
       </div>
     </article>
   } @else {

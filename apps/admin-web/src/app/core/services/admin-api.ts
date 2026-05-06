@@ -82,6 +82,31 @@ export class AdminApi {
     );
   }
 
+  updateDoctor(
+    doctorId: string,
+    payload: {
+      name: string;
+      email: string;
+      mobile?: string;
+      specialty: string;
+      registrationNo?: string;
+      isAvailable: boolean;
+    }
+  ) {
+    return firstValueFrom(this.http.put(`${this.apiBase}/admin/doctors/${doctorId}`, payload, { headers: this.headers() }));
+  }
+
+  createDoctor(payload: {
+    name: string;
+    email: string;
+    mobile?: string;
+    password: string;
+    specialty: string;
+    registrationNo?: string;
+  }) {
+    return firstValueFrom(this.http.post(`${this.apiBase}/admin/doctors`, payload, { headers: this.headers() }));
+  }
+
   getConsultations() {
     return firstValueFrom(
       this.http.get<{ consultations: Array<any> }>(`${this.apiBase}/consultations`, { headers: this.headers() })
