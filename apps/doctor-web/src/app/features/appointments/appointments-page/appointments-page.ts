@@ -30,6 +30,7 @@ type LoadedPrescription = {
   version: number;
   status: 'DRAFT' | 'PUBLISHED' | 'CANCELLED';
   createdAt?: string;
+  followUpDate?: string | null;
   diagnosis: string;
   advice?: string | null;
   notes: string;
@@ -62,6 +63,7 @@ export class AppointmentsPage {
   diagnosis = '';
   notes = '';
   advice = '';
+  followUpDate = '';
   status: 'DRAFT' | 'PUBLISHED' = 'DRAFT';
   editingPrescriptionId = '';
   loadedPrescriptions: LoadedPrescription[] = [];
@@ -209,6 +211,9 @@ export class AppointmentsPage {
     this.diagnosis = prescription.diagnosis || '';
     this.advice = prescription.advice || '';
     this.notes = prescription.notes || '';
+    this.followUpDate = prescription.followUpDate
+      ? new Date(prescription.followUpDate).toISOString().substring(0, 10)
+      : '';
     this.status = prescription.status === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT';
     this.medicineRows = (prescription.items || []).length
       ? (prescription.items || []).map((item) => ({
@@ -250,6 +255,7 @@ export class AppointmentsPage {
     this.diagnosis = prescription.diagnosis || '';
     this.advice = prescription.advice || '';
     this.notes = prescription.notes || '';
+    this.followUpDate = '';
     this.status = 'DRAFT';
     this.medicineRows = (prescription.items || []).length
       ? (prescription.items || []).map((item) => ({
@@ -284,6 +290,7 @@ export class AppointmentsPage {
     this.diagnosis = '';
     this.advice = '';
     this.notes = '';
+    this.followUpDate = '';
     this.medicineRows = [this.newMedicineRow()];
   }
 
@@ -352,6 +359,7 @@ export class AppointmentsPage {
       diagnosis: this.diagnosis,
       notes: this.notes,
       advice: this.advice || undefined,
+      followUpDate: this.followUpDate || undefined,
       status: targetStatus,
       items: this.medicineRows.map((row) => ({
         medicineName: row.medicineName,

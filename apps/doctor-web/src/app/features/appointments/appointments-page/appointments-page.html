@@ -19,6 +19,9 @@
           </div>
           <p>{{ item.diagnosis || 'No diagnosis summary' }}</p>
           <small>{{ item.createdAt ? (item.createdAt | date: 'medium') : '' }}</small>
+          @if (item.followUpDate) {
+            <small>Follow-up: {{ item.followUpDate | date: 'mediumDate' }}</small>
+          }
           <div class="actions">
             <button type="button" (click)="openVersion(item)">Open</button>
             <button type="button" [disabled]="!canEditVersion(item)" (click)="openVersion(item)">Edit</button>
@@ -76,6 +79,9 @@
 
   <label for="notes">Prescription Notes</label>
   <textarea id="notes" name="notes" [(ngModel)]="notes"></textarea>
+
+  <label for="followUpDate">Follow-up Date (optional)</label>
+  <input id="followUpDate" name="followUpDate" type="date" [(ngModel)]="followUpDate" />
 
   <h3>Medicines</h3>
   @let safety = prescriptionSafetyReport();
