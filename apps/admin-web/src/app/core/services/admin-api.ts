@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { AdminAuth } from './admin-auth';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdminApi {
-  private readonly apiBase = 'http://localhost:4000';
+  private readonly apiBase = environment.apiUrl;
 
   constructor(
     private readonly http: HttpClient,

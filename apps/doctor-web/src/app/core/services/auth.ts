@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Auth {
   private readonly tokenKey = 'doctor_app_token';
-  private readonly apiBase = 'http://localhost:4000';
+  private readonly apiBase = environment.apiUrl;
 
   constructor(private readonly http: HttpClient) {}
 

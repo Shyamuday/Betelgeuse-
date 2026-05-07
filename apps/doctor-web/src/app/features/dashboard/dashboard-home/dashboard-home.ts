@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { Auth } from '../../../core/services/auth';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-dashboard-home',
@@ -11,7 +12,7 @@ import { Auth } from '../../../core/services/auth';
   styleUrl: './dashboard-home.scss',
 })
 export class DashboardHome {
-  private readonly apiBase = 'http://localhost:4000';
+  private readonly apiBase = environment.apiUrl;
   error = '';
   summary: {
     doctorSharePercent: number;

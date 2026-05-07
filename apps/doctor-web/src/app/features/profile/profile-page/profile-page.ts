@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Auth } from '../../../core/services/auth';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-profile-page',
@@ -11,7 +12,7 @@ import { Auth } from '../../../core/services/auth';
   styleUrl: './profile-page.scss'
 })
 export class ProfilePage {
-  private readonly apiBase = 'http://localhost:4000';
+  private readonly apiBase = environment.apiUrl;
 
   name = '';
   email = '';

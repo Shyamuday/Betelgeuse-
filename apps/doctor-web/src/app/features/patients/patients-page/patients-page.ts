@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { Auth } from '../../../core/services/auth';
+import { environment } from '../../../../environments/environment';
 
 type WorklistConsultation = {
   id: string;
@@ -28,7 +29,7 @@ type WorklistConsultation = {
   styleUrl: './patients-page.scss'
 })
 export class PatientsPage {
-  private readonly apiBase = 'http://localhost:4000';
+  private readonly apiBase = environment.apiUrl;
   worklistLoading = false;
   worklistError = '';
   consultations: WorklistConsultation[] = [];
