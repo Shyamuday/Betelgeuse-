@@ -29,6 +29,10 @@ export class AdminDashboard {
   paymentFrom = '';
   paymentTo = '';
   paymentSummary = { total: 0, paid: 0, failedCount: 0, pendingCount: 0 };
+  paymentsLoading = false;
+  paymentsError = '';
+  csvExporting = false;
+  csvError = '';
   error = '';
 
   constructor(private readonly api: AdminApi) {
@@ -56,20 +60,35 @@ export class AdminDashboard {
 
   async loadPayments(page = this.paymentsPage) {
     this.paymentsPage = page;
-    const result = await this.api.getPayments({
-      page,
-      pageSize: 10,
-      status: this.paymentStatus,
-      from: this.paymentFrom || undefined,
-      to: this.paymentTo || undefined
-    });
-    this.payments = result.payments || [];
-    this.paymentSummary = result.summary || this.paymentSummary;
-    this.paymentsTotalPages = result.pagination?.totalPages || 1;
+    this.paymentsLoading = true;
+    this.paymentsError = '';
+    try {
+      const result = await this.api.getPayments({
+        page,
+        pageSize: 10,
+        status: this.paymentStatus,
+        from: this.paymentFrom || undefined,
+        to: this.paymentTo || undefined
+      });
+      this.payments = result.payments || [];
+      this.paymentSummary = result.summary || this.paymentSummary;
+      this.paymentsTotalPages = result.pagination?.totalPages || 1;
+    } catch {
+      this.paymentsError = 'Could not load payments. Please try again.';
+    } finally {
+      this.paymentsLoading = false;
+    }
   }
 
   async applyPaymentFilters() {
     await this.loadPayments(1);
+  }
+
+  clearPaymentFilters() {
+    this.paymentStatus = 'ALL';
+    this.paymentFrom = '';
+    this.paymentTo = '';
+    void this.loadPayments(1);
   }
 
   paymentPages() {
@@ -77,19 +96,25 @@ export class AdminDashboard {
   }
 
   async exportPaymentsCsv() {
-    const csv = await this.api.exportPaymentsCsv({
-      page: this.paymentsPage,
-      pageSize: 100,
-      status: this.paymentStatus,
-      from: this.paymentFrom || undefined,
-      to: this.paymentTo || undefined
-    });
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'admin-payments.csv';
-    link.click();
-    URL.revokeObjectURL(url);
+    this.csvExporting = true;
+    this.csvError = '';
+    try {
+      const csv = await this.api.exportPaymentsCsv({
+        status: this.paymentStatus,
+        from: this.paymentFrom || undefined,
+        to: this.paymentTo || undefined
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `payments-${new Date().toISOString().substring(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      this.csvError = 'CSV export failed. Please try again.';
+    } finally {
+      this.csvExporting = false;
+    }
   }
 }

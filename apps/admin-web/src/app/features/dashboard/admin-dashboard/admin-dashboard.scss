@@ -1,3 +1,4 @@
+/* ── Top stats ─────────────────────────────────────────────── */
 .stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -9,63 +10,343 @@
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 1rem;
+
+  h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+  }
 }
 
-.card h3 {
-  margin: 0 0 0.5rem;
+/* ── Panel ──────────────────────────────────────────────────── */
+.panel {
+  margin-top: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  background: #fff;
 }
 
-.card p {
-  margin: 0;
-  font-size: 1.15rem;
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+}
+
+.panel > h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
   font-weight: 600;
 }
 
-.error {
-  color: #b91c1c;
-}
-
-.panel {
-  margin-top: 1rem;
-}
-
+/* ── Filters ────────────────────────────────────────────────── */
 .filters {
   display: flex;
-  gap: 0.5rem;
+  gap: 1rem;
   flex-wrap: wrap;
-  margin-bottom: 0.75rem;
+  align-items: flex-end;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.filter-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .filters input,
 .filters select {
   border: 1px solid #cbd5e1;
   border-radius: 8px;
-  padding: 0.45rem 0.55rem;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.9rem;
+  background: #fff;
+  color: #111827;
 }
 
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+/* ── Buttons ────────────────────────────────────────────────── */
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.15s;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background: #1d4ed8;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #1e40af;
+  }
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #374151;
+
+  &:hover:not(:disabled) {
+    background: #f3f4f6;
+  }
+}
+
+.btn-export {
+  background: #065f46;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #064e3b;
+  }
+}
+
+/* ── Summary stats bar ──────────────────────────────────────── */
+.summary-stats {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.summary-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.summary-label {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.summary-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+
+  &.warn {
+    color: #b91c1c;
+  }
+}
+
+/* ── Payment rows ───────────────────────────────────────────── */
+.payment-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid #f3f4f6;
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+
+.payment-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+
+  strong {
+    font-size: 0.9rem;
+    color: #111827;
+  }
+}
+
+.disease-label {
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.payment-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.amount {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+.plan-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+}
+
+.payment-detail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+
+  small {
+    font-size: 0.75rem;
+    color: #9ca3af;
+  }
+}
+
+/* ── Status badges ──────────────────────────────────────────── */
+.status-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.status-paid {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-created {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.status-failed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ── Pagination ─────────────────────────────────────────────── */
 .pagination {
   display: flex;
   gap: 0.4rem;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
-.pagination button.active {
-  background: #dbeafe;
-  color: #1d4ed8;
+.page-btn {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  min-width: 2rem;
+  padding: 0.35rem 0.6rem;
+
+  &.active {
+    background: #dbeafe;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+    font-weight: 600;
+  }
+
+  &:hover:not(.active):not(:disabled) {
+    background: #f3f4f6;
+  }
 }
 
+/* ── State feedback ─────────────────────────────────────────── */
+.loading-text {
+  color: #6b7280;
+  font-size: 0.9rem;
+  padding: 1rem 0;
+}
+
+.empty-state {
+  color: #9ca3af;
+  font-size: 0.875rem;
+  padding: 1rem 0;
+}
+
+.error {
+  color: #b91c1c;
+  font-size: 0.875rem;
+}
+
+.inline-error {
+  color: #b91c1c;
+  font-size: 0.82rem;
+  margin: 0.25rem 0 0.5rem;
+}
+
+.error-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .stats {
     grid-template-columns: 1fr;
   }
 
-  .card {
-    padding: 0.85rem;
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .filters {
-    display: grid;
+  .filter-actions {
+    flex-wrap: wrap;
+  }
+
+  .payment-row {
     grid-template-columns: 1fr;
+  }
+
+  .payment-detail {
+    align-items: flex-start;
+  }
+
+  .summary-stats {
+    gap: 1rem;
   }
 }

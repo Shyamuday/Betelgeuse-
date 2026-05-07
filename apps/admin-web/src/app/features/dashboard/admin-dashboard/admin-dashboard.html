@@ -1,6 +1,6 @@
 <section class="stats">
   <article class="card">
-    <h3>Revenue</h3>
+    <h3>Revenue Collected</h3>
     <p>{{ revenueInPaise / 100 | currency: 'INR' }}</p>
   </article>
   <article class="card">
@@ -14,40 +14,128 @@
 </section>
 
 <section class="panel">
-  <h3>Finance Operations</h3>
+  <div class="panel-header">
+    <h3>Finance Operations</h3>
+  </div>
+
   <div class="filters">
-    <select [(ngModel)]="paymentStatus">
-      <option value="ALL">All status</option>
-      <option value="PAID">Paid</option>
-      <option value="CREATED">Pending</option>
-      <option value="FAILED">Failed</option>
-    </select>
-    <input type="date" [(ngModel)]="paymentFrom" />
-    <input type="date" [(ngModel)]="paymentTo" />
-    <button type="button" (click)="applyPaymentFilters()">Apply</button>
-    <button type="button" (click)="exportPaymentsCsv()">Export CSV</button>
+    <div class="filter-group">
+      <label class="filter-label" for="paymentStatus">Status</label>
+      <select id="paymentStatus" [(ngModel)]="paymentStatus">
+        <option value="ALL">All</option>
+        <option value="PAID">Paid</option>
+        <option value="CREATED">Pending</option>
+        <option value="FAILED">Failed</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label" for="paymentFrom">From</label>
+      <input id="paymentFrom" type="date" [(ngModel)]="paymentFrom" />
+    </div>
+    <div class="filter-group">
+      <label class="filter-label" for="paymentTo">To</label>
+      <input id="paymentTo" type="date" [(ngModel)]="paymentTo" />
+    </div>
+    <div class="filter-actions">
+      <button type="button" class="btn-primary" (click)="applyPaymentFilters()" [disabled]="paymentsLoading">
+        {{ paymentsLoading ? 'Loading...' : 'Apply Filters' }}
+      </button>
+      <button type="button" class="btn-ghost" (click)="clearPaymentFilters()" [disabled]="paymentsLoading">
+        Clear
+      </button>
+      <button
+        type="button"
+        class="btn-export"
+        (click)="exportPaymentsCsv()"
+        [disabled]="csvExporting || paymentsLoading"
+      >
+        {{ csvExporting ? 'Exporting...' : 'Export CSV' }}
+      </button>
+    </div>
   </div>
-  <p>
-    Paid: {{ paymentSummary.paid / 100 | currency: 'INR' }} | Total: {{ paymentSummary.total / 100 | currency: 'INR' }} |
-    Pending: {{ paymentSummary.pendingCount }} | Failed: {{ paymentSummary.failedCount }}
-  </p>
-  @for (payment of payments; track payment.id) {
-    <article class="card">
-      <strong>{{ payment.consultation?.patient?.name || 'Patient' }} - {{ payment.status }}</strong>
-      <p>
-        {{ payment.amountInPaise / 100 | currency: 'INR' }} | Plan: {{ payment.billingPlanCode || 'ONE_TIME' }} | Disease:
-        {{ payment.consultation?.disease?.name || 'NA' }}
-      </p>
-      <small>{{ payment.createdAt | date: 'medium' }} | Doctor: {{ payment.consultation?.assignedDoctor?.name || 'Unassigned' }}</small>
-    </article>
-  } @empty {
-    <p>No payments found for selected filters.</p>
+
+  @if (csvError) {
+    <p class="inline-error">{{ csvError }}</p>
   }
-  <div class="pagination">
-    @for (page of paymentPages(); track page) {
-      <button type="button" [class.active]="paymentsPage === page" (click)="loadPayments(page)">{{ page }}</button>
-    }
+
+  <div class="summary-stats">
+    <div class="summary-stat">
+      <span class="summary-label">Total collected</span>
+      <span class="summary-value">{{ paymentSummary.paid / 100 | currency: 'INR' }}</span>
+    </div>
+    <div class="summary-stat">
+      <span class="summary-label">Gross billed</span>
+      <span class="summary-value">{{ paymentSummary.total / 100 | currency: 'INR' }}</span>
+    </div>
+    <div class="summary-stat">
+      <span class="summary-label">Pending</span>
+      <span class="summary-value">{{ paymentSummary.pendingCount }}</span>
+    </div>
+    <div class="summary-stat">
+      <span class="summary-label">Failed</span>
+      <span class="summary-value warn">{{ paymentSummary.failedCount }}</span>
+    </div>
   </div>
+
+  @if (paymentsLoading) {
+    <p class="loading-text">Loading payments...</p>
+  } @else if (paymentsError) {
+    <div class="error-row">
+      <p class="error">{{ paymentsError }}</p>
+      <button type="button" class="btn-ghost" (click)="loadPayments()">Retry</button>
+    </div>
+  } @else {
+    @for (payment of payments; track payment.id) {
+      <article class="payment-row">
+        <div class="payment-main">
+          <strong>{{ payment.consultation?.patient?.name || 'Patient' }}</strong>
+          <span class="disease-label">{{ payment.consultation?.disease?.name || 'Consultation' }}</span>
+        </div>
+        <div class="payment-meta">
+          <span class="amount">{{ payment.amountInPaise / 100 | currency: 'INR' }}</span>
+          <span class="plan-label">{{ payment.billingPlanCode || 'ONE_TIME' }}</span>
+          <span [class]="'status-badge status-' + payment.status.toLowerCase()">{{ payment.status }}</span>
+        </div>
+        <div class="payment-detail">
+          <small>{{ payment.createdAt | date: 'mediumDate' }}</small>
+          <small>Doctor: {{ payment.consultation?.assignedDoctor?.name || 'Unassigned' }}</small>
+        </div>
+      </article>
+    } @empty {
+      <p class="empty-state">No payments found for the selected filters.</p>
+    }
+
+    @if (paymentsTotalPages > 1) {
+      <div class="pagination">
+        <button
+          type="button"
+          class="btn-ghost"
+          [disabled]="paymentsPage === 1"
+          (click)="loadPayments(paymentsPage - 1)"
+        >
+          &larr; Prev
+        </button>
+        @for (page of paymentPages(); track page) {
+          <button
+            type="button"
+            class="page-btn"
+            [class.active]="paymentsPage === page"
+            (click)="loadPayments(page)"
+          >
+            {{ page }}
+          </button>
+        }
+        <button
+          type="button"
+          class="btn-ghost"
+          [disabled]="paymentsPage === paymentsTotalPages"
+          (click)="loadPayments(paymentsPage + 1)"
+        >
+          Next &rarr;
+        </button>
+      </div>
+    }
+  }
 </section>
 
 <section class="panel">
@@ -59,7 +147,7 @@
       <small>{{ log.targetType }}: {{ log.targetId }} | {{ log.actorRole || 'SYSTEM' }} | {{ log.createdAt | date: 'medium' }}</small>
     </article>
   } @empty {
-    <p>No audit activity yet.</p>
+    <p class="empty-state">No audit activity yet.</p>
   }
 </section>
 
