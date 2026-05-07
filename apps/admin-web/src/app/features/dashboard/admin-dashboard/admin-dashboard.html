@@ -14,6 +14,43 @@
 </section>
 
 <section class="panel">
+  <h3>Finance Operations</h3>
+  <div class="filters">
+    <select [(ngModel)]="paymentStatus">
+      <option value="ALL">All status</option>
+      <option value="PAID">Paid</option>
+      <option value="CREATED">Pending</option>
+      <option value="FAILED">Failed</option>
+    </select>
+    <input type="date" [(ngModel)]="paymentFrom" />
+    <input type="date" [(ngModel)]="paymentTo" />
+    <button type="button" (click)="applyPaymentFilters()">Apply</button>
+    <button type="button" (click)="exportPaymentsCsv()">Export CSV</button>
+  </div>
+  <p>
+    Paid: {{ paymentSummary.paid / 100 | currency: 'INR' }} | Total: {{ paymentSummary.total / 100 | currency: 'INR' }} |
+    Pending: {{ paymentSummary.pendingCount }} | Failed: {{ paymentSummary.failedCount }}
+  </p>
+  @for (payment of payments; track payment.id) {
+    <article class="card">
+      <strong>{{ payment.consultation?.patient?.name || 'Patient' }} - {{ payment.status }}</strong>
+      <p>
+        {{ payment.amountInPaise / 100 | currency: 'INR' }} | Plan: {{ payment.billingPlanCode || 'ONE_TIME' }} | Disease:
+        {{ payment.consultation?.disease?.name || 'NA' }}
+      </p>
+      <small>{{ payment.createdAt | date: 'medium' }} | Doctor: {{ payment.consultation?.assignedDoctor?.name || 'Unassigned' }}</small>
+    </article>
+  } @empty {
+    <p>No payments found for selected filters.</p>
+  }
+  <div class="pagination">
+    @for (page of paymentPages(); track page) {
+      <button type="button" [class.active]="paymentsPage === page" (click)="loadPayments(page)">{{ page }}</button>
+    }
+  </div>
+</section>
+
+<section class="panel">
   <h3>Recent Admin Audit Trail</h3>
   @for (log of auditLogs; track log.id) {
     <article class="card">

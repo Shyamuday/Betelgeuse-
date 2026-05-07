@@ -7,7 +7,7 @@ import { AppFooterComponent } from './app-footer.component';
 import { AppHeaderComponent } from './app-header.component';
 import { ClinicApiService } from './clinic-api.service';
 import { AuthService } from './auth/auth.service';
-import { Disease, Consultation, Doctor, DoseEvent, Prescription } from './models';
+import { BillingPlan, Consultation, Disease, Doctor, DoseEvent, Prescription } from './models';
 
 @Component({
   selector: 'app-dashboard',
@@ -36,6 +36,28 @@ import { Disease, Consultation, Doctor, DoseEvent, Prescription } from './models
           <div class="panel">
             <h2>Book Consultation</h2>
             <label>
+              Purchase type
+              <select [(ngModel)]="purchaseType">
+                <option value="ONE_TIME">One-time appointment</option>
+                <option value="PLAN">Plan purchase</option>
+              </select>
+            </label>
+            @if (purchaseType === 'PLAN') {
+              <label>
+                Select plan
+                <select [(ngModel)]="selectedPlanCode">
+                  @for (plan of billingPlans(); track plan.code) {
+                    @if (plan.code !== 'ONE_TIME') {
+                      <option [value]="plan.code">
+                        {{ plan.name }} - {{ plan.priceInPaise / 100 | currency: 'INR' }}
+                      </option>
+                    }
+                  }
+                </select>
+              </label>
+              <p class="muted">{{ selectedPlan()?.description }}</p>
+            }
+            <label>
               Select problem
               <select [(ngModel)]="selectedDiseaseId" (change)="resetAnswers()">
                 @for (disease of diseases(); track disease.id) {
@@ -52,7 +74,11 @@ import { Disease, Consultation, Doctor, DoseEvent, Prescription } from './models
             }
 
             <button class="primary" [disabled]="isProcessing()" (click)="bookConsultation()">Create consultation</button>
-            <p class="muted">After booking, pay securely with Razorpay to move your consultation to doctor assignment.</p>
+            <p class="muted">
+              Payable now:
+              <strong>{{ estimatedPayableInPaise() / 100 | currency: 'INR' }}</strong>.
+              After payment, consultation moves to doctor assignment.
+            </p>
           </div>
 
           <ng-container *ngTemplateOutlet="consultationList"></ng-container>
@@ -203,6 +229,8 @@ import { Disease, Consultation, Doctor, DoseEvent, Prescription } from './models
                 <strong>{{ consultation.disease.name }}</strong>
                 <span>{{ consultation.patient.name }}</span>
                 <small>{{ consultation.status }}</small>
+                <small>Plan: {{ consultation.billingPlanCode || consultation.payment?.billingPlanCode || 'ONE_TIME' }}</small>
+                <small>Amount: {{ (consultation.payment?.amountInPaise || 0) / 100 | currency: 'INR' }}</small>
               </button>
               @if (auth.user()?.role === 'PATIENT' && consultation.status === 'PAYMENT_PENDING') {
                 <button class="primary" [disabled]="isProcessing()" (click)="pay(consultation)">Pay now</button>
@@ -281,6 +309,7 @@ import { Disease, Consultation, Doctor, DoseEvent, Prescription } from './models
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   readonly diseases = signal<Disease[]>([]);
+  readonly billingPlans = signal<BillingPlan[]>([]);
   readonly consultations = signal<Consultation[]>([]);
   readonly doctors = signal<Doctor[]>([]);
   readonly report = signal<{ revenueInPaise: number; activeDoctors: number; consultations: unknown[] } | null>(null);
@@ -296,6 +325,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private realtimeChannel?: RealtimeChannel;
 
   selectedDiseaseId = '';
+  purchaseType: 'ONE_TIME' | 'PLAN' = 'ONE_TIME';
+  selectedPlanCode = '';
   intakeAnswers: Record<string, string> = {};
   messageBody = '';
   snoozeMinutes = 15;
@@ -338,6 +369,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return this.diseases().find((disease) => disease.id === this.selectedDiseaseId);
   }
 
+  selectedPlan() {
+    return this.billingPlans().find((plan) => plan.code === this.selectedPlanCode) || null;
+  }
+
+  estimatedPayableInPaise() {
+    if (this.purchaseType === 'PLAN') {
+      return this.selectedPlan()?.priceInPaise || 0;
+    }
+    return this.selectedDisease()?.feeInPaise || 0;
+  }
+
   resetAnswers() {
     this.intakeAnswers = {};
   }
@@ -348,7 +390,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     this.isProcessing.set(true);
-    this.api.createConsultation({ diseaseId: this.selectedDiseaseId, intakeAnswers: this.intakeAnswers }).subscribe({
+    this.api
+      .createConsultation({
+        diseaseId: this.selectedDiseaseId,
+        intakeAnswers: this.intakeAnswers,
+        purchaseType: this.purchaseType,
+        ...(this.purchaseType === 'PLAN' ? { planCode: this.selectedPlanCode } : {})
+      })
+      .subscribe({
       next: () => {
         this.showNotice('Consultation created. Complete payment to continue.');
         this.loadConsultations();
@@ -357,8 +406,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.isProcessing.set(false);
         this.showNotice(error.error?.message || error.message || 'Could not create consultation.');
       },
-      complete: () => this.isProcessing.set(false)
-    });
+        complete: () => this.isProcessing.set(false)
+      });
   }
 
   pay(consultation: Consultation) {
@@ -554,6 +603,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
       error: (error) => {
         this.isLoading.set(false);
         this.showNotice(error.error?.message || error.message || 'Could not load diseases.');
+      }
+    });
+    this.api.billingPlans().subscribe({
+      next: ({ plans }) => {
+        this.billingPlans.set(plans || []);
+        this.selectedPlanCode =
+          (plans || []).find((plan) => plan.code !== 'ONE_TIME')?.code ||
+          (plans || [])[0]?.code ||
+          '';
+      },
+      error: () => {
+        // keep disease-based one-time fallback
       }
     });
     this.loadConsultations();

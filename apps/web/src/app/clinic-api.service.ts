@@ -3,7 +3,7 @@ import { from, map } from 'rxjs';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { supabase } from './supabase.client';
 import { environment } from '../environments/environment';
-import { Consultation, Disease, Doctor, DoseEvent, Prescription } from './models';
+import { BillingPlan, Consultation, Disease, Doctor, DoseEvent, Prescription } from './models';
 
 type RazorpayOrderResponse = {
   orderId: string;
@@ -36,8 +36,17 @@ export class ClinicApiService {
     return from(this.fetchConsultationsViaApiOrSupabase());
   }
 
-  createConsultation(payload: { diseaseId: string; intakeAnswers: Record<string, string> }) {
+  createConsultation(payload: {
+    diseaseId: string;
+    intakeAnswers: Record<string, string>;
+    purchaseType?: 'ONE_TIME' | 'PLAN';
+    planCode?: string;
+  }) {
     return from(this.createConsultationViaApiOrSupabase(payload));
+  }
+
+  billingPlans() {
+    return from(this.fetchBillingPlans());
   }
 
   createPaymentOrder(consultationId: string) {
@@ -247,7 +256,12 @@ export class ClinicApiService {
     return { consultation };
   }
 
-  private async createConsultationViaApiOrSupabase(payload: { diseaseId: string; intakeAnswers: Record<string, string> }) {
+  private async createConsultationViaApiOrSupabase(payload: {
+    diseaseId: string;
+    intakeAnswers: Record<string, string>;
+    purchaseType?: 'ONE_TIME' | 'PLAN';
+    planCode?: string;
+  }) {
     if (!this.backendToken) {
       throw new Error('Backend session missing. Please login again.');
     }
@@ -317,46 +331,25 @@ export class ClinicApiService {
   }
 
   private async createRazorpayOrder(consultationId: string) {
-    const user = (await supabase.auth.getUser()).data.user;
-    if (!user) {
-      throw new Error('Login required.');
-    }
-
-    const response = await fetch(`${environment.apiUrl}/payments/${consultationId}/create-order`, {
+    return this.apiFetch<RazorpayOrderResponse>(`/payments/${consultationId}/create-order`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ patientId: user.id })
+      body: JSON.stringify({})
     });
-
-    if (!response.ok) {
-      throw new Error((await response.json()).message || 'Could not create Razorpay order.');
-    }
-
-    return (await response.json()) as RazorpayOrderResponse;
   }
 
   private async verifyRazorpayPayment(consultationId: string, payment: RazorpayCheckoutResponse) {
-    const user = (await supabase.auth.getUser()).data.user;
-    if (!user) {
-      throw new Error('Login required.');
-    }
-
-    const response = await fetch(`${environment.apiUrl}/payments/${consultationId}/verify`, {
+    return this.apiFetch(`/payments/${consultationId}/verify`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        patientId: user.id,
         razorpayOrderId: payment.razorpay_order_id,
         razorpayPaymentId: payment.razorpay_payment_id,
         razorpaySignature: payment.razorpay_signature
       })
     });
+  }
 
-    if (!response.ok) {
-      throw new Error((await response.json()).message || 'Could not verify Razorpay payment.');
-    }
-
-    return response.json();
+  private async fetchBillingPlans() {
+    return this.apiFetch<{ plans: BillingPlan[] }>('/billing/plans');
   }
 
   private loadRazorpayScript() {
@@ -687,13 +680,17 @@ export class ClinicApiService {
       patient: this.toUser(row['patient']),
       assignedDoctor: row['assigned_doctor'] ? this.toUser(row['assigned_doctor']) : null,
       disease: this.toDisease(row['disease']),
+      billingPlanCode: row['billing_plan_code'] || null,
+      pricingSnapshot: row['pricing_snapshot'] || null,
       payment: row['payment']
         ? {
-          id: row['payment'].id,
-          amountInPaise: row['payment'].amount_in_paise,
-          status: row['payment'].status,
-          providerOrderId: row['payment'].provider_order_id
-        }
+            id: row['payment'].id,
+            amountInPaise: row['payment'].amount_in_paise,
+            status: row['payment'].status,
+            billingPlanCode: row['payment'].billing_plan_code || null,
+            lineItems: row['payment'].line_items || null,
+            providerOrderId: row['payment'].provider_order_id
+          }
         : null,
       messages: (row['messages'] || [])
         .map((message: Record<string, any>) => ({
@@ -726,7 +723,18 @@ export class ClinicApiService {
       patient: row['patient'],
       assignedDoctor: row['assignedDoctor'] || null,
       disease: row['disease'],
-      payment: row['payment'] || null,
+      billingPlanCode: row['billingPlanCode'] || null,
+      pricingSnapshot: row['pricingSnapshot'] || null,
+      payment: row['payment']
+        ? {
+            id: row['payment'].id,
+            amountInPaise: row['payment'].amountInPaise,
+            status: row['payment'].status,
+            billingPlanCode: row['payment'].billingPlanCode || null,
+            lineItems: row['payment'].lineItems || null,
+            providerOrderId: row['payment'].providerOrderId || null
+          }
+        : null,
       messages: row['messages'] || [],
       prescription: latestPrescription
         ? {

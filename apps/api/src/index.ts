@@ -6,6 +6,7 @@ import Razorpay from 'razorpay';
 import crypto from 'node:crypto';
 import { OAuth2Client } from 'google-auth-library';
 import {
+  BillingPlanType,
   ConsultationStatus,
   DoseEventStatus,
   PaymentStatus,
@@ -18,7 +19,6 @@ import { z } from 'zod';
 import { allowRoles, authRequired, signToken } from './auth.js';
 import { prisma } from './db.js';
 import { createNotificationService, type NotificationChannel } from './notifications.js';
-import { supabaseAdmin } from './supabase.js';
 
 const app = express();
 const port = Number(process.env.PORT || 4000);
@@ -38,6 +38,43 @@ const enabledNotificationChannels = (process.env.NOTIFICATION_CHANNELS || 'IN_AP
   .map((value) => value.trim().toUpperCase())
   .filter(Boolean) as NotificationChannel[];
 const notificationService = createNotificationService(enabledNotificationChannels);
+const defaultBillingPlans: Array<{
+  code: string;
+  name: string;
+  description: string;
+  planType: BillingPlanType;
+  priceInPaise: number;
+  consultationsLimit: number | null;
+  sortOrder: number;
+}> = [
+  {
+    code: 'ONE_TIME',
+    name: 'One-Time Appointment',
+    description: 'Single consultation with diagnosis, chat, and prescription follow-up.',
+    planType: BillingPlanType.ONE_TIME_APPOINTMENT,
+    priceInPaise: 150000,
+    consultationsLimit: 1,
+    sortOrder: 1
+  },
+  {
+    code: 'STARTER_MONTHLY',
+    name: 'Starter Monthly Plan',
+    description: 'Monthly care plan with up to 3 consultations and follow-up support.',
+    planType: BillingPlanType.STARTER_MONTHLY,
+    priceInPaise: 350000,
+    consultationsLimit: 3,
+    sortOrder: 2
+  },
+  {
+    code: 'CONTINUITY_QUARTERLY',
+    name: 'Continuity Quarterly Plan',
+    description: 'Quarterly continuity plan with up to 10 consultations and medicine adherence tracking.',
+    planType: BillingPlanType.CONTINUITY_QUARTERLY,
+    priceInPaise: 900000,
+    consultationsLimit: 10,
+    sortOrder: 3
+  }
+];
 type ReminderPreference = {
   inApp: boolean;
   sms: boolean;
@@ -54,6 +91,26 @@ const defaultReminderPreference: ReminderPreference = {
   quietHoursStart: '22:00',
   quietHoursEnd: '07:00'
 };
+
+async function ensureBillingPlans() {
+  await Promise.all(
+    defaultBillingPlans.map((plan) =>
+      prisma.billingPlan.upsert({
+        where: { code: plan.code },
+        update: {
+          name: plan.name,
+          description: plan.description,
+          planType: plan.planType,
+          priceInPaise: plan.priceInPaise,
+          consultationsLimit: plan.consultationsLimit,
+          isActive: true,
+          sortOrder: plan.sortOrder
+        },
+        create: plan
+      })
+    )
+  );
+}
 
 app.use(cors({ origin: webOrigin, credentials: true }));
 app.use('/payments/razorpay-webhook', express.raw({ type: 'application/json' }));
@@ -1121,6 +1178,18 @@ app.get(
   })
 );
 
+app.get(
+  '/billing/plans',
+  asyncRoute(async (_req, res) => {
+    await ensureBillingPlans();
+    const plans = await prisma.billingPlan.findMany({
+      where: { isActive: true },
+      orderBy: [{ sortOrder: 'asc' }, { priceInPaise: 'asc' }]
+    });
+    res.json({ plans });
+  })
+);
+
 app.post(
   '/consultations',
   authRequired,
@@ -1129,19 +1198,52 @@ app.post(
     const body = z
       .object({
         diseaseId: z.string().min(1),
-        intakeAnswers: z.record(z.string(), z.string().min(1))
+        intakeAnswers: z.record(z.string(), z.string().min(1)),
+        purchaseType: z.enum(['ONE_TIME', 'PLAN']).optional().default('ONE_TIME'),
+        planCode: z.string().min(2).optional()
       })
       .parse(req.body);
 
+    await ensureBillingPlans();
     const disease = await prisma.disease.findUniqueOrThrow({ where: { id: body.diseaseId } });
+    const selectedPlan =
+      body.purchaseType === 'PLAN'
+        ? await prisma.billingPlan.findFirst({
+            where: { code: body.planCode || '', isActive: true }
+          })
+        : await prisma.billingPlan.findFirst({
+            where: { code: 'ONE_TIME', isActive: true }
+          });
+    if (!selectedPlan) {
+      return res.status(400).json({ message: 'Selected billing plan is not available.' });
+    }
+
+    const amountInPaise = body.purchaseType === 'ONE_TIME' ? disease.feeInPaise : selectedPlan.priceInPaise;
     const consultation = await prisma.consultation.create({
       data: {
         patientId: req.user!.id,
         diseaseId: disease.id,
         intakeAnswers: body.intakeAnswers,
+        billingPlanCode: selectedPlan.code,
+        pricingSnapshot: {
+          purchaseType: body.purchaseType,
+          diseaseFeeInPaise: disease.feeInPaise,
+          selectedPlanCode: selectedPlan.code,
+          selectedPlanName: selectedPlan.name,
+          selectedPlanPriceInPaise: selectedPlan.priceInPaise
+        },
         payment: {
           create: {
-            amountInPaise: disease.feeInPaise,
+            amountInPaise,
+            billingPlanCode: selectedPlan.code,
+            lineItems: {
+              purchaseType: body.purchaseType,
+              diseaseName: disease.name,
+              diseaseFeeInPaise: disease.feeInPaise,
+              planCode: selectedPlan.code,
+              planName: selectedPlan.name,
+              consultationsLimit: selectedPlan.consultationsLimit
+            },
             status: PaymentStatus.CREATED
           }
         }
@@ -1944,60 +2046,49 @@ app.post(
 
 app.post(
   '/payments/:consultationId/create-order',
+  authRequired,
+  allowRoles(Role.PATIENT),
   asyncRoute(async (req, res) => {
-    if (!supabaseAdmin) {
-      return res.status(503).json({ message: 'Supabase service role is not configured.' });
-    }
-
-    const body = z.object({ patientId: z.string().uuid() }).parse(req.body);
     const consultationId = routeParam(req, 'consultationId');
-
-    const { data: consultation, error: consultationError } = await supabaseAdmin
-      .from('consultations')
-      .select('id, patient_id, payments(id, amount_in_paise, status)')
-      .eq('id', consultationId)
-      .single();
-
-    if (consultationError || !consultation) {
+    const consultation = await prisma.consultation.findUnique({
+      where: { id: consultationId },
+      include: { payment: true }
+    });
+    if (!consultation) {
       return res.status(404).json({ message: 'Consultation not found.' });
     }
-
-    if (consultation.patient_id !== body.patientId) {
+    if (consultation.patientId !== req.user!.id) {
       return res.status(403).json({ message: 'Access denied.' });
     }
 
-    const payment = Array.isArray(consultation.payments) ? consultation.payments[0] : consultation.payments;
+    const payment = consultation.payment;
     if (!payment) {
       return res.status(400).json({ message: 'Payment record is missing for this consultation.' });
     }
-
-    if (payment.status === 'PAID') {
+    if (payment.status === PaymentStatus.PAID) {
       return res.status(400).json({ message: 'Payment is already completed.' });
     }
 
     const razorpay = getRazorpayClient();
     const order = await razorpay.orders.create({
-      amount: payment.amount_in_paise,
+      amount: payment.amountInPaise,
       currency: 'INR',
-      receipt: consultation.id,
+      receipt: consultationId,
       notes: {
-        consultationId: consultation.id,
-        patientId: body.patientId
+        consultationId,
+        patientId: req.user!.id,
+        billingPlanCode: payment.billingPlanCode || consultation.billingPlanCode || 'ONE_TIME'
       }
     });
 
-    const { error: paymentError } = await supabaseAdmin
-      .from('payments')
-      .update({ provider_order_id: order.id, status: 'CREATED' })
-      .eq('id', payment.id);
-
-    if (paymentError) {
-      return res.status(500).json({ message: paymentError.message });
-    }
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: { providerOrderId: order.id, status: PaymentStatus.CREATED }
+    });
 
     res.json({
       orderId: order.id,
-      amountInPaise: payment.amount_in_paise,
+      amountInPaise: payment.amountInPaise,
       currency: 'INR',
       razorpayKeyId
     });
@@ -2006,37 +2097,29 @@ app.post(
 
 app.post(
   '/payments/:consultationId/verify',
+  authRequired,
+  allowRoles(Role.PATIENT),
   asyncRoute(async (req, res) => {
-    if (!supabaseAdmin) {
-      return res.status(503).json({ message: 'Supabase service role is not configured.' });
-    }
-
     const body = z
       .object({
-        patientId: z.string().uuid(),
         razorpayOrderId: z.string().min(1),
         razorpayPaymentId: z.string().min(1),
         razorpaySignature: z.string().min(1)
       })
       .parse(req.body);
     const consultationId = routeParam(req, 'consultationId');
-
-    const { data: consultation, error: consultationError } = await supabaseAdmin
-      .from('consultations')
-      .select('id, patient_id, payments(id, provider_order_id)')
-      .eq('id', consultationId)
-      .single();
-
-    if (consultationError || !consultation) {
+    const consultation = await prisma.consultation.findUnique({
+      where: { id: consultationId },
+      include: { payment: true }
+    });
+    if (!consultation) {
       return res.status(404).json({ message: 'Consultation not found.' });
     }
-
-    if (consultation.patient_id !== body.patientId) {
+    if (consultation.patientId !== req.user!.id) {
       return res.status(403).json({ message: 'Access denied.' });
     }
-
-    const payment = Array.isArray(consultation.payments) ? consultation.payments[0] : consultation.payments;
-    if (!payment || payment.provider_order_id !== body.razorpayOrderId) {
+    const payment = consultation.payment;
+    if (!payment || payment.providerOrderId !== body.razorpayOrderId) {
       return res.status(400).json({ message: 'Payment order does not match consultation.' });
     }
 
@@ -2044,26 +2127,17 @@ app.post(
       return res.status(400).json({ message: 'Invalid Razorpay signature.' });
     }
 
-    const { error: paymentError } = await supabaseAdmin
-      .from('payments')
-      .update({
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: {
         status: 'PAID',
-        provider_payment_id: body.razorpayPaymentId
-      })
-      .eq('id', payment.id);
-
-    if (paymentError) {
-      return res.status(500).json({ message: paymentError.message });
-    }
-
-    const { error: updateError } = await supabaseAdmin
-      .from('consultations')
-      .update({ status: 'PAID' })
-      .eq('id', consultation.id);
-
-    if (updateError) {
-      return res.status(500).json({ message: updateError.message });
-    }
+        providerPaymentId: body.razorpayPaymentId
+      }
+    });
+    await prisma.consultation.update({
+      where: { id: consultation.id },
+      data: { status: ConsultationStatus.PAID }
+    });
 
     res.json({ ok: true });
   })
@@ -2072,10 +2146,6 @@ app.post(
 app.post(
   '/payments/razorpay-webhook',
   asyncRoute(async (req, res) => {
-    if (!supabaseAdmin) {
-      return res.status(503).json({ message: 'Supabase service role is not configured.' });
-    }
-
     if (!razorpayWebhookSecret) {
       return res.status(503).json({ message: 'Razorpay webhook secret is not configured.' });
     }
@@ -2112,38 +2182,169 @@ app.post(
       return res.status(400).json({ message: 'Webhook payment payload is missing order id.' });
     }
 
-    const { data: payment, error: paymentLookupError } = await supabaseAdmin
-      .from('payments')
-      .select('id, consultation_id')
-      .eq('provider_order_id', paymentEntity.order_id)
-      .single();
-
-    if (paymentLookupError || !payment) {
+    const payment = await prisma.payment.findFirst({
+      where: { providerOrderId: paymentEntity.order_id },
+      select: { id: true, consultationId: true }
+    });
+    if (!payment) {
       return res.status(404).json({ message: 'Payment record not found for Razorpay order.' });
     }
-
-    const { error: paymentError } = await supabaseAdmin
-      .from('payments')
-      .update({
-        status: 'PAID',
-        provider_payment_id: paymentEntity.id
-      })
-      .eq('id', payment.id);
-
-    if (paymentError) {
-      return res.status(500).json({ message: paymentError.message });
-    }
-
-    const { error: consultationError } = await supabaseAdmin
-      .from('consultations')
-      .update({ status: 'PAID' })
-      .eq('id', payment.consultation_id);
-
-    if (consultationError) {
-      return res.status(500).json({ message: consultationError.message });
-    }
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: {
+        status: PaymentStatus.PAID,
+        providerPaymentId: paymentEntity.id
+      }
+    });
+    await prisma.consultation.update({
+      where: { id: payment.consultationId },
+      data: { status: ConsultationStatus.PAID }
+    });
 
     res.json({ ok: true });
+  })
+);
+
+app.get(
+  '/admin/payments',
+  authRequired,
+  allowRoles(Role.ADMIN),
+  asyncRoute(async (req, res) => {
+    const page = queryPositiveInt(req, 'page', 1);
+    const pageSize = queryPositiveInt(req, 'pageSize', 20, 1, 100);
+    const status = queryText(req, 'status').toUpperCase();
+    const from = queryText(req, 'from');
+    const to = queryText(req, 'to');
+    const exportType = queryText(req, 'export').toLowerCase();
+
+    const where: Prisma.PaymentWhereInput = {
+      ...(status === 'PAID' || status === 'FAILED' || status === 'CREATED' ? { status: status as PaymentStatus } : {}),
+      ...(from || to
+        ? {
+            createdAt: {
+              ...(from ? { gte: new Date(from) } : {}),
+              ...(to ? { lte: new Date(to) } : {})
+            }
+          }
+        : {})
+    };
+
+    const [total, payments] = await Promise.all([
+      prisma.payment.count({ where }),
+      prisma.payment.findMany({
+        where,
+        include: {
+          consultation: {
+            select: {
+              id: true,
+              status: true,
+              patient: { select: { id: true, name: true } },
+              assignedDoctor: { select: { id: true, name: true } },
+              disease: { select: { name: true } }
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize
+      })
+    ]);
+
+    if (exportType === 'csv') {
+      const lines = [
+        'paymentId,consultationId,patientName,doctorName,disease,billingPlanCode,amountInPaise,status,providerOrderId,providerPaymentId,createdAt'
+      ];
+      for (const payment of payments) {
+        lines.push(
+          [
+            payment.id,
+            payment.consultationId,
+            payment.consultation.patient?.name || '',
+            payment.consultation.assignedDoctor?.name || '',
+            payment.consultation.disease?.name || '',
+            payment.billingPlanCode || '',
+            String(payment.amountInPaise),
+            payment.status,
+            payment.providerOrderId || '',
+            payment.providerPaymentId || '',
+            payment.createdAt.toISOString()
+          ]
+            .map((value) => `"${String(value).replaceAll('"', '""')}"`)
+            .join(',')
+        );
+      }
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="admin-payments-page-${page}.csv"`);
+      return res.send(lines.join('\n'));
+    }
+
+    const summary = payments.reduce(
+      (acc, payment) => {
+        acc.total += payment.amountInPaise;
+        if (payment.status === PaymentStatus.PAID) acc.paid += payment.amountInPaise;
+        if (payment.status === PaymentStatus.FAILED) acc.failedCount += 1;
+        if (payment.status === PaymentStatus.CREATED) acc.pendingCount += 1;
+        return acc;
+      },
+      { total: 0, paid: 0, failedCount: 0, pendingCount: 0 }
+    );
+
+    res.json({
+      payments,
+      summary,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / pageSize))
+      }
+    });
+  })
+);
+
+app.get(
+  '/doctor/payments/summary',
+  authRequired,
+  allowRoles(Role.DOCTOR),
+  asyncRoute(async (req, res) => {
+    const doctorSharePercent = 60;
+    const payments = await prisma.payment.findMany({
+      where: {
+        status: PaymentStatus.PAID,
+        consultation: { assignedDoctorId: req.user!.id }
+      },
+      include: {
+        consultation: {
+          select: {
+            id: true,
+            status: true,
+            disease: { select: { name: true } },
+            patient: { select: { id: true, name: true } }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 50
+    });
+
+    const totals = payments.reduce(
+      (acc, payment) => {
+        acc.gross += payment.amountInPaise;
+        acc.estimatedDoctorEarnings += Math.round((payment.amountInPaise * doctorSharePercent) / 100);
+        return acc;
+      },
+      { gross: 0, estimatedDoctorEarnings: 0 }
+    );
+
+    res.json({
+      doctorSharePercent,
+      totals: {
+        paidConsultations: payments.length,
+        grossInPaise: totals.gross,
+        estimatedDoctorEarningsInPaise: totals.estimatedDoctorEarnings
+      },
+      payments
+    });
   })
 );
 
@@ -2180,6 +2381,9 @@ app.use((error: unknown, _req: express.Request, res: express.Response, _next: ex
 
 app.listen(port, () => {
   console.log(`Clinic API running on http://localhost:${port}`);
+  void ensureBillingPlans().catch((error) => {
+    console.error('[billing] Failed to ensure billing plans', error);
+  });
   if (!doseOverdueSweepEnabled) {
     console.log('[scheduler] Overdue dose sweep disabled');
   } else {

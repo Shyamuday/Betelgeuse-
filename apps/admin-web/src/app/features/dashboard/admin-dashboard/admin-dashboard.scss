@@ -29,6 +29,32 @@
   margin-top: 1rem;
 }
 
+.filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.filters input,
+.filters select {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+}
+
+.pagination {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pagination button.active {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
 @media (max-width: 768px) {
   .stats {
     grid-template-columns: 1fr;
@@ -36,5 +62,10 @@
 
   .card {
     padding: 0.85rem;
+  }
+
+  .filters {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 }

@@ -33,6 +33,57 @@ export class AdminApi {
     );
   }
 
+  getPayments(params: {
+    page?: number;
+    pageSize?: number;
+    status?: 'ALL' | 'CREATED' | 'PAID' | 'FAILED';
+    from?: string;
+    to?: string;
+  }) {
+    return firstValueFrom(
+      this.http.get<{
+        payments: Array<any>;
+        summary: { total: number; paid: number; failedCount: number; pendingCount: number };
+        pagination: any;
+      }>(`${this.apiBase}/admin/payments`, {
+        headers: this.headers(),
+        params: {
+          page: String(params.page ?? 1),
+          pageSize: String(params.pageSize ?? 10),
+          status: params.status ?? 'ALL',
+          from: params.from ?? '',
+          to: params.to ?? ''
+        }
+      })
+    );
+  }
+
+  async exportPaymentsCsv(params: {
+    page?: number;
+    pageSize?: number;
+    status?: 'ALL' | 'CREATED' | 'PAID' | 'FAILED';
+    from?: string;
+    to?: string;
+  }) {
+    const query = new URLSearchParams({
+      page: String(params.page ?? 1),
+      pageSize: String(params.pageSize ?? 100),
+      status: params.status ?? 'ALL',
+      export: 'csv'
+    });
+    if (params.from) query.set('from', params.from);
+    if (params.to) query.set('to', params.to);
+    const response = await fetch(`${this.apiBase}/admin/payments?${query.toString()}`, {
+      headers: {
+        Authorization: `Bearer ${this.auth.token()}`
+      }
+    });
+    if (!response.ok) {
+      throw new Error('Could not export payments CSV.');
+    }
+    return response.text();
+  }
+
   getDoctors() {
     return this.getDoctorsPaged({});
   }
