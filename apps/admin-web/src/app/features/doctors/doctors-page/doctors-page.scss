@@ -18,6 +18,7 @@
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 0.45rem 0.55rem;
+  min-height: 40px;
 }
 
 .card {
@@ -31,6 +32,7 @@
   display: flex;
   gap: 0.5rem;
   margin-top: 0.5rem;
+  flex-wrap: wrap;
 }
 
 button {
@@ -44,6 +46,7 @@ button {
   display: flex;
   gap: 0.4rem;
   margin-top: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .pagination button.active {
@@ -70,4 +73,26 @@ button {
 
 .error {
   color: #b91c1c;
+}
+
+@media (max-width: 768px) {
+  .panel {
+    padding: 0.85rem;
+  }
+
+  .toolbar {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar input,
+  .toolbar select,
+  .toolbar button {
+    width: 100%;
+  }
+
+  .actions button {
+    flex: 1 1 140px;
+    min-height: 40px;
+  }
 }

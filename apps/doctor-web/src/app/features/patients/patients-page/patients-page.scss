@@ -55,6 +55,7 @@ select {
 .actions {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 button {
@@ -74,4 +75,22 @@ button {
 
 .muted {
   color: #475569;
+}
+
+@media (max-width: 768px) {
+  .toolbar {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar input,
+  .toolbar select,
+  .toolbar button {
+    width: 100%;
+  }
+
+  .actions button {
+    flex: 1 1 150px;
+    min-height: 40px;
+  }
 }

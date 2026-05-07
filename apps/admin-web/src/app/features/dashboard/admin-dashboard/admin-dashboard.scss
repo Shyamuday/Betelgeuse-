@@ -24,3 +24,17 @@
 .error {
   color: #b91c1c;
 }
+
+.panel {
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 0.85rem;
+  }
+}

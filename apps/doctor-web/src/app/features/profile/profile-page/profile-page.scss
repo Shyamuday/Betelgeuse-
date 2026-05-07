@@ -11,6 +11,7 @@ input {
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 0.55rem 0.65rem;
+  min-height: 40px;
 }
 
 .checkbox {
@@ -23,6 +24,7 @@ input {
 .actions {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 button {
@@ -38,4 +40,15 @@ button {
 
 .error {
   color: #b91c1c;
+}
+
+@media (max-width: 768px) {
+  .profile-card {
+    max-width: 100%;
+  }
+
+  .actions button {
+    flex: 1 1 140px;
+    min-height: 40px;
+  }
 }
