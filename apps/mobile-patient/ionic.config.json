@@ -1,0 +1,7 @@
+{
+  "name": "mobile-patient",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

@@ -73,7 +73,16 @@ supabase/.temp/
 supabase/.env
 supabase/.env.*
 
-# Deployment output
+# Ionic / Capacitor mobile shells (built SPA output)
+apps/mobile-*/www/
+
+# Android local build artifacts
+apps/mobile-*/android/.gradle/
+apps/mobile-*/android/app/build/
+apps/mobile-*/android/build/
+apps/mobile-*/android/local.properties
+**/*.keystore
+
 .vercel/
 .netlify/
 

@@ -16,6 +16,9 @@ jobs:
           - apps/web
           - apps/doctor-web
           - apps/admin-web
+          - apps/mobile-patient
+          - apps/mobile-doctor
+          - apps/mobile-admin
 
     defaults:
       run:
