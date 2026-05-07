@@ -13,6 +13,19 @@
   </article>
 </section>
 
+<section class="panel">
+  <h3>Recent Admin Audit Trail</h3>
+  @for (log of auditLogs; track log.id) {
+    <article class="card">
+      <strong>{{ log.action }}</strong>
+      <p>{{ log.summary || 'No summary' }}</p>
+      <small>{{ log.targetType }}: {{ log.targetId }} | {{ log.actorRole || 'SYSTEM' }} | {{ log.createdAt | date: 'medium' }}</small>
+    </article>
+  } @empty {
+    <p>No audit activity yet.</p>
+  }
+</section>
+
 @if (error) {
   <p class="error">{{ error }}</p>
 }

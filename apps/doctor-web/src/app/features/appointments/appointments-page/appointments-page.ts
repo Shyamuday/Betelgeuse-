@@ -286,6 +286,64 @@ export class AppointmentsPage {
     this.medicineRows = [this.newMedicineRow()];
   }
 
+  private normalizeMedicineName(name: string) {
+    return name.trim().toLowerCase().replace(/\s+/g, ' ');
+  }
+
+  prescriptionSafetyReport(): {
+    duplicateMedicines: string[];
+    conflictingMedicines: string[];
+  } {
+    const groups = new Map<string, MedicineRow[]>();
+    for (const row of this.medicineRows) {
+      const key = this.normalizeMedicineName(row.medicineName);
+      if (!key) {
+        continue;
+      }
+      const list = groups.get(key);
+      if (list) {
+        list.push(row);
+      } else {
+        groups.set(key, [row]);
+      }
+    }
+
+    const duplicateMedicines: string[] = [];
+    const conflictingMedicines: string[] = [];
+    for (const rows of groups.values()) {
+      if (rows.length < 2) {
+        continue;
+      }
+      const displayName = rows[0].medicineName.trim() || rows[0].medicineName;
+      duplicateMedicines.push(displayName);
+      const signatures = new Set(
+        rows.map((r) => `${(r.dose || '').trim()}|${(r.frequency || '').trim()}`)
+      );
+      if (signatures.size > 1) {
+        conflictingMedicines.push(displayName);
+      }
+    }
+
+    return { duplicateMedicines, conflictingMedicines };
+  }
+
+  private confirmPrescriptionSafety(targetStatus: 'DRAFT' | 'PUBLISHED'): boolean {
+    const { duplicateMedicines, conflictingMedicines } = this.prescriptionSafetyReport();
+    if (!duplicateMedicines.length && !conflictingMedicines.length) {
+      return true;
+    }
+
+    const parts: string[] = [];
+    if (duplicateMedicines.length) {
+      parts.push(`Duplicate medicine entries: ${duplicateMedicines.join(', ')}.`);
+    }
+    if (conflictingMedicines.length) {
+      parts.push(`Different dose or frequency for the same medicine: ${conflictingMedicines.join(', ')}.`);
+    }
+    parts.push(`Still ${targetStatus === 'PUBLISHED' ? 'publish' : 'save'} this prescription?`);
+    return window.confirm(parts.join('\n\n'));
+  }
+
   private buildPayload(targetStatus: 'DRAFT' | 'PUBLISHED') {
     return {
       methodOptionId: this.methodOptionId,
@@ -321,6 +379,10 @@ export class AppointmentsPage {
 
     if (this.medicineRows.some((row) => !row.medicineName.trim())) {
       this.error = 'Each medicine row must include medicine name.';
+      return;
+    }
+
+    if (!this.confirmPrescriptionSafety(targetStatus)) {
       return;
     }
 

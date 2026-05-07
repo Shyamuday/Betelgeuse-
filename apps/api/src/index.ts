@@ -11,6 +11,7 @@ import {
   PaymentStatus,
   PrescriptionOptionType,
   PrescriptionStatus,
+  Prisma,
   Role
 } from '@prisma/client';
 import { z } from 'zod';
@@ -216,6 +217,28 @@ function logAuthEvent(event: 'staff_login_success' | 'staff_login_failure', deta
   console.info(`[auth] ${event}`, {
     at: new Date().toISOString(),
     ...details
+  });
+}
+
+async function writeAuditLog(input: {
+  actorId?: string;
+  actorRole?: Role;
+  action: string;
+  targetType: string;
+  targetId: string;
+  summary?: string;
+  metadata?: Record<string, unknown>;
+}) {
+  await prisma.auditLog.create({
+    data: {
+      actorId: input.actorId || null,
+      actorRole: input.actorRole || null,
+      action: input.action,
+      targetType: input.targetType,
+      targetId: input.targetId,
+      summary: input.summary,
+      metadata: input.metadata as Prisma.InputJsonValue | undefined
+    }
   });
 }
 
@@ -890,6 +913,14 @@ app.post(
       data: { isActive: true },
       select: { ...publicUserSelect, isActive: true, doctorProfile: true }
     });
+    await writeAuditLog({
+      actorId: req.user!.id,
+      actorRole: req.user!.role,
+      action: 'doctor.approve',
+      targetType: 'doctor',
+      targetId: doctor.id,
+      summary: 'Doctor approved by admin.'
+    });
 
     res.json({ doctor, message: 'Doctor approved successfully.' });
   })
@@ -905,6 +936,14 @@ app.post(
       where: { id: doctorId },
       data: { isActive: false },
       select: { ...publicUserSelect, isActive: true, doctorProfile: true }
+    });
+    await writeAuditLog({
+      actorId: req.user!.id,
+      actorRole: req.user!.role,
+      action: 'doctor.reject',
+      targetType: 'doctor',
+      targetId: doctor.id,
+      summary: 'Doctor marked pending/inactive by admin.'
     });
 
     res.json({ doctor, message: 'Doctor marked as not approved.' });
@@ -930,6 +969,14 @@ app.post(
       where: { id: doctorId },
       data: { isActive: body.isActive },
       select: { ...publicUserSelect, isActive: true, doctorProfile: true }
+    });
+    await writeAuditLog({
+      actorId: req.user!.id,
+      actorRole: req.user!.role,
+      action: body.isActive ? 'doctor.activate' : 'doctor.deactivate',
+      targetType: 'doctor',
+      targetId: doctor.id,
+      summary: body.isActive ? 'Doctor activated by admin.' : 'Doctor deactivated by admin.'
     });
 
     res.json({
@@ -971,6 +1018,15 @@ app.post(
         }
       },
       select: { ...publicUserSelect, doctorProfile: true }
+    });
+    await writeAuditLog({
+      actorId: req.user!.id,
+      actorRole: req.user!.role,
+      action: 'doctor.create',
+      targetType: 'doctor',
+      targetId: doctor.id,
+      summary: 'Doctor account created by admin.',
+      metadata: { specialty: body.specialty }
     });
 
     res.status(201).json({ doctor });
@@ -1025,8 +1081,43 @@ app.put(
       },
       select: { ...publicUserSelect, isActive: true, doctorProfile: true }
     });
+    await writeAuditLog({
+      actorId: req.user!.id,
+      actorRole: req.user!.role,
+      action: 'doctor.update',
+      targetType: 'doctor',
+      targetId: doctor.id,
+      summary: 'Doctor profile updated by admin.',
+      metadata: { isAvailable: body.isAvailable, specialty: body.specialty }
+    });
 
     res.json({ doctor, message: 'Doctor profile updated successfully.' });
+  })
+);
+
+app.get(
+  '/admin/audit-logs',
+  authRequired,
+  allowRoles(Role.ADMIN),
+  asyncRoute(async (req, res) => {
+    const page = queryPositiveInt(req, 'page', 1);
+    const pageSize = queryPositiveInt(req, 'pageSize', 20);
+    const total = await prisma.auditLog.count();
+    const logs = await prisma.auditLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * pageSize,
+      take: pageSize
+    });
+
+    res.json({
+      logs,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / pageSize))
+      }
+    });
   })
 );
 

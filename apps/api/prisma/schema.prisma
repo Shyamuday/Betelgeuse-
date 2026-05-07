@@ -63,9 +63,26 @@ model User {
   createdPrescriptionOptions PrescriptionOption[] @relation("PrescriptionOptionCreator")
   doseEvents           MedicineDoseEvent[] @relation("PatientDoseEvents")
   reminderPreference  ReminderPreference?
+  auditLogs          AuditLog[]      @relation("AuditActor")
   passwordResetTokens PasswordResetToken[]
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actorRole Role?
+  action    String
+  targetType String
+  targetId  String
+  summary   String?
+  metadata  Json?
+  actor     User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  @@index([targetType, targetId])
+  @@index([createdAt])
 }
 
 model ReminderPreference {

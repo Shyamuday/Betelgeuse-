@@ -12,6 +12,15 @@ export class AdminDashboard {
   revenueInPaise = 0;
   activeDoctors = 0;
   consultationsCount = 0;
+  auditLogs: Array<{
+    id: string;
+    action: string;
+    actorRole?: string;
+    targetType: string;
+    targetId: string;
+    summary?: string;
+    createdAt: string;
+  }> = [];
   error = '';
 
   constructor(private readonly api: AdminApi) {
@@ -29,6 +38,8 @@ export class AdminDashboard {
       this.revenueInPaise = report.revenueInPaise || 0;
       this.activeDoctors = report.activeDoctors || 0;
       this.consultationsCount = report.consultations?.length || 0;
+      const audit = await this.api.getAuditLogs(1, 15);
+      this.auditLogs = audit.logs || [];
     } catch {
       this.error = 'Could not load admin dashboard summary.';
     }

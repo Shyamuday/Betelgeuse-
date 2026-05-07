@@ -78,6 +78,24 @@
   <textarea id="notes" name="notes" [(ngModel)]="notes"></textarea>
 
   <h3>Medicines</h3>
+  @let safety = prescriptionSafetyReport();
+  @if (safety.duplicateMedicines.length || safety.conflictingMedicines.length) {
+    <div class="safety-warnings" role="status">
+      @if (safety.duplicateMedicines.length) {
+        <p>
+          <strong>Duplicate medicines</strong> (same name more than once):
+          {{ safety.duplicateMedicines.join(', ') }}
+        </p>
+      }
+      @if (safety.conflictingMedicines.length) {
+        <p>
+          <strong>Dose or frequency differs</strong> between lines for:
+          {{ safety.conflictingMedicines.join(', ') }}
+        </p>
+      }
+      <p class="safety-hint">Save or publish will ask you to confirm while these warnings are present.</p>
+    </div>
+  }
   @for (row of medicineRows; track $index) {
     <div class="medicine-card">
       <label>Medicine name</label>

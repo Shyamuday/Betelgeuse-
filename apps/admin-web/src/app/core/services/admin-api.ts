@@ -24,6 +24,15 @@ export class AdminApi {
     return firstValueFrom(this.http.get(`${this.apiBase}/admin/reports`, { headers: this.headers() }));
   }
 
+  getAuditLogs(page = 1, pageSize = 20) {
+    return firstValueFrom(
+      this.http.get<{ logs: Array<any>; pagination: any }>(`${this.apiBase}/admin/audit-logs`, {
+        headers: this.headers(),
+        params: { page: String(page), pageSize: String(pageSize) }
+      })
+    );
+  }
+
   getDoctors() {
     return this.getDoctorsPaged({});
   }
