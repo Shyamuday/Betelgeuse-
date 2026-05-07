@@ -77,6 +77,81 @@ button {
   color: #475569;
 }
 
+/* ── Dose notes section ─────────────────────────────────────── */
+.panel-sub {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin: 0 0 0.75rem;
+}
+
+.dose-events-header {
+  display: grid;
+  grid-template-columns: 1.5fr 1.4fr 0.7fr 2fr;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.dose-event-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1.4fr 0.7fr 2fr;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.55rem 0.5rem;
+  border-bottom: 1px solid #f9fafb;
+  font-size: 0.875rem;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.medicine-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.scheduled-time {
+  color: #6b7280;
+  font-size: 0.82rem;
+}
+
+.dose-badge {
+  display: inline-block;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dose-missed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.dose-skipped {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.dose-note {
+  color: #374151;
+  font-size: 0.85rem;
+}
+
+.no-note {
+  color: #9ca3af;
+  font-style: italic;
+}
+
 @media (max-width: 768px) {
   .toolbar {
     display: grid;
@@ -92,5 +167,20 @@ button {
   .actions button {
     flex: 1 1 150px;
     min-height: 40px;
+  }
+
+  .dose-events-header {
+    display: none;
+  }
+
+  .dose-event-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    row-gap: 0.3rem;
+    padding: 0.65rem 0.25rem;
+  }
+
+  .dose-note {
+    grid-column: 1 / -1;
   }
 }

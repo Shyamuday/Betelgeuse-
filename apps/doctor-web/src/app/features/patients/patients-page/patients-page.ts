@@ -7,6 +7,15 @@ import { Router } from '@angular/router';
 import { Auth } from '../../../core/services/auth';
 import { environment } from '../../../../environments/environment';
 
+type DoseEvent = {
+  id: string;
+  status: 'SKIPPED' | 'MISSED';
+  scheduledFor: string;
+  interactedAt: string | null;
+  note: string | null;
+  medicineName: string;
+};
+
 type WorklistConsultation = {
   id: string;
   status: 'ASSIGNED' | 'IN_PROGRESS' | 'PRESCRIPTION_UPLOADED' | 'COMPLETED' | string;
@@ -41,6 +50,9 @@ export class PatientsPage {
   loading = false;
   error = '';
   message = '';
+  doseEvents: DoseEvent[] = [];
+  doseEventsLoading = false;
+  doseEventsError = '';
 
   summary: {
     patientId: string;
@@ -76,6 +88,7 @@ export class PatientsPage {
     this.error = '';
     this.message = '';
     this.summary = null;
+    this.doseEvents = [];
     const id = this.patientId.trim();
     if (!id) {
       this.error = 'Enter patient ID.';
@@ -83,19 +96,40 @@ export class PatientsPage {
     }
 
     this.loading = true;
-    try {
-      const response = await firstValueFrom(
+    this.doseEventsLoading = true;
+    this.doseEventsError = '';
+
+    const params = { days: String(this.days) };
+
+    const [trendResult, eventsResult] = await Promise.allSettled([
+      firstValueFrom(
         this.http.get<PatientsPage['summary']>(`${this.apiBase}/doctor/patients/${id}/adherence-trend`, {
           headers: this.headers(),
-          params: { days: String(this.days) }
+          params
         })
-      );
-      this.summary = response;
+      ),
+      firstValueFrom(
+        this.http.get<{ events: DoseEvent[] }>(`${this.apiBase}/doctor/patients/${id}/dose-events`, {
+          headers: this.headers(),
+          params
+        })
+      )
+    ]);
+
+    this.loading = false;
+    this.doseEventsLoading = false;
+
+    if (trendResult.status === 'fulfilled') {
+      this.summary = trendResult.value;
       this.message = `Loaded ${this.days}-day adherence trend.`;
-    } catch {
+    } else {
       this.error = 'Could not load adherence trend for this patient.';
-    } finally {
-      this.loading = false;
+    }
+
+    if (eventsResult.status === 'fulfilled') {
+      this.doseEvents = eventsResult.value.events || [];
+    } else {
+      this.doseEventsError = 'Could not load dose notes.';
     }
   }
 

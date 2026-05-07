@@ -2024,6 +2024,61 @@ app.get(
   })
 );
 
+app.get(
+  '/doctor/patients/:id/dose-events',
+  authRequired,
+  allowRoles(Role.DOCTOR, Role.ADMIN),
+  asyncRoute(async (req, res) => {
+    const patientId = routeParam(req, 'id');
+    const days = queryPositiveInt(req, 'days', 7, 1, 30);
+
+    if (req.user!.role === Role.DOCTOR) {
+      const linkedConsultation = await prisma.consultation.findFirst({
+        where: { patientId, assignedDoctorId: req.user!.id },
+        select: { id: true }
+      });
+      if (!linkedConsultation) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+    }
+
+    const since = new Date();
+    since.setDate(since.getDate() - (days - 1));
+    since.setHours(0, 0, 0, 0);
+
+    const events = await prisma.medicineDoseEvent.findMany({
+      where: {
+        patientId,
+        status: { in: [DoseEventStatus.SKIPPED, DoseEventStatus.MISSED] },
+        scheduledFor: { gte: since }
+      },
+      select: {
+        id: true,
+        status: true,
+        scheduledFor: true,
+        skippedAt: true,
+        note: true,
+        prescriptionItem: { select: { medicineName: true } }
+      },
+      orderBy: { scheduledFor: 'desc' },
+      take: 50
+    });
+
+    res.json({
+      patientId,
+      days,
+      events: events.map((e) => ({
+        id: e.id,
+        status: e.status,
+        scheduledFor: e.scheduledFor,
+        interactedAt: e.skippedAt ?? null,
+        note: e.note ?? null,
+        medicineName: e.prescriptionItem.medicineName
+      }))
+    });
+  })
+);
+
 app.post(
   '/consultations/:id/complete',
   authRequired,
