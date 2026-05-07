@@ -32,6 +32,8 @@ export class PatientsPage {
   worklistLoading = false;
   worklistError = '';
   consultations: WorklistConsultation[] = [];
+  worklistSearch = '';
+  worklistView: 'ALL' | 'ASSIGNED' | 'IN_PROGRESS' | 'FOLLOW_UP_DUE' = 'ALL';
 
   patientId = '';
   days: 7 | 30 = 7;
@@ -113,12 +115,37 @@ export class PatientsPage {
     }
   }
 
+  private normalizedSearch() {
+    return this.worklistSearch.trim().toLowerCase();
+  }
+
+  private matchesSearch(item: WorklistConsultation) {
+    const needle = this.normalizedSearch();
+    if (!needle) {
+      return true;
+    }
+
+    const haystack = [
+      item.patient?.name || '',
+      item.patient?.id || '',
+      item.patient?.mobile || '',
+      item.disease?.name || '',
+      item.status || ''
+    ]
+      .join(' ')
+      .toLowerCase();
+
+    return haystack.includes(needle);
+  }
+
   assignedCases() {
-    return this.consultations.filter((item) => item.status === 'ASSIGNED');
+    return this.consultations.filter((item) => item.status === 'ASSIGNED' && this.matchesSearch(item));
   }
 
   inProgressCases() {
-    return this.consultations.filter((item) => item.status === 'IN_PROGRESS' || item.status === 'PRESCRIPTION_UPLOADED');
+    return this.consultations.filter(
+      (item) => (item.status === 'IN_PROGRESS' || item.status === 'PRESCRIPTION_UPLOADED') && this.matchesSearch(item)
+    );
   }
 
   followUpDueCases() {
@@ -129,7 +156,7 @@ export class PatientsPage {
       if (!published?.followUpDate) {
         return false;
       }
-      return new Date(published.followUpDate) <= today && item.status !== 'COMPLETED';
+      return new Date(published.followUpDate) <= today && item.status !== 'COMPLETED' && this.matchesSearch(item);
     });
   }
 
@@ -139,5 +166,28 @@ export class PatientsPage {
 
   openInAppointments(consultationId: string) {
     void this.router.navigate(['/appointments'], { queryParams: { consultationId } });
+  }
+
+  showSection(section: 'ASSIGNED' | 'IN_PROGRESS' | 'FOLLOW_UP_DUE') {
+    return this.worklistView === 'ALL' || this.worklistView === section;
+  }
+
+  followUpUrgency(item: WorklistConsultation) {
+    const followUpDate = this.publishedFollowUpDate(item);
+    if (!followUpDate) {
+      return 'NORMAL';
+    }
+
+    const now = new Date();
+    const due = new Date(followUpDate);
+    const today = new Date(now);
+    today.setHours(23, 59, 59, 999);
+    if (due < now) {
+      return 'OVERDUE';
+    }
+    if (due <= today) {
+      return 'DUE_TODAY';
+    }
+    return 'NORMAL';
   }
 }
