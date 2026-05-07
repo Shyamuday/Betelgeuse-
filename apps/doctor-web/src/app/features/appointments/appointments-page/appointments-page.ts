@@ -8,6 +8,25 @@ import { environment } from '../../../../environments/environment';
 
 type OptionType = 'METHOD' | 'DIAGNOSED_DISEASE';
 
+type TemplateItem = {
+  medicineName: string;
+  strength?: string;
+  dose?: string;
+  frequency?: string;
+  duration?: string;
+  instructions?: string;
+  sortOrder?: number;
+};
+
+type PrescriptionTemplate = {
+  id: string;
+  name: string;
+  diagnosis: string;
+  advice?: string | null;
+  notes: string;
+  items: TemplateItem[];
+};
+
 type PrescriptionOption = {
   id: string;
   label: string;
@@ -76,6 +95,16 @@ export class AppointmentsPage {
   error = '';
   saving = false;
   pendingSaveStatus: 'DRAFT' | 'PUBLISHED' | null = null;
+  consultationStatus = '';
+  confirmingClose = false;
+
+  templates: PrescriptionTemplate[] = [];
+  templatesLoading = false;
+  showSaveTemplateForm = false;
+  templateName = '';
+  savingTemplate = false;
+  savingTemplateError = '';
+  deletingTemplateId = '';
   medicineRows: MedicineRow[] = [this.newMedicineRow()];
 
   constructor(
@@ -84,6 +113,7 @@ export class AppointmentsPage {
   ) {
     this.consultationId = this.route.snapshot.queryParamMap.get('consultationId') || '';
     void this.loadOptions();
+    void this.loadTemplates();
     if (this.consultationId) {
       void this.loadConsultationPrescriptions();
     }
@@ -179,11 +209,12 @@ export class AppointmentsPage {
 
     try {
       const response = await firstValueFrom(
-        this.http.get<{ prescriptions: LoadedPrescription[] }>(
+        this.http.get<{ prescriptions: LoadedPrescription[]; consultation?: { status: string } }>(
           `${this.apiBase}/doctor/appointments/${this.consultationId}/prescriptions`
         )
       );
       this.loadedPrescriptions = response.prescriptions || [];
+      this.consultationStatus = response.consultation?.status || '';
       if (this.loadedPrescriptions.length) {
         this.selectPrescription(this.loadedPrescriptions[0]);
       } else {
@@ -407,6 +438,107 @@ export class AppointmentsPage {
       await this.loadConsultationPrescriptions();
     } catch {
       this.error = 'Could not save prescription. Check consultation assignment and draft state.';
+    } finally {
+      this.saving = false;
+    }
+  }
+
+  async loadTemplates() {
+    this.templatesLoading = true;
+    try {
+      const res = await firstValueFrom(
+        this.http.get<{ templates: PrescriptionTemplate[] }>(`${this.apiBase}/doctor/prescription-templates`)
+      );
+      this.templates = res.templates || [];
+    } catch {
+      // non-blocking — silently skip
+    } finally {
+      this.templatesLoading = false;
+    }
+  }
+
+  applyTemplate(template: PrescriptionTemplate) {
+    this.diagnosis = template.diagnosis || '';
+    this.advice = template.advice || '';
+    this.notes = template.notes || '';
+    this.medicineRows = template.items.length
+      ? template.items.map((item) => ({
+          medicineName: item.medicineName,
+          strength: item.strength || '',
+          dose: item.dose || '',
+          frequency: item.frequency || '',
+          duration: item.duration || '',
+          durationDays: 0,
+          instructions: item.instructions || '',
+          intakeTimesText: ''
+        }))
+      : [this.newMedicineRow()];
+    this.message = `Template "${template.name}" applied. Review and adjust before saving.`;
+  }
+
+  async saveAsTemplate() {
+    const name = this.templateName.trim();
+    if (!name) { this.savingTemplateError = 'Enter a template name.'; return; }
+    if (!this.medicineRows.some((r) => r.medicineName.trim())) {
+      this.savingTemplateError = 'Add at least one medicine.'; return;
+    }
+    this.savingTemplate = true;
+    this.savingTemplateError = '';
+    try {
+      await firstValueFrom(
+        this.http.post(`${this.apiBase}/doctor/prescription-templates`, {
+          name,
+          diagnosis: this.diagnosis,
+          advice: this.advice,
+          notes: this.notes,
+          items: this.medicineRows
+            .filter((r) => r.medicineName.trim())
+            .map((r, i) => ({
+              medicineName: r.medicineName,
+              strength: r.strength || undefined,
+              dose: r.dose || undefined,
+              frequency: r.frequency || undefined,
+              duration: r.duration || undefined,
+              instructions: r.instructions || undefined,
+              sortOrder: i
+            }))
+        })
+      );
+      this.templateName = '';
+      this.showSaveTemplateForm = false;
+      await this.loadTemplates();
+      this.message = `Template "${name}" saved.`;
+    } catch {
+      this.savingTemplateError = 'Could not save template.';
+    } finally {
+      this.savingTemplate = false;
+    }
+  }
+
+  async deleteTemplate(id: string) {
+    this.deletingTemplateId = id;
+    try {
+      await firstValueFrom(this.http.delete(`${this.apiBase}/doctor/prescription-templates/${id}`));
+      this.templates = this.templates.filter((t) => t.id !== id);
+    } catch {
+      this.error = 'Could not delete template.';
+    } finally {
+      this.deletingTemplateId = '';
+    }
+  }
+
+  async closeConsultation() {
+    this.saving = true;
+    this.error = '';
+    try {
+      await firstValueFrom(
+        this.http.post(`${this.apiBase}/consultations/${this.consultationId}/complete`, {})
+      );
+      this.consultationStatus = 'COMPLETED';
+      this.confirmingClose = false;
+      this.message = 'Consultation marked as completed.';
+    } catch {
+      this.error = 'Could not close consultation.';
     } finally {
       this.saving = false;
     }

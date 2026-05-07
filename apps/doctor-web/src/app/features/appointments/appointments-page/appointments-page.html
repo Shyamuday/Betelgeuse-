@@ -1,6 +1,38 @@
 <h2>Create Prescription</h2>
 <p>Draft, edit, and publish multi-medicine prescriptions with follow-up versions.</p>
 
+<div class="templates-bar">
+  <span class="templates-label">Templates</span>
+  @if (templatesLoading) {
+    <span class="hint">Loading…</span>
+  }
+  @for (t of templates; track t.id) {
+    <button type="button" class="btn-template" (click)="applyTemplate(t)" title="Apply template: {{ t.name }}">
+      {{ t.name }}
+    </button>
+    <button type="button" class="btn-template-del" (click)="deleteTemplate(t.id)"
+      [disabled]="deletingTemplateId === t.id" title="Delete template">&#x2715;</button>
+  }
+  @if (!templates.length && !templatesLoading) {
+    <span class="hint">No templates yet — save your first below.</span>
+  }
+
+  <button type="button" class="btn-save-tpl" (click)="showSaveTemplateForm = !showSaveTemplateForm">
+    {{ showSaveTemplateForm ? 'Cancel' : '+ Save current as template' }}
+  </button>
+  @if (showSaveTemplateForm) {
+    <div class="save-tpl-form">
+      <input name="templateName" [(ngModel)]="templateName" placeholder="Template name (e.g. Hair Fall — Acute)" />
+      <button type="button" (click)="saveAsTemplate()" [disabled]="savingTemplate">
+        {{ savingTemplate ? 'Saving…' : 'Save' }}
+      </button>
+      @if (savingTemplateError) {
+        <span class="hint error-hint">{{ savingTemplateError }}</span>
+      }
+    </div>
+  }
+</div>
+
 <div class="grid">
   <label for="consultationId">Consultation ID</label>
   <input id="consultationId" name="consultationId" [(ngModel)]="consultationId" />
@@ -174,6 +206,28 @@
     {{ saving && !pendingSaveStatus ? 'Publishing...' : 'Publish' }}
   </button>
 </div>
+
+@if (consultationId && consultationStatus && consultationStatus !== 'COMPLETED') {
+  <div class="close-consultation-row">
+    <span class="status-badge">Status: {{ consultationStatus }}</span>
+    @if (!confirmingClose) {
+      <button type="button" class="btn-close-consult" (click)="confirmingClose = true" [disabled]="saving">
+        Mark as Completed
+      </button>
+    } @else {
+      <span class="close-warning">This will permanently close the consultation.</span>
+      <button type="button" class="btn-confirm-close" (click)="closeConsultation()" [disabled]="saving">
+        {{ saving ? 'Closing…' : 'Yes, close it' }}
+      </button>
+      <button type="button" (click)="confirmingClose = false" [disabled]="saving">Cancel</button>
+    }
+  </div>
+}
+@if (consultationStatus === 'COMPLETED') {
+  <div class="close-consultation-row">
+    <span class="status-badge completed">✓ Consultation closed</span>
+  </div>
+}
 
 @if (message) {
   <p class="message">{{ message }}</p>

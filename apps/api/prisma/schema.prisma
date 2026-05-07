@@ -60,6 +60,9 @@ model User {
   passwordHash        String?
   role                Role
   isActive            Boolean        @default(true)
+  allergies           String?
+  currentMedications  String?
+  chronicConditions   String?
   doctorProfile       Doctor?
   patientConsults     Consultation[] @relation("PatientConsultations")
   doctorConsults      Consultation[] @relation("DoctorConsultations")
@@ -67,6 +70,7 @@ model User {
   uploadedPrescriptions Prescription[]
   patientPrescriptions Prescription[] @relation("PatientPrescriptions")
   createdPrescriptionOptions PrescriptionOption[] @relation("PrescriptionOptionCreator")
+  prescriptionTemplates      PrescriptionTemplate[] @relation("DoctorTemplates")
   doseEvents           MedicineDoseEvent[] @relation("PatientDoseEvents")
   reminderPreference  ReminderPreference?
   auditLogs          AuditLog[]      @relation("AuditActor")
@@ -277,4 +281,32 @@ model MedicineDoseEvent {
 
   @@unique([prescriptionItemId, scheduledFor])
   @@index([patientId, scheduledFor])
+}
+
+model PrescriptionTemplate {
+  id          String                   @id @default(cuid())
+  doctorId    String
+  doctor      User                     @relation("DoctorTemplates", fields: [doctorId], references: [id])
+  name        String
+  diagnosis   String                   @default("")
+  advice      String?
+  notes       String                   @default("")
+  items       PrescriptionTemplateItem[]
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+
+  @@index([doctorId])
+}
+
+model PrescriptionTemplateItem {
+  id           String               @id @default(cuid())
+  templateId   String
+  template     PrescriptionTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  medicineName String
+  strength     String?
+  dose         String?
+  frequency    String?
+  duration     String?
+  instructions String?
+  sortOrder    Int                  @default(0)
 }

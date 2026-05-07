@@ -13,6 +13,7 @@ import { PaymentStatusOverlayComponent } from './payment-status-overlay.componen
 import { PrescriptionHistoryComponent } from './prescription-history.component';
 import { ReminderPreferencesComponent, ReminderPrefs } from './reminder-preferences.component';
 import { TodayMedicinesComponent } from './today-medicines.component';
+import { PatientProfileComponent } from './patient-profile.component';
 import { ClinicApiService } from './clinic-api.service';
 import { AuthService } from './auth/auth.service';
 import { BillingPlan, Consultation, Disease, Doctor, DoseEvent, Prescription } from './models';
@@ -34,6 +35,7 @@ type PaymentFlowState = 'IDLE' | 'CREATING_ORDER' | 'OPENING_CHECKOUT' | 'VERIFY
     PrescriptionHistoryComponent,
     ReminderPreferencesComponent,
     TodayMedicinesComponent,
+    PatientProfileComponent,
   ],
   template: `
     <app-header [subtitle]="title()" [user]="auth.user()" [whatsappLink]="whatsappLink" (logout)="logout()" />
@@ -89,6 +91,10 @@ type PaymentFlowState = 'IDLE' | 'CREATING_ORDER' | 'OPENING_CHECKOUT' | 'VERIFY
             (saved)="onSavePreferences($event)"
           />
           <app-prescription-history [prescriptions]="patientPrescriptions()" />
+        </section>
+
+        <section class="grid two">
+          <app-patient-profile />
         </section>
       }
 

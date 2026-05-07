@@ -758,6 +758,46 @@ app.get('/me', authRequired, (req, res) => {
 });
 
 app.get(
+  '/patient/profile',
+  authRequired,
+  allowRoles(Role.PATIENT),
+  asyncRoute(async (req, res) => {
+    const user = await prisma.user.findUniqueOrThrow({
+      where: { id: req.user!.id },
+      select: {
+        id: true, name: true, email: true, mobile: true,
+        allergies: true, currentMedications: true, chronicConditions: true
+      }
+    });
+    res.json({ profile: user });
+  })
+);
+
+app.put(
+  '/patient/profile',
+  authRequired,
+  allowRoles(Role.PATIENT),
+  asyncRoute(async (req, res) => {
+    const body = z.object({
+      name: z.string().min(1).max(100),
+      allergies: z.string().max(1000).optional(),
+      currentMedications: z.string().max(2000).optional(),
+      chronicConditions: z.string().max(1000).optional()
+    }).parse(req.body);
+
+    const updated = await prisma.user.update({
+      where: { id: req.user!.id },
+      data: body,
+      select: {
+        id: true, name: true, email: true, mobile: true,
+        allergies: true, currentMedications: true, chronicConditions: true
+      }
+    });
+    res.json({ profile: updated });
+  })
+);
+
+app.get(
   '/diseases',
   asyncRoute(async (_req, res) => {
     const diseases = await prisma.disease.findMany({
@@ -1396,8 +1436,27 @@ app.post(
         assignedDoctorId: doctor.id,
         status: ConsultationStatus.ASSIGNED
       },
-      include: includeConsultationRelations()
+      include: {
+        ...includeConsultationRelations(),
+        patient: { select: { id: true, name: true, mobile: true, email: true } }
+      }
     });
+
+    const patient = (consultation as any).patient;
+    if (patient) {
+      void notificationService.sendBatch(
+        enabledNotificationChannels.map((ch) => ({
+          eventType: 'DOCTOR_ASSIGNED' as const,
+          channel: ch,
+          recipientId: patient.id,
+          recipientName: patient.name,
+          recipientMobile: patient.mobile,
+          recipientEmail: patient.email,
+          title: 'Doctor assigned — Vitalis Care',
+          body: `Dr. ${doctor.name} has been assigned to your consultation. You can now chat with your doctor in the app.`
+        }))
+      );
+    }
 
     res.json({ consultation });
   })
@@ -1496,6 +1555,104 @@ app.get(
   })
 );
 
+const templateItemSchema = z.object({
+  medicineName: z.string().min(1),
+  strength: z.string().optional(),
+  dose: z.string().optional(),
+  frequency: z.string().optional(),
+  duration: z.string().optional(),
+  instructions: z.string().optional(),
+  sortOrder: z.number().int().min(0).default(0)
+});
+
+const templateInputSchema = z.object({
+  name: z.string().min(1).max(120),
+  diagnosis: z.string().max(500).default(''),
+  advice: z.string().max(2000).optional(),
+  notes: z.string().max(2000).default(''),
+  items: z.array(templateItemSchema).min(1)
+});
+
+app.get(
+  '/doctor/prescription-templates',
+  authRequired,
+  allowRoles(Role.DOCTOR, Role.ADMIN),
+  asyncRoute(async (req, res) => {
+    const templates = await prisma.prescriptionTemplate.findMany({
+      where: { doctorId: req.user!.id },
+      include: { items: { orderBy: { sortOrder: 'asc' } } },
+      orderBy: { updatedAt: 'desc' }
+    });
+    res.json({ templates });
+  })
+);
+
+app.post(
+  '/doctor/prescription-templates',
+  authRequired,
+  allowRoles(Role.DOCTOR, Role.ADMIN),
+  asyncRoute(async (req, res) => {
+    const body = templateInputSchema.parse(req.body);
+    const template = await prisma.prescriptionTemplate.create({
+      data: {
+        doctorId: req.user!.id,
+        name: body.name,
+        diagnosis: body.diagnosis,
+        advice: body.advice,
+        notes: body.notes,
+        items: {
+          create: body.items.map((item, i) => ({ ...item, sortOrder: item.sortOrder ?? i }))
+        }
+      },
+      include: { items: { orderBy: { sortOrder: 'asc' } } }
+    });
+    res.status(201).json({ template });
+  })
+);
+
+app.put(
+  '/doctor/prescription-templates/:id',
+  authRequired,
+  allowRoles(Role.DOCTOR, Role.ADMIN),
+  asyncRoute(async (req, res) => {
+    const body = templateInputSchema.parse(req.body);
+    const existing = await prisma.prescriptionTemplate.findUnique({ where: { id: routeParam(req, 'id') } });
+    if (!existing || existing.doctorId !== req.user!.id) {
+      return res.status(404).json({ message: 'Template not found' });
+    }
+
+    await prisma.prescriptionTemplateItem.deleteMany({ where: { templateId: existing.id } });
+    const template = await prisma.prescriptionTemplate.update({
+      where: { id: existing.id },
+      data: {
+        name: body.name,
+        diagnosis: body.diagnosis,
+        advice: body.advice,
+        notes: body.notes,
+        items: {
+          create: body.items.map((item, i) => ({ ...item, sortOrder: item.sortOrder ?? i }))
+        }
+      },
+      include: { items: { orderBy: { sortOrder: 'asc' } } }
+    });
+    res.json({ template });
+  })
+);
+
+app.delete(
+  '/doctor/prescription-templates/:id',
+  authRequired,
+  allowRoles(Role.DOCTOR, Role.ADMIN),
+  asyncRoute(async (req, res) => {
+    const existing = await prisma.prescriptionTemplate.findUnique({ where: { id: routeParam(req, 'id') } });
+    if (!existing || existing.doctorId !== req.user!.id) {
+      return res.status(404).json({ message: 'Template not found' });
+    }
+    await prisma.prescriptionTemplate.delete({ where: { id: existing.id } });
+    res.json({ ok: true });
+  })
+);
+
 const prescriptionItemInputSchema = z.object({
   medicineName: z.string().min(2),
   strength: z.string().min(1).optional(),
@@ -1526,7 +1683,7 @@ app.get(
   asyncRoute(async (req, res) => {
     const consultation = await prisma.consultation.findUnique({
       where: { id: routeParam(req, 'id') },
-      select: { id: true, assignedDoctorId: true }
+      select: { id: true, assignedDoctorId: true, status: true }
     });
 
     if (!consultation) {
@@ -1543,7 +1700,7 @@ app.get(
       orderBy: { version: 'desc' }
     });
 
-    res.json({ prescriptions });
+    res.json({ prescriptions, consultation: { status: consultation.status } });
   })
 );
 
@@ -1652,6 +1809,24 @@ app.post(
       }
     });
 
+    if (body.status === PrescriptionStatus.PUBLISHED) {
+      const rxPatient = (prescription as any).patient;
+      if (rxPatient) {
+        void notificationService.sendBatch(
+          enabledNotificationChannels.map((ch) => ({
+            eventType: 'PRESCRIPTION_READY' as const,
+            channel: ch,
+            recipientId: rxPatient.id,
+            recipientName: rxPatient.name,
+            recipientMobile: rxPatient.mobile,
+            recipientEmail: rxPatient.email,
+            title: 'Your prescription is ready — Vitalis Care',
+            body: `Your doctor has published a new prescription. Open the app to view your medicines and dosage schedule.`
+          }))
+        );
+      }
+    }
+
     res.status(201).json({ prescription });
   })
 );
@@ -1756,6 +1931,22 @@ app.put(
         where: { id: updated.consultation.id },
         data: { status: ConsultationStatus.PRESCRIPTION_UPLOADED }
       });
+
+      const updatedPatient = (updated as any).patient;
+      if (updatedPatient) {
+        void notificationService.sendBatch(
+          enabledNotificationChannels.map((ch) => ({
+            eventType: 'PRESCRIPTION_READY' as const,
+            channel: ch,
+            recipientId: updatedPatient.id,
+            recipientName: updatedPatient.name,
+            recipientMobile: updatedPatient.mobile,
+            recipientEmail: updatedPatient.email,
+            title: 'Your prescription is ready — Vitalis Care',
+            body: `Your doctor has published a new prescription. Open the app to view your medicines and dosage schedule.`
+          }))
+        );
+      }
     }
 
     res.json({ prescription: updated });
@@ -1817,6 +2008,117 @@ app.get(
     }
 
     res.json({ prescription });
+  })
+);
+
+app.get(
+  '/patient/prescriptions/:id/pdf',
+  authRequired,
+  asyncRoute(async (req, res) => {
+    const prescription = await prisma.prescription.findUnique({
+      where: { id: routeParam(req, 'id') },
+      include: {
+        ...includePrescriptionRelations(),
+        patient: { select: { name: true, mobile: true } }
+      }
+    });
+
+    if (!prescription || prescription.status !== PrescriptionStatus.PUBLISHED) {
+      return res.status(404).json({ message: 'Prescription not found' });
+    }
+
+    const isOwner = prescription.patientId === req.user!.id;
+    const isDoctor = prescription.consultation.assignedDoctorId === req.user!.id;
+    const isAdmin = req.user!.role === Role.ADMIN;
+    if (!isOwner && !isDoctor && !isAdmin) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    const rxPatient = (prescription as any).patient;
+    const items = prescription.items || [];
+    const date = new Date(prescription.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    const followUp = prescription.followUpDate
+      ? new Date(prescription.followUpDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+      : null;
+
+    const medicineRows = items.map((item, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td><strong>${item.medicineName}</strong>${item.strength ? ` <small>(${item.strength})</small>` : ''}</td>
+        <td>${item.dose || '—'}</td>
+        <td>${item.frequency || '—'}</td>
+        <td>${item.duration || '—'}</td>
+        <td>${item.instructions || '—'}</td>
+      </tr>`).join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Prescription — Vitalis Care</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; font-size: 13px; color: #111; padding: 32px; }
+  .clinic-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .clinic-name { font-size: 18px; font-weight: bold; color: #1d4ed8; }
+  .clinic-sub { font-size: 11px; color: #6b7280; margin-top: 2px; }
+  .rx-symbol { font-size: 40px; color: #1d4ed8; font-style: italic; line-height: 1; }
+  .divider { border: none; border-top: 2px solid #1d4ed8; margin: 8px 0 16px; }
+  .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 32px; margin-bottom: 16px; }
+  .meta-item label { font-size: 10px; text-transform: uppercase; color: #6b7280; letter-spacing: .05em; }
+  .meta-item p { font-size: 13px; font-weight: 600; margin-top: 2px; }
+  .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: #6b7280; margin-bottom: 6px; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  th { background: #1d4ed8; color: #fff; font-size: 11px; text-align: left; padding: 6px 8px; }
+  td { border-bottom: 1px solid #e5e7eb; padding: 6px 8px; font-size: 12px; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8faff; }
+  .notes-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px 12px; margin-bottom: 16px; font-size: 12px; }
+  .footer { margin-top: 32px; display: flex; justify-content: flex-end; }
+  .sig-box { text-align: center; border-top: 1px solid #374151; padding-top: 6px; min-width: 180px; font-size: 11px; color: #6b7280; }
+  .followup { background: #dbeafe; border-radius: 6px; padding: 8px 12px; font-size: 12px; margin-bottom: 16px; }
+  @media print { body { padding: 16px; } }
+</style>
+</head>
+<body>
+  <div class="clinic-header">
+    <div>
+      <div class="clinic-name">Vitalis Care and Research Centre</div>
+      <div class="clinic-sub">Doctor-led digital consultations &nbsp;|&nbsp; vitaliscare.in</div>
+    </div>
+    <div class="rx-symbol">&#x211E;</div>
+  </div>
+  <hr class="divider" />
+
+  <div class="meta-grid">
+    <div class="meta-item"><label>Patient</label><p>${rxPatient?.name || 'Patient'}</p></div>
+    <div class="meta-item"><label>Date</label><p>${date}</p></div>
+    <div class="meta-item"><label>Diagnosis</label><p>${prescription.diagnosis || '—'}</p></div>
+    <div class="meta-item"><label>Doctor</label><p>${prescription.uploadedBy?.name || '—'}</p></div>
+    ${prescription.methodOption ? `<div class="meta-item"><label>Method</label><p>${prescription.methodOption.label}</p></div>` : ''}
+    ${prescription.diagnosedDiseaseOption ? `<div class="meta-item"><label>Condition</label><p>${prescription.diagnosedDiseaseOption.label}</p></div>` : ''}
+  </div>
+
+  <p class="section-title">Medicines</p>
+  <table>
+    <thead><tr><th>#</th><th>Medicine</th><th>Dose</th><th>Frequency</th><th>Duration</th><th>Instructions</th></tr></thead>
+    <tbody>${medicineRows || '<tr><td colspan="6" style="color:#9ca3af">No items</td></tr>'}</tbody>
+  </table>
+
+  ${prescription.notes ? `<p class="section-title">Clinical Notes</p><div class="notes-box">${prescription.notes}</div>` : ''}
+  ${prescription.advice ? `<p class="section-title">Advice</p><div class="notes-box">${prescription.advice}</div>` : ''}
+  ${followUp ? `<div class="followup">&#x1F4C5; <strong>Follow-up due:</strong> ${followUp}</div>` : ''}
+
+  <div class="footer">
+    <div class="sig-box">
+      ${prescription.uploadedBy?.name || 'Doctor'}<br />Vitalis Care
+    </div>
+  </div>
+</body>
+</html>`;
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Content-Disposition', `inline; filename="prescription-${prescription.id.slice(0, 8)}.html"`);
+    res.send(html);
   })
 );
 
