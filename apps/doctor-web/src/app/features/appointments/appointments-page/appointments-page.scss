@@ -103,6 +103,7 @@ button {
   color: #b91c1c;
 }
 
+/* ── Live safety warning (shows while typing) ──────────────── */
 .safety-warnings {
   border: 1px solid #f59e0b;
   background: #fffbeb;
@@ -117,8 +118,114 @@ button {
 }
 
 .safety-hint {
+  font-size: 0.825rem;
+  opacity: 0.85;
+  font-style: italic;
+}
+
+/* ── Inline confirmation panel (replaces window.confirm) ────── */
+.safety-confirm {
+  border: 2px solid #d97706;
+  background: #fffbeb;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0 0.5rem;
+  max-width: 920px;
+}
+
+.safety-confirm-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+  color: #92400e;
+  font-size: 0.95rem;
+}
+
+.safety-confirm-list {
+  margin: 0 0 0.75rem 1.25rem;
+  padding: 0;
+  color: #78350f;
+  font-size: 0.875rem;
+
+  li {
+    margin-bottom: 0.3rem;
+  }
+}
+
+.warn-type {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: #b45309;
+  margin-right: 0.25rem;
+}
+
+.safety-confirm-question {
+  color: #92400e;
   font-size: 0.9rem;
-  opacity: 0.95;
+  margin: 0 0 0.85rem;
+}
+
+.safety-confirm-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.btn-proceed {
+  background: #b45309;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #92400e;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-cancel-confirm {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #f3f4f6;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* ── Publish button (distinct from draft) ───────────────────── */
+.btn-publish {
+  background: #166534;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #14532d;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 @media (max-width: 768px) {

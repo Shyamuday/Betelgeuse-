@@ -75,6 +75,8 @@ export class AppointmentsPage {
   newDiagnosedDisease = '';
   message = '';
   error = '';
+  saving = false;
+  pendingSaveStatus: 'DRAFT' | 'PUBLISHED' | null = null;
   medicineRows: MedicineRow[] = [this.newMedicineRow()];
 
   constructor(
@@ -335,21 +337,17 @@ export class AppointmentsPage {
     return { duplicateMedicines, conflictingMedicines };
   }
 
-  private confirmPrescriptionSafety(targetStatus: 'DRAFT' | 'PUBLISHED'): boolean {
-    const { duplicateMedicines, conflictingMedicines } = this.prescriptionSafetyReport();
-    if (!duplicateMedicines.length && !conflictingMedicines.length) {
-      return true;
-    }
+  dismissSafetyConfirm() {
+    this.pendingSaveStatus = null;
+  }
 
-    const parts: string[] = [];
-    if (duplicateMedicines.length) {
-      parts.push(`Duplicate medicine entries: ${duplicateMedicines.join(', ')}.`);
+  async confirmAndSave() {
+    if (!this.pendingSaveStatus) {
+      return;
     }
-    if (conflictingMedicines.length) {
-      parts.push(`Different dose or frequency for the same medicine: ${conflictingMedicines.join(', ')}.`);
-    }
-    parts.push(`Still ${targetStatus === 'PUBLISHED' ? 'publish' : 'save'} this prescription?`);
-    return window.confirm(parts.join('\n\n'));
+    const status = this.pendingSaveStatus;
+    this.pendingSaveStatus = null;
+    await this.executeSave(status);
   }
 
   private buildPayload(targetStatus: 'DRAFT' | 'PUBLISHED') {
@@ -377,9 +375,10 @@ export class AppointmentsPage {
     };
   }
 
-  async savePrescription(targetStatus: 'DRAFT' | 'PUBLISHED') {
+  savePrescription(targetStatus: 'DRAFT' | 'PUBLISHED') {
     this.message = '';
     this.error = '';
+    this.pendingSaveStatus = null;
 
     if (!this.consultationId || !this.methodOptionId || !this.diagnosedDiseaseOptionId || !this.diagnosis || !this.notes) {
       this.error = 'Please fill consultation id, method, diagnosed disease, diagnosis and notes.';
@@ -391,10 +390,18 @@ export class AppointmentsPage {
       return;
     }
 
-    if (!this.confirmPrescriptionSafety(targetStatus)) {
+    const { duplicateMedicines, conflictingMedicines } = this.prescriptionSafetyReport();
+    if (duplicateMedicines.length || conflictingMedicines.length) {
+      this.pendingSaveStatus = targetStatus;
       return;
     }
 
+    void this.executeSave(targetStatus);
+  }
+
+  private async executeSave(targetStatus: 'DRAFT' | 'PUBLISHED') {
+    this.saving = true;
+    this.error = '';
     try {
       const payload = this.buildPayload(targetStatus);
       if (this.editingPrescriptionId) {
@@ -412,10 +419,11 @@ export class AppointmentsPage {
         );
         this.message = targetStatus === 'PUBLISHED' ? 'Follow-up prescription created and published.' : 'Draft created.';
       }
-
       await this.loadConsultationPrescriptions();
     } catch {
       this.error = 'Could not save prescription. Check consultation assignment and draft state.';
+    } finally {
+      this.saving = false;
     }
   }
 }
