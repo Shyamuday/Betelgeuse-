@@ -8,7 +8,7 @@ import { PUBLIC_WHATSAPP_LINK } from './public-whatsapp';
   imports: [AppHeaderComponent, AppFooterComponent],
   template: `
     <section class="public-shell">
-      <app-header subtitle="Hair fall care" [whatsappLink]="whatsappLink" />
+      <app-header subtitle="Hair fall care" />
       <main class="content-page">
         <section class="page-hero panel">
           <p class="eyebrow">Hair Fall Treatment</p>

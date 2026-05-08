@@ -72,6 +72,9 @@ import { AppOverlayService } from './overlay.service';
               <li>
                 <a href="/login" (click)="openAuthOverlay($event, 'patient')">Patient sign-in</a>
               </li>
+              <li>
+                <a href="/login" (click)="openAuthOverlay($event, 'staff')">Doctor login</a>
+              </li>
             </ul>
           </nav>
 

@@ -2,8 +2,6 @@ import { Component, type OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { AppHeaderComponent } from '../app-header.component';
-import { buildPatientWhatsAppLink } from '../patient/patient-whatsapp';
-import { environment } from '../../environments/environment';
 import { AppOverlayService } from '../overlay.service';
 import { AuthFormOverlayComponent } from './auth-form-overlay.component';
 import { supabase } from '../supabase.client';
@@ -13,7 +11,7 @@ import { supabase } from '../supabase.client';
   imports: [AppHeaderComponent],
   template: `
     <div class="auth-reset-page">
-      <app-header [subtitle]="subtitle" [whatsappLink]="whatsappLink" />
+      <app-header [subtitle]="subtitle" />
       <div class="reset-callback">
         <p>Processing reset link…</p>
       </div>
@@ -43,11 +41,6 @@ export class AuthResetCallbackComponent implements OnInit {
   get subtitle(): string {
     return this.translate.instant('common.digitalClinicTagline');
   }
-
-  readonly whatsappLink = buildPatientWhatsAppLink(
-    environment.patientExperience.whatsappE164,
-    environment.patientExperience.whatsappMessage
-  );
 
   async ngOnInit() {
     await new Promise((resolve) => setTimeout(resolve, 300));

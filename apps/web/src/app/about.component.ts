@@ -7,7 +7,7 @@ import { AppHeaderComponent } from './app-header.component';
   imports: [AppHeaderComponent, AppFooterComponent],
   template: `
     <section class="public-shell">
-      <app-header subtitle="About our care" [whatsappLink]="whatsappLink" />
+      <app-header subtitle="About our care" />
 
       <main class="about-page">
         <section class="about-hero panel">

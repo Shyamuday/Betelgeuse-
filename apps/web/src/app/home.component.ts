@@ -28,7 +28,7 @@ import { TranslateService } from '@ngx-translate/core';
   ],
   template: `
     <section class="public-shell">
-      <app-header [subtitle]="headerTagline()" [whatsappLink]="whatsappLink" />
+      <app-header [subtitle]="headerTagline()" />
 
       <main id="main-content" class="content-page" tabindex="-1">
         <app-home-launch-banner [disease]="launchDisease()" />

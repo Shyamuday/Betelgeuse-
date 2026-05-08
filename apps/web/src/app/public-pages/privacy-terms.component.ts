@@ -8,7 +8,7 @@ import { PUBLIC_WHATSAPP_LINK } from './public-whatsapp';
   imports: [AppHeaderComponent, AppFooterComponent],
   template: `
     <section class="public-shell">
-      <app-header subtitle="Privacy and terms" [whatsappLink]="whatsappLink" />
+      <app-header subtitle="Privacy and terms" />
       <main class="content-page">
         <section class="page-hero panel">
           <p class="eyebrow">Privacy Policy / Terms</p>

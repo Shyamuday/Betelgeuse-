@@ -1,4 +1,4 @@
-<app-header [subtitle]="headerSubtitle()" [user]="auth.user()" [whatsappLink]="whatsappLink" (logout)="logout()" />
+<app-header [subtitle]="headerSubtitle()" [user]="auth.user()" (logout)="logout()" />
 
 <main class="dashboard">
   @if (isLoading()) {
