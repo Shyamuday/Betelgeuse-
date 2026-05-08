@@ -1,0 +1,10 @@
+**/node_modules
+**/.angular
+**/dist
+**/out-tsc
+**/build
+**/www
+**/android
+**/ios
+**/coverage
+**/package-lock.json

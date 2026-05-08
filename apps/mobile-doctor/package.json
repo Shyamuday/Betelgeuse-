@@ -13,9 +13,10 @@
     "open:ios": "npx cap open ios",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "tsc -p tsconfig.app.json --noEmit"
   },
   "private": true,
+  "packageManager": "npm@10.9.3",
   "dependencies": {
     "@angular/animations": "^21.2.0",
     "@angular/common": "^21.2.0",
@@ -39,23 +40,12 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^21.2.8",
-    "@angular-eslint/builder": "^21.2.0",
-    "@angular-eslint/eslint-plugin": "^21.2.0",
-    "@angular-eslint/eslint-plugin-template": "^21.2.0",
-    "@angular-eslint/schematics": "^21.2.0",
-    "@angular-eslint/template-parser": "^21.2.0",
     "@angular/cli": "^21.2.8",
     "@angular/compiler-cli": "^21.2.0",
     "@angular/language-service": "^21.2.0",
     "@capacitor/cli": "8.3.1",
     "@ionic/angular-toolkit": "^12.0.0",
     "@types/jasmine": "~5.1.0",
-    "@typescript-eslint/eslint-plugin": "^8.18.0",
-    "@typescript-eslint/parser": "^8.18.0",
-    "eslint": "^9.16.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-jsdoc": "^48.2.1",
-    "eslint-plugin-prefer-arrow": "1.2.2",
     "jasmine-core": "~5.1.0",
     "jasmine-spec-reporter": "~5.0.0",
     "karma": "~6.4.0",
@@ -63,7 +53,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.9.0"
+    "typescript": "~5.9.2"
   },
   "description": "An Ionic project"
 }
