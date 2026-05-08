@@ -52,6 +52,12 @@ enum DoseEventStatus {
   MISSED
 }
 
+enum ConsultationAttachmentKind {
+  PATIENT_REPORT
+  DOCTOR_CLINICAL
+  OTHER
+}
+
 model User {
   id                  String         @id @default(cuid())
   name                String
@@ -72,6 +78,7 @@ model User {
   createdPrescriptionOptions PrescriptionOption[] @relation("PrescriptionOptionCreator")
   prescriptionTemplates      PrescriptionTemplate[] @relation("DoctorTemplates")
   doseEvents           MedicineDoseEvent[] @relation("PatientDoseEvents")
+  consultationAttachments ConsultationAttachment[]
   reminderPreference  ReminderPreference?
   auditLogs          AuditLog[]      @relation("AuditActor")
   passwordResetTokens PasswordResetToken[]
@@ -157,8 +164,25 @@ model Consultation {
   payment         Payment?
   messages        Message[]
   prescriptions   Prescription[]
+  attachments     ConsultationAttachment[]
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
+}
+
+model ConsultationAttachment {
+  id             String                     @id @default(cuid())
+  consultationId String
+  uploadedById   String
+  kind           ConsultationAttachmentKind @default(OTHER)
+  storagePath    String
+  fileName       String?
+  mimeType       String?
+  caption        String?
+  consultation   Consultation               @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  uploadedBy     User                       @relation(fields: [uploadedById], references: [id])
+  createdAt      DateTime                   @default(now())
+
+  @@index([consultationId])
 }
 
 model Payment {

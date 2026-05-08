@@ -94,3 +94,8 @@ Configured in each `capacitor.config.ts`:
 | Ship patient app binary | `npm run mobile:patient:sync` → Android Studio / Xcode |
 
 Same pattern for `doctor-web` / `mobile-doctor` and `admin-web` / `mobile-admin`.
+
+## Tooling (lint & format)
+
+- **Lint:** Every app under `apps/*` uses the same pattern: `npm run lint` runs **`tsc -p tsconfig.app.json --noEmit`** (API uses project `tsconfig` via its script). Ionic shells no longer use ESLint for CI.
+- **Format:** Repo-wide Prettier lives at **`.prettierrc`** (root). From the monorepo root, after `npm install`: **`npm run format`** (write) or **`npm run format:check`** (CI-style check). Paths are scoped in **`.prettierignore`** (e.g. `node_modules`, `www`, native projects).
