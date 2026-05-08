@@ -273,6 +273,85 @@ export function registerAuthRoutes(app: express.Application) {
   );
 
   app.post(
+    '/auth/google-staff',
+    asyncRoute(async (req, res) => {
+      const body = z.object({ idToken: z.string().min(20) }).parse(req.body);
+      if (!googleClient || !googleClientId) {
+        return res.status(503).json({ message: 'Google login is not configured. Set GOOGLE_CLIENT_ID.' });
+      }
+
+      const ticket = await googleClient.verifyIdToken({
+        idToken: body.idToken,
+        audience: googleClientId
+      });
+      const payload = ticket.getPayload();
+
+      if (!payload?.email) {
+        return res.status(401).json({ message: 'Google account email is required' });
+      }
+
+      const emailRaw = payload.email.trim();
+
+      const user = await prisma.user.findFirst({
+        where: {
+          email: { equals: emailRaw, mode: 'insensitive' }
+        },
+        select: {
+          ...publicUserSelect,
+          passwordHash: true,
+          isActive: true,
+          staffProfile: { select: { isSuperAdmin: true, permissionCodes: true } }
+        }
+      });
+
+      if (!user) {
+        logAuthEvent('google_staff_login_failure', { reason: 'unknown_user' });
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      if (user.role === Role.PATIENT) {
+        logAuthEvent('google_staff_login_failure', { userId: user.id, reason: 'patient_account' });
+        return res.status(403).json({
+          message: 'This Google account is registered as a patient. Use the patient portal to sign in.'
+        });
+      }
+
+      if (!user.isActive && user.role === Role.DOCTOR) {
+        logAuthEvent('google_staff_login_failure', { userId: user.id, reason: 'doctor_pending_approval' });
+        return res.status(403).json({ message: 'Doctor account is pending admin approval.' });
+      }
+
+      if (!user.isActive) {
+        logAuthEvent('google_staff_login_failure', { userId: user.id, reason: 'inactive_account' });
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      const { passwordHash, isActive, staffProfile, ...rest } = user;
+      void passwordHash;
+      void isActive;
+      const staffSummary =
+        rest.role === Role.ADMIN
+          ? staffProfile
+            ? {
+                isSuperAdmin: staffProfile.isSuperAdmin,
+                permissionCodes: staffProfile.permissionCodes
+              }
+            : null
+          : undefined;
+      const safeUser =
+        rest.role === Role.ADMIN
+          ? {
+              ...rest,
+              staffProfile: staffSummary ?? null
+            }
+          : rest;
+
+      logAuthEvent('google_staff_login_success', { userId: safeUser.id, role: safeUser.role });
+      res.json(toAuthResponse(safeUser));
+    })
+  );
+
+  app.post(
     '/auth/supabase-exchange',
     asyncRoute(async (req, res) => {
       const body = z.object({ supabaseToken: z.string().min(10) }).parse(req.body);

@@ -89,6 +89,47 @@ button {
   color: #fff;
 }
 
+.divider {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 1rem 0 0.75rem;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 38%;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+.hint-google {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin: 0.6rem 0 0;
+  line-height: 1.4;
+}
+
+.hint-google.muted {
+  color: #94a3b8;
+}
+
+.hint-google code {
+  font-size: 0.72rem;
+}
+
 .error {
   color: #b91c1c;
   margin: 0.3rem 0;

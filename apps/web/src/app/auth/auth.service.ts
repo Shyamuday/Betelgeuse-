@@ -127,6 +127,12 @@ export class AuthService {
     );
   }
 
+  staffGoogleLogin(idToken: string) {
+    return this.http.post<AuthResponse>(`${this.apiBase}/auth/google-staff`, { idToken }).pipe(
+      tap((response: AuthResponse) => this.persistSession(response))
+    );
+  }
+
   forgotPassword(email: string) {
     return from(this.supabaseAuth.forgotPassword(email)).pipe(
       map(() => ({ message: 'Password reset link sent if the account exists.', resetToken: undefined }))

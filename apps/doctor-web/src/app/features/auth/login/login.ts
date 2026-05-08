@@ -3,15 +3,17 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Auth } from '../../../core/services/auth';
 import { environment } from '../../../../environments/environment';
+import { GoogleSignInButtonComponent } from '../google-sign-in-button/google-sign-in-button';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, GoogleSignInButtonComponent],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
 export class Login {
   readonly patientPortalUrl = environment.patientPortalUrl?.trim() || '';
+  readonly googleClientId = environment.googleClientId?.trim() || '';
 
   mode: 'signin' | 'enroll' = 'signin';
 
@@ -67,6 +69,22 @@ export class Login {
 
       this.mode = 'signin';
       this.message = result.message;
+    } finally {
+      this.submitting = false;
+    }
+  }
+
+  async googleSignIn(idToken: string) {
+    this.error = '';
+    this.message = '';
+    this.submitting = true;
+    try {
+      const result = await this.auth.loginWithGoogle(idToken);
+      if (!result.ok) {
+        this.error = result.message;
+        return;
+      }
+      void this.router.navigateByUrl('/dashboard');
     } finally {
       this.submitting = false;
     }

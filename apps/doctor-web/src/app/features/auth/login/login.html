@@ -32,6 +32,16 @@
         {{ submitting ? 'Signing in...' : 'Sign in' }}
       </button>
     </form>
+
+    <p class="divider">or</p>
+    @if (googleClientId) {
+      <app-google-sign-in-button [clientId]="googleClientId" (credential)="googleSignIn($event)" />
+      <p class="hint-google">Use the Google account whose email matches your doctor profile.</p>
+    } @else {
+      <p class="hint-google muted">
+        Google sign-in: set <code>googleClientId</code> in environment (same as API <code>GOOGLE_CLIENT_ID</code>).
+      </p>
+    }
   } @else {
     <h2>Doctor Enrollment</h2>
     <p>Create doctor account with your specialty profile.</p>

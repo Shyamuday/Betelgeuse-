@@ -7,6 +7,8 @@ export const environment = {
   supabaseAnonKey: 'sb_publishable_xiRZ389iXVBa0Cf0jyj80w_BHyIxw4g',
   /** Vitalis Doctor web app base URL (shown to staff using the patient portal). */
   doctorPortalUrl: '',
+  /** Same web Client ID as API `GOOGLE_CLIENT_ID` (for staff Sign-In + patient overlay). */
+  googleClientId: '',
   /** Patient-facing hero copy, WhatsApp, and which reminder channels are truly live. */
   patientExperience: defaultPatientExperience()
 };

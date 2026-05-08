@@ -5,7 +5,9 @@ export function logAuthEvent(
     | 'supabase_exchange'
     | 'patient_password_login_success'
     | 'patient_password_login_failure'
-    | 'patient_password_login_fallback',
+    | 'patient_password_login_fallback'
+    | 'google_staff_login_success'
+    | 'google_staff_login_failure',
   details: Record<string, unknown>
 ) {
   console.info(`[auth] ${event}`, {

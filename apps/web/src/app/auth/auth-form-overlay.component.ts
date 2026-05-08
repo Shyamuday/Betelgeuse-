@@ -7,6 +7,8 @@ import { APP_OVERLAY_DATA, APP_OVERLAY_REF } from '../overlay.tokens';
 import { type AppOverlayRef, AppOverlayService } from '../overlay.service';
 import { AuthStatusOverlayComponent } from './auth-status-overlay.component';
 import { AuthService } from './auth.service';
+import { GoogleSignInButtonComponent } from './google-sign-in-button.component';
+import { environment } from '../../environments/environment';
 
 type AuthFormOverlayData = {
   mode?: 'patient' | 'staff';
@@ -17,7 +19,7 @@ type ForgotStep = 'none' | 'email' | 'sent' | 'reset';
 
 @Component({
   selector: 'app-auth-form-overlay',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, GoogleSignInButtonComponent],
   template: `
     <div class="auth-card">
       <p class="eyebrow">Vitalis Care and Research Centre</p>
@@ -32,7 +34,7 @@ type ForgotStep = 'none' | 'email' | 'sent' | 'reset';
             <input
               name="identifier"
               [(ngModel)]="patientCredentials.identifier"
-              placeholder="Enter Gmail or mobile number"
+              placeholder="Enter email or mobile number"
             />
           </label>
           <label>
@@ -47,9 +49,9 @@ type ForgotStep = 'none' | 'email' | 'sent' | 'reset';
           <button class="primary" type="submit" [disabled]="isProcessing()">Login</button>
         </form>
 
-        <div class="divider-text">or continue with Gmail</div>
+        <div class="divider-text">or continue with Google</div>
         <form (ngSubmit)="loginWithGoogle()">
-          <button class="secondary" type="submit" [disabled]="isProcessing()">Continue with Gmail</button>
+          <button class="secondary" type="submit" [disabled]="isProcessing()">Continue with Google</button>
           <p class="muted">Uses the Google provider configured in Supabase Auth.</p>
         </form>
 
@@ -95,6 +97,14 @@ type ForgotStep = 'none' | 'email' | 'sent' | 'reset';
             <button type="button" class="link-btn" (click)="goToForgotStep('email')">
               Forgot password?
             </button>
+
+            <div class="divider-text">or continue with Google</div>
+            @if (googleClientId) {
+              <app-google-sign-in-button [clientId]="googleClientId" (credential)="loginStaffWithGoogle($event)" />
+              <p class="muted">Staff Google sign-in: your Google email must match your doctor or admin account.</p>
+            } @else {
+              <p class="muted">For staff Google sign-in, set <code>googleClientId</code> in environment (same as API <code>GOOGLE_CLIENT_ID</code>).</p>
+            }
           }
 
           @case ('email') {
@@ -194,6 +204,8 @@ export class AuthFormOverlayComponent {
   private readonly overlayService = inject(AppOverlayService);
   private readonly hostOverlayRef = inject(APP_OVERLAY_REF) as AppOverlayRef;
 
+  readonly googleClientId = environment.googleClientId?.trim() || '';
+
   goToForgotStep(step: ForgotStep) {
     this.forgotStep.set(step);
   }
@@ -239,6 +251,16 @@ export class AuthFormOverlayComponent {
         this.router.navigateByUrl(this.auth.dashboardFor(user.role));
       },
       error: (error) => this.showError(error.error?.message || 'Staff login failed.')
+    });
+  }
+
+  loginStaffWithGoogle(idToken: string) {
+    this.process('Signing in with Google...', this.auth.staffGoogleLogin(idToken)).subscribe({
+      next: ({ user }) => {
+        this.closeAllOverlays();
+        this.router.navigateByUrl(this.auth.dashboardFor(user.role));
+      },
+      error: (error) => this.showError(error.error?.message || 'Google sign-in failed.')
     });
   }
 

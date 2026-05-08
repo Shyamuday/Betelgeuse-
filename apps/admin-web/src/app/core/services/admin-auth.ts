@@ -70,6 +70,28 @@ export class AdminAuth {
     }
   }
 
+  async loginWithGoogle(idToken: string) {
+    try {
+      const response = await firstValueFrom(
+        this.http.post<{ token: string; user: AdminUser }>(`${this.apiBase}/auth/google-staff`, { idToken })
+      );
+
+      if (response.user.role !== 'ADMIN') {
+        return { ok: false as const, message: 'Only admin accounts can use this console.' };
+      }
+
+      localStorage.setItem(this.tokenKey, response.token);
+      this.setUser(response.user);
+      return { ok: true as const };
+    } catch (error: unknown) {
+      const message =
+        typeof error === 'object' && error !== null && 'error' in error
+          ? (error as { error?: { message?: string } }).error?.message
+          : undefined;
+      return { ok: false as const, message: message || 'Google sign-in failed.' };
+    }
+  }
+
   logout() {
     localStorage.removeItem(this.tokenKey);
     this.setUser(null);

@@ -65,4 +65,21 @@ export class Auth {
   token() {
     return localStorage.getItem(this.tokenKey) || '';
   }
+
+  async loginWithGoogle(idToken: string) {
+    try {
+      const response = await firstValueFrom(
+        this.http.post<{ token: string; user: { role: string } }>(`${this.apiBase}/auth/google-staff`, { idToken })
+      );
+
+      if (response.user.role !== 'DOCTOR') {
+        return { ok: false as const, message: 'Only approved doctor accounts can use this app.' };
+      }
+
+      localStorage.setItem(this.tokenKey, response.token);
+      return { ok: true as const };
+    } catch (error: any) {
+      return { ok: false as const, message: error?.error?.message || 'Google sign-in failed.' };
+    }
+  }
 }
