@@ -1,0 +1,19 @@
+import type express from 'express';
+import { registerAdminAuditRoutes } from './admin-audit.routes.js';
+import { registerAdminConsumerRoutes } from './admin-consumers.routes.js';
+import { registerAdminDiseaseRoutes } from './admin-diseases.routes.js';
+import { registerAdminDoctorListRoutes } from './admin-doctors-list.routes.js';
+import { registerAdminDoctorMutationRoutes } from './admin-doctors-mutations.routes.js';
+import { registerAdminPaymentRoutes } from './admin-payments.routes.js';
+import { registerAdminReportsRoutes } from './admin-reports.routes.js';
+
+/** Admin API: one register function per feature area. */
+export function registerAdminRoutes(app: express.Application) {
+  registerAdminDiseaseRoutes(app);
+  registerAdminDoctorListRoutes(app);
+  registerAdminDoctorMutationRoutes(app);
+  registerAdminConsumerRoutes(app);
+  registerAdminAuditRoutes(app);
+  registerAdminPaymentRoutes(app);
+  registerAdminReportsRoutes(app);
+}

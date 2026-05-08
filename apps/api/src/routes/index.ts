@@ -1,5 +1,5 @@
 import type express from 'express';
-import { registerAdminRoutes } from './admin.routes.js';
+import { registerAdminRoutes } from './admin/index.js';
 import { registerAuthRoutes } from './auth.routes.js';
 import { registerCatalogRoutes } from './catalog.routes.js';
 import { registerConsultationRoutes } from './consultations.routes.js';
