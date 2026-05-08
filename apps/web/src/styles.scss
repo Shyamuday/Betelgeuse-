@@ -924,6 +924,38 @@ body.header-menu-no-scroll {
   text-decoration: underline;
 }
 
+.auth-sub-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem 0.6rem;
+  margin-top: -0.35rem;
+}
+
+.auth-text-link {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.auth-text-link:hover {
+  color: #0f62fe;
+}
+
+.auth-sub-sep {
+  color: #cbd5e1;
+  font-size: 0.82rem;
+  user-select: none;
+}
+
 .success-notice {
   display: flex;
   align-items: center;

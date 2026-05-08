@@ -17,6 +17,8 @@ type AuthFormOverlayData = {
 
 type ForgotStep = 'none' | 'email' | 'sent' | 'reset';
 
+type PatientAuthStep = 'signin' | 'register' | 'forgot' | 'forgot-sent' | 'reset';
+
 @Component({
   selector: 'app-auth-form-overlay',
   imports: [CommonModule, FormsModule, GoogleSignInButtonComponent],
@@ -25,55 +27,159 @@ type ForgotStep = 'none' | 'email' | 'sent' | 'reset';
       <p class="eyebrow">Vitalis Care and Research Centre</p>
 
       @if (mode() === 'patient') {
-        <h2>Login to continue</h2>
-        <p class="muted">Use email/mobile with password, or choose mobile OTP as a separate option.</p>
+        @switch (patientStep()) {
+          @case ('signin') {
+            <h2>Login to continue</h2>
+            <p class="muted">Sign in with the email or mobile number registered on your account.</p>
 
-        <form (ngSubmit)="loginPatientWithPassword()">
-          <label>
-            Email or mobile number
-            <input
-              name="identifier"
-              [(ngModel)]="patientCredentials.identifier"
-              placeholder="Enter email or mobile number"
-            />
-          </label>
-          <label>
-            Password
-            <input
-              name="patientPassword"
-              type="password"
-              [(ngModel)]="patientCredentials.password"
-              placeholder="Enter your password"
-            />
-          </label>
-          <button class="primary" type="submit" [disabled]="isProcessing()">Login</button>
-        </form>
+            <form (ngSubmit)="loginPatientWithPassword()">
+              <label>
+                Email or mobile number
+                <input
+                  name="identifier"
+                  [(ngModel)]="patientCredentials.identifier"
+                  placeholder="Enter email or mobile number"
+                  autocomplete="username"
+                />
+              </label>
+              <label>
+                Password
+                <input
+                  name="patientPassword"
+                  type="password"
+                  [(ngModel)]="patientCredentials.password"
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                />
+              </label>
+              <button class="primary" type="submit" [disabled]="isProcessing()">Login</button>
+            </form>
 
-        <div class="divider-text">or continue with Google</div>
-        <form (ngSubmit)="loginWithGoogle()">
-          <button class="secondary" type="submit" [disabled]="isProcessing()">Continue with Google</button>
-          <p class="muted">Uses the Google provider configured in Supabase Auth.</p>
-        </form>
+            <div class="auth-sub-actions">
+              <button type="button" class="auth-text-link" (click)="goPatientStep('register')">
+                Mobile number &amp; OTP
+              </button>
+              <span class="auth-sub-sep" aria-hidden="true">·</span>
+              <button type="button" class="auth-text-link" (click)="goPatientStep('forgot')">
+                Forgot password?
+              </button>
+            </div>
 
-        <div class="divider-text">or login with mobile OTP</div>
-        <form (ngSubmit)="loginPatientWithOtp()">
-          <label>
-            Full name
-            <input name="otpName" [(ngModel)]="patientOtp.name" placeholder="Enter your full name" />
-          </label>
-          <label>
-            Mobile number
-            <input name="otpMobile" [(ngModel)]="patientOtp.mobile" placeholder="Enter 10-digit mobile number" />
-          </label>
-          <div class="otp-row">
-            <label>
-              OTP
-              <input name="otpCode" [(ngModel)]="patientOtp.otp" placeholder="Enter 6-digit OTP" />
-            </label>
-            <button type="button" class="secondary" [disabled]="isProcessing()" (click)="requestOtp()">Send OTP</button>
-          </div>
-          <button class="secondary" type="submit" [disabled]="isProcessing()">Continue with OTP</button>
-        </form>
+            <div class="divider-text">or continue with Google</div>
+            <form (ngSubmit)="loginWithGoogle()">
+              <button class="secondary" type="submit" [disabled]="isProcessing()">Continue with Google</button>
+              <p class="muted">Uses the Google provider configured in Supabase Auth.</p>
+            </form>
+          }
+
+          @case ('register') {
+            <button type="button" class="back-btn" (click)="goPatientStep('signin')">← Back to login</button>
+            <h2>Mobile number &amp; OTP</h2>
+            <p class="muted">
+              Enter your <strong>full name</strong> and <strong>mobile number</strong>. Tap <strong>Send OTP</strong>, enter the
+              code (SMS or, in development, the code shown on screen), then tap <strong>Continue with OTP</strong>. Works for new
+              and existing patients.
+            </p>
+
+            <form (ngSubmit)="loginPatientWithOtp()">
+              <label>
+                Full name
+                <input name="otpName" [(ngModel)]="patientOtp.name" placeholder="Enter your full name" />
+              </label>
+              <label>
+                Mobile number
+                <input name="otpMobile" [(ngModel)]="patientOtp.mobile" placeholder="Enter 10-digit mobile number" />
+              </label>
+              <div class="otp-row">
+                <label>
+                  OTP
+                  <input name="otpCode" [(ngModel)]="patientOtp.otp" placeholder="Enter 6-digit OTP" />
+                </label>
+                <button type="button" class="secondary" [disabled]="isProcessing()" (click)="requestOtp()">
+                  Send OTP
+                </button>
+              </div>
+              <button class="secondary" type="submit" [disabled]="isProcessing()">Continue with OTP</button>
+            </form>
+          }
+
+          @case ('forgot') {
+            <button type="button" class="back-btn" (click)="goPatientStep('signin')">← Back to login</button>
+            <h2>Forgot password</h2>
+            <p class="muted">Enter the <strong>email</strong> on your account. We’ll send a reset link.</p>
+
+            <form (ngSubmit)="forgotPassword()">
+              <label>
+                Email
+                <input
+                  name="patientForgotEmail"
+                  type="email"
+                  [(ngModel)]="forgot.email"
+                  placeholder="you@example.com"
+                  autocomplete="email"
+                />
+              </label>
+              <button class="primary" type="submit" [disabled]="isProcessing()">Send reset link</button>
+            </form>
+          }
+
+          @case ('forgot-sent') {
+            <button type="button" class="back-btn" (click)="goPatientStep('signin')">← Back to login</button>
+            <div class="success-notice">
+              <span class="notice-icon">✓</span>
+              <h2>Reset link sent</h2>
+            </div>
+            <p class="muted">
+              We’ve sent a password reset link to <strong>{{ forgot.email }}</strong>. Please check your inbox and click
+              the link.
+            </p>
+
+            <div class="step-divider">
+              <span>After clicking the link</span>
+            </div>
+
+            <button class="primary" type="button" (click)="goPatientStep('reset')">
+              I’ve clicked the link → Enter new password
+            </button>
+
+            <button type="button" class="link-btn" (click)="forgotPassword()">Didn’t receive? Resend link</button>
+          }
+
+          @case ('reset') {
+            <button type="button" class="back-btn" (click)="goPatientStep('signin')">← Back to login</button>
+            <h2>Set new password</h2>
+            <p class="muted">Enter your new password below.</p>
+
+            <form (ngSubmit)="resetPassword()">
+              <label>
+                New password
+                <input
+                  name="newPatientPassword"
+                  type="password"
+                  [(ngModel)]="forgot.password"
+                  placeholder="Min 8 characters"
+                  autocomplete="new-password"
+                />
+              </label>
+              <label>
+                Confirm password
+                <input
+                  name="confirmPatientPassword"
+                  type="password"
+                  [(ngModel)]="forgot.confirmPassword"
+                  placeholder="Confirm new password"
+                  autocomplete="new-password"
+                />
+              </label>
+              @if (forgot.password && forgot.confirmPassword && forgot.password !== forgot.confirmPassword) {
+                <p class="error-text">Passwords do not match</p>
+              }
+              <button class="primary" type="submit" [disabled]="isProcessing() || !canResetPassword()">
+                Reset password &amp; login
+              </button>
+            </form>
+          }
+        }
       } @else {
         <!-- Staff Login / Forgot Password Flow -->
         @switch (forgotStep()) {
@@ -175,6 +281,11 @@ export class AuthFormOverlayComponent {
   readonly mode = signal<'patient' | 'staff'>(this.overlayData.mode || 'patient');
   readonly isProcessing = signal(false);
   readonly forgotStep = signal<ForgotStep>(this.overlayData.initialForgotStep || 'none');
+  readonly patientStep = signal<PatientAuthStep>(
+    (this.overlayData.mode || 'patient') === 'patient' && this.overlayData.initialForgotStep === 'reset'
+      ? 'reset'
+      : 'signin'
+  );
   private activeOverlayRef?: AppOverlayRef;
 
   patientCredentials = {
@@ -208,6 +319,17 @@ export class AuthFormOverlayComponent {
 
   goToForgotStep(step: ForgotStep) {
     this.forgotStep.set(step);
+  }
+
+  goPatientStep(step: PatientAuthStep) {
+    if (step === 'forgot') {
+      this.forgot.email = '';
+    }
+    if (step === 'signin') {
+      this.forgot.password = '';
+      this.forgot.confirmPassword = '';
+    }
+    this.patientStep.set(step);
   }
 
   canResetPassword(): boolean {
@@ -268,7 +390,11 @@ export class AuthFormOverlayComponent {
     this.process('Sending reset link...', this.auth.forgotPassword(this.forgot.email)).subscribe({
       next: () => {
         this.closeActiveOverlay();
-        this.goToForgotStep('sent');
+        if (this.mode() === 'patient') {
+          this.patientStep.set('forgot-sent');
+        } else {
+          this.goToForgotStep('sent');
+        }
       },
       error: () => this.showError('Could not send reset link.')
     });
