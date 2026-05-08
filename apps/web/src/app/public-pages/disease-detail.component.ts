@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { AppFooterComponent } from '../app-footer.component';
 import { AppHeaderComponent } from '../app-header.component';
 import { diseaseInfos } from '../disease/disease-info.constants';
-import type { DiseaseInfo } from '../models';
+import type { DiseaseInfo } from '../interfaces';
 import { AppOverlayService } from '../overlay.service';
 import { openPublicAuthOverlay } from './open-public-auth-overlay';
 import { PUBLIC_WHATSAPP_LINK } from './public-whatsapp';

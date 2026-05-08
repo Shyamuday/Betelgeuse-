@@ -1,4 +1,4 @@
-import { HomeopathyApproach } from '../models';
+import { HomeopathyApproach } from '../interfaces';
 import { banerjiProtocolsApproach } from './banerji-protocols-approach.constants';
 import { boenninghausenMethodApproach } from './boenninghausen-method-approach.constants';
 import { bogerMethodApproach } from './boger-method-approach.constants';

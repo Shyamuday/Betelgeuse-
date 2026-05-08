@@ -7,7 +7,7 @@ import type {
   DoseEvent,
   Payment,
   Prescription
-} from './models';
+} from './interfaces';
 
 export function mapPatientPrescriptionFromApi(row: Record<string, unknown>): Prescription {
   return {

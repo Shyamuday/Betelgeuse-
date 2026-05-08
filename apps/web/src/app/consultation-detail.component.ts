@@ -3,7 +3,7 @@ import { Component, EventEmitter, inject, Input, OnChanges, Output } from '@angu
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ClinicApiService } from './clinic-api.service';
-import { Consultation, Prescription, Role } from './models';
+import { Consultation, Prescription, Role } from './interfaces';
 
 export type SendMessagePayload = { consultation: Consultation; body: string };
 export type PrescriptionPayload = { notes: string; fileUrl: string };

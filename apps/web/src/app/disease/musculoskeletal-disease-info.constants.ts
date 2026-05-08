@@ -1,4 +1,4 @@
-import { DiseaseInfo } from '../models';
+import { DiseaseInfo } from '../interfaces';
 
 export const musculoskeletalDiseaseInfo: DiseaseInfo = {
   slug: 'musculoskeletal-disease',

@@ -3,7 +3,7 @@ import { from, map } from 'rxjs';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { supabase } from './supabase.client';
 import { environment } from '../environments/environment';
-import { BillingPlan, Consultation, Disease, Doctor, DoseEvent, Prescription } from './models';
+import { BillingPlan, Consultation, Disease, Doctor, DoseEvent, Prescription } from './interfaces';
 import {
   mapConsultationFromApi,
   mapConsultationFromSupabaseRow,

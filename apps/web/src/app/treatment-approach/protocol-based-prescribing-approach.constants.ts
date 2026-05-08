@@ -1,4 +1,4 @@
-import { HomeopathyApproach } from '../models';
+import { HomeopathyApproach } from '../interfaces';
 
 export const protocolBasedApproach: HomeopathyApproach = {
   slug: 'protocol-based-prescribing',

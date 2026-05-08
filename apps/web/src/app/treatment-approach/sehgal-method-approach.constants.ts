@@ -1,4 +1,4 @@
-import { HomeopathyApproach } from '../models';
+import { HomeopathyApproach } from '../interfaces';
 
 export const sehgalMethodApproach: HomeopathyApproach = {
   slug: 'sehgal-method',

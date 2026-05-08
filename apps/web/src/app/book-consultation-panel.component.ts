@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BillingPlan, Disease } from './models';
+import { BillingPlan, Disease } from './interfaces';
 
 export type BookConsultationPayload = {
   diseaseId: string;

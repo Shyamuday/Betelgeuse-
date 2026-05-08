@@ -16,7 +16,7 @@ import { TodayMedicinesComponent } from './today-medicines.component';
 import { PatientProfileComponent } from './patient-profile.component';
 import { ClinicApiService } from './clinic-api.service';
 import { AuthService } from './auth/auth.service';
-import { BillingPlan, Consultation, Disease, Doctor, DoseEvent, Prescription } from './models';
+import { BillingPlan, Consultation, Disease, Doctor, DoseEvent, Prescription } from './interfaces';
 import { environment } from '../environments/environment';
 
 type PaymentFlowState = 'IDLE' | 'CREATING_ORDER' | 'OPENING_CHECKOUT' | 'VERIFYING' | 'SUCCESS' | 'ERROR';

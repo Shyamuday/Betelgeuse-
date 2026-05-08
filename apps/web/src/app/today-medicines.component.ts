@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DoseEvent } from './models';
+import { DoseEvent } from './interfaces';
 
 @Component({
   selector: 'app-today-medicines',
