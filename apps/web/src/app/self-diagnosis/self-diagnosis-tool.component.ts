@@ -10,6 +10,13 @@ import { AppFooterComponent } from '../app-footer.component';
 import { AppHeaderComponent } from '../app-header.component';
 import { AuthService } from '../auth/auth.service';
 import { ClinicApiService } from '../clinic-api/clinic-api.service';
+import { environment } from '../../environments/environment';
+import { buildPatientWhatsAppLink } from '../patient/patient-whatsapp';
+import {
+  clearWorksheetBookingDraft,
+  persistWorksheetBookingDraft,
+  worksheetAnswersToSummaryText
+} from '../patient/patient-worksheet-booking-bridge';
 import { selfDiagnosisToolByKey } from './self-diagnosis.constants';
 import { SelfDiagnosisFieldRowsComponent } from './self-diagnosis-field-rows/self-diagnosis-field-rows.component';
 import {
@@ -56,10 +63,13 @@ export class SelfDiagnosisToolComponent {
 
   readonly formValues: Record<string, string> = {};
 
-  private flatKeys: string[] = [];
+  readonly patientXp = environment.patientExperience;
+  readonly whatsappLink = buildPatientWhatsAppLink(
+    this.patientXp.whatsappE164,
+    this.patientXp.whatsappMessage
+  );
 
-  readonly whatsappLink =
-    'https://wa.me/919876543210?text=Hi%20Vitalis%20Care%20and%20Research%20Centre%2C%20I%20need%20help%20with%20my%20consultation';
+  private flatKeys: string[] = [];
 
   constructor() {
     this.route.paramMap
@@ -149,7 +159,20 @@ export class SelfDiagnosisToolComponent {
     this.saveError.set('');
     this.api.savePatientSelfDiagnosis(def.key, answers).subscribe({
       next: () => {
-        this.saveNotice.set('Saved to your account.');
+        const summary = worksheetAnswersToSummaryText(answers);
+        if (summary.trim()) {
+          persistWorksheetBookingDraft({
+            toolKey: def.key,
+            toolLabel: def.label,
+            summaryText: summary
+          });
+          this.saveNotice.set(
+            'Saved to your account. On your dashboard, booking can include these notes in your consultation intake.'
+          );
+        } else {
+          clearWorksheetBookingDraft();
+          this.saveNotice.set('Saved to your account. Add worksheet answers if you want to copy them into a future booking.');
+        }
         this.saving.set(false);
       },
       error: (err: { error?: { message?: string }; message?: string }) => {

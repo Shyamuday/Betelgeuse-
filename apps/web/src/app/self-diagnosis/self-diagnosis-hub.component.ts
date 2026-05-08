@@ -4,6 +4,8 @@ import { Router, RouterLink } from '@angular/router';
 import { AppFooterComponent } from '../app-footer.component';
 import { AppHeaderComponent } from '../app-header.component';
 import { AuthService } from '../auth/auth.service';
+import { environment } from '../../environments/environment';
+import { buildPatientWhatsAppLink } from '../patient/patient-whatsapp';
 import { SELF_DIAGNOSIS_TOOLS } from './self-diagnosis.constants';
 
 @Component({
@@ -19,8 +21,11 @@ export class SelfDiagnosisHubComponent {
 
   readonly pageTitle = 'Self-assessment worksheets';
   readonly tools = SELF_DIAGNOSIS_TOOLS;
-  readonly whatsappLink =
-    'https://wa.me/919876543210?text=Hi%20Vitalis%20Care%20and%20Research%20Centre%2C%20I%20need%20help%20with%20my%20consultation';
+  readonly patientXp = environment.patientExperience;
+  readonly whatsappLink = buildPatientWhatsAppLink(
+    this.patientXp.whatsappE164,
+    this.patientXp.whatsappMessage
+  );
 
   logout() {
     this.auth.logout();

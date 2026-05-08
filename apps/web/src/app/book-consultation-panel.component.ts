@@ -1,7 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, type OnChanges, Output } from '@angular/core';
+import { Component, EventEmitter, Input, type OnChanges, Output, type SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { type BillingPlan, type Disease } from './interfaces';
+import {
+  SELF_ASSESSMENT_WORKSHEET_INTAKE_KEY,
+  type WorksheetBookingDraft,
+  clearWorksheetBookingDraft
+} from './patient/patient-worksheet-booking-bridge';
 
 export type BookConsultationPayload = {
   diseaseId: string;
@@ -15,8 +20,26 @@ export type BookConsultationPayload = {
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="panel">
-      <h2>Book Consultation</h2>
+    <div class="panel" id="book-consultation">
+      <h2>Book consultation</h2>
+
+      @if (worksheetBookingDraft) {
+        <div class="worksheet-prefill">
+          <p class="muted">
+            Notes from your saved worksheet <strong>{{ worksheetBookingDraft.toolLabel }}</strong> are included below. Edit
+            them before you book — they are sent with your intake.
+          </p>
+          <label>
+            Worksheet notes (optional)
+            <textarea
+              [(ngModel)]="worksheetNotesText"
+              rows="6"
+              placeholder="Summarize what you want the doctor to see from your worksheet"
+            ></textarea>
+          </label>
+          <button type="button" class="secondary" (click)="dismissWorksheetDraft()">Clear worksheet notes</button>
+        </div>
+      }
 
       <label>
         Purchase type
@@ -77,14 +100,25 @@ export class BookConsultationPanelComponent implements OnChanges {
   @Input() diseases: Disease[] = [];
   @Input() plans: BillingPlan[] = [];
   @Input() disabled = false;
+  /** When set, patient can edit and submit these notes as part of intake. */
+  @Input() worksheetBookingDraft: WorksheetBookingDraft | null = null;
   @Output() booked = new EventEmitter<BookConsultationPayload>();
+  @Output() worksheetDraftDismissed = new EventEmitter<void>();
 
   purchaseType: 'ONE_TIME' | 'PLAN' = 'ONE_TIME';
   selectedPlanCode = '';
   selectedDiseaseId = '';
   intakeAnswers: Record<string, string> = {};
+  worksheetNotesText = '';
 
-  ngOnChanges() {
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['worksheetBookingDraft']) {
+      if (this.worksheetBookingDraft) {
+        this.worksheetNotesText = this.worksheetBookingDraft.summaryText;
+      } else {
+        this.worksheetNotesText = '';
+      }
+    }
     if (!this.selectedDiseaseId && this.diseases.length) {
       this.selectedDiseaseId = this.diseases[0].id;
     }
@@ -118,11 +152,22 @@ export class BookConsultationPanelComponent implements OnChanges {
 
   submit() {
     if (!this.selectedDiseaseId) return;
+    const intakeAnswers = { ...this.intakeAnswers };
+    const extra = this.worksheetNotesText.trim();
+    if (extra) {
+      intakeAnswers[SELF_ASSESSMENT_WORKSHEET_INTAKE_KEY] = extra;
+    }
     this.booked.emit({
       diseaseId: this.selectedDiseaseId,
-      intakeAnswers: { ...this.intakeAnswers },
+      intakeAnswers,
       purchaseType: this.purchaseType,
       ...(this.purchaseType === 'PLAN' ? { planCode: this.selectedPlanCode } : {})
     });
+  }
+
+  dismissWorksheetDraft() {
+    this.worksheetNotesText = '';
+    clearWorksheetBookingDraft();
+    this.worksheetDraftDismissed.emit();
   }
 }

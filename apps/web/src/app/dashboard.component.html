@@ -8,20 +8,30 @@
   }
 
   @if (auth.user()?.role === 'PATIENT') {
-    <section class="panel hero">
+    <section class="panel hero hero-panel">
       <div>
-        <p class="eyebrow">First launch niche</p>
-        <h2>Hair Fall Treatment</h2>
-        <p>Book a chat consultation for diagnosis, prescription, and follow-up guidance.</p>
+        <p class="eyebrow">{{ patientXp.dashboardHero.eyebrow }}</p>
+        <h2>{{ patientXp.dashboardHero.title }}</h2>
+        <p>{{ patientXp.dashboardHero.subtitle }}</p>
+        <div class="hero-trust-row" role="navigation" aria-label="Trust and safety">
+          <a routerLink="/safety" class="trust-item">
+            <span class="trust-icon" aria-hidden="true">!</span>
+            Safety and emergencies
+          </a>
+          <a routerLink="/privacy-terms" class="trust-item">
+            <span class="trust-icon" aria-hidden="true">i</span>
+            Privacy and data
+          </a>
+        </div>
       </div>
-      <strong>Fee shown at payment</strong>
+      <strong>{{ patientXp.dashboardHero.feeNote }}</strong>
     </section>
 
     <section class="panel">
       <h2>Self-assessment worksheets</h2>
       <p class="muted">
-        Optional kingdom and miasm notes for your own reference. These are not a medical diagnosis and do not replace a
-        consultation.
+        Optional structured notes for your own reference. They are not a medical diagnosis and do not replace a
+        consultation. Saved answers can be pulled into your booking form below.
       </p>
       <button type="button" class="primary" routerLink="/patient/self-diagnosis">Open worksheets</button>
     </section>
@@ -31,7 +41,9 @@
         [diseases]="diseases()"
         [plans]="billingPlans()"
         [disabled]="isProcessing()"
+        [worksheetBookingDraft]="worksheetBookingDraft()"
         (booked)="onBooked($event)"
+        (worksheetDraftDismissed)="onWorksheetDraftDismissed()"
       />
       <app-consultation-list
         [consultations]="consultations()"
@@ -72,6 +84,7 @@
       <app-reminder-preferences
         [prefs]="reminderPreferences"
         [disabled]="isProcessing()"
+        [channelsLive]="patientXp.reminderChannelsLive"
         (saved)="onSavePreferences($event)"
       />
       <app-prescription-history [prescriptions]="patientPrescriptions()" />

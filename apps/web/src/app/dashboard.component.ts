@@ -18,6 +18,12 @@ import { PrescriptionHistoryComponent } from './prescription-history.component';
 import { ReminderPreferencesComponent, type ReminderPrefs } from './reminder-preferences.component';
 import { TodayMedicinesComponent } from './today-medicines.component';
 import { PatientProfileComponent } from './patient-profile.component';
+import { buildPatientWhatsAppLink } from './patient/patient-whatsapp';
+import {
+  clearWorksheetBookingDraft,
+  readWorksheetBookingDraft,
+  type WorksheetBookingDraft
+} from './patient/patient-worksheet-booking-bridge';
 import { ClinicApiService } from './clinic-api/clinic-api.service';
 import { AuthService } from './auth/auth.service';
 import type { BillingPlan, Consultation, Disease, Doctor, DoseEvent, Prescription } from './interfaces';
@@ -47,6 +53,11 @@ type PaymentFlowState = 'IDLE' | 'CREATING_ORDER' | 'OPENING_CHECKOUT' | 'VERIFY
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   readonly doctorPortalUrl = environment.doctorPortalUrl || '';
+  readonly patientXp = environment.patientExperience;
+  readonly whatsappLink = buildPatientWhatsAppLink(
+    this.patientXp.whatsappE164,
+    this.patientXp.whatsappMessage
+  );
   readonly diseases = signal<Disease[]>([]);
   readonly billingPlans = signal<BillingPlan[]>([]);
   readonly consultations = signal<Consultation[]>([]);
@@ -64,8 +75,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly paymentFlowConsultation = signal<Consultation | null>(null);
   readonly paymentFlowError = signal('');
   readonly title = computed(() => `${this.auth.user()?.role?.toLowerCase()} dashboard`);
-  readonly whatsappLink =
-    'https://wa.me/919876543210?text=Hi%20Vitalis%20Care%20and%20Research%20Centre%2C%20I%20need%20help%20with%20my%20consultation';
+  readonly worksheetBookingDraft = signal<WorksheetBookingDraft | null>(null);
   private realtimeChannel?: RealtimeChannel;
 
   snoozeMinutes = 15;
@@ -93,8 +103,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
+    if (this.auth.user()?.role === 'PATIENT') {
+      this.worksheetBookingDraft.set(readWorksheetBookingDraft());
+    }
     this.loadBaseData();
     this.realtimeChannel = this.api.watchClinicChanges(() => this.loadConsultations());
+  }
+
+  onWorksheetDraftDismissed() {
+    clearWorksheetBookingDraft();
+    this.worksheetBookingDraft.set(null);
   }
 
   ngOnDestroy() {
@@ -114,6 +132,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       })
       .subscribe({
         next: () => {
+          clearWorksheetBookingDraft();
+          this.worksheetBookingDraft.set(null);
           this.showNotice('Consultation created. Complete payment to continue.');
           this.loadConsultations();
         },
@@ -183,7 +203,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (state === 'CREATING_ORDER') return 'Preparing your order details.';
     if (state === 'OPENING_CHECKOUT') return 'Complete payment in the Razorpay popup.';
     if (state === 'VERIFYING') return 'Please wait while we verify with the gateway.';
-    if (state === 'SUCCESS') return 'Your consultation is now ready for doctor assignment.';
+    if (state === 'SUCCESS') {
+      return 'Your consultation is now ready for doctor assignment. You’ll see updates here once a doctor is assigned.';
+    }
     if (state === 'ERROR') return this.paymentFlowError() || 'Something went wrong. Please try again.';
     return '';
   }
