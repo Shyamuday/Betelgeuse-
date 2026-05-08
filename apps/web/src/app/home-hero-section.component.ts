@@ -151,10 +151,11 @@ type BookStep = 'form' | 'otp' | 'loading' | 'done';
       <div class="hero-layout">
         <div class="hero-main">
           <div class="home-hero">
-            <p class="eyebrow">Vitalis Care and Research Centre | Doctor-led digital clinic</p>
-            <h1>Chronic care that actually follows through.</h1>
+            <p class="eyebrow">Vitalis Care and Research Centre | Homeopathy-led chronic care online</p>
+            <h1>Chronic care rooted in individualized homeopathic practice.</h1>
             <p class="hero-copy">
-              We specialize in long-running conditions that need deeper history, pattern tracking, and disciplined follow-up — not quick-fix consultations.
+              Structured case-taking, remedy selection supervised by doctors, and follow-ups designed for recurring and
+              long-running complaints — aligned with continuity of care rather than rushed one-off prescriptions.
             </p>
           </div>
 

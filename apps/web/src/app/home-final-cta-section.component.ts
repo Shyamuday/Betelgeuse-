@@ -9,7 +9,7 @@ import { AppOverlayService } from './overlay.service';
     <section class="why-choose-section">
       <div class="section-header">
         <p class="eyebrow">Why Vitalis Care and Research Centre</p>
-        <h2 class="section-title">Built for chronic conditions, not quick fixes</h2>
+        <h2 class="section-title">Built around homoeopathic continuity, not one-off dosing</h2>
       </div>
       
       <div class="benefits-grid">
@@ -20,8 +20,8 @@ import { AppOverlayService } from './overlay.service';
         </div>
         <div class="benefit-card">
           <div class="benefit-icon">📊</div>
-          <h4>Pattern tracking</h4>
-          <p>We track symptom patterns over time, not just single episodes.</p>
+          <h4>Mentals, modalities &amp; relapse pattern</h4>
+          <p>Clinical documentation emphasises relapse tendency and characteristic symptoms — anchors for prudent homoeopathic follow-up.</p>
         </div>
         <div class="benefit-card">
           <div class="benefit-icon">🩺</div>
@@ -40,8 +40,11 @@ import { AppOverlayService } from './overlay.service';
     <section class="final-cta-section panel">
       <div class="cta-content">
         <p class="eyebrow">Ready to start?</p>
-        <h2>Begin your chronic care journey today.</h2>
-        <p>Book a consultation now, or chat with us on WhatsApp to see if your condition fits our chronic-care pathway.</p>
+        <h2>Begin your chronic homoeopathic care journey today.</h2>
+        <p>
+          Start a supervised consultation pathway, ask whether your case suits our methodology, or read how we blend
+          clinical safety with structured homoeopathic practice.
+        </p>
       </div>
       <div class="cta-actions">
         <a class="primary home-action" href="/login" (click)="openAuthOverlay($event)">
