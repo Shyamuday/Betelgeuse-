@@ -1,10 +1,17 @@
 import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, type OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import {
+  type CghsFormularyEntry,
+  filterFormularyOptions,
+  formularyOptionValue,
+  matchFormularyKey,
+  parseFormularyPick
+} from './cghs-formulary';
 
 type OptionType = 'METHOD' | 'DIAGNOSED_DISEASE';
 
@@ -33,6 +40,8 @@ type PrescriptionOption = {
 };
 
 type MedicineRow = {
+  /** Encodes CGHS pick as tab-separated code, name, potency, amount; or `__other__`; or empty. */
+  formularyKey: string;
   medicineName: string;
   strength: string;
   dose: string;
@@ -83,7 +92,7 @@ type ConsultationAttachmentRow = {
   templateUrl: './appointments-page.html',
   styleUrl: './appointments-page.scss'
 })
-export class AppointmentsPage {
+export class AppointmentsPage implements OnInit {
   private readonly apiBase = environment.apiUrl;
 
   consultationId = '';
@@ -123,6 +132,12 @@ export class AppointmentsPage {
   deletingTemplateId = '';
   medicineRows: MedicineRow[] = [this.newMedicineRow()];
 
+  /** CGHS Homoeopathic Formulary (JSON in public/data). */
+  formulary: CghsFormularyEntry[] = [];
+  formularyQuery = '';
+  formularyLoaded = false;
+  formularyLoadError = '';
+
   constructor(
     private readonly http: HttpClient,
     private readonly route: ActivatedRoute
@@ -133,6 +148,10 @@ export class AppointmentsPage {
     if (this.consultationId) {
       void this.loadConsultationPrescriptions();
     }
+  }
+
+  ngOnInit() {
+    void this.loadFormulary();
   }
 
   private async loadByType(type: OptionType) {
@@ -157,6 +176,7 @@ export class AppointmentsPage {
 
   private newMedicineRow(): MedicineRow {
     return {
+      formularyKey: '',
       medicineName: '',
       strength: '',
       dose: '',
@@ -166,6 +186,52 @@ export class AppointmentsPage {
       instructions: '',
       intakeTimesText: '09:00,21:00'
     };
+  }
+
+  private async loadFormulary() {
+    this.formularyLoadError = '';
+    try {
+      const res = await firstValueFrom(
+        this.http.get<{ entries: CghsFormularyEntry[] }>('data/cghs-homoeopathic-formulary.json')
+      );
+      this.formulary = res.entries || [];
+    } catch {
+      this.formulary = [];
+      this.formularyLoadError =
+        'CGHS formulary file missing or invalid — run `npm run build:cghs-formulary` from the repo root. You can still enter medicines manually.';
+    } finally {
+      this.formularyLoaded = true;
+      this.refreshFormularyKeysOnRows();
+    }
+  }
+
+  formularyEntryKey(e: CghsFormularyEntry): string {
+    return formularyOptionValue(e);
+  }
+
+  formularyOptionsFiltered(): CghsFormularyEntry[] {
+    return filterFormularyOptions(this.formulary, this.formularyQuery);
+  }
+
+  onFormularyPick(row: MedicineRow, value: string) {
+    row.formularyKey = value;
+    const parsed = parseFormularyPick(value);
+    if (!parsed) {
+      return;
+    }
+    row.medicineName = parsed.name;
+    row.strength = parsed.potency;
+    row.dose = parsed.amount;
+  }
+
+  private refreshFormularyKeysOnRows() {
+    for (const row of this.medicineRows) {
+      if (!row.medicineName.trim()) {
+        row.formularyKey = '';
+        continue;
+      }
+      row.formularyKey = matchFormularyKey(this.formulary, row.medicineName, row.strength, row.dose);
+    }
   }
 
   async addOption(type: OptionType) {
@@ -312,6 +378,7 @@ export class AppointmentsPage {
     this.status = prescription.status === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT';
     this.medicineRows = (prescription.items || []).length
       ? (prescription.items || []).map((item) => ({
+          formularyKey: matchFormularyKey(this.formulary, item.medicineName || '', item.strength || '', item.dose || ''),
           medicineName: item.medicineName || '',
           strength: item.strength || '',
           dose: item.dose || '',
@@ -354,6 +421,7 @@ export class AppointmentsPage {
     this.status = 'DRAFT';
     this.medicineRows = (prescription.items || []).length
       ? (prescription.items || []).map((item) => ({
+          formularyKey: matchFormularyKey(this.formulary, item.medicineName || '', item.strength || '', item.dose || ''),
           medicineName: item.medicineName || '',
           strength: item.strength || '',
           dose: item.dose || '',
@@ -536,6 +604,7 @@ export class AppointmentsPage {
     this.notes = template.notes || '';
     this.medicineRows = template.items.length
       ? template.items.map((item) => ({
+          formularyKey: matchFormularyKey(this.formulary, item.medicineName, item.strength || '', item.dose || ''),
           medicineName: item.medicineName,
           strength: item.strength || '',
           dose: item.dose || '',

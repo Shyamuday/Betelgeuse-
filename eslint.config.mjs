@@ -46,6 +46,18 @@ export default tseslint.config(
     }
   },
   {
+    name: 'repo-node-scripts',
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: globals.node
+    },
+    rules: {
+      'no-console': 'off'
+    }
+  },
+  {
     name: 'clinic-api',
     files: ['apps/api/**/*.ts'],
     languageOptions: {
@@ -75,6 +87,13 @@ export default tseslint.config(
     rules: {
       ...angularTsRules,
       '@typescript-eslint/consistent-type-imports': 'off'
+    }
+  },
+  {
+    name: 'doctor-appointments-page',
+    files: ['apps/doctor-web/src/app/features/appointments/appointments-page/appointments-page.ts'],
+    rules: {
+      'max-lines': ['warn', { max: 700, skipBlankLines: true, skipComments: true }]
     }
   },
   {

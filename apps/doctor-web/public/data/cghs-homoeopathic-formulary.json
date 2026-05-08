@@ -1,0 +1,6534 @@
+{
+  "schemaVersion": 1,
+  "title": "CGHS Homoeopathic Formulary (22nd Edition)",
+  "description": "Canonical formulary list for the doctor app. Edit entries here after import, or adjust markdown and re-run npm run import:cghs-formulary.",
+  "sourceFile": "apps/web/data/cghs-homoeopathic-formulary.json",
+  "syncedAt": "2026-05-08T08:06:01.726Z",
+  "entryCount": 932,
+  "entries": [
+    {
+      "code": "A-1",
+      "name": "Abies Can",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Abies Can · 30 · 100ml (A-1)"
+    },
+    {
+      "code": "A-2",
+      "name": "Abies Nigra",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Abies Nigra · 30 · 100ml (A-2)"
+    },
+    {
+      "code": "A-3",
+      "name": "Abrotanum",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Abrotanum · 6 · 100ml (A-3)"
+    },
+    {
+      "code": "A-4",
+      "name": "Absinthinum",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Absinthinum · 6 · 100ml (A-4)"
+    },
+    {
+      "code": "A-5",
+      "name": "Absinthinum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Absinthinum · 200 · 100ml (A-5)"
+    },
+    {
+      "code": "A-6",
+      "name": "Acetic Acid",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Acetic Acid · 6 · 100ml (A-6)"
+    },
+    {
+      "code": "A-7",
+      "name": "Acinite Nap",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Acinite Nap · 30 · 100ml (A-7)"
+    },
+    {
+      "code": "A-8",
+      "name": "Aconite Nap",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Aconite Nap · 200 · 100ml (A-8)"
+    },
+    {
+      "code": "A-9",
+      "name": "Actea Rac",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Actea Rac · 6 · 100ml (A-9)"
+    },
+    {
+      "code": "A-10",
+      "name": "Actea Rac",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Actea Rac · 30 · 100ml (A-10)"
+    },
+    {
+      "code": "A-11",
+      "name": "Actea Rac",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Actea Rac · 200 · 100ml (A-11)"
+    },
+    {
+      "code": "A-12",
+      "name": "Actea Rac",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Actea Rac · 1M · 60ml (A-12)"
+    },
+    {
+      "code": "A-13",
+      "name": "Actea Spicata",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Actea Spicata · 6 · 100ml (A-13)"
+    },
+    {
+      "code": "A-14",
+      "name": "Actea Spicata",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Actea Spicata · 30 · 100ml (A-14)"
+    },
+    {
+      "code": "A-15",
+      "name": "Actea Spicata",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Actea Spicata · 200 · 100ml (A-15)"
+    },
+    {
+      "code": "A-16",
+      "name": "Actea Spicata",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Actea Spicata · 1M · 60ml (A-16)"
+    },
+    {
+      "code": "A-17",
+      "name": "Aesculus Hip",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Aesculus Hip · 30 · 100ml (A-17)"
+    },
+    {
+      "code": "A-18",
+      "name": "Aesculus Hip",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Aesculus Hip · 200 · 100ml (A-18)"
+    },
+    {
+      "code": "A-19",
+      "name": "Aesculus Hip",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Aesculus Hip · 1M · 60ml (A-19)"
+    },
+    {
+      "code": "A-20",
+      "name": "Aethusa Cyn",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Aethusa Cyn · 6 · 100ml (A-20)"
+    },
+    {
+      "code": "A-21",
+      "name": "Agaricus M",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Agaricus M · 30 · 100ml (A-21)"
+    },
+    {
+      "code": "A-22",
+      "name": "Agaricus M",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Agaricus M · 200 · 100ml (A-22)"
+    },
+    {
+      "code": "A-23",
+      "name": "Agaricus M",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Agaricus M · 1M · 60ml (A-23)"
+    },
+    {
+      "code": "A-24",
+      "name": "Agnus Castus",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Agnus Castus · 6 · 100ml (A-24)"
+    },
+    {
+      "code": "A-25",
+      "name": "Agnus Castus",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Agnus Castus · 200 · 100ml (A-25)"
+    },
+    {
+      "code": "A-26",
+      "name": "Agnus Castus",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Agnus Castus · 1M · 60ml (A-26)"
+    },
+    {
+      "code": "A-27",
+      "name": "Agraphis Nut",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Agraphis Nut · 3x · 100ml (A-27)"
+    },
+    {
+      "code": "A-28",
+      "name": "Agraphis Nut",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Agraphis Nut · 200 · 100ml (A-28)"
+    },
+    {
+      "code": "A-29",
+      "name": "Aletris Fari",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Aletris Fari · 6 · 100ml (A-29)"
+    },
+    {
+      "code": "A-30",
+      "name": "Allium Cepa",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Allium Cepa · 6 · 100ml (A-30)"
+    },
+    {
+      "code": "A-31",
+      "name": "Allium cepa",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Allium cepa · 200 · 100ml (A-31)"
+    },
+    {
+      "code": "A-32",
+      "name": "Allium Sativa",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Allium Sativa · 30 · 100ml (A-32)"
+    },
+    {
+      "code": "A-33",
+      "name": "Aloe Soc",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Aloe Soc · 6 · 100ml (A-33)"
+    },
+    {
+      "code": "A-34",
+      "name": "Aloe Soc",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Aloe Soc · 30 · 100ml (A-34)"
+    },
+    {
+      "code": "A-35",
+      "name": "Aloe Soc",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Aloe Soc · 200 · 100ml (A-35)"
+    },
+    {
+      "code": "A-36",
+      "name": "Alstonia Sch.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Alstonia Sch. · 6 · 100ml (A-36)"
+    },
+    {
+      "code": "A-37",
+      "name": "Alumen",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Alumen · 200 · 100ml (A-37)"
+    },
+    {
+      "code": "A-38",
+      "name": "Alumina",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Alumina · 30 · 100ml (A-38)"
+    },
+    {
+      "code": "A-39",
+      "name": "Alumina",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Alumina · 200 · 100ml (A-39)"
+    },
+    {
+      "code": "A-40",
+      "name": "Alumina",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Alumina · 10M · 30ml (A-40)"
+    },
+    {
+      "code": "A-41",
+      "name": "Ambra Grisea",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Ambra Grisea · 30 · 100ml (A-41)"
+    },
+    {
+      "code": "A-42",
+      "name": "Ambra Grisea",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Ambra Grisea · 200 · 100ml (A-42)"
+    },
+    {
+      "code": "A-43",
+      "name": "Ammonium Br.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Ammonium Br. · 30 · 100ml (A-43)"
+    },
+    {
+      "code": "A-44",
+      "name": "Ammonium C.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Ammonium C. · 30 · 100ml (A-44)"
+    },
+    {
+      "code": "A-45",
+      "name": "Ammonium C",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Ammonium C · 200 · 100ml (A-45)"
+    },
+    {
+      "code": "A-46",
+      "name": "Ammonium C",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Ammonium C · 6 · 100ml (A-46)"
+    },
+    {
+      "code": "A-47",
+      "name": "Amm. Mur",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Amm. Mur · 30 · 100ml (A-47)"
+    },
+    {
+      "code": "A-48",
+      "name": "Amm. Mur",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Amm. Mur · 200 · 100ml (A-48)"
+    },
+    {
+      "code": "A-49",
+      "name": "Amm.Phos",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Amm.Phos · 6 · 100ml (A-49)"
+    },
+    {
+      "code": "A-50",
+      "name": "Anacardium O.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Anacardium O. · 30 · 100ml (A-50)"
+    },
+    {
+      "code": "A-51",
+      "name": "Anacardium O.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Anacardium O. · 200 · 100ml (A-51)"
+    },
+    {
+      "code": "A-52",
+      "name": "Anacardium O.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Anacardium O. · 1M · 60ml (A-52)"
+    },
+    {
+      "code": "A-53",
+      "name": "Anacardium O.",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Anacardium O. · CM · 30ml (A-53)"
+    },
+    {
+      "code": "A-54",
+      "name": "Anthrakokali",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Anthrakokali · 30 · 100ml (A-54)"
+    },
+    {
+      "code": "A-55",
+      "name": "Anthracinum",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Anthracinum · 30 · 100ml (A-55)"
+    },
+    {
+      "code": "A-56",
+      "name": "Anthracinum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Anthracinum · 200 · 100ml (A-56)"
+    },
+    {
+      "code": "A-57",
+      "name": "Anagallis",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Anagallis · 6 · 100ml (A-57)"
+    },
+    {
+      "code": "A-58",
+      "name": "Anagallis",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Anagallis · 200 · 100ml (A-58)"
+    },
+    {
+      "code": "A-59",
+      "name": "Antim.Ars.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Antim.Ars. · 30 · 100ml (A-59)"
+    },
+    {
+      "code": "A-60",
+      "name": "Antim Ars.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Antim Ars. · 200 · 100ml (A-60)"
+    },
+    {
+      "code": "A-61",
+      "name": "Antim Crud.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Antim Crud. · 30 · 100ml (A-61)"
+    },
+    {
+      "code": "A-62",
+      "name": "Antim Crud",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Antim Crud · 200 · 100ml (A-62)"
+    },
+    {
+      "code": "A-63",
+      "name": "Antim Crud",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Antim Crud · 1M · 60ml (A-63)"
+    },
+    {
+      "code": "A-64",
+      "name": "Antim Crud",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Antim Crud · 10M · 30ml (A-64)"
+    },
+    {
+      "code": "A-65",
+      "name": "Antim Crud",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Antim Crud · 50M · 30ml (A-65)"
+    },
+    {
+      "code": "A-66",
+      "name": "Antim Crud",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Antim Crud · CM · 30ml (A-66)"
+    },
+    {
+      "code": "A-67",
+      "name": "Antim Tart.",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Antim Tart. · 3x · 100ml (A-67)"
+    },
+    {
+      "code": "A-68",
+      "name": "Antim Tart",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Antim Tart · 30 · 100ml (A-68)"
+    },
+    {
+      "code": "A-69",
+      "name": "Antim Tart",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Antim Tart · 200 · 100ml (A-69)"
+    },
+    {
+      "code": "A-70",
+      "name": "Apis Mel",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Apis Mel · 6 · 100ml (A-70)"
+    },
+    {
+      "code": "A-71",
+      "name": "Apis Mel",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Apis Mel · 30 · 100ml (A-71)"
+    },
+    {
+      "code": "A-72",
+      "name": "Apis Mel.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Apis Mel. · 200 · 100ml (A-72)"
+    },
+    {
+      "code": "A-73",
+      "name": "Apis Mel.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Apis Mel. · 1M · 60ml (A-73)"
+    },
+    {
+      "code": "A-74",
+      "name": "Apocynum Can.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Apocynum Can. · 6 · 100ml (A-74)"
+    },
+    {
+      "code": "A-75",
+      "name": "Apocuynum Can",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Apocuynum Can · 200 · 100ml (A-75)"
+    },
+    {
+      "code": "A-76",
+      "name": "Aralia Rac",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Aralia Rac · 30 · 100ml (A-76)"
+    },
+    {
+      "code": "A-77",
+      "name": "Arania diadema",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Arania diadema · 30 · 100ml (A-77)"
+    },
+    {
+      "code": "A-78",
+      "name": "Argentum Met",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Argentum Met · 30 · 100ml (A-78)"
+    },
+    {
+      "code": "A-79",
+      "name": "Argentum Met",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Argentum Met · 200 · 100ml (A-79)"
+    },
+    {
+      "code": "A-80",
+      "name": "Argentum met",
+      "potency": "1M",
+      "amount": "100ml",
+      "label": "Argentum met · 1M · 100ml (A-80)"
+    },
+    {
+      "code": "A-81",
+      "name": "Argentum nit",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Argentum nit · 30 · 100ml (A-81)"
+    },
+    {
+      "code": "A-82",
+      "name": "Argentum Nit",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Argentum Nit · 200 · 100ml (A-82)"
+    },
+    {
+      "code": "A-83",
+      "name": "Argentum Nit",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Argentum Nit · 1M · 60ml (A-83)"
+    },
+    {
+      "code": "A-84",
+      "name": "Argentum Nit",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Argentum Nit · 10M · 30ml (A-84)"
+    },
+    {
+      "code": "A-85",
+      "name": "Arnica Mont.",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Arnica Mont. · 3x · 100ml (A-85)"
+    },
+    {
+      "code": "A-86",
+      "name": "Arnica Mont.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Arnica Mont. · 30 · 100ml (A-86)"
+    },
+    {
+      "code": "A-87",
+      "name": "Arnica Mont.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Arnica Mont. · 200 · 100ml (A-87)"
+    },
+    {
+      "code": "A-88",
+      "name": "Arnica Mont.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Arnica Mont. · 1M · 60ml (A-88)"
+    },
+    {
+      "code": "A-89",
+      "name": "Arnica Mont.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Arnica Mont. · 10M · 30ml (A-89)"
+    },
+    {
+      "code": "A-90",
+      "name": "Arnica Mont.",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Arnica Mont. · 50M · 30ml (A-90)"
+    },
+    {
+      "code": "A-91",
+      "name": "Arnica Mont.",
+      "potency": "CM",
+      "amount": "100ml",
+      "label": "Arnica Mont. · CM · 100ml (A-91)"
+    },
+    {
+      "code": "A-92",
+      "name": "Ars.Alb.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Ars.Alb. · 6 · 100ml (A-92)"
+    },
+    {
+      "code": "A-93",
+      "name": "Ars.Alb.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Ars.Alb. · 30 · 100ml (A-93)"
+    },
+    {
+      "code": "A-94",
+      "name": "Ars.Alb.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Ars.Alb. · 200 · 100ml (A-94)"
+    },
+    {
+      "code": "A-95",
+      "name": "Ars.Alb.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Ars.Alb. · 1M · 60ml (A-95)"
+    },
+    {
+      "code": "A-96",
+      "name": "Ars.Alb.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Ars.Alb. · 10M · 30ml (A-96)"
+    },
+    {
+      "code": "A-97",
+      "name": "Ars.Alb.",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Ars.Alb. · 50M · 30ml (A-97)"
+    },
+    {
+      "code": "A-98",
+      "name": "Ars.Alb.",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Ars.Alb. · CM · 30ml (A-98)"
+    },
+    {
+      "code": "A-99",
+      "name": "Ars.Brom.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Ars.Brom. · 6 · 100ml (A-99)"
+    },
+    {
+      "code": "A-100",
+      "name": "Ars.Brom.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Ars.Brom. · 30 · 100ml (A-100)"
+    },
+    {
+      "code": "A-101",
+      "name": "Ars.Iod",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Ars.Iod · 6 · 100ml (A-101)"
+    },
+    {
+      "code": "A-102",
+      "name": "Ars. Iod",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Ars. Iod · 200 · 100ml (A-102)"
+    },
+    {
+      "code": "A-103",
+      "name": "Ars.Sul.Fl.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Ars.Sul.Fl. · 200 · 100ml (A-103)"
+    },
+    {
+      "code": "A-104",
+      "name": "Artemesia V.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Artemesia V. · 30 · 100ml (A-104)"
+    },
+    {
+      "code": "A-105",
+      "name": "Artemesia V.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Artemesia V. · 200 · 100ml (A-105)"
+    },
+    {
+      "code": "A-106",
+      "name": "Arum Triphy.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Arum Triphy. · 6 · 100ml (A-106)"
+    },
+    {
+      "code": "A-107",
+      "name": "Arum Triphy.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Arum Triphy. · 200 · 100ml (A-107)"
+    },
+    {
+      "code": "A-108",
+      "name": "Asafoetida",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Asafoetida · 30 · 100ml (A-108)"
+    },
+    {
+      "code": "A-109",
+      "name": "Asafoetida",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Asafoetida · 200 · 100ml (A-109)"
+    },
+    {
+      "code": "A-110",
+      "name": "Aspidosperma",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Aspidosperma · 6 · 100ml (A-110)"
+    },
+    {
+      "code": "A-111",
+      "name": "Asterias Rub",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Asterias Rub · 6 · 100ml (A-111)"
+    },
+    {
+      "code": "A-112",
+      "name": "Arum Met.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Arum Met. · 30 · 100ml (A-112)"
+    },
+    {
+      "code": "A-113",
+      "name": "Arum Met.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Arum Met. · 200 · 100ml (A-113)"
+    },
+    {
+      "code": "A-114",
+      "name": "Arum Met.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Arum Met. · 1M · 60ml (A-114)"
+    },
+    {
+      "code": "A-115",
+      "name": "Arum Met.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Arum Met. · 10M · 30ml (A-115)"
+    },
+    {
+      "code": "A-116",
+      "name": "Arum Met.",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Arum Met. · CM · 30ml (A-116)"
+    },
+    {
+      "code": "A-117",
+      "name": "Bacillinum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Bacillinum · 200 · 100ml (A-117)"
+    },
+    {
+      "code": "A-118",
+      "name": "Bacillinum",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Bacillinum · 50M · 30ml (A-118)"
+    },
+    {
+      "code": "A-119",
+      "name": "Bacillinum",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Bacillinum · CM · 30ml (A-119)"
+    },
+    {
+      "code": "A-120",
+      "name": "Badiaga",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Badiaga · 30 · 100ml (A-120)"
+    },
+    {
+      "code": "A-121",
+      "name": "Badiaga",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Badiaga · 200 · 100ml (A-121)"
+    },
+    {
+      "code": "A-122",
+      "name": "Baptisia T.",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Baptisia T. · 3x · 100ml (A-122)"
+    },
+    {
+      "code": "A-123",
+      "name": "Baptisia",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Baptisia · 30 · 100ml (A-123)"
+    },
+    {
+      "code": "A-124",
+      "name": "Baptisia",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Baptisia · 200 · 100ml (A-124)"
+    },
+    {
+      "code": "A-125",
+      "name": "Baryta Carb",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Baryta Carb · 6 · 100ml (A-125)"
+    },
+    {
+      "code": "A-126",
+      "name": "Baryta Carb",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Baryta Carb · 30 · 100ml (A-126)"
+    },
+    {
+      "code": "A-127",
+      "name": "Baryta Carb",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Baryta Carb · 200 · 100ml (A-127)"
+    },
+    {
+      "code": "A-128",
+      "name": "Baryta Carb",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Baryta Carb · 1M · 60ml (A-128)"
+    },
+    {
+      "code": "A-129",
+      "name": "Baryta Carb",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Baryta Carb · 10M · 30ml (A-129)"
+    },
+    {
+      "code": "A-130",
+      "name": "Baryta Carb",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Baryta Carb · CM · 30ml (A-130)"
+    },
+    {
+      "code": "A-131",
+      "name": "Baryta Iod",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Baryta Iod · 30 · 100ml (A-131)"
+    },
+    {
+      "code": "A-132",
+      "name": "Baryta Iod",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Baryta Iod · 200 · 100ml (A-132)"
+    },
+    {
+      "code": "A-133",
+      "name": "Baryta Mur.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Baryta Mur. · 30 · 100ml (A-133)"
+    },
+    {
+      "code": "A-134",
+      "name": "Baryta Mur",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Baryta Mur · 200 · 100ml (A-134)"
+    },
+    {
+      "code": "A-135",
+      "name": "Baryta Phos",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Baryta Phos · 30 · 100ml (A-135)"
+    },
+    {
+      "code": "A-136",
+      "name": "Belladonna",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Belladonna · 3x · 100ml (A-136)"
+    },
+    {
+      "code": "A-137",
+      "name": "Belladonna",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Belladonna · 30 · 100ml (A-137)"
+    },
+    {
+      "code": "A-138",
+      "name": "Belladonna",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Belladonna · 200 · 100ml (A-138)"
+    },
+    {
+      "code": "A-139",
+      "name": "Belladonna",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Belladonna · 1M · 60ml (A-139)"
+    },
+    {
+      "code": "A-140",
+      "name": "Bellis Perenis",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Bellis Perenis · 6 · 100ml (A-140)"
+    },
+    {
+      "code": "A-141",
+      "name": "Bellis Perenis",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Bellis Perenis · 200 · 100ml (A-141)"
+    },
+    {
+      "code": "A-142",
+      "name": "Bellis Perenis",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Bellis Perenis · 1M · 60ml (A-142)"
+    },
+    {
+      "code": "A-143",
+      "name": "Benzoic Acid",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Benzoic Acid · 6 · 100ml (A-143)"
+    },
+    {
+      "code": "A-144",
+      "name": "Benzoic Acid",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Benzoic Acid · 200 · 100ml (A-144)"
+    },
+    {
+      "code": "A-145",
+      "name": "Berberis Vulg.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Berberis Vulg. · 200 · 100ml (A-145)"
+    },
+    {
+      "code": "A-146",
+      "name": "Bismuthum",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Bismuthum · 6 · 100ml (A-146)"
+    },
+    {
+      "code": "A-147",
+      "name": "Blata Ori.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Blata Ori. · 6 · 100ml (A-147)"
+    },
+    {
+      "code": "A-148",
+      "name": "Borax .",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Borax . · 30 · 100ml (A-148)"
+    },
+    {
+      "code": "A-149",
+      "name": "Borex",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Borex · 200 · 100ml (A-149)"
+    },
+    {
+      "code": "A-150",
+      "name": "Bovista",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Bovista · 6 · 100ml (A-150)"
+    },
+    {
+      "code": "A-151",
+      "name": "Bovista",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Bovista · 30 · 100ml (A-151)"
+    },
+    {
+      "code": "A-152",
+      "name": "Bovista",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Bovista · 200 · 100ml (A-152)"
+    },
+    {
+      "code": "A-153",
+      "name": "Bromium",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Bromium · 30 · 100ml (A-153)"
+    },
+    {
+      "code": "A-154",
+      "name": "Bryonia Alb.",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Bryonia Alb. · 3x · 100ml (A-154)"
+    },
+    {
+      "code": "A-155",
+      "name": "Bryonia Alb.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Bryonia Alb. · 30 · 100ml (A-155)"
+    },
+    {
+      "code": "A-156",
+      "name": "Bryonia Alb.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Bryonia Alb. · 200 · 100ml (A-156)"
+    },
+    {
+      "code": "A-157",
+      "name": "Bryonia Alb.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Bryonia Alb. · 1M · 60ml (A-157)"
+    },
+    {
+      "code": "A-158",
+      "name": "Bryonia Alb.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Bryonia Alb. · 10M · 30ml (A-158)"
+    },
+    {
+      "code": "A-159",
+      "name": "Bryonia Alb.",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Bryonia Alb. · 50M · 30ml (A-159)"
+    },
+    {
+      "code": "A-160",
+      "name": "Bufo Rana",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Bufo Rana · 30 · 100ml (A-160)"
+    },
+    {
+      "code": "A-161",
+      "name": "Cactus Grand",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Cactus Grand · 30 · 100ml (A-161)"
+    },
+    {
+      "code": "A-162",
+      "name": "Cactus Grand",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Cactus Grand · 200 · 100ml (A-162)"
+    },
+    {
+      "code": "A-163",
+      "name": "Cadmium Sulph",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Cadmium Sulph · 30 · 100ml (A-163)"
+    },
+    {
+      "code": "A-164",
+      "name": "Caladium Sag.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Caladium Sag. · 6 · 100ml (A-164)"
+    },
+    {
+      "code": "A-165",
+      "name": "Caladium Sag.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Caladium Sag. · 200 · 100ml (A-165)"
+    },
+    {
+      "code": "A-166",
+      "name": "Calcerea Ars.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Calcerea Ars. · 200 · 100ml (A-166)"
+    },
+    {
+      "code": "A-167",
+      "name": "Calcerea Carb.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Calcerea Carb. · 30 · 100ml (A-167)"
+    },
+    {
+      "code": "A-168",
+      "name": "Calcerea Carb.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Calcerea Carb. · 200 · 100ml (A-168)"
+    },
+    {
+      "code": "A-169",
+      "name": "Calcerea Carb.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Calcerea Carb. · 1M · 60ml (A-169)"
+    },
+    {
+      "code": "A-170",
+      "name": "Calcerea Carb.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Calcerea Carb. · 10M · 30ml (A-170)"
+    },
+    {
+      "code": "A-171",
+      "name": "Calcerea Carb.",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Calcerea Carb. · 50M · 30ml (A-171)"
+    },
+    {
+      "code": "A-172",
+      "name": "Calcerea Carb.",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Calcerea Carb. · CM · 30ml (A-172)"
+    },
+    {
+      "code": "A-173",
+      "name": "Calcerea Flour",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Calcerea Flour · 30 · 100ml (A-173)"
+    },
+    {
+      "code": "A-174",
+      "name": "Calcerea Flour",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Calcerea Flour · 200 · 100ml (A-174)"
+    },
+    {
+      "code": "A-175",
+      "name": "Calcerea Flour",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Calcerea Flour · 1M · 60ml (A-175)"
+    },
+    {
+      "code": "A-176",
+      "name": "Calcerea Flour",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Calcerea Flour · 10M · 30ml (A-176)"
+    },
+    {
+      "code": "A-177",
+      "name": "Calcerea Flour",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Calcerea Flour · 50M · 30ml (A-177)"
+    },
+    {
+      "code": "A-178",
+      "name": "Calcerea Flour",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Calcerea Flour · CM · 30ml (A-178)"
+    },
+    {
+      "code": "A-179",
+      "name": "Calcerea Iod",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Calcerea Iod · 30 · 100ml (A-179)"
+    },
+    {
+      "code": "A-180",
+      "name": "Calcerea Iod",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Calcerea Iod · 200 · 100ml (A-180)"
+    },
+    {
+      "code": "A-181",
+      "name": "Calcerea Phos.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Calcerea Phos. · 30 · 100ml (A-181)"
+    },
+    {
+      "code": "A-182",
+      "name": "Calcerea Phos.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Calcerea Phos. · 200 · 100ml (A-182)"
+    },
+    {
+      "code": "A-183",
+      "name": "Calcerea Phos.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Calcerea Phos. · 1M · 60ml (A-183)"
+    },
+    {
+      "code": "A-184",
+      "name": "Calcerea Phos.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Calcerea Phos. · 10M · 30ml (A-184)"
+    },
+    {
+      "code": "A-185",
+      "name": "Calcerea Phos.",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Calcerea Phos. · 50M · 30ml (A-185)"
+    },
+    {
+      "code": "A-186",
+      "name": "Calcerea Phos.",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Calcerea Phos. · CM · 30ml (A-186)"
+    },
+    {
+      "code": "A-187",
+      "name": "Calcerea Sulph",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Calcerea Sulph · 200 · 100ml (A-187)"
+    },
+    {
+      "code": "A-188",
+      "name": "Calendula Off.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Calendula Off. · 6 · 100ml (A-188)"
+    },
+    {
+      "code": "A-189",
+      "name": "Calendula Off.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Calendula Off. · 200 · 100ml (A-189)"
+    },
+    {
+      "code": "A-190",
+      "name": "Camphora",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Camphora · 30 · 100ml (A-190)"
+    },
+    {
+      "code": "A-191",
+      "name": "Canabis Indica",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Canabis Indica · 30 · 100ml (A-191)"
+    },
+    {
+      "code": "A-192",
+      "name": "Canabis Indica",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Canabis Indica · 200 · 100ml (A-192)"
+    },
+    {
+      "code": "A-193",
+      "name": "Canabis Sativa",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Canabis Sativa · 30 · 100ml (A-193)"
+    },
+    {
+      "code": "A-194",
+      "name": "Canabis Sativa",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Canabis Sativa · 200 · 100ml (A-194)"
+    },
+    {
+      "code": "A-195",
+      "name": "Cantharis",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Cantharis · 6 · 100ml (A-195)"
+    },
+    {
+      "code": "A-196",
+      "name": "Cantharis",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Cantharis · 30 · 100ml (A-196)"
+    },
+    {
+      "code": "A-197",
+      "name": "Cantharis",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Cantharis · 200 · 100ml (A-197)"
+    },
+    {
+      "code": "A-198",
+      "name": "Cantharis",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Cantharis · 1M · 60ml (A-198)"
+    },
+    {
+      "code": "A-199",
+      "name": "Capsicum",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Capsicum · 30 · 100ml (A-199)"
+    },
+    {
+      "code": "A-200",
+      "name": "Capsicum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Capsicum · 200 · 100ml (A-200)"
+    },
+    {
+      "code": "A-201",
+      "name": "Carbo An.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Carbo An. · 30 · 100ml (A-201)"
+    },
+    {
+      "code": "A-202",
+      "name": "Carbo An.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Carbo An. · 200 · 100ml (A-202)"
+    },
+    {
+      "code": "A-203",
+      "name": "Carbo An.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Carbo An. · 1M · 60ml (A-203)"
+    },
+    {
+      "code": "A-204",
+      "name": "Carbo Veg.",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Carbo Veg. · 3x · 100ml (A-204)"
+    },
+    {
+      "code": "A-205",
+      "name": "Carbo Veg.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Carbo Veg. · 30 · 100ml (A-205)"
+    },
+    {
+      "code": "A-206",
+      "name": "Carbo Veg.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Carbo Veg. · 200 · 100ml (A-206)"
+    },
+    {
+      "code": "A-207",
+      "name": "Carbo Veg.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Carbo Veg. · 1M · 60ml (A-207)"
+    },
+    {
+      "code": "A-208",
+      "name": "Carbolic Acid",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Carbolic Acid · 30 · 100ml (A-208)"
+    },
+    {
+      "code": "A-209",
+      "name": "Carbolic Acid",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Carbolic Acid · 200 · 100ml (A-209)"
+    },
+    {
+      "code": "A-210",
+      "name": "Carcinosin",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Carcinosin · 200 · 100ml (A-210)"
+    },
+    {
+      "code": "A-211",
+      "name": "Carcinosin",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Carcinosin · 1M · 60ml (A-211)"
+    },
+    {
+      "code": "A-212",
+      "name": "Carcinosin",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Carcinosin · 10M · 30ml (A-212)"
+    },
+    {
+      "code": "A-213",
+      "name": "Carcinosin",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Carcinosin · CM · 30ml (A-213)"
+    },
+    {
+      "code": "A-214",
+      "name": "Caulophyllum",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Caulophyllum · 3x · 100ml (A-214)"
+    },
+    {
+      "code": "A-215",
+      "name": "Caulophyllum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Caulophyllum · 200 · 100ml (A-215)"
+    },
+    {
+      "code": "A-216",
+      "name": "Causticum",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Causticum · 6 · 100ml (A-216)"
+    },
+    {
+      "code": "A-217",
+      "name": "Causticum",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Causticum · 30 · 100ml (A-217)"
+    },
+    {
+      "code": "A-218",
+      "name": "Causticum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Causticum · 200 · 100ml (A-218)"
+    },
+    {
+      "code": "A-219",
+      "name": "Causticum",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Causticum · 1M · 60ml (A-219)"
+    },
+    {
+      "code": "A-220",
+      "name": "Causticum",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Causticum · 10M · 30ml (A-220)"
+    },
+    {
+      "code": "A-221",
+      "name": "Causticum",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Causticum · 50M · 30ml (A-221)"
+    },
+    {
+      "code": "A-222",
+      "name": "Causticum",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Causticum · CM · 30ml (A-222)"
+    },
+    {
+      "code": "A-223",
+      "name": "Cedron",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Cedron · 30 · 100ml (A-223)"
+    },
+    {
+      "code": "A-224",
+      "name": "Chamomilla",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Chamomilla · 6 · 100ml (A-224)"
+    },
+    {
+      "code": "A-225",
+      "name": "Chamomilla",
+      "potency": "30",
+      "amount": "199ml",
+      "label": "Chamomilla · 30 · 199ml (A-225)"
+    },
+    {
+      "code": "A-226",
+      "name": "Chamomilla",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Chamomilla · 200 · 100ml (A-226)"
+    },
+    {
+      "code": "A-227",
+      "name": "Chamomilla",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Chamomilla · 1M · 60ml (A-227)"
+    },
+    {
+      "code": "A-228",
+      "name": "Chelidonium",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Chelidonium · 3x · 100ml (A-228)"
+    },
+    {
+      "code": "A-229",
+      "name": "Chelidonium",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Chelidonium · 30 · 100ml (A-229)"
+    },
+    {
+      "code": "A-230",
+      "name": "Chelidonium",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Chelidonium · 200 · 100ml (A-230)"
+    },
+    {
+      "code": "A-231",
+      "name": "Chelidonium",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Chelidonium · 1M · 60ml (A-231)"
+    },
+    {
+      "code": "A-232",
+      "name": "Chelidonium",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Chelidonium · 10M · 30ml (A-232)"
+    },
+    {
+      "code": "A-233",
+      "name": "Chenopodi A.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Chenopodi A. · 30 · 100ml (A-233)"
+    },
+    {
+      "code": "A-234",
+      "name": "China Ars.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "China Ars. · 200 · 100ml (A-234)"
+    },
+    {
+      "code": "A-235",
+      "name": "China Off.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "China Off. · 6 · 100ml (A-235)"
+    },
+    {
+      "code": "A-236",
+      "name": "China Off.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "China Off. · 30 · 100ml (A-236)"
+    },
+    {
+      "code": "A-237",
+      "name": "China Off.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "China Off. · 200 · 100ml (A-237)"
+    },
+    {
+      "code": "A-238",
+      "name": "China Off.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "China Off. · 1M · 60ml (A-238)"
+    },
+    {
+      "code": "A-239",
+      "name": "China Off.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "China Off. · 10M · 30ml (A-239)"
+    },
+    {
+      "code": "A-240",
+      "name": "China Sulph",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "China Sulph · 200 · 100ml (A-240)"
+    },
+    {
+      "code": "A-241",
+      "name": "Chloralum",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Chloralum · 30 · 100ml (A-241)"
+    },
+    {
+      "code": "A-242",
+      "name": "Cicuta Vir.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Cicuta Vir. · 6 · 100ml (A-242)"
+    },
+    {
+      "code": "A-243",
+      "name": "Cicuta Vir",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Cicuta Vir · 200 · 100ml (A-243)"
+    },
+    {
+      "code": "A-244",
+      "name": "Cicuta Vir.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Cicuta Vir. · 1M · 60ml (A-244)"
+    },
+    {
+      "code": "A-245",
+      "name": "Cina",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Cina · 6 · 100ml (A-245)"
+    },
+    {
+      "code": "A-246",
+      "name": "Cina",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Cina · 30 · 100ml (A-246)"
+    },
+    {
+      "code": "A-247",
+      "name": "Cina",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Cina · 200 · 100ml (A-247)"
+    },
+    {
+      "code": "A-248",
+      "name": "Cina",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Cina · 1M · 60ml (A-248)"
+    },
+    {
+      "code": "A-249",
+      "name": "Cina",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Cina · 10M · 30ml (A-249)"
+    },
+    {
+      "code": "A-250",
+      "name": "Cistus Can.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Cistus Can. · 6 · 100ml (A-250)"
+    },
+    {
+      "code": "A-251",
+      "name": "Cistus Can.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Cistus Can. · 200 · 100ml (A-251)"
+    },
+    {
+      "code": "A-252",
+      "name": "Cistus Can.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Cistus Can. · 1M · 60ml (A-252)"
+    },
+    {
+      "code": "A-253",
+      "name": "Clematis Er.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Clematis Er. · 30 · 100ml (A-253)"
+    },
+    {
+      "code": "A-254",
+      "name": "Clematis Er.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Clematis Er. · 200 · 100ml (A-254)"
+    },
+    {
+      "code": "A-255",
+      "name": "Cocculus Ind",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Cocculus Ind · 30 · 100ml (A-255)"
+    },
+    {
+      "code": "A-256",
+      "name": "Cocculus Ind",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Cocculus Ind · 200 · 100ml (A-256)"
+    },
+    {
+      "code": "A-257",
+      "name": "Cocculus Ind",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Cocculus Ind · 1M · 60ml (A-257)"
+    },
+    {
+      "code": "A-258",
+      "name": "Coca",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Coca · 6 · 100ml (A-258)"
+    },
+    {
+      "code": "A-259",
+      "name": "Coccus Cacti",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Coccus Cacti · 6 · 100ml (A-259)"
+    },
+    {
+      "code": "A-260",
+      "name": "Coccus Cacti",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Coccus Cacti · 200 · 100ml (A-260)"
+    },
+    {
+      "code": "A-261",
+      "name": "Coffia Cruda",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Coffia Cruda · 30 · 100ml (A-261)"
+    },
+    {
+      "code": "A-262",
+      "name": "Coffia Cruda",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Coffia Cruda · 200 · 100ml (A-262)"
+    },
+    {
+      "code": "A-263",
+      "name": "Colchicum",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Colchicum · 3x · 100ml (A-263)"
+    },
+    {
+      "code": "A-264",
+      "name": "Colchicum",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Colchicum · 30 · 100ml (A-264)"
+    },
+    {
+      "code": "A-265",
+      "name": "Colchicum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Colchicum · 200 · 100ml (A-265)"
+    },
+    {
+      "code": "A-266",
+      "name": "Collinsonia C.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Collinsonia C. · 30 · 100ml (A-266)"
+    },
+    {
+      "code": "A-267",
+      "name": "Collinsonia C.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Collinsonia C. · 200 · 100ml (A-267)"
+    },
+    {
+      "code": "A-268",
+      "name": "Colocynth",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Colocynth · 6 · 100ml (A-268)"
+    },
+    {
+      "code": "A-269",
+      "name": "Colocynth",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Colocynth · 30 · 100ml (A-269)"
+    },
+    {
+      "code": "A-270",
+      "name": "Colocynth",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Colocynth · 200 · 100ml (A-270)"
+    },
+    {
+      "code": "A-271",
+      "name": "Colocynth",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Colocynth · 1M · 60ml (A-271)"
+    },
+    {
+      "code": "A-272",
+      "name": "Colocynth",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Colocynth · 10M · 30ml (A-272)"
+    },
+    {
+      "code": "A-273",
+      "name": "Condurango",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Condurango · 30 · 100ml (A-273)"
+    },
+    {
+      "code": "A-274",
+      "name": "Conium Mac.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Conium Mac. · 30 · 100ml (A-274)"
+    },
+    {
+      "code": "A-275",
+      "name": "Conium Mac.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Conium Mac. · 200 · 100ml (A-275)"
+    },
+    {
+      "code": "A-276",
+      "name": "Conium Mac.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Conium Mac. · 1M · 60ml (A-276)"
+    },
+    {
+      "code": "A-277",
+      "name": "Conium Mac.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Conium Mac. · 10M · 30ml (A-277)"
+    },
+    {
+      "code": "A-278",
+      "name": "Conium Mac.",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Conium Mac. · 50M · 30ml (A-278)"
+    },
+    {
+      "code": "A-279",
+      "name": "Conium Mac.",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Conium Mac. · CM · 30ml (A-279)"
+    },
+    {
+      "code": "A-280",
+      "name": "Copaiva",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Copaiva · 6 · 100ml (A-280)"
+    },
+    {
+      "code": "A-281",
+      "name": "Copaiva",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Copaiva · 200 · 100ml (A-281)"
+    },
+    {
+      "code": "A-282",
+      "name": "Corallium Rub",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Corallium Rub · 30 · 100ml (A-282)"
+    },
+    {
+      "code": "A-283",
+      "name": "Ccroccus Sat",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Ccroccus Sat · 30 · 100ml (A-283)"
+    },
+    {
+      "code": "A-284",
+      "name": "Cotalus Horr.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Cotalus Horr. · 30 · 100ml (A-284)"
+    },
+    {
+      "code": "A-285",
+      "name": "Croton Tig.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Croton Tig. · 30 · 100ml (A-285)"
+    },
+    {
+      "code": "A-286",
+      "name": "Croton Tig.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Croton Tig. · 200 · 100ml (A-286)"
+    },
+    {
+      "code": "A-287",
+      "name": "Cuprum Met.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Cuprum Met. · 30 · 100ml (A-287)"
+    },
+    {
+      "code": "A-288",
+      "name": "Cuprum Met.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Cuprum Met. · 200 · 100ml (A-288)"
+    },
+    {
+      "code": "A-289",
+      "name": "Cuprum Met.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Cuprum Met. · 1M · 60ml (A-289)"
+    },
+    {
+      "code": "A-290",
+      "name": "Curare",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Curare · 200 · 100ml (A-290)"
+    },
+    {
+      "code": "A-291",
+      "name": "Cyclamen",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Cyclamen · 30 · 100ml (A-291)"
+    },
+    {
+      "code": "A-292",
+      "name": "Cyclamen",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Cyclamen · 200 · 100ml (A-292)"
+    },
+    {
+      "code": "A-293",
+      "name": "Cynodon Dac.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Cynodon Dac. · 30 · 100ml (A-293)"
+    },
+    {
+      "code": "A-294",
+      "name": "Damiana",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Damiana · 30 · 100ml (A-294)"
+    },
+    {
+      "code": "A-295",
+      "name": "Digitalis",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Digitalis · 6 · 100ml (A-295)"
+    },
+    {
+      "code": "A-296",
+      "name": "Digitalis",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Digitalis · 30 · 100ml (A-296)"
+    },
+    {
+      "code": "A-297",
+      "name": "Dioscoria V.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Dioscoria V. · 6 · 100ml (A-297)"
+    },
+    {
+      "code": "A-298",
+      "name": "Dioscoria V.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Dioscoria V. · 200 · 100ml (A-298)"
+    },
+    {
+      "code": "A-299",
+      "name": "Diphtherinum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Diphtherinum · 200 · 100ml (A-299)"
+    },
+    {
+      "code": "A-300",
+      "name": "Dolichos",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Dolichos · 6 · 100ml (A-300)"
+    },
+    {
+      "code": "A-301",
+      "name": "Dolichos",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Dolichos · 200 · 100ml (A-301)"
+    },
+    {
+      "code": "A-302",
+      "name": "Drosera",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Drosera · 3x · 100ml (A-302)"
+    },
+    {
+      "code": "A-303",
+      "name": "Drosera",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Drosera · 30 · 100ml (A-303)"
+    },
+    {
+      "code": "A-304",
+      "name": "Drosera",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Drosera · 200 · 100ml (A-304)"
+    },
+    {
+      "code": "A-305",
+      "name": "Dulcamera",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Dulcamera · 30 · 100ml (A-305)"
+    },
+    {
+      "code": "A-306",
+      "name": "Dulcamera",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Dulcamera · 200 · 100ml (A-306)"
+    },
+    {
+      "code": "A-307",
+      "name": "Dulcamera",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Dulcamera · 1M · 60ml (A-307)"
+    },
+    {
+      "code": "A-308",
+      "name": "Dulcamera",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Dulcamera · 10M · 30ml (A-308)"
+    },
+    {
+      "code": "A-309",
+      "name": "Echinacia",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Echinacia · 3x · 100ml (A-309)"
+    },
+    {
+      "code": "A-310",
+      "name": "Echinacia",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Echinacia · 30 · 100ml (A-310)"
+    },
+    {
+      "code": "A-311",
+      "name": "Equisetum",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Equisetum · 6 · 100ml (A-311)"
+    },
+    {
+      "code": "A-312",
+      "name": "Equisetum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Equisetum · 200 · 100ml (A-312)"
+    },
+    {
+      "code": "A-313",
+      "name": "Erigeron",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Erigeron · 6 · 100ml (A-313)"
+    },
+    {
+      "code": "A-314",
+      "name": "Eupatorium P.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Eupatorium P. · 30 · 100ml (A-314)"
+    },
+    {
+      "code": "A-315",
+      "name": "Eupatorium P.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Eupatorium P. · 200 · 100ml (A-315)"
+    },
+    {
+      "code": "A-316",
+      "name": "Euphorbunum",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Euphorbunum · 30 · 100ml (A-316)"
+    },
+    {
+      "code": "A-317",
+      "name": "Euphrasia",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Euphrasia · 30 · 100ml (A-317)"
+    },
+    {
+      "code": "A-318",
+      "name": "Euphrasia",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Euphrasia · 200 · 100ml (A-318)"
+    },
+    {
+      "code": "A-319",
+      "name": "Fagopyrum",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Fagopyrum · 6 · 100ml (A-319)"
+    },
+    {
+      "code": "A-320",
+      "name": "Fagopyrum",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Fagopyrum · 30 · 100ml (A-320)"
+    },
+    {
+      "code": "A-321",
+      "name": "Fagopyrum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Fagopyrum · 200 · 100ml (A-321)"
+    },
+    {
+      "code": "A-322",
+      "name": "Feltauri",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Feltauri · 6 · 100ml (A-322)"
+    },
+    {
+      "code": "A-323",
+      "name": "Ferrum Met.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Ferrum Met. · 30 · 100ml (A-323)"
+    },
+    {
+      "code": "A-324",
+      "name": "Ferrum Met.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Ferrum Met. · 200 · 100ml (A-324)"
+    },
+    {
+      "code": "A-325",
+      "name": "Ferrum Met.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Ferrum Met. · 1M · 60ml (A-325)"
+    },
+    {
+      "code": "A-326",
+      "name": "Ferrum Phos",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Ferrum Phos · 200 · 100ml (A-326)"
+    },
+    {
+      "code": "A-327",
+      "name": "Flouoric Acid",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Flouoric Acid · 30 · 100ml (A-327)"
+    },
+    {
+      "code": "A-328",
+      "name": "Flouoric Acid",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Flouoric Acid · 200 · 100ml (A-328)"
+    },
+    {
+      "code": "A-329",
+      "name": "Flouoric Acid",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Flouoric Acid · 1M · 60ml (A-329)"
+    },
+    {
+      "code": "A-330",
+      "name": "Formica Rufa",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Formica Rufa · 200 · 100ml (A-330)"
+    },
+    {
+      "code": "A-331",
+      "name": "Gombogia",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Gombogia · 30 · 100ml (A-331)"
+    },
+    {
+      "code": "A-332",
+      "name": "Gaultheria",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Gaultheria · 30 · 100ml (A-332)"
+    },
+    {
+      "code": "A-333",
+      "name": "Gaultharia",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Gaultharia · 200 · 100ml (A-333)"
+    },
+    {
+      "code": "A-334",
+      "name": "Gelsemium S.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Gelsemium S. · 6 · 100ml (A-334)"
+    },
+    {
+      "code": "A-335",
+      "name": "Gelsemium S.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Gelsemium S. · 30 · 100ml (A-335)"
+    },
+    {
+      "code": "A-336",
+      "name": "Gelsemium S.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Gelsemium S. · 200 · 100ml (A-336)"
+    },
+    {
+      "code": "A-337",
+      "name": "Gelsemium S.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Gelsemium S. · 1M · 60ml (A-337)"
+    },
+    {
+      "code": "A-338",
+      "name": "Gelsemium S.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Gelsemium S. · 10M · 30ml (A-338)"
+    },
+    {
+      "code": "A-339",
+      "name": "Glonoinum",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Glonoinum · 30 · 100ml (A-339)"
+    },
+    {
+      "code": "A-340",
+      "name": "Glonoin",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Glonoin · 200 · 100ml (A-340)"
+    },
+    {
+      "code": "A-341",
+      "name": "Gnaphallium P.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Gnaphallium P. · 30 · 100ml (A-341)"
+    },
+    {
+      "code": "A-342",
+      "name": "Gnaphallium P.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Gnaphallium P. · 200 · 100ml (A-342)"
+    },
+    {
+      "code": "A-343",
+      "name": "Gnaphallium P.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Gnaphallium P. · 1M · 60ml (A-343)"
+    },
+    {
+      "code": "A-344",
+      "name": "Graphites",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Graphites · 6 · 100ml (A-344)"
+    },
+    {
+      "code": "A-345",
+      "name": "Graphites",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Graphites · 30 · 100ml (A-345)"
+    },
+    {
+      "code": "A-346",
+      "name": "Graphites",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Graphites · 200 · 100ml (A-346)"
+    },
+    {
+      "code": "A-347",
+      "name": "Graphites",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Graphites · 1M · 60ml (A-347)"
+    },
+    {
+      "code": "A-348",
+      "name": "Graphites",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Graphites · 10M · 30ml (A-348)"
+    },
+    {
+      "code": "A-349",
+      "name": "Graphites",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Graphites · 50M · 30ml (A-349)"
+    },
+    {
+      "code": "A-350",
+      "name": "Graphites",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Graphites · CM · 30ml (A-350)"
+    },
+    {
+      "code": "A-351",
+      "name": "Granatum",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Granatum · 30 · 100ml (A-351)"
+    },
+    {
+      "code": "A-352",
+      "name": "Grindelia",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Grindelia · 6 · 100ml (A-352)"
+    },
+    {
+      "code": "A-353",
+      "name": "Guaiacum",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Guaiacum · 30 · 100ml (A-353)"
+    },
+    {
+      "code": "A-354",
+      "name": "Hamamelis Vir",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Hamamelis Vir · 30 · 100ml (A-354)"
+    },
+    {
+      "code": "A-355",
+      "name": "Hamamelis Vir",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Hamamelis Vir · 200 · 100ml (A-355)"
+    },
+    {
+      "code": "A-356",
+      "name": "Hamamelis Vir",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Hamamelis Vir · 1M · 60ml (A-356)"
+    },
+    {
+      "code": "A-357",
+      "name": "Helliborus Nig",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Helliborus Nig · 30 · 100ml (A-357)"
+    },
+    {
+      "code": "A-358",
+      "name": "Helliborus Nig",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Helliborus Nig · 200 · 100ml (A-358)"
+    },
+    {
+      "code": "A-359",
+      "name": "Helonias",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Helonias · 30 · 100ml (A-359)"
+    },
+    {
+      "code": "A-360",
+      "name": "Hepar Sulph",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Hepar Sulph · 6 · 100ml (A-360)"
+    },
+    {
+      "code": "A-361",
+      "name": "Hepar Sulph",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Hepar Sulph · 30 · 100ml (A-361)"
+    },
+    {
+      "code": "A-362",
+      "name": "Hepar Sulph",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Hepar Sulph · 200 · 100ml (A-362)"
+    },
+    {
+      "code": "A-363",
+      "name": "Hepar Sulph",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Hepar Sulph · 1M · 60ml (A-363)"
+    },
+    {
+      "code": "A-364",
+      "name": "Hepar Sulph",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Hepar Sulph · 10M · 30ml (A-364)"
+    },
+    {
+      "code": "A-365",
+      "name": "Hepar Sulph",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Hepar Sulph · 50M · 30ml (A-365)"
+    },
+    {
+      "code": "A-366",
+      "name": "Hepar Sulph",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Hepar Sulph · CM · 30ml (A-366)"
+    },
+    {
+      "code": "A-367",
+      "name": "Hippozaenum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Hippozaenum · 200 · 100ml (A-367)"
+    },
+    {
+      "code": "A-368",
+      "name": "Holarrhena A.",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Holarrhena A. · 3x · 100ml (A-368)"
+    },
+    {
+      "code": "A-369",
+      "name": "Hydrastis Can",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Hydrastis Can · 30 · 100ml (A-369)"
+    },
+    {
+      "code": "A-370",
+      "name": "Hydrastis Can",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Hydrastis Can · 200 · 100ml (A-370)"
+    },
+    {
+      "code": "A-371",
+      "name": "Hydrocotyl A.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Hydrocotyl A. · 6 · 100ml (A-371)"
+    },
+    {
+      "code": "A-372",
+      "name": "Hydrocotyl A.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Hydrocotyl A. · 30 · 100ml (A-372)"
+    },
+    {
+      "code": "A-373",
+      "name": "Hydrocotyle A",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Hydrocotyle A · 200 · 100ml (A-373)"
+    },
+    {
+      "code": "A-374",
+      "name": "Hydrocotyle A",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Hydrocotyle A · 1M · 60ml (A-374)"
+    },
+    {
+      "code": "A-375",
+      "name": "Hyosyamus N.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Hyosyamus N. · 30 · 100ml (A-375)"
+    },
+    {
+      "code": "A-376",
+      "name": "Hyosyamus N.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Hyosyamus N. · 200 · 100ml (A-376)"
+    },
+    {
+      "code": "A-377",
+      "name": "Hyosyamus N.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Hyosyamus N. · 1M · 60ml (A-377)"
+    },
+    {
+      "code": "A-378",
+      "name": "Hypericim Perf",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Hypericim Perf · 3x · 100ml (A-378)"
+    },
+    {
+      "code": "A-379",
+      "name": "Hypericim Perf",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Hypericim Perf · 30 · 100ml (A-379)"
+    },
+    {
+      "code": "A-380",
+      "name": "Hypericim Perf",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Hypericim Perf · 200 · 100ml (A-380)"
+    },
+    {
+      "code": "A-381",
+      "name": "Hypericim Perf",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Hypericim Perf · 1M · 60ml (A-381)"
+    },
+    {
+      "code": "A-382",
+      "name": "Hypericim Perf",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Hypericim Perf · 10M · 30ml (A-382)"
+    },
+    {
+      "code": "A-383",
+      "name": "Hypericim Perf",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Hypericim Perf · CM · 30ml (A-383)"
+    },
+    {
+      "code": "A-384",
+      "name": "Ignatia Amara",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Ignatia Amara · 30 · 100ml (A-384)"
+    },
+    {
+      "code": "A-385",
+      "name": "Ignatia Amara",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Ignatia Amara · 200 · 100ml (A-385)"
+    },
+    {
+      "code": "A-386",
+      "name": "Ignatia Amara",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Ignatia Amara · 1M · 60ml (A-386)"
+    },
+    {
+      "code": "A-387",
+      "name": "Ignatia Amara",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Ignatia Amara · 10M · 30ml (A-387)"
+    },
+    {
+      "code": "A-388",
+      "name": "Ignatia Amara",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Ignatia Amara · 50M · 30ml (A-388)"
+    },
+    {
+      "code": "A-389",
+      "name": "Ignatia Amara",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Ignatia Amara · CM · 30ml (A-389)"
+    },
+    {
+      "code": "A-390",
+      "name": "Influenzinum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Influenzinum · 200 · 100ml (A-390)"
+    },
+    {
+      "code": "A-391",
+      "name": "Insulin",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Insulin · 6 · 100ml (A-391)"
+    },
+    {
+      "code": "A-392",
+      "name": "Iodium",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Iodium · 30 · 100ml (A-392)"
+    },
+    {
+      "code": "A-393",
+      "name": "Iodium",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Iodium · 200 · 100ml (A-393)"
+    },
+    {
+      "code": "A-394",
+      "name": "Iodium",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Iodium · 1M · 60ml (A-394)"
+    },
+    {
+      "code": "A-395",
+      "name": "Iodium",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Iodium · 10M · 30ml (A-395)"
+    },
+    {
+      "code": "A-396",
+      "name": "Ipecacunha",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Ipecacunha · 3x · 100ml (A-396)"
+    },
+    {
+      "code": "A-397",
+      "name": "Ipecacunha",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Ipecacunha · 30 · 100ml (A-397)"
+    },
+    {
+      "code": "A-398",
+      "name": "Ipecacunha",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Ipecacunha · 200 · 100ml (A-398)"
+    },
+    {
+      "code": "A-399",
+      "name": "Iris Tenax",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Iris Tenax · 30 · 100ml (A-399)"
+    },
+    {
+      "code": "A-400",
+      "name": "Iris Ver.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Iris Ver. · 6 · 100ml (A-400)"
+    },
+    {
+      "code": "A-401",
+      "name": "Iris Ver.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Iris Ver. · 200 · 100ml (A-401)"
+    },
+    {
+      "code": "A-402",
+      "name": "Jaborandi",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Jaborandi · 30 · 100ml (A-402)"
+    },
+    {
+      "code": "A-403",
+      "name": "Justicia A.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Justicia A. · 30 · 100ml (A-403)"
+    },
+    {
+      "code": "A-404",
+      "name": "Kali Ars.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Kali Ars. · 30 · 100ml (A-404)"
+    },
+    {
+      "code": "A-405",
+      "name": "Kali Ars.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Kali Ars. · 200 · 100ml (A-405)"
+    },
+    {
+      "code": "A-406",
+      "name": "Kali Bich.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Kali Bich. · 6 · 100ml (A-406)"
+    },
+    {
+      "code": "A-407",
+      "name": "Kali Bich.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Kali Bich. · 30 · 100ml (A-407)"
+    },
+    {
+      "code": "A-408",
+      "name": "Kali Bich.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Kali Bich. · 200 · 100ml (A-408)"
+    },
+    {
+      "code": "A-409",
+      "name": "Kali Bich.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Kali Bich. · 1M · 60ml (A-409)"
+    },
+    {
+      "code": "A-410",
+      "name": "Kali Bich.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Kali Bich. · 10M · 30ml (A-410)"
+    },
+    {
+      "code": "A-411",
+      "name": "Kali Brom.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Kali Brom. · 30 · 100ml (A-411)"
+    },
+    {
+      "code": "A-412",
+      "name": "Kali Brom.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Kali Brom. · 200 · 100ml (A-412)"
+    },
+    {
+      "code": "A-413",
+      "name": "Kali Carb.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Kali Carb. · 30 · 100ml (A-413)"
+    },
+    {
+      "code": "A-414",
+      "name": "Kali Carb.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Kali Carb. · 200 · 100ml (A-414)"
+    },
+    {
+      "code": "A-415",
+      "name": "Kali Carb.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Kali Carb. · 1M · 60ml (A-415)"
+    },
+    {
+      "code": "A-416",
+      "name": "Kali Carb.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Kali Carb. · 10M · 30ml (A-416)"
+    },
+    {
+      "code": "A-417",
+      "name": "Kali Chlor.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Kali Chlor. · 30 · 100ml (A-417)"
+    },
+    {
+      "code": "A-418",
+      "name": "Kali Iod.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Kali Iod. · 30 · 100ml (A-418)"
+    },
+    {
+      "code": "A-419",
+      "name": "Kali Iod.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Kali Iod. · 200 · 100ml (A-419)"
+    },
+    {
+      "code": "A-420",
+      "name": "Kali Mur.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Kali Mur. · 30 · 100ml (A-420)"
+    },
+    {
+      "code": "A-421",
+      "name": "Kali Mur.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Kali Mur. · 200 · 100ml (A-421)"
+    },
+    {
+      "code": "A-422",
+      "name": "Kali Nit.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Kali Nit. · 30 · 100ml (A-422)"
+    },
+    {
+      "code": "A-423",
+      "name": "Kali Phos.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Kali Phos. · 30 · 100ml (A-423)"
+    },
+    {
+      "code": "A-424",
+      "name": "Kali Phos.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Kali Phos. · 200 · 100ml (A-424)"
+    },
+    {
+      "code": "A-425",
+      "name": "Kali Phos.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Kali Phos. · 10M · 30ml (A-425)"
+    },
+    {
+      "code": "A-426",
+      "name": "Kali Sulph.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Kali Sulph. · 30 · 100ml (A-426)"
+    },
+    {
+      "code": "A-427",
+      "name": "Kali Sulph.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Kali Sulph. · 200 · 100ml (A-427)"
+    },
+    {
+      "code": "A-428",
+      "name": "Kalmia Let.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Kalmia Let. · 6 · 100ml (A-428)"
+    },
+    {
+      "code": "A-429",
+      "name": "Kalmia Let.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Kalmia Let. · 200 · 100ml (A-429)"
+    },
+    {
+      "code": "A-430",
+      "name": "Kalmia Let.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Kalmia Let. · 1M · 60ml (A-430)"
+    },
+    {
+      "code": "A-431",
+      "name": "Kreosotum",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Kreosotum · 30 · 100ml (A-431)"
+    },
+    {
+      "code": "A-432",
+      "name": "Kreosotum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Kreosotum · 200 · 100ml (A-432)"
+    },
+    {
+      "code": "A-433",
+      "name": "Kreosotum",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Kreosotum · 1M · 60ml (A-433)"
+    },
+    {
+      "code": "A-434",
+      "name": "Lac Can",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Lac Can · 200 · 100ml (A-434)"
+    },
+    {
+      "code": "A-435",
+      "name": "Lac Can",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Lac Can · 1M · 60ml (A-435)"
+    },
+    {
+      "code": "A-436",
+      "name": "Lac Can",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Lac Can · 10M · 30ml (A-436)"
+    },
+    {
+      "code": "A-437",
+      "name": "Lac Def.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Lac Def. · 30 · 100ml (A-437)"
+    },
+    {
+      "code": "A-438",
+      "name": "Lachesis",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Lachesis · 30 · 100ml (A-438)"
+    },
+    {
+      "code": "A-439",
+      "name": "Lachesis",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Lachesis · 200 · 100ml (A-439)"
+    },
+    {
+      "code": "A-440",
+      "name": "Lachesis",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Lachesis · 1M · 60ml (A-440)"
+    },
+    {
+      "code": "A-441",
+      "name": "Lachesis",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Lachesis · 10M · 30ml (A-441)"
+    },
+    {
+      "code": "A-442",
+      "name": "Lachesis",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Lachesis · 50M · 30ml (A-442)"
+    },
+    {
+      "code": "A-443",
+      "name": "Lachesis",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Lachesis · CM · 30ml (A-443)"
+    },
+    {
+      "code": "A-444",
+      "name": "Lachnanth",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Lachnanth · 30 · 100ml (A-444)"
+    },
+    {
+      "code": "A-445",
+      "name": "Lachnanth",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Lachnanth · 200 · 100ml (A-445)"
+    },
+    {
+      "code": "A-446",
+      "name": "Lactic Acid",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Lactic Acid · 6 · 100ml (A-446)"
+    },
+    {
+      "code": "A-447",
+      "name": "Lactic Acid",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Lactic Acid · 200 · 100ml (A-447)"
+    },
+    {
+      "code": "A-448",
+      "name": "Lapis Alb.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Lapis Alb. · 30 · 100ml (A-448)"
+    },
+    {
+      "code": "A-449",
+      "name": "Lapis Alb.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Lapis Alb. · 200 · 100ml (A-449)"
+    },
+    {
+      "code": "A-450",
+      "name": "Lathyrus",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Lathyrus · 6 · 100ml (A-450)"
+    },
+    {
+      "code": "A-451",
+      "name": "Lathyrus",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Lathyrus · 30 · 100ml (A-451)"
+    },
+    {
+      "code": "A-452",
+      "name": "Lathyrus",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Lathyrus · 1M · 60ml (A-452)"
+    },
+    {
+      "code": "A-453",
+      "name": "Lactrodect M.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Lactrodect M. · 6 · 100ml (A-453)"
+    },
+    {
+      "code": "A-454",
+      "name": "Lactrodect M.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Lactrodect M. · 200 · 100ml (A-454)"
+    },
+    {
+      "code": "A-455",
+      "name": "Lauroceras",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Lauroceras · 30 · 100ml (A-455)"
+    },
+    {
+      "code": "A-456",
+      "name": "Laurocerasus",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Laurocerasus · 200 · 100ml (A-456)"
+    },
+    {
+      "code": "A-457",
+      "name": "Lacithin",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Lacithin · 30 · 100ml (A-457)"
+    },
+    {
+      "code": "A-458",
+      "name": "Ledum Pal",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Ledum Pal · 30 · 100ml (A-458)"
+    },
+    {
+      "code": "A-459",
+      "name": "Ledum Pal",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Ledum Pal · 200 · 100ml (A-459)"
+    },
+    {
+      "code": "A-460",
+      "name": "Ledum Pal",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Ledum Pal · 1M · 60ml (A-460)"
+    },
+    {
+      "code": "A-461",
+      "name": "Ledum Pal",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Ledum Pal · 10M · 30ml (A-461)"
+    },
+    {
+      "code": "A-462",
+      "name": "Ledum Pla",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Ledum Pla · CM · 30ml (A-462)"
+    },
+    {
+      "code": "A-463",
+      "name": "Lemna Min",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Lemna Min · 6 · 100ml (A-463)"
+    },
+    {
+      "code": "A-464",
+      "name": "Lemna Min",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Lemna Min · 30 · 100ml (A-464)"
+    },
+    {
+      "code": "A-465",
+      "name": "Lemna Min",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Lemna Min · 200 · 100ml (A-465)"
+    },
+    {
+      "code": "A-466",
+      "name": "Lillium Tig.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Lillium Tig. · 30 · 100ml (A-466)"
+    },
+    {
+      "code": "A-467",
+      "name": "Lillium Tig.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Lillium Tig. · 200 · 100ml (A-467)"
+    },
+    {
+      "code": "A-468",
+      "name": "Lithium Carb.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Lithium Carb. · 6 · 100ml (A-468)"
+    },
+    {
+      "code": "A-469",
+      "name": "Lithium Carb.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Lithium Carb. · 200 · 100ml (A-469)"
+    },
+    {
+      "code": "A-470",
+      "name": "Lobelia Inflata",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Lobelia Inflata · 6 · 100ml (A-470)"
+    },
+    {
+      "code": "A-471",
+      "name": "Lycopodium",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Lycopodium · 30 · 100ml (A-471)"
+    },
+    {
+      "code": "A-472",
+      "name": "Lycopodium",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Lycopodium · 200 · 100ml (A-472)"
+    },
+    {
+      "code": "A-473",
+      "name": "Lycopodium",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Lycopodium · 1M · 60ml (A-473)"
+    },
+    {
+      "code": "A-474",
+      "name": "Lycopodium",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Lycopodium · 10M · 30ml (A-474)"
+    },
+    {
+      "code": "A-475",
+      "name": "Lycopodium",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Lycopodium · 50M · 30ml (A-475)"
+    },
+    {
+      "code": "A-476",
+      "name": "Lycopodium",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Lycopodium · CM · 30ml (A-476)"
+    },
+    {
+      "code": "A-477",
+      "name": "Lyssin",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Lyssin · 200 · 100ml (A-477)"
+    },
+    {
+      "code": "A-478",
+      "name": "Magnesia Carb.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Magnesia Carb. · 30 · 100ml (A-478)"
+    },
+    {
+      "code": "A-479",
+      "name": "Magnesia Carb.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Magnesia Carb. · 200 · 100ml (A-479)"
+    },
+    {
+      "code": "A-480",
+      "name": "Megnesia Mur.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Megnesia Mur. · 6 · 100ml (A-480)"
+    },
+    {
+      "code": "A-481",
+      "name": "Megnesia Mur.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Megnesia Mur. · 200 · 100ml (A-481)"
+    },
+    {
+      "code": "A-482",
+      "name": "Megenisa Phos.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Megenisa Phos. · 30 · 100ml (A-482)"
+    },
+    {
+      "code": "A-483",
+      "name": "Megenisa Phos.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Megenisa Phos. · 200 · 100ml (A-483)"
+    },
+    {
+      "code": "A-484",
+      "name": "Megenisa Phos.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Megenisa Phos. · 1M · 60ml (A-484)"
+    },
+    {
+      "code": "A-485",
+      "name": "Megenisa Sulph",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Megenisa Sulph · 200 · 100ml (A-485)"
+    },
+    {
+      "code": "A-486",
+      "name": "Malaria Off.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Malaria Off. · 30 · 100ml (A-486)"
+    },
+    {
+      "code": "A-487",
+      "name": "Melandrinum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Melandrinum · 200 · 100ml (A-487)"
+    },
+    {
+      "code": "A-488",
+      "name": "Medorrihinum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Medorrihinum · 200 · 100ml (A-488)"
+    },
+    {
+      "code": "A-489",
+      "name": "Medorrihinum",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Medorrihinum · 1M · 60ml (A-489)"
+    },
+    {
+      "code": "A-490",
+      "name": "Medorrihinum",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Medorrihinum · 10M · 30ml (A-490)"
+    },
+    {
+      "code": "A-491",
+      "name": "Medorrihinum",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Medorrihinum · 50M · 30ml (A-491)"
+    },
+    {
+      "code": "A-492",
+      "name": "Medorrihinum",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Medorrihinum · CM · 30ml (A-492)"
+    },
+    {
+      "code": "A-493",
+      "name": "Melolotus",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Melolotus · 6 · 100ml (A-493)"
+    },
+    {
+      "code": "A-494",
+      "name": "Melilotus alb",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Melilotus alb · 30 · 100ml (A-494)"
+    },
+    {
+      "code": "A-495",
+      "name": "Mephitis",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Mephitis · 3x · 100ml (A-495)"
+    },
+    {
+      "code": "A-496",
+      "name": "Mephitis",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Mephitis · 200 · 100ml (A-496)"
+    },
+    {
+      "code": "A-497",
+      "name": "Mercurius Cor.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Mercurius Cor. · 30 · 100ml (A-497)"
+    },
+    {
+      "code": "A-498",
+      "name": "Mercurius Cor.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Mercurius Cor. · 200 · 100ml (A-498)"
+    },
+    {
+      "code": "A-499",
+      "name": "Merc.Cynatus",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Merc.Cynatus · 30 · 100ml (A-499)"
+    },
+    {
+      "code": "A-500",
+      "name": "Merc. Dulsis",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Merc. Dulsis · 200 · 100ml (A-500)"
+    },
+    {
+      "code": "A-501",
+      "name": "Merc.Iod. Flav",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Merc.Iod. Flav · 30 · 100ml (A-501)"
+    },
+    {
+      "code": "A-502",
+      "name": "Merc Iod. Flav",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Merc Iod. Flav · 200 · 100ml (A-502)"
+    },
+    {
+      "code": "A-503",
+      "name": "Merc.Iod. Rub",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Merc.Iod. Rub · 30 · 100ml (A-503)"
+    },
+    {
+      "code": "A-504",
+      "name": "Merc.Iod Rub",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Merc.Iod Rub · 200 · 100ml (A-504)"
+    },
+    {
+      "code": "A-505",
+      "name": "Merc.Sol.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Merc.Sol. · 6 · 100ml (A-505)"
+    },
+    {
+      "code": "A-506",
+      "name": "Merc.Sol.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Merc.Sol. · 30 · 100ml (A-506)"
+    },
+    {
+      "code": "A-507",
+      "name": "Merc.Sol.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Merc.Sol. · 200 · 100ml (A-507)"
+    },
+    {
+      "code": "A-508",
+      "name": "Merc.Sol.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Merc.Sol. · 1M · 60ml (A-508)"
+    },
+    {
+      "code": "A-509",
+      "name": "Merc.Sol.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Merc.Sol. · 10M · 30ml (A-509)"
+    },
+    {
+      "code": "A-510",
+      "name": "Merc.Sol.",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Merc.Sol. · 50M · 30ml (A-510)"
+    },
+    {
+      "code": "A-511",
+      "name": "Merc.Sol.",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Merc.Sol. · CM · 30ml (A-511)"
+    },
+    {
+      "code": "A-512",
+      "name": "Mezerium",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Mezerium · 6 · 100ml (A-512)"
+    },
+    {
+      "code": "A-513",
+      "name": "Mezerium",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Mezerium · 30 · 100ml (A-513)"
+    },
+    {
+      "code": "A-514",
+      "name": "Mezerium",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Mezerium · 200 · 100ml (A-514)"
+    },
+    {
+      "code": "A-515",
+      "name": "Mezerium",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Mezerium · 1M · 60ml (A-515)"
+    },
+    {
+      "code": "A-516",
+      "name": "Mezerium",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Mezerium · 10M · 30ml (A-516)"
+    },
+    {
+      "code": "A-517",
+      "name": "Mellifolium",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Mellifolium · 200 · 100ml (A-517)"
+    },
+    {
+      "code": "A-518",
+      "name": "Morbillium",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Morbillium · 200 · 100ml (A-518)"
+    },
+    {
+      "code": "A-519",
+      "name": "Morphinum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Morphinum · 200 · 100ml (A-519)"
+    },
+    {
+      "code": "A-520",
+      "name": "Moscus",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Moscus · 200 · 100ml (A-520)"
+    },
+    {
+      "code": "A-521",
+      "name": "Muriatic Acid",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Muriatic Acid · 6 · 100ml (A-521)"
+    },
+    {
+      "code": "A-522",
+      "name": "Muriatic Acid",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Muriatic Acid · 200 · 100ml (A-522)"
+    },
+    {
+      "code": "A-523",
+      "name": "Murex P.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Murex P. · 200 · 100ml (A-523)"
+    },
+    {
+      "code": "A-524",
+      "name": "Myristica S.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Myristica S. · 30 · 100ml (A-524)"
+    },
+    {
+      "code": "A-525",
+      "name": "Naja T.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Naja T. · 30 · 100ml (A-525)"
+    },
+    {
+      "code": "A-526",
+      "name": "Naja T.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Naja T. · 200 · 100ml (A-526)"
+    },
+    {
+      "code": "A-527",
+      "name": "Natrum Ars.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Natrum Ars. · 6 · 100ml (A-527)"
+    },
+    {
+      "code": "A-528",
+      "name": "Natrum Ars.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Natrum Ars. · 200 · 100ml (A-528)"
+    },
+    {
+      "code": "A-529",
+      "name": "Natrum Carb.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Natrum Carb. · 30 · 100ml (A-529)"
+    },
+    {
+      "code": "A-530",
+      "name": "Natrum Carb.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Natrum Carb. · 200 · 100ml (A-530)"
+    },
+    {
+      "code": "A-531",
+      "name": "Natrum Carb.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Natrum Carb. · 1M · 60ml (A-531)"
+    },
+    {
+      "code": "A-532",
+      "name": "Natrum Mur.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Natrum Mur. · 30 · 100ml (A-532)"
+    },
+    {
+      "code": "A-533",
+      "name": "Natrum Mur.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Natrum Mur. · 200 · 100ml (A-533)"
+    },
+    {
+      "code": "A-534",
+      "name": "Natrum Mur.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Natrum Mur. · 1M · 60ml (A-534)"
+    },
+    {
+      "code": "A-535",
+      "name": "Natrum Mur.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Natrum Mur. · 10M · 30ml (A-535)"
+    },
+    {
+      "code": "A-536",
+      "name": "Natrum Mur.",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Natrum Mur. · 50M · 30ml (A-536)"
+    },
+    {
+      "code": "A-537",
+      "name": "Natrum Mur.",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Natrum Mur. · CM · 30ml (A-537)"
+    },
+    {
+      "code": "A-538",
+      "name": "Natrum Phos.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Natrum Phos. · 30 · 100ml (A-538)"
+    },
+    {
+      "code": "A-539",
+      "name": "Netrum Phos.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Netrum Phos. · 200 · 100ml (A-539)"
+    },
+    {
+      "code": "A-540",
+      "name": "Netrum Salic",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Netrum Salic · 30 · 100ml (A-540)"
+    },
+    {
+      "code": "A-541",
+      "name": "Netrum Sulph.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Netrum Sulph. · 30 · 100ml (A-541)"
+    },
+    {
+      "code": "A-542",
+      "name": "Netrum Sulph.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Netrum Sulph. · 200 · 100ml (A-542)"
+    },
+    {
+      "code": "A-543",
+      "name": "Netrum Sulph",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Netrum Sulph · 1M · 60ml (A-543)"
+    },
+    {
+      "code": "A-544",
+      "name": "Netrum Sulph.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Netrum Sulph. · 10M · 30ml (A-544)"
+    },
+    {
+      "code": "A-545",
+      "name": "Nitric Acid",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Nitric Acid · 30 · 100ml (A-545)"
+    },
+    {
+      "code": "A-546",
+      "name": "Nitric Acid",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Nitric Acid · 200 · 100ml (A-546)"
+    },
+    {
+      "code": "A-547",
+      "name": "Nitric Acid",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Nitric Acid · 1M · 60ml (A-547)"
+    },
+    {
+      "code": "A-548",
+      "name": "Nitric Acid",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Nitric Acid · 10M · 30ml (A-548)"
+    },
+    {
+      "code": "A-549",
+      "name": "Nitric Acid",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Nitric Acid · CM · 30ml (A-549)"
+    },
+    {
+      "code": "A-550",
+      "name": "Nux Mosch.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Nux Mosch. · 30 · 100ml (A-550)"
+    },
+    {
+      "code": "A-551",
+      "name": "Nux Musch.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Nux Musch. · 200 · 100ml (A-551)"
+    },
+    {
+      "code": "A-552",
+      "name": "Nux Vomica",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Nux Vomica · 6 · 100ml (A-552)"
+    },
+    {
+      "code": "A-553",
+      "name": "Nux Vomica",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Nux Vomica · 30 · 100ml (A-553)"
+    },
+    {
+      "code": "A-554",
+      "name": "Nux Vomica",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Nux Vomica · 200 · 100ml (A-554)"
+    },
+    {
+      "code": "A-555",
+      "name": "Nux Vomica",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Nux Vomica · 1M · 60ml (A-555)"
+    },
+    {
+      "code": "A-556",
+      "name": "Nux Vomica",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Nux Vomica · 10M · 30ml (A-556)"
+    },
+    {
+      "code": "A-557",
+      "name": "Nux Vomica",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Nux Vomica · 50M · 30ml (A-557)"
+    },
+    {
+      "code": "A-558",
+      "name": "Nux Vomica",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Nux Vomica · CM · 30ml (A-558)"
+    },
+    {
+      "code": "A-559",
+      "name": "Ocimum Can.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Ocimum Can. · 6 · 100ml (A-559)"
+    },
+    {
+      "code": "A-560",
+      "name": "Ocimum Can.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Ocimum Can. · 200 · 100ml (A-560)"
+    },
+    {
+      "code": "A-561",
+      "name": "Ocimum Sant.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Ocimum Sant. · 30 · 100ml (A-561)"
+    },
+    {
+      "code": "A-562",
+      "name": "Oliandar",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Oliandar · 6 · 100ml (A-562)"
+    },
+    {
+      "code": "A-563",
+      "name": "Oleum. S.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Oleum. S. · 6 · 100ml (A-563)"
+    },
+    {
+      "code": "A-564",
+      "name": "Onosmodium",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Onosmodium · 30 · 100ml (A-564)"
+    },
+    {
+      "code": "A-565",
+      "name": "Onosmodium",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Onosmodium · 200 · 100ml (A-565)"
+    },
+    {
+      "code": "A-566",
+      "name": "Opium",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Opium · 30 · 100ml (A-566)"
+    },
+    {
+      "code": "A-567",
+      "name": "Opium",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Opium · 200 · 100ml (A-567)"
+    },
+    {
+      "code": "A-568",
+      "name": "Opium",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Opium · 1M · 60ml (A-568)"
+    },
+    {
+      "code": "A-569",
+      "name": "Opium",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Opium · 10M · 30ml (A-569)"
+    },
+    {
+      "code": "A-570",
+      "name": "Osmium",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Osmium · 30 · 100ml (A-570)"
+    },
+    {
+      "code": "A-571",
+      "name": "O.A.Nosod",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "O.A.Nosod · 200 · 100ml (A-571)"
+    },
+    {
+      "code": "A-572",
+      "name": "Oxelic Acid",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Oxelic Acid · 6 · 100ml (A-572)"
+    },
+    {
+      "code": "A-573",
+      "name": "Oxelic Acid",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Oxelic Acid · 200 · 100ml (A-573)"
+    },
+    {
+      "code": "A-574",
+      "name": "Paeonia",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Paeonia · 30 · 100ml (A-574)"
+    },
+    {
+      "code": "A-575",
+      "name": "Paeonia",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Paeonia · 200 · 100ml (A-575)"
+    },
+    {
+      "code": "A-576",
+      "name": "Parthenium",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Parthenium · 30 · 100ml (A-576)"
+    },
+    {
+      "code": "A-577",
+      "name": "Parotidinum",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Parotidinum · 30 · 100ml (A-577)"
+    },
+    {
+      "code": "A-578",
+      "name": "Parotidinum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Parotidinum · 200 · 100ml (A-578)"
+    },
+    {
+      "code": "A-579",
+      "name": "Pertussin",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Pertussin · 200 · 100ml (A-579)"
+    },
+    {
+      "code": "A-580",
+      "name": "Petrolium",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Petrolium · 30 · 100ml (A-580)"
+    },
+    {
+      "code": "A-581",
+      "name": "Petrolium",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Petrolium · 200 · 100ml (A-581)"
+    },
+    {
+      "code": "A-582",
+      "name": "Petrolium",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Petrolium · 1M · 60ml (A-582)"
+    },
+    {
+      "code": "A-583",
+      "name": "Petrolium",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Petrolium · 10M · 30ml (A-583)"
+    },
+    {
+      "code": "A-584",
+      "name": "Petrolium",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Petrolium · 50M · 30ml (A-584)"
+    },
+    {
+      "code": "A-585",
+      "name": "Petrolium",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Petrolium · CM · 30ml (A-585)"
+    },
+    {
+      "code": "A-586",
+      "name": "Petroselenium",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Petroselenium · 6 · 100ml (A-586)"
+    },
+    {
+      "code": "A-587",
+      "name": "Petroselenium",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Petroselenium · 200 · 100ml (A-587)"
+    },
+    {
+      "code": "A-588",
+      "name": "Phosphoric Acid",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Phosphoric Acid · 30 · 100ml (A-588)"
+    },
+    {
+      "code": "A-589",
+      "name": "Phosphoric Acid",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Phosphoric Acid · 200 · 100ml (A-589)"
+    },
+    {
+      "code": "A-590",
+      "name": "Phosphoric Acid",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Phosphoric Acid · 1M · 60ml (A-590)"
+    },
+    {
+      "code": "A-591",
+      "name": "Phosphoric Acid",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Phosphoric Acid · 10M · 30ml (A-591)"
+    },
+    {
+      "code": "A-592",
+      "name": "Phosphorus",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Phosphorus · 6 · 100ml (A-592)"
+    },
+    {
+      "code": "A-593",
+      "name": "Phosphorus",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Phosphorus · 30 · 100ml (A-593)"
+    },
+    {
+      "code": "A-594",
+      "name": "Phosphorus",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Phosphorus · 200 · 100ml (A-594)"
+    },
+    {
+      "code": "A-595",
+      "name": "Phosphorus",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Phosphorus · 1M · 60ml (A-595)"
+    },
+    {
+      "code": "A-596",
+      "name": "Phosphorus",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Phosphorus · 10M · 30ml (A-596)"
+    },
+    {
+      "code": "A-597",
+      "name": "Phosphorus",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Phosphorus · 50M · 30ml (A-597)"
+    },
+    {
+      "code": "A-598",
+      "name": "Phosphorus",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Phosphorus · CM · 30ml (A-598)"
+    },
+    {
+      "code": "A-599",
+      "name": "Phytostigma",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Phytostigma · 6 · 100ml (A-599)"
+    },
+    {
+      "code": "A-600",
+      "name": "Phytostigma",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Phytostigma · 200 · 100ml (A-600)"
+    },
+    {
+      "code": "A-601",
+      "name": "Phytolacca",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Phytolacca · 30 · 100ml (A-601)"
+    },
+    {
+      "code": "A-602",
+      "name": "Phytolacca",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Phytolacca · 200 · 100ml (A-602)"
+    },
+    {
+      "code": "A-603",
+      "name": "Phytolacca",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Phytolacca · 1M · 60ml (A-603)"
+    },
+    {
+      "code": "A-604",
+      "name": "Phytolacca",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Phytolacca · 10M · 30ml (A-604)"
+    },
+    {
+      "code": "A-605",
+      "name": "Picric Acid",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Picric Acid · 30 · 100ml (A-605)"
+    },
+    {
+      "code": "A-606",
+      "name": "Picric Acid",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Picric Acid · 200 · 100ml (A-606)"
+    },
+    {
+      "code": "A-607",
+      "name": "Pix Liquida",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Pix Liquida · 30 · 100ml (A-607)"
+    },
+    {
+      "code": "A-608",
+      "name": "Pix Liquida",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Pix Liquida · 200 · 100ml (A-608)"
+    },
+    {
+      "code": "A-609",
+      "name": "Plantago Maj",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Plantago Maj · 30 · 100ml (A-609)"
+    },
+    {
+      "code": "A-610",
+      "name": "Platina",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Platina · 30 · 100ml (A-610)"
+    },
+    {
+      "code": "A-611",
+      "name": "Platina",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Platina · 200 · 100ml (A-611)"
+    },
+    {
+      "code": "A-612",
+      "name": "Platina",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Platina · 1M · 60ml (A-612)"
+    },
+    {
+      "code": "A-613",
+      "name": "Platina",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Platina · 10M · 30ml (A-613)"
+    },
+    {
+      "code": "A-614",
+      "name": "Plumbun Met",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Plumbun Met · 30 · 100ml (A-614)"
+    },
+    {
+      "code": "A-615",
+      "name": "Plumbum Met",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Plumbum Met · 200 · 100ml (A-615)"
+    },
+    {
+      "code": "A-616",
+      "name": "Plumbum Met",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Plumbum Met · 1M · 60ml (A-616)"
+    },
+    {
+      "code": "A-617",
+      "name": "Plumbum Met",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Plumbum Met · 10M · 30ml (A-617)"
+    },
+    {
+      "code": "A-618",
+      "name": "Podophyllum",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Podophyllum · 6 · 100ml (A-618)"
+    },
+    {
+      "code": "A-619",
+      "name": "Podophyllum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Podophyllum · 200 · 100ml (A-619)"
+    },
+    {
+      "code": "A-620",
+      "name": "Pothos foetida",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Pothos foetida · 6 · 100ml (A-620)"
+    },
+    {
+      "code": "A-621",
+      "name": "Pothos foetida",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Pothos foetida · 200 · 100ml (A-621)"
+    },
+    {
+      "code": "A-622",
+      "name": "Psoralia",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Psoralia · 6 · 100ml (A-622)"
+    },
+    {
+      "code": "A-623",
+      "name": "Psorinum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Psorinum · 200 · 100ml (A-623)"
+    },
+    {
+      "code": "A-624",
+      "name": "Psorinum",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Psorinum · 1M · 60ml (A-624)"
+    },
+    {
+      "code": "A-625",
+      "name": "Psorinum",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Psorinum · 10M · 30ml (A-625)"
+    },
+    {
+      "code": "A-626",
+      "name": "Psorinum",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Psorinum · 50M · 30ml (A-626)"
+    },
+    {
+      "code": "A-627",
+      "name": "Pulsatilla",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Pulsatilla · 30 · 100ml (A-627)"
+    },
+    {
+      "code": "A-628",
+      "name": "Pulsatilla",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Pulsatilla · 200 · 100ml (A-628)"
+    },
+    {
+      "code": "A-629",
+      "name": "Pulsatilla",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Pulsatilla · 1M · 60ml (A-629)"
+    },
+    {
+      "code": "A-630",
+      "name": "Pulsatilla",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Pulsatilla · 10M · 30ml (A-630)"
+    },
+    {
+      "code": "A-631",
+      "name": "Pulsatilla",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Pulsatilla · 50M · 30ml (A-631)"
+    },
+    {
+      "code": "A-632",
+      "name": "Pulsatilla",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Pulsatilla · CM · 30ml (A-632)"
+    },
+    {
+      "code": "A-633",
+      "name": "Pyrogen",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Pyrogen · 30 · 100ml (A-633)"
+    },
+    {
+      "code": "A-634",
+      "name": "Pyrogen",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Pyrogen · 200 · 100ml (A-634)"
+    },
+    {
+      "code": "A-635",
+      "name": "Pyrogen",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Pyrogen · 1M · 60ml (A-635)"
+    },
+    {
+      "code": "A-636",
+      "name": "Radium Brom",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Radium Brom · 30 · 100ml (A-636)"
+    },
+    {
+      "code": "A-637",
+      "name": "Radium Brom",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Radium Brom · 200 · 100ml (A-637)"
+    },
+    {
+      "code": "A-638",
+      "name": "Ranunculus B.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Ranunculus B. · 30 · 100ml (A-638)"
+    },
+    {
+      "code": "A-639",
+      "name": "Ranunculus B.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Ranunculus B. · 200 · 100ml (A-639)"
+    },
+    {
+      "code": "A-640",
+      "name": "Ranunculus S.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Ranunculus S. · 30 · 100ml (A-640)"
+    },
+    {
+      "code": "A-641",
+      "name": "Raphanus",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Raphanus · 6 · 100ml (A-641)"
+    },
+    {
+      "code": "A-642",
+      "name": "Ratahina",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Ratahina · 6 · 100ml (A-642)"
+    },
+    {
+      "code": "A-643",
+      "name": "Ratahnia",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Ratahnia · 200 · 100ml (A-643)"
+    },
+    {
+      "code": "A-644",
+      "name": "Ratahnia",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Ratahnia · 1M · 60ml (A-644)"
+    },
+    {
+      "code": "A-645",
+      "name": "Rauwolfia Ser.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Rauwolfia Ser. · 30 · 100ml (A-645)"
+    },
+    {
+      "code": "A-646",
+      "name": "Rhododendron",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Rhododendron · 30 · 100ml (A-646)"
+    },
+    {
+      "code": "A-647",
+      "name": "Rhododendron",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Rhododendron · 200 · 100ml (A-647)"
+    },
+    {
+      "code": "A-648",
+      "name": "Rhododendron",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Rhododendron · 10M · 30ml (A-648)"
+    },
+    {
+      "code": "A-649",
+      "name": "Rhus Tox.",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Rhus Tox. · 3x · 100ml (A-649)"
+    },
+    {
+      "code": "A-650",
+      "name": "Rhus Tox.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Rhus Tox. · 30 · 100ml (A-650)"
+    },
+    {
+      "code": "A-651",
+      "name": "Rhus Tox.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Rhus Tox. · 200 · 100ml (A-651)"
+    },
+    {
+      "code": "A-652",
+      "name": "Rhus Tox.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Rhus Tox. · 1M · 60ml (A-652)"
+    },
+    {
+      "code": "A-653",
+      "name": "Rhus Tox.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Rhus Tox. · 10M · 30ml (A-653)"
+    },
+    {
+      "code": "A-654",
+      "name": "Rhus Tox.",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Rhus Tox. · 50M · 30ml (A-654)"
+    },
+    {
+      "code": "A-655",
+      "name": "Rhus Tox.",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Rhus Tox. · CM · 30ml (A-655)"
+    },
+    {
+      "code": "A-656",
+      "name": "Rhus Veneta",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Rhus Veneta · 6 · 100ml (A-656)"
+    },
+    {
+      "code": "A-657",
+      "name": "Robinia",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Robinia · 3x · 100ml (A-657)"
+    },
+    {
+      "code": "A-658",
+      "name": "Robinia",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Robinia · 30 · 100ml (A-658)"
+    },
+    {
+      "code": "A-659",
+      "name": "Robinia",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Robinia · 200 · 100ml (A-659)"
+    },
+    {
+      "code": "A-660",
+      "name": "Rumex Crisp.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Rumex Crisp. · 6 · 100ml (A-660)"
+    },
+    {
+      "code": "A-661",
+      "name": "Rumex Crisp.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Rumex Crisp. · 200 · 100ml (A-661)"
+    },
+    {
+      "code": "A-662",
+      "name": "Ruta Grav.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Ruta Grav. · 30 · 100ml (A-662)"
+    },
+    {
+      "code": "A-663",
+      "name": "Ruta Grav.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Ruta Grav. · 200 · 100ml (A-663)"
+    },
+    {
+      "code": "A-664",
+      "name": "Ruta Grav.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Ruta Grav. · 1M · 60ml (A-664)"
+    },
+    {
+      "code": "A-665",
+      "name": "Ruta Grav.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Ruta Grav. · 10M · 30ml (A-665)"
+    },
+    {
+      "code": "A-666",
+      "name": "Ruta Grav.",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Ruta Grav. · CM · 30ml (A-666)"
+    },
+    {
+      "code": "A-667",
+      "name": "Sabadilla",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Sabadilla · 6 · 100ml (A-667)"
+    },
+    {
+      "code": "A-668",
+      "name": "Sabadilla",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Sabadilla · 200 · 100ml (A-668)"
+    },
+    {
+      "code": "A-669",
+      "name": "Sabina",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Sabina · 6 · 100ml (A-669)"
+    },
+    {
+      "code": "A-670",
+      "name": "Sabina",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Sabina · 200 · 100ml (A-670)"
+    },
+    {
+      "code": "A-671",
+      "name": "Sambucus N",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Sambucus N · 6 · 100ml (A-671)"
+    },
+    {
+      "code": "A-672",
+      "name": "Sambucus N",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Sambucus N · 200 · 100ml (A-672)"
+    },
+    {
+      "code": "A-673",
+      "name": "Sanguinaria C",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Sanguinaria C · 30 · 100ml (A-673)"
+    },
+    {
+      "code": "A-674",
+      "name": "Sanguinaria C",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Sanguinaria C · 200 · 100ml (A-674)"
+    },
+    {
+      "code": "A-675",
+      "name": "Sanguinaria C",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Sanguinaria C · 1M · 60ml (A-675)"
+    },
+    {
+      "code": "A-676",
+      "name": "Sanguinaria N",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Sanguinaria N · 6 · 100ml (A-676)"
+    },
+    {
+      "code": "A-677",
+      "name": "Sanguinaria N",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Sanguinaria N · 30 · 100ml (A-677)"
+    },
+    {
+      "code": "A-678",
+      "name": "Sanguinaria N",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Sanguinaria N · 200 · 100ml (A-678)"
+    },
+    {
+      "code": "A-679",
+      "name": "Sanicula",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Sanicula · 30 · 100ml (A-679)"
+    },
+    {
+      "code": "A-680",
+      "name": "Sanicula",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Sanicula · 200 · 100ml (A-680)"
+    },
+    {
+      "code": "A-681",
+      "name": "Sarsaparilla",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Sarsaparilla · 30 · 100ml (A-681)"
+    },
+    {
+      "code": "A-682",
+      "name": "Sarsaparilla",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Sarsaparilla · 200 · 100ml (A-682)"
+    },
+    {
+      "code": "A-683",
+      "name": "Sarsaparilla",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Sarsaparilla · 1M · 60ml (A-683)"
+    },
+    {
+      "code": "A-684",
+      "name": "Scrophularia N",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Scrophularia N · 200 · 100ml (A-684)"
+    },
+    {
+      "code": "A-685",
+      "name": "Secale Cor",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Secale Cor · 30 · 100ml (A-685)"
+    },
+    {
+      "code": "A-686",
+      "name": "Secale Cor",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Secale Cor · 200 · 100ml (A-686)"
+    },
+    {
+      "code": "A-687",
+      "name": "Selenium",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Selenium · 6 · 100ml (A-687)"
+    },
+    {
+      "code": "A-688",
+      "name": "Selenium",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Selenium · 200 · 100ml (A-688)"
+    },
+    {
+      "code": "A-689",
+      "name": "Selenium",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Selenium · 1M · 60ml (A-689)"
+    },
+    {
+      "code": "A-690",
+      "name": "Senega",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Senega · 200 · 100ml (A-690)"
+    },
+    {
+      "code": "A-691",
+      "name": "Sepia",
+      "potency": "3x",
+      "amount": "100ml",
+      "label": "Sepia · 3x · 100ml (A-691)"
+    },
+    {
+      "code": "A-692",
+      "name": "sepia",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "sepia · 30 · 100ml (A-692)"
+    },
+    {
+      "code": "A-693",
+      "name": "Sepia",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Sepia · 200 · 100ml (A-693)"
+    },
+    {
+      "code": "A-694",
+      "name": "Sepia",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Sepia · 1M · 60ml (A-694)"
+    },
+    {
+      "code": "A-695",
+      "name": "Sepia",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Sepia · 10M · 30ml (A-695)"
+    },
+    {
+      "code": "A-696",
+      "name": "Sepia",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Sepia · 50M · 30ml (A-696)"
+    },
+    {
+      "code": "A-697",
+      "name": "Sepia",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Sepia · CM · 30ml (A-697)"
+    },
+    {
+      "code": "A-698",
+      "name": "Silicea",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Silicea · 30 · 100ml (A-698)"
+    },
+    {
+      "code": "A-699",
+      "name": "Silicea",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Silicea · 200 · 100ml (A-699)"
+    },
+    {
+      "code": "A-700",
+      "name": "Silicea",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Silicea · 1M · 60ml (A-700)"
+    },
+    {
+      "code": "A-701",
+      "name": "Silicea",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Silicea · 10M · 30ml (A-701)"
+    },
+    {
+      "code": "A-702",
+      "name": "Silicea",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Silicea · 50M · 30ml (A-702)"
+    },
+    {
+      "code": "A-703",
+      "name": "Silicea",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Silicea · CM · 30ml (A-703)"
+    },
+    {
+      "code": "A-704",
+      "name": "Sinapis Nigra",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Sinapis Nigra · 30 · 100ml (A-704)"
+    },
+    {
+      "code": "A-705",
+      "name": "Spigelia",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Spigelia · 30 · 100ml (A-705)"
+    },
+    {
+      "code": "A-706",
+      "name": "Spigelia",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Spigelia · 200 · 100ml (A-706)"
+    },
+    {
+      "code": "A-707",
+      "name": "Spigelia",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Spigelia · 1M · 60ml (A-707)"
+    },
+    {
+      "code": "A-708",
+      "name": "Spigelia",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Spigelia · 10M · 30ml (A-708)"
+    },
+    {
+      "code": "A-709",
+      "name": "Spongia",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Spongia · 6 · 100ml (A-709)"
+    },
+    {
+      "code": "A-710",
+      "name": "Spongia",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Spongia · 200 · 100ml (A-710)"
+    },
+    {
+      "code": "A-711",
+      "name": "Squilla",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Squilla · 30 · 100ml (A-711)"
+    },
+    {
+      "code": "A-712",
+      "name": "Stannum Met.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Stannum Met. · 30 · 100ml (A-712)"
+    },
+    {
+      "code": "A-713",
+      "name": "Stannum Met.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Stannum Met. · 200 · 100ml (A-713)"
+    },
+    {
+      "code": "A-714",
+      "name": "Staphylococcin",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Staphylococcin · 30 · 100ml (A-714)"
+    },
+    {
+      "code": "A-715",
+      "name": "Staphysagria",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Staphysagria · 30 · 100ml (A-715)"
+    },
+    {
+      "code": "A-716",
+      "name": "Staphysagria",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Staphysagria · 200 · 100ml (A-716)"
+    },
+    {
+      "code": "A-717",
+      "name": "Staphysagria",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Staphysagria · 1M · 60ml (A-717)"
+    },
+    {
+      "code": "A-718",
+      "name": "Staphysagria",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Staphysagria · 10M · 30ml (A-718)"
+    },
+    {
+      "code": "A-719",
+      "name": "Staphysagria",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Staphysagria · CM · 30ml (A-719)"
+    },
+    {
+      "code": "A-720",
+      "name": "Sticta Pul.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Sticta Pul. · 6 · 100ml (A-720)"
+    },
+    {
+      "code": "A-721",
+      "name": "Sticta Pul.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Sticta Pul. · 200 · 100ml (A-721)"
+    },
+    {
+      "code": "A-722",
+      "name": "Stromonium",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Stromonium · 200 · 100ml (A-722)"
+    },
+    {
+      "code": "A-723",
+      "name": "Stromonium",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Stromonium · 1M · 60ml (A-723)"
+    },
+    {
+      "code": "A-724",
+      "name": "Stromonium",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Stromonium · 10M · 30ml (A-724)"
+    },
+    {
+      "code": "A-725",
+      "name": "Streptococcin",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Streptococcin · 30 · 100ml (A-725)"
+    },
+    {
+      "code": "A-726",
+      "name": "Streptococcin",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Streptococcin · 200 · 100ml (A-726)"
+    },
+    {
+      "code": "A-727",
+      "name": "Streptomycin",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Streptomycin · 30 · 100ml (A-727)"
+    },
+    {
+      "code": "A-728",
+      "name": "Strontis Carb",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Strontis Carb · 200 · 100ml (A-728)"
+    },
+    {
+      "code": "A-729",
+      "name": "Strychninum",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Strychninum · 6 · 100ml (A-729)"
+    },
+    {
+      "code": "A-730",
+      "name": "Sulphur",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Sulphur · 6 · 100ml (A-730)"
+    },
+    {
+      "code": "A-731",
+      "name": "Sulphur",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Sulphur · 30 · 100ml (A-731)"
+    },
+    {
+      "code": "A-732",
+      "name": "Sulphur",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Sulphur · 200 · 100ml (A-732)"
+    },
+    {
+      "code": "A-733",
+      "name": "Sulphur",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Sulphur · 1M · 60ml (A-733)"
+    },
+    {
+      "code": "A-734",
+      "name": "Sulphur",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Sulphur · 10M · 30ml (A-734)"
+    },
+    {
+      "code": "A-735",
+      "name": "Sulphur",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Sulphur · 50M · 30ml (A-735)"
+    },
+    {
+      "code": "A-736",
+      "name": "Sulphur",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Sulphur · CM · 30ml (A-736)"
+    },
+    {
+      "code": "A-737",
+      "name": "Sulphuric Acid",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Sulphuric Acid · 6 · 100ml (A-737)"
+    },
+    {
+      "code": "A-738",
+      "name": "Sulphuric Acid",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Sulphuric Acid · 200 · 100ml (A-738)"
+    },
+    {
+      "code": "A-739",
+      "name": "Sulphar Iod.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Sulphar Iod. · 6 · 100ml (A-739)"
+    },
+    {
+      "code": "A-740",
+      "name": "Sulphur Iod.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Sulphur Iod. · 200 · 100ml (A-740)"
+    },
+    {
+      "code": "A-741",
+      "name": "Symphoricarp R.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Symphoricarp R. · 30 · 100ml (A-741)"
+    },
+    {
+      "code": "A-742",
+      "name": "Symphytum Off.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Symphytum Off. · 6 · 100ml (A-742)"
+    },
+    {
+      "code": "A-743",
+      "name": "Symphytum Off.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Symphytum Off. · 200 · 100ml (A-743)"
+    },
+    {
+      "code": "A-744",
+      "name": "Symphytum Off.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Symphytum Off. · 1M · 60ml (A-744)"
+    },
+    {
+      "code": "A-745",
+      "name": "Syphillium",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Syphillium · 200 · 100ml (A-745)"
+    },
+    {
+      "code": "A-746",
+      "name": "Syphillium",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Syphillium · 1M · 60ml (A-746)"
+    },
+    {
+      "code": "A-747",
+      "name": "Syphillium",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Syphillium · 10M · 30ml (A-747)"
+    },
+    {
+      "code": "A-748",
+      "name": "Syphillium",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Syphillium · 50M · 30ml (A-748)"
+    },
+    {
+      "code": "A-749",
+      "name": "Syphillium",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Syphillium · CM · 30ml (A-749)"
+    },
+    {
+      "code": "A-750",
+      "name": "Tabacum",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Tabacum · 6 · 100ml (A-750)"
+    },
+    {
+      "code": "A-751",
+      "name": "Tabacum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Tabacum · 200 · 100ml (A-751)"
+    },
+    {
+      "code": "A-752",
+      "name": "Tarentula Cuben.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Tarentula Cuben. · 30 · 100ml (A-752)"
+    },
+    {
+      "code": "A-753",
+      "name": "Tarentula Hisp.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Tarentula Hisp. · 30 · 100ml (A-753)"
+    },
+    {
+      "code": "A-754",
+      "name": "Taraxicum",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Taraxicum · 30 · 100ml (A-754)"
+    },
+    {
+      "code": "A-755",
+      "name": "Tallurium",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Tallurium · 30 · 100ml (A-755)"
+    },
+    {
+      "code": "A-756",
+      "name": "Tallurium",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Tallurium · 200 · 100ml (A-756)"
+    },
+    {
+      "code": "A-757",
+      "name": "Terebinthina",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Terebinthina · 6 · 100ml (A-757)"
+    },
+    {
+      "code": "A-758",
+      "name": "Terebinthina",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Terebinthina · 200 · 100ml (A-758)"
+    },
+    {
+      "code": "A-759",
+      "name": "Teucrim M.V.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Teucrim M.V. · 6 · 100ml (A-759)"
+    },
+    {
+      "code": "A-760",
+      "name": "Teucrim M.V.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Teucrim M.V. · 200 · 100ml (A-760)"
+    },
+    {
+      "code": "A-761",
+      "name": "Teucrim M.V.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Teucrim M.V. · 1M · 60ml (A-761)"
+    },
+    {
+      "code": "A-762",
+      "name": "Thalaspi B.P.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Thalaspi B.P. · 30 · 100ml (A-762)"
+    },
+    {
+      "code": "A-763",
+      "name": "Thuja Occ.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Thuja Occ. · 30 · 100ml (A-763)"
+    },
+    {
+      "code": "A-764",
+      "name": "Thuja Occ.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Thuja Occ. · 200 · 100ml (A-764)"
+    },
+    {
+      "code": "A-765",
+      "name": "Thuja Occ.",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Thuja Occ. · 1M · 60ml (A-765)"
+    },
+    {
+      "code": "A-766",
+      "name": "Thuja Occ.",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Thuja Occ. · 10M · 30ml (A-766)"
+    },
+    {
+      "code": "A-767",
+      "name": "Thuja Occ.",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Thuja Occ. · 50M · 30ml (A-767)"
+    },
+    {
+      "code": "A-768",
+      "name": "Thuja Occ.",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Thuja Occ. · CM · 30ml (A-768)"
+    },
+    {
+      "code": "A-769",
+      "name": "Thyroidinum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Thyroidinum · 200 · 100ml (A-769)"
+    },
+    {
+      "code": "A-770",
+      "name": "Thyroidinum",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Thyroidinum · 1M · 60ml (A-770)"
+    },
+    {
+      "code": "A-771",
+      "name": "Thyooidinum",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Thyooidinum · 10M · 30ml (A-771)"
+    },
+    {
+      "code": "A-772",
+      "name": "Tuberculinum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Tuberculinum · 200 · 100ml (A-772)"
+    },
+    {
+      "code": "A-773",
+      "name": "Tuberculinum",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Tuberculinum · 1M · 60ml (A-773)"
+    },
+    {
+      "code": "A-774",
+      "name": "Tuberculinum",
+      "potency": "10M",
+      "amount": "30ml",
+      "label": "Tuberculinum · 10M · 30ml (A-774)"
+    },
+    {
+      "code": "A-775",
+      "name": "Tuberculinum",
+      "potency": "50M",
+      "amount": "30ml",
+      "label": "Tuberculinum · 50M · 30ml (A-775)"
+    },
+    {
+      "code": "A-776",
+      "name": "Tuberculinum",
+      "potency": "CM",
+      "amount": "30ml",
+      "label": "Tuberculinum · CM · 30ml (A-776)"
+    },
+    {
+      "code": "A-777",
+      "name": "Typhoidinum",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Typhoidinum · 30 · 100ml (A-777)"
+    },
+    {
+      "code": "A-778",
+      "name": "Typhoidinum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Typhoidinum · 200 · 100ml (A-778)"
+    },
+    {
+      "code": "A-779",
+      "name": "Typhoidinum",
+      "potency": "1M",
+      "amount": "60ml",
+      "label": "Typhoidinum · 1M · 60ml (A-779)"
+    },
+    {
+      "code": "A-780",
+      "name": "Uric.Acid",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Uric.Acid · 6 · 100ml (A-780)"
+    },
+    {
+      "code": "A-781",
+      "name": "Uritica Urens",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Uritica Urens · 6 · 100ml (A-781)"
+    },
+    {
+      "code": "A-782",
+      "name": "Uritica Urens",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Uritica Urens · 200 · 100ml (A-782)"
+    },
+    {
+      "code": "A-783",
+      "name": "Valerina",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Valerina · 6 · 100ml (A-783)"
+    },
+    {
+      "code": "A-784",
+      "name": "Valerina",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Valerina · 200 · 100ml (A-784)"
+    },
+    {
+      "code": "A-785",
+      "name": "Vanadium",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Vanadium · 6 · 100ml (A-785)"
+    },
+    {
+      "code": "A-786",
+      "name": "Variolinum",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Variolinum · 30 · 100ml (A-786)"
+    },
+    {
+      "code": "A-787",
+      "name": "Variolinum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Variolinum · 200 · 100ml (A-787)"
+    },
+    {
+      "code": "A-788",
+      "name": "Varatrum Alb",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Varatrum Alb · 30 · 100ml (A-788)"
+    },
+    {
+      "code": "A-789",
+      "name": "Varatrum Alb",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Varatrum Alb · 200 · 100ml (A-789)"
+    },
+    {
+      "code": "A-790",
+      "name": "Varatrum Vir.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Varatrum Vir. · 6 · 100ml (A-790)"
+    },
+    {
+      "code": "A-791",
+      "name": "Varatrum Vir.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Varatrum Vir. · 200 · 100ml (A-791)"
+    },
+    {
+      "code": "A-792",
+      "name": "Verbascum",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Verbascum · 6 · 100ml (A-792)"
+    },
+    {
+      "code": "A-793",
+      "name": "Verbascum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Verbascum · 200 · 100ml (A-793)"
+    },
+    {
+      "code": "A-794",
+      "name": "Vinca Minour",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Vinca Minour · 6 · 100ml (A-794)"
+    },
+    {
+      "code": "A-795",
+      "name": "Vinca Minour",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Vinca Minour · 200 · 100ml (A-795)"
+    },
+    {
+      "code": "A-796",
+      "name": "Viola Odorata",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Viola Odorata · 6 · 100ml (A-796)"
+    },
+    {
+      "code": "A-797",
+      "name": "Viola Odorata",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Viola Odorata · 200 · 100ml (A-797)"
+    },
+    {
+      "code": "A-798",
+      "name": "Viola Tricolor",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Viola Tricolor · 200 · 100ml (A-798)"
+    },
+    {
+      "code": "A-799",
+      "name": "Vipera",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Vipera · 30 · 100ml (A-799)"
+    },
+    {
+      "code": "A-800",
+      "name": "Viscum Album",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Viscum Album · 6 · 100ml (A-800)"
+    },
+    {
+      "code": "A-801",
+      "name": "Viscum Album",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Viscum Album · 200 · 100ml (A-801)"
+    },
+    {
+      "code": "A-802",
+      "name": "Weisbaden",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Weisbaden · 6 · 100ml (A-802)"
+    },
+    {
+      "code": "A-803",
+      "name": "Weisbaden",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Weisbaden · 200 · 100ml (A-803)"
+    },
+    {
+      "code": "A-804",
+      "name": "Wyethia",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Wyethia · 6 · 100ml (A-804)"
+    },
+    {
+      "code": "A-805",
+      "name": "Wyethia",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Wyethia · 200 · 100ml (A-805)"
+    },
+    {
+      "code": "A-806",
+      "name": "Xanthoxyllum",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Xanthoxyllum · 6 · 100ml (A-806)"
+    },
+    {
+      "code": "A-807",
+      "name": "Xanthoxyllum",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Xanthoxyllum · 200 · 100ml (A-807)"
+    },
+    {
+      "code": "A-808",
+      "name": "Zincum Met.",
+      "potency": "30",
+      "amount": "100ml",
+      "label": "Zincum Met. · 30 · 100ml (A-808)"
+    },
+    {
+      "code": "A-809",
+      "name": "Zincum Met.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Zincum Met. · 200 · 100ml (A-809)"
+    },
+    {
+      "code": "A-810",
+      "name": "Zincum Phos.",
+      "potency": "6",
+      "amount": "100ml",
+      "label": "Zincum Phos. · 6 · 100ml (A-810)"
+    },
+    {
+      "code": "A-811",
+      "name": "Zincum Phos.",
+      "potency": "200",
+      "amount": "100ml",
+      "label": "Zincum Phos. · 200 · 100ml (A-811)"
+    },
+    {
+      "code": "B-1",
+      "name": "Abroma Aug.",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Abroma Aug. · Q · 30ml (B-1)"
+    },
+    {
+      "code": "B-2",
+      "name": "Aclypha Ind",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Aclypha Ind · Q · 30ml (B-2)"
+    },
+    {
+      "code": "B-3",
+      "name": "Acid Phos",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Acid Phos · Q · 30ml (B-3)"
+    },
+    {
+      "code": "B-4",
+      "name": "Aegle Folia",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Aegle Folia · Q · 30ml (B-4)"
+    },
+    {
+      "code": "B-5",
+      "name": "Agnus Cast",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Agnus Cast · Q · 30ml (B-5)"
+    },
+    {
+      "code": "B-6",
+      "name": "Alfalfa",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Alfalfa · Q · 30ml (B-6)"
+    },
+    {
+      "code": "B-7",
+      "name": "Aralia Racem",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Aralia Racem · Q · 30ml (B-7)"
+    },
+    {
+      "code": "B-8",
+      "name": "Ashwangand",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Ashwangand · Q · 30ml (B-8)"
+    },
+    {
+      "code": "B-9",
+      "name": "Aspidosperma",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Aspidosperma · Q · 30ml (B-9)"
+    },
+    {
+      "code": "B-10",
+      "name": "Avena Sativa",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Avena Sativa · Q · 30ml (B-10)"
+    },
+    {
+      "code": "B-11",
+      "name": "Azadirachta Ind",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Azadirachta Ind · Q · 30ml (B-11)"
+    },
+    {
+      "code": "B-12",
+      "name": "Bellisperennis",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Bellisperennis · Q · 30ml (B-12)"
+    },
+    {
+      "code": "B-13",
+      "name": "Berberis Aqua.",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Berberis Aqua. · Q · 30ml (B-13)"
+    },
+    {
+      "code": "B-14",
+      "name": "Berberis Vulg.",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Berberis Vulg. · Q · 30ml (B-14)"
+    },
+    {
+      "code": "B-15",
+      "name": "Bllata Orientalis",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Bllata Orientalis · Q · 30ml (B-15)"
+    },
+    {
+      "code": "B-16",
+      "name": "Blumia Odorata",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Blumia Odorata · Q · 30ml (B-16)"
+    },
+    {
+      "code": "B-17",
+      "name": "Brahmi",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Brahmi · Q · 30ml (B-17)"
+    },
+    {
+      "code": "B-18",
+      "name": "Bryonia Alb",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Bryonia Alb · Q · 30ml (B-18)"
+    },
+    {
+      "code": "B-19",
+      "name": "Cactus Grand",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Cactus Grand · Q · 30ml (B-19)"
+    },
+    {
+      "code": "B-20",
+      "name": "Cantharis",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Cantharis · Q · 30ml (B-20)"
+    },
+    {
+      "code": "B-21",
+      "name": "Carduas Mar",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Carduas Mar · Q · 30ml (B-21)"
+    },
+    {
+      "code": "B-22",
+      "name": "Carrica Papaya",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Carrica Papaya · Q · 30ml (B-22)"
+    },
+    {
+      "code": "B-23",
+      "name": "Cascare Sagrada",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Cascare Sagrada · Q · 30ml (B-23)"
+    },
+    {
+      "code": "B-24",
+      "name": "Ceonanthus Am",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Ceonanthus Am · Q · 30ml (B-24)"
+    },
+    {
+      "code": "B-25",
+      "name": "Cephelandra Ind",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Cephelandra Ind · Q · 30ml (B-25)"
+    },
+    {
+      "code": "B-26",
+      "name": "Chellidonium Maj",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Chellidonium Maj · Q · 30ml (B-26)"
+    },
+    {
+      "code": "B-27",
+      "name": "Chelone G",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Chelone G · Q · 30ml (B-27)"
+    },
+    {
+      "code": "B-28",
+      "name": "Chimaphyla U",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Chimaphyla U · Q · 30ml (B-28)"
+    },
+    {
+      "code": "B-29",
+      "name": "China Off",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "China Off · Q · 30ml (B-29)"
+    },
+    {
+      "code": "B-30",
+      "name": "Chionanthus",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Chionanthus · Q · 30ml (B-30)"
+    },
+    {
+      "code": "B-31",
+      "name": "Collinsonia Can",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Collinsonia Can · Q · 30ml (B-31)"
+    },
+    {
+      "code": "B-32",
+      "name": "Condurango",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Condurango · Q · 30ml (B-32)"
+    },
+    {
+      "code": "B-33",
+      "name": "Cretaegus Oxy",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Cretaegus Oxy · Q · 30ml (B-33)"
+    },
+    {
+      "code": "B-34",
+      "name": "Cynoden Dac",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Cynoden Dac · Q · 30ml (B-34)"
+    },
+    {
+      "code": "B-35",
+      "name": "Damiana",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Damiana · Q · 30ml (B-35)"
+    },
+    {
+      "code": "B-36",
+      "name": "Drosera",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Drosera · Q · 30ml (B-36)"
+    },
+    {
+      "code": "B-37",
+      "name": "Equisetum hym",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Equisetum hym · Q · 30ml (B-37)"
+    },
+    {
+      "code": "B-38",
+      "name": "Erigeron",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Erigeron · Q · 30ml (B-38)"
+    },
+    {
+      "code": "B-39",
+      "name": "Eucalypqusy G.",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Eucalypqusy G. · Q · 30ml (B-39)"
+    },
+    {
+      "code": "B-40",
+      "name": "Ficus Religeo",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Ficus Religeo · Q · 30ml (B-40)"
+    },
+    {
+      "code": "B-41",
+      "name": "Fraxinus Am",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Fraxinus Am · Q · 30ml (B-41)"
+    },
+    {
+      "code": "B-42",
+      "name": "Fucus Vasicul",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Fucus Vasicul · Q · 30ml (B-42)"
+    },
+    {
+      "code": "B-43",
+      "name": "Gaultheria",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Gaultheria · Q · 30ml (B-43)"
+    },
+    {
+      "code": "B-44",
+      "name": "Ginseng",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Ginseng · Q · 30ml (B-44)"
+    },
+    {
+      "code": "B-45",
+      "name": "Grindelia",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Grindelia · Q · 30ml (B-45)"
+    },
+    {
+      "code": "B-46",
+      "name": "Gymnema Syl.",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Gymnema Syl. · Q · 30ml (B-46)"
+    },
+    {
+      "code": "B-47",
+      "name": "Hamamelis Vu",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Hamamelis Vu · Q · 30ml (B-47)"
+    },
+    {
+      "code": "B-48",
+      "name": "Holarrhena An",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Holarrhena An · Q · 30ml (B-48)"
+    },
+    {
+      "code": "B-49",
+      "name": "Hydrangoia",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Hydrangoia · Q · 30ml (B-49)"
+    },
+    {
+      "code": "B-50",
+      "name": "Hydrocotyle A",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Hydrocotyle A · Q · 30ml (B-50)"
+    },
+    {
+      "code": "B-51",
+      "name": "Hydratis Can",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Hydratis Can · Q · 30ml (B-51)"
+    },
+    {
+      "code": "B-52",
+      "name": "Hypericum",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Hypericum · Q · 30ml (B-52)"
+    },
+    {
+      "code": "B-53",
+      "name": "Ipecaunha",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Ipecaunha · Q · 30ml (B-53)"
+    },
+    {
+      "code": "B-54",
+      "name": "Jaborandi",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Jaborandi · Q · 30ml (B-54)"
+    },
+    {
+      "code": "B-55",
+      "name": "Jonesia Asho",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Jonesia Asho · Q · 30ml (B-55)"
+    },
+    {
+      "code": "B-56",
+      "name": "Justisia Adh",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Justisia Adh · Q · 30ml (B-56)"
+    },
+    {
+      "code": "B-57",
+      "name": "Kalmegh",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Kalmegh · Q · 30ml (B-57)"
+    },
+    {
+      "code": "B-58",
+      "name": "Millefolium",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Millefolium · Q · 30ml (B-58)"
+    },
+    {
+      "code": "B-59",
+      "name": "Miyristica Seb",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Miyristica Seb · Q · 30ml (B-59)"
+    },
+    {
+      "code": "B-60",
+      "name": "Ocimum Sant",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Ocimum Sant · Q · 30ml (B-60)"
+    },
+    {
+      "code": "B-61",
+      "name": "Oleum J.A.",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Oleum J.A. · Q · 30ml (B-61)"
+    },
+    {
+      "code": "B-62",
+      "name": "Oleum Santali",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Oleum Santali · Q · 30ml (B-62)"
+    },
+    {
+      "code": "B-63",
+      "name": "Pareira Brava",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Pareira Brava · Q · 30ml (B-63)"
+    },
+    {
+      "code": "B-64",
+      "name": "Passiflora Inc",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Passiflora Inc · Q · 30ml (B-64)"
+    },
+    {
+      "code": "B-65",
+      "name": "Phytolacca D.",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Phytolacca D. · Q · 30ml (B-65)"
+    },
+    {
+      "code": "B-66",
+      "name": "Psoralia Cor",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Psoralia Cor · Q · 30ml (B-66)"
+    },
+    {
+      "code": "B-67",
+      "name": "Quricus Gla.S.",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Quricus Gla.S. · Q · 30ml (B-67)"
+    },
+    {
+      "code": "B-68",
+      "name": "Rauwalfia Sur",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Rauwalfia Sur · Q · 30ml (B-68)"
+    },
+    {
+      "code": "B-69",
+      "name": "Sabal serrulata",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Sabal serrulata · Q · 30ml (B-69)"
+    },
+    {
+      "code": "B-70",
+      "name": "Senecio Aurius",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Senecio Aurius · Q · 30ml (B-70)"
+    },
+    {
+      "code": "B-71",
+      "name": "Senega Poly",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Senega Poly · Q · 30ml (B-71)"
+    },
+    {
+      "code": "B-72",
+      "name": "Spongia Tosta",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Spongia Tosta · Q · 30ml (B-72)"
+    },
+    {
+      "code": "B-73",
+      "name": "Staphysagria",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Staphysagria · Q · 30ml (B-73)"
+    },
+    {
+      "code": "B-74",
+      "name": "Stropanthus H.",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Stropanthus H. · Q · 30ml (B-74)"
+    },
+    {
+      "code": "B-75",
+      "name": "Syzygium Ja",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Syzygium Ja · Q · 30ml (B-75)"
+    },
+    {
+      "code": "B-76",
+      "name": "Terminalia Arj",
+      "potency": "Q",
+      "amount": "30ml",
+      "label": "Terminalia Arj · Q · 30ml (B-76)"
+    },
+    {
+      "code": "B-77",
+      "name": "Thalaspi B.",
+      "potency": "",
+      "amount": "P.",
+      "label": "Thalaspi B. · P. (B-77)"
+    },
+    {
+      "code": "D-1",
+      "name": "Antimonium Ars",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Antimonium Ars · 3x · 20gm (D-1)"
+    },
+    {
+      "code": "D-2",
+      "name": "Arsenic Alb",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Arsenic Alb · 3x · 20gm (D-2)"
+    },
+    {
+      "code": "D-3",
+      "name": "Arsenic Iod",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Arsenic Iod · 3x · 20gm (D-3)"
+    },
+    {
+      "code": "D-4",
+      "name": "Arsenic Sul Fla",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Arsenic Sul Fla · 3x · 20gm (D-4)"
+    },
+    {
+      "code": "D-5",
+      "name": "Arsenic Sul Fla",
+      "potency": "6x",
+      "amount": "20gm",
+      "label": "Arsenic Sul Fla · 6x · 20gm (D-5)"
+    },
+    {
+      "code": "D-6",
+      "name": "Auram Mur Nat",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Auram Mur Nat · 3x · 20gm (D-6)"
+    },
+    {
+      "code": "D-7",
+      "name": "Baryta Iodata",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Baryta Iodata · 3x · 20gm (D-7)"
+    },
+    {
+      "code": "D-8",
+      "name": "Baryta Muriat",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Baryta Muriat · 3x · 20gm (D-8)"
+    },
+    {
+      "code": "D-9",
+      "name": "Borax",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Borax · 3x · 20gm (D-9)"
+    },
+    {
+      "code": "D-10",
+      "name": "Calcarea Ars",
+      "potency": "6x",
+      "amount": "20gm",
+      "label": "Calcarea Ars · 6x · 20gm (D-10)"
+    },
+    {
+      "code": "D-11",
+      "name": "Calcarea Hypo",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Calcarea Hypo · 3x · 20gm (D-11)"
+    },
+    {
+      "code": "D-12",
+      "name": "Calcarea Iod",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Calcarea Iod · 3x · 20gm (D-12)"
+    },
+    {
+      "code": "D-13",
+      "name": "Calcarea Picrat",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Calcarea Picrat · 3x · 20gm (D-13)"
+    },
+    {
+      "code": "D-14",
+      "name": "Calcarea Ranal",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Calcarea Ranal · 3x · 20gm (D-14)"
+    },
+    {
+      "code": "D-15",
+      "name": "Chininum Ars",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Chininum Ars · 3x · 20gm (D-15)"
+    },
+    {
+      "code": "D-16",
+      "name": "Cholesterinum",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Cholesterinum · 3x · 20gm (D-16)"
+    },
+    {
+      "code": "D-17",
+      "name": "Cuprum.Oxy.N",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Cuprum.Oxy.N · 3x · 20gm (D-17)"
+    },
+    {
+      "code": "D-18",
+      "name": "Ferrum Pic",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Ferrum Pic · 3x · 20gm (D-18)"
+    },
+    {
+      "code": "D-19",
+      "name": "Formica Rufa",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Formica Rufa · 3x · 20gm (D-19)"
+    },
+    {
+      "code": "D-20",
+      "name": "Gun Powder",
+      "potency": "6x",
+      "amount": "20gm",
+      "label": "Gun Powder · 6x · 20gm (D-20)"
+    },
+    {
+      "code": "D-21",
+      "name": "Hecla Lava",
+      "potency": "6x",
+      "amount": "20gm",
+      "label": "Hecla Lava · 6x · 20gm (D-21)"
+    },
+    {
+      "code": "D-22",
+      "name": "Kali Ars",
+      "potency": "6x",
+      "amount": "20gm",
+      "label": "Kali Ars · 6x · 20gm (D-22)"
+    },
+    {
+      "code": "D-23",
+      "name": "Kali Brom",
+      "potency": "6x",
+      "amount": "20gm",
+      "label": "Kali Brom · 6x · 20gm (D-23)"
+    },
+    {
+      "code": "D-24",
+      "name": "Kali Iod",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Kali Iod · 3x · 20gm (D-24)"
+    },
+    {
+      "code": "D-25",
+      "name": "Lapis Alb",
+      "potency": "6x",
+      "amount": "20gm",
+      "label": "Lapis Alb · 6x · 20gm (D-25)"
+    },
+    {
+      "code": "D-26",
+      "name": "Myristic Seb",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Myristic Seb · 3x · 20gm (D-26)"
+    },
+    {
+      "code": "D-27",
+      "name": "Napthallinum",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Napthallinum · 3x · 20gm (D-27)"
+    },
+    {
+      "code": "D-28",
+      "name": "Ova Tosta",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Ova Tosta · 3x · 20gm (D-28)"
+    },
+    {
+      "code": "D-29",
+      "name": "Phytolacca",
+      "potency": "6x",
+      "amount": "20gm",
+      "label": "Phytolacca · 6x · 20gm (D-29)"
+    },
+    {
+      "code": "D-30",
+      "name": "Quercus G.Spi.",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Quercus G.Spi. · 3x · 20gm (D-30)"
+    },
+    {
+      "code": "D-31",
+      "name": "Santoninum",
+      "potency": "2x",
+      "amount": "20gm",
+      "label": "Santoninum · 2x · 20gm (D-31)"
+    },
+    {
+      "code": "D-32",
+      "name": "Sangunaria Nit",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Sangunaria Nit · 3x · 20gm (D-32)"
+    },
+    {
+      "code": "D-33",
+      "name": "Skookum Chu",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Skookum Chu · 3x · 20gm (D-33)"
+    },
+    {
+      "code": "D-34",
+      "name": "Strontium Carb",
+      "potency": "6x",
+      "amount": "20gm",
+      "label": "Strontium Carb · 6x · 20gm (D-34)"
+    },
+    {
+      "code": "D-35",
+      "name": "Thiosinaminum",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Thiosinaminum · 3x · 20gm (D-35)"
+    },
+    {
+      "code": "D-36",
+      "name": "Thyrodinum",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Thyrodinum · 3x · 20gm (D-36)"
+    },
+    {
+      "code": "D-37",
+      "name": "Uranium Nitri \\*",
+      "potency": "3x",
+      "amount": "20gm",
+      "label": "Uranium Nitri \\* · 3x · 20gm (D-37)"
+    },
+    {
+      "code": "E-1",
+      "name": "Aesculus.Hip. 15gm",
+      "potency": "",
+      "amount": "989",
+      "label": "Aesculus.Hip. 15gm · 989 (E-1)"
+    },
+    {
+      "code": "F-1",
+      "name": "Alfalfa Tonic",
+      "potency": "",
+      "amount": "115ml",
+      "label": "Alfalfa Tonic · 115ml (F-1)"
+    },
+    {
+      "code": "F-2",
+      "name": "Alfalfa Paedi.Drop",
+      "potency": "",
+      "amount": "30ml",
+      "label": "Alfalfa Paedi.Drop · 30ml (F-2)"
+    },
+    {
+      "code": "F-3",
+      "name": "Arnica.Hair.Oil _",
+      "potency": "",
+      "amount": "110ml",
+      "label": "Arnica.Hair.Oil _ · 110ml (F-3)"
+    },
+    {
+      "code": "F-4",
+      "name": "Calen.D.Powder 20gm 1008 F-5 Cine.Mari.Eye.Dro",
+      "potency": "",
+      "amount": "8ml",
+      "label": "Calen.D.Powder 20gm 1008 F-5 Cine.Mari.Eye.Dro · 8ml (F-4)"
+    },
+    {
+      "code": "F-6",
+      "name": "Euphra.Eye.Drops 8ml 1010 F-7 Mullein.Oil",
+      "potency": "",
+      "amount": "8ml",
+      "label": "Euphra.Eye.Drops 8ml 1010 F-7 Mullein.Oil · 8ml (F-6)"
+    },
+    {
+      "code": "F-8",
+      "name": "C.C.S.Drops 15ml 1012 F-9 Phytolacca.B.Tab _",
+      "potency": "",
+      "amount": "20gm",
+      "label": "C.C.S.Drops 15ml 1012 F-9 Phytolacca.B.Tab _ · 20gm (F-8)"
+    }
+  ]
+}
