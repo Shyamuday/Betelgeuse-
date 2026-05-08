@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, EventEmitter, inject, Input, type OnChanges, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, type OnChanges, Output, type SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ClinicApiService } from './clinic-api/clinic-api.service';
@@ -44,6 +44,10 @@ export type PrescriptionPayload = { notes: string; fileUrl: string };
       }
       .rx-readonly ul {
         margin: 0.35rem 0 0 1rem;
+      }
+      .chat-hint {
+        margin: 0.25rem 0 0.5rem;
+        font-size: 0.88rem;
       }
     `
   ],
@@ -176,8 +180,9 @@ export type PrescriptionPayload = { notes: string; fileUrl: string };
         </div>
         <label>
           New message
-          <textarea [(ngModel)]="messageBody"></textarea>
+          <textarea [(ngModel)]="messageBody" rows="4" placeholder="Ask a question or describe how you feel on the medicines…"></textarea>
         </label>
+        <p class="muted chat-hint">Use this chat for questions, side effects, or updates while you follow your plan.</p>
         <button class="secondary" [disabled]="disabled" (click)="emitSendMessage()">Send message</button>
 
         @if (userRole === 'ADMIN') {
@@ -208,6 +213,9 @@ export class ConsultationDetailComponent implements OnChanges {
   @Input() userRole: Role | null = null;
   @Input() disabled = false;
   @Input() doctorPortalUrl = '';
+  /** Bump to insert `composeMessageBody` into the chat field (e.g. from Today’s Medicines). */
+  @Input() composeMessageToken = 0;
+  @Input() composeMessageBody = '';
 
   @Output() messageSent = new EventEmitter<SendMessagePayload>();
   @Output() uploadPrescription = new EventEmitter<PrescriptionPayload>();
@@ -219,14 +227,35 @@ export class ConsultationDetailComponent implements OnChanges {
   attachmentCaption = '';
   attachmentBusy = false;
   attachmentNotice = '';
+  private lastAppliedComposeToken = 0;
 
-  ngOnChanges() {
-    this.messageBody = '';
+  ngOnChanges(changes: SimpleChanges) {
     this.attachmentNotice = '';
     this.prescription = {
       notes: this.consultation?.prescription?.notes || '',
       fileUrl: this.consultation?.prescription?.fileUrl || ''
     };
+
+    const composeApplied =
+      changes['composeMessageToken'] &&
+      this.composeMessageToken > 0 &&
+      this.composeMessageToken !== this.lastAppliedComposeToken &&
+      this.composeMessageBody.trim().length > 0;
+
+    if (composeApplied) {
+      this.lastAppliedComposeToken = this.composeMessageToken;
+      this.messageBody = this.composeMessageBody;
+      return;
+    }
+
+    if (changes['consultation']) {
+      const prevId = changes['consultation'].previousValue?.id;
+      const currId = changes['consultation'].currentValue?.id;
+      if (prevId !== currId) {
+        this.messageBody = '';
+        this.lastAppliedComposeToken = 0;
+      }
+    }
   }
 
   visiblePrescription(): Prescription | null {

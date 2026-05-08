@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, formatDate } from '@angular/common';
 import { Component, type OnDestroy, type OnInit, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -54,6 +54,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly activeConsultation = signal<Consultation | null>(null);
   readonly patientPrescriptions = signal<Prescription[]>([]);
   readonly todayDoseEvents = signal<DoseEvent[]>([]);
+  /** Patient: prefill consultation chat from Today’s Medicines (“Question or side effect”). */
+  readonly patientChatCompose = signal<{ token: number; text: string }>({ token: 0, text: '' });
   readonly notice = signal('');
   readonly isLoading = signal(false);
   readonly isProcessing = signal(false);
@@ -293,6 +295,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
       },
       complete: () => this.isProcessing.set(false)
     });
+  }
+
+  onDoseDoctorMessage(dose: DoseEvent) {
+    const cid = dose.consultationId;
+    if (!cid) {
+      this.showNotice('This reminder is not linked to a consultation. Use the chat on your active case or book a follow-up.');
+      return;
+    }
+    const c = this.consultations().find((x) => x.id === cid);
+    if (!c) {
+      this.showNotice('Could not find this consultation. Try again after the list loads.');
+      return;
+    }
+    this.setActive(c);
+    const when = formatDate(dose.scheduledFor, 'medium', 'en-IN');
+    const rx = dose.prescriptionItem;
+    const summary = [rx.medicineName, rx.strength, rx.dose, rx.frequency].filter(Boolean).join(' · ');
+    const text = `[Medicine / dose: ${summary} — scheduled ${when}, status: ${dose.status}]\n\n`;
+    this.patientChatCompose.update((prev) => ({ token: prev.token + 1, text }));
+    this.showNotice('Draft added below in Chat — add details and send.');
   }
 
   onSavePreferences(prefs: ReminderPrefs) {

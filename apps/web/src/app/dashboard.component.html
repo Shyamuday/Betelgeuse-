@@ -41,6 +41,8 @@
         [userRole]="auth.user()?.role ?? null"
         [disabled]="isProcessing()"
         [doctorPortalUrl]="doctorPortalUrl"
+        [composeMessageToken]="patientChatCompose().token"
+        [composeMessageBody]="patientChatCompose().text"
         (messageSent)="onMessageSent($event)"
         (attachmentsChanged)="loadConsultations()"
       />
@@ -51,10 +53,12 @@
         [doseEvents]="todayDoseEvents()"
         [disabled]="isProcessing()"
         [snoozeMinutes]="snoozeMinutes"
+        [doseFeedbackEnabled]="true"
         (snoozeMinutesChange)="snoozeMinutes = $event"
         (taken)="markDoseTaken($event)"
         (skipped)="skipDose($event)"
         (snoozed)="snoozeDose($event)"
+        (doctorMessage)="onDoseDoctorMessage($event)"
       />
       <app-reminder-preferences
         [prefs]="reminderPreferences"

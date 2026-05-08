@@ -36,8 +36,10 @@ export function mapPatientPrescriptionFromApi(row: Record<string, unknown>): Pre
 
 export function mapDoseEventFromApi(row: Record<string, unknown>): DoseEvent {
   const pi = row['prescriptionItem'] as Record<string, unknown> | undefined;
+  const prescription = row['prescription'] as { consultationId?: string } | undefined;
   return {
     id: row['id'] as string,
+    consultationId: prescription?.consultationId,
     scheduledFor: row['scheduledFor'] as string,
     status: row['status'] as DoseEvent['status'],
     note: row['note'] as string | undefined,
