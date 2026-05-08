@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ApplicationRef, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
@@ -57,6 +57,7 @@ import { VITALIS_LANG_STORAGE_KEY } from './app-language.factory';
 })
 export class LanguageSwitcherComponent {
   private readonly translate = inject(TranslateService);
+  private readonly appRef = inject(ApplicationRef);
 
   readonly languages = INDIAN_UI_LANGUAGES;
   readonly currentLang = signal(this.translate.getCurrentLang() || 'en');
@@ -65,13 +66,18 @@ export class LanguageSwitcherComponent {
     this.translate.onLangChange.subscribe((e) => this.currentLang.set(e.lang));
   }
 
-  onSelect(code: string) {
+  /**
+   * After loading a locale, run a full tick so templates that call `translate.instant()` in methods
+   * (not the `translate` pipe) re-render. Pipes update on their own; plain bindings do not.
+   */
+  async onSelect(code: string) {
     this.currentLang.set(code);
-    void firstValueFrom(this.translate.use(code));
     try {
       localStorage.setItem(VITALIS_LANG_STORAGE_KEY, code);
     } catch {
       /* private mode */
     }
+    await firstValueFrom(this.translate.use(code));
+    this.appRef.tick();
   }
 }

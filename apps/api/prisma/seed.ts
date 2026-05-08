@@ -1,12 +1,7 @@
-import { PrismaClient, PrescriptionOptionType, Role } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
+import 'dotenv/config';
+import { PrescriptionOptionType, Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-
-const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL
-});
-
-const prisma = new PrismaClient({ adapter });
+import { prisma } from '../src/db.js';
 
 async function main() {
   const passwordHash = await bcrypt.hash('Password@123', 10);

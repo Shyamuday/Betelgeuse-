@@ -1,0 +1,173 @@
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <h2>Offline clinic locations</h2>
+      <p class="panel-sub">
+        Sites where patients can book <strong>in-clinic</strong> visits. Shown in the patient app when they choose an in-person consultation.
+      </p>
+    </div>
+    <button type="button" class="btn-primary" (click)="showCreateForm = !showCreateForm">
+      {{ showCreateForm ? 'Cancel' : '+ New location' }}
+    </button>
+  </div>
+
+  @if (showCreateForm) {
+    <div class="create-form">
+      <h3>New location</h3>
+      <div class="field-row">
+        <label class="field">
+          Display name
+          <input [(ngModel)]="newLoc.name" name="newName" placeholder="e.g. Vitalis — Indiranagar" />
+        </label>
+        <label class="field">
+          Slug (optional)
+          <input [(ngModel)]="newLoc.slug" name="newSlug" placeholder="e.g. bengaluru-indiranagar" />
+          <span class="field-hint">Lowercase letters, numbers, hyphens only</span>
+        </label>
+      </div>
+      <label class="field">
+        Address line 1
+        <input [(ngModel)]="newLoc.addressLine1" name="newAddr1" placeholder="Street / building" />
+      </label>
+      <label class="field">
+        Address line 2 (optional)
+        <input [(ngModel)]="newLoc.addressLine2" name="newAddr2" />
+      </label>
+      <div class="field-row">
+        <label class="field">
+          City
+          <input [(ngModel)]="newLoc.city" name="newCity" />
+        </label>
+        <label class="field">
+          State
+          <input [(ngModel)]="newLoc.state" name="newState" />
+        </label>
+      </div>
+      <div class="field-row">
+        <label class="field">
+          Pincode
+          <input [(ngModel)]="newLoc.pincode" name="newPin" />
+        </label>
+        <label class="field">
+          Phone
+          <input [(ngModel)]="newLoc.phone" name="newPhone" placeholder="+91-..." />
+        </label>
+      </div>
+      <div class="field-row">
+        <label class="field">
+          Timezone
+          <input [(ngModel)]="newLoc.timezone" name="newTz" />
+        </label>
+        <label class="field">
+          Sort order
+          <input type="number" [(ngModel)]="newLoc.sortOrder" name="newSort" />
+        </label>
+      </div>
+      <label class="field checkbox-field">
+        <input type="checkbox" [(ngModel)]="newLoc.isActive" name="newActive" />
+        Active (visible for new bookings)
+      </label>
+      @if (createError) {
+        <p class="error">{{ createError }}</p>
+      }
+      <button type="button" class="btn-save" (click)="createLocation()" [disabled]="creating">
+        {{ creating ? 'Creating…' : 'Create location' }}
+      </button>
+    </div>
+  }
+
+  @if (loading) {
+    <p class="loading-text">Loading locations…</p>
+  } @else if (error) {
+    <div class="error-row">
+      <p class="error">{{ error }}</p>
+      <button type="button" class="retry-btn" (click)="load()">Retry</button>
+    </div>
+  } @else {
+    @for (loc of locations; track loc.id) {
+      <article class="loc-card" [class.editing]="editingId === loc.id">
+        @if (editingId !== loc.id) {
+          <div class="loc-header">
+            <div>
+              <strong>{{ loc.name }}</strong>
+              @if (!loc.isActive) {
+                <span class="inactive-badge">Inactive</span>
+              }
+              <span class="sort-badge">Order {{ loc.sortOrder }}</span>
+            </div>
+            <button type="button" class="btn-edit" (click)="startEdit(loc)">Edit</button>
+          </div>
+          <p class="loc-address">{{ formatAddress(loc) }}</p>
+          @if (loc.phone) {
+            <p class="loc-meta">{{ loc.phone }} · {{ loc.timezone }}</p>
+          } @else {
+            <p class="loc-meta">{{ loc.timezone }}</p>
+          }
+        } @else {
+          <h4>Editing {{ loc.name }}</h4>
+          <div class="field-row">
+            <label class="field">
+              Display name
+              <input [(ngModel)]="draft.name" name="dName" />
+            </label>
+            <label class="field">
+              Slug
+              <input [(ngModel)]="draft.slug" name="dSlug" />
+            </label>
+          </div>
+          <label class="field">
+            Address line 1
+            <input [(ngModel)]="draft.addressLine1" name="dAddr1" />
+          </label>
+          <label class="field">
+            Address line 2
+            <input [(ngModel)]="draft.addressLine2" name="dAddr2" />
+          </label>
+          <div class="field-row">
+            <label class="field">
+              City
+              <input [(ngModel)]="draft.city" name="dCity" />
+            </label>
+            <label class="field">
+              State
+              <input [(ngModel)]="draft.state" name="dState" />
+            </label>
+          </div>
+          <div class="field-row">
+            <label class="field">
+              Pincode
+              <input [(ngModel)]="draft.pincode" name="dPin" />
+            </label>
+            <label class="field">
+              Phone
+              <input [(ngModel)]="draft.phone" name="dPhone" />
+            </label>
+          </div>
+          <div class="field-row">
+            <label class="field">
+              Timezone
+              <input [(ngModel)]="draft.timezone" name="dTz" />
+            </label>
+            <label class="field">
+              Sort order
+              <input type="number" [(ngModel)]="draft.sortOrder" name="dSort" />
+            </label>
+          </div>
+          <label class="field checkbox-field">
+            <input type="checkbox" [(ngModel)]="draft.isActive" name="dActive" />
+            Active
+          </label>
+          @if (saveError) {
+            <p class="error">{{ saveError }}</p>
+          }
+          <div class="edit-actions">
+            <button type="button" class="btn-save" (click)="saveEdit()" [disabled]="saving">Save</button>
+            <button type="button" class="btn-cancel" (click)="cancelEdit()" [disabled]="saving">Cancel</button>
+          </div>
+        }
+      </article>
+    } @empty {
+      <p class="empty-state">No locations yet. Add one for in-clinic bookings.</p>
+    }
+  }
+</section>

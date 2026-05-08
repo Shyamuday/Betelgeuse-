@@ -5,6 +5,7 @@ import { AdminDashboard } from './features/dashboard/admin-dashboard/admin-dashb
 import { ConsumersPage } from './features/consumers/consumers-page/consumers-page';
 import { DoctorsPage } from './features/doctors/doctors-page/doctors-page';
 import { DiseasesPage } from './features/diseases/diseases-page/diseases-page';
+import { LocationsPage } from './features/locations/locations-page/locations-page';
 import { AdminShell } from './layout/admin-shell/admin-shell';
 
 export const routes: Routes = [
@@ -18,7 +19,8 @@ export const routes: Routes = [
       { path: 'dashboard', component: AdminDashboard },
       { path: 'doctors', component: DoctorsPage },
       { path: 'consumers', component: ConsumersPage },
-      { path: 'diseases', component: DiseasesPage }
+      { path: 'diseases', component: DiseasesPage },
+      { path: 'locations', component: LocationsPage }
     ]
   },
   { path: '**', redirectTo: '' }

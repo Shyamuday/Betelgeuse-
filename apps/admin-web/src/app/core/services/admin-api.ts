@@ -216,4 +216,60 @@ export class AdminApi {
   updateDisease(id: string, payload: { name: string; description: string; feeInPaise: number; isActive: boolean; intakeQuestions: string[] }) {
     return firstValueFrom(this.http.put(`${this.apiBase}/admin/diseases/${id}`, payload));
   }
+
+  getLocations() {
+    return firstValueFrom(
+      this.http.get<{
+        locations: Array<{
+          id: string;
+          name: string;
+          slug: string | null;
+          addressLine1: string;
+          addressLine2: string | null;
+          city: string | null;
+          state: string | null;
+          pincode: string | null;
+          phone: string | null;
+          timezone: string;
+          isActive: boolean;
+          sortOrder: number;
+        }>;
+      }>(`${this.apiBase}/admin/locations`)
+    );
+  }
+
+  createLocation(payload: {
+    name: string;
+    slug?: string | null;
+    addressLine1: string;
+    addressLine2?: string | null;
+    city?: string | null;
+    state?: string | null;
+    pincode?: string | null;
+    phone?: string | null;
+    timezone?: string;
+    isActive?: boolean;
+    sortOrder?: number;
+  }) {
+    return firstValueFrom(this.http.post(`${this.apiBase}/admin/locations`, payload));
+  }
+
+  updateLocation(
+    id: string,
+    payload: {
+      name: string;
+      slug?: string | null;
+      addressLine1: string;
+      addressLine2?: string | null;
+      city?: string | null;
+      state?: string | null;
+      pincode?: string | null;
+      phone?: string | null;
+      timezone?: string;
+      isActive?: boolean;
+      sortOrder?: number;
+    }
+  ) {
+    return firstValueFrom(this.http.put(`${this.apiBase}/admin/locations/${id}`, payload));
+  }
 }

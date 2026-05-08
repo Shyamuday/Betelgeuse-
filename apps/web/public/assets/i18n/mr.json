@@ -12,7 +12,9 @@
     "language": "Language",
     "logout": "Logout",
     "loadingClinicData": "Loading clinic data…",
-    "dashboard": "dashboard"
+    "dashboard": "dashboard",
+    "digitalClinicTagline": "Digital clinic",
+    "chatWhatsAppAria": "Chat on WhatsApp"
   },
   "dashboard": {
     "subtitle": {
