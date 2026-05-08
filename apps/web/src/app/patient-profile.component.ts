@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, type OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../environments/environment';
-import { type AuthService } from './auth/auth.service';
+import { AuthService } from './auth/auth.service';
 
 type Profile = {
   id: string;

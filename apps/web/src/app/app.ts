@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { type SeoService } from './seo.service';
+import { SeoService } from './seo.service';
 
 @Component({
   selector: 'app-root',

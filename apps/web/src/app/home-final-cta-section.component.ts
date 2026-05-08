@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { AuthFormOverlayComponent } from './auth/auth-form-overlay.component';
-import { type AppOverlayService } from './overlay.service';
+import { AppOverlayService } from './overlay.service';
 
 @Component({
   selector: 'app-home-final-cta-section',

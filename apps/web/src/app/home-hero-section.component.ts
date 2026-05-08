@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { type Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { type AuthService } from './auth/auth.service';
+import { AuthService } from './auth/auth.service';
 
 type BookStep = 'form' | 'otp' | 'loading' | 'done';
 

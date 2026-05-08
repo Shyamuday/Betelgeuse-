@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { type Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { type AdminAuth } from '../../core/services/admin-auth';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AdminAuth } from '../../core/services/admin-auth';
 
 @Component({
   selector: 'app-admin-shell',

@@ -73,7 +73,8 @@ export default tseslint.config(
     },
     processor: angular.processInlineTemplates,
     rules: {
-      ...angularTsRules
+      ...angularTsRules,
+      '@typescript-eslint/consistent-type-imports': 'off'
     }
   },
   {

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { type HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 

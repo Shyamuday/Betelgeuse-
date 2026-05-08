@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, type OnDestroy, type OnInit, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { type Router } from '@angular/router';
-import { type RealtimeChannel } from '@supabase/supabase-js';
+import { Router } from '@angular/router';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { AppFooterComponent } from './app-footer.component';
 import { AppHeaderComponent } from './app-header.component';
 import { AdminStatsComponent } from './admin-stats.component';
@@ -18,8 +18,8 @@ import { PrescriptionHistoryComponent } from './prescription-history.component';
 import { ReminderPreferencesComponent, type ReminderPrefs } from './reminder-preferences.component';
 import { TodayMedicinesComponent } from './today-medicines.component';
 import { PatientProfileComponent } from './patient-profile.component';
-import { type ClinicApiService } from './clinic-api/clinic-api.service';
-import { type AuthService } from './auth/auth.service';
+import { ClinicApiService } from './clinic-api/clinic-api.service';
+import { AuthService } from './auth/auth.service';
 import type { BillingPlan, Consultation, Disease, Doctor, DoseEvent, Prescription } from './interfaces';
 import { environment } from '../environments/environment';
 
