@@ -33,7 +33,7 @@ export function registerAuthRoutes(app: express.Application) {
         .object({
           mobile: z.string().min(8),
           otp: z.string().min(4),
-          name: z.string().trim().max(120).optional()
+          name: z.string().trim().max(120).nullish()
         })
         .parse(req.body);
 
@@ -46,7 +46,7 @@ export function registerAuthRoutes(app: express.Application) {
 
       const user = await prisma.user.upsert({
         where: { mobile: body.mobile },
-        update: resolvedName ? { name: resolvedName } : {},
+        update: resolvedName ? { name: resolvedName } : { mobile: body.mobile },
         create: {
           name: resolvedName ?? 'Patient',
           mobile: body.mobile,

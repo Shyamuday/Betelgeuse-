@@ -19,6 +19,8 @@ type ForgotStep = 'none' | 'email' | 'sent' | 'reset';
 
 type PatientAuthStep = 'signin' | 'register' | 'forgot' | 'forgot-sent' | 'reset';
 
+type PatientOtpUiStep = 'mobile' | 'otp';
+
 @Component({
   selector: 'app-auth-form-overlay',
   imports: [CommonModule, FormsModule, GoogleSignInButtonComponent],
@@ -30,7 +32,6 @@ type PatientAuthStep = 'signin' | 'register' | 'forgot' | 'forgot-sent' | 'reset
         @switch (patientStep()) {
           @case ('signin') {
             <h2>Login to continue</h2>
-            <p class="muted">Sign in with the email or mobile number registered on your account.</p>
 
             <form (ngSubmit)="loginPatientWithPassword()">
               <label>
@@ -65,44 +66,54 @@ type PatientAuthStep = 'signin' | 'register' | 'forgot' | 'forgot-sent' | 'reset
               </button>
             </div>
 
-            <div class="divider-text">or continue with Google</div>
             <form (ngSubmit)="loginWithGoogle()">
               <button class="secondary" type="submit" [disabled]="isProcessing()">Continue with Google</button>
-              <p class="muted">Uses the Google provider configured in Supabase Auth.</p>
             </form>
           }
 
           @case ('register') {
-            <button type="button" class="back-btn" (click)="goPatientStep('signin')">← Back to login</button>
-            <h2>Mobile number &amp; OTP</h2>
-            <p class="muted">
-              Enter your <strong>mobile number</strong>. Tap <strong>Send OTP</strong>, enter the code (SMS or, in development, the
-              code shown on screen), then tap <strong>Continue with OTP</strong>. Works for new and existing patients — no name
-              required.
-            </p>
-
-            <form (ngSubmit)="loginPatientWithOtp()">
-              <label>
-                Mobile number
-                <input name="otpMobile" [(ngModel)]="patientOtp.mobile" placeholder="Enter 10-digit mobile number" />
-              </label>
-              <div class="otp-row">
-                <label>
-                  OTP
-                  <input name="otpCode" [(ngModel)]="patientOtp.otp" placeholder="Enter 6-digit OTP" />
-                </label>
-                <button type="button" class="secondary" [disabled]="isProcessing()" (click)="requestOtp()">
-                  Send OTP
-                </button>
-              </div>
-              <button class="secondary" type="submit" [disabled]="isProcessing()">Continue with OTP</button>
-            </form>
+            @switch (patientOtpUiStep()) {
+              @case ('mobile') {
+                <button type="button" class="back-btn" (click)="goPatientStep('signin')">← Back</button>
+                <h2>Mobile number</h2>
+                <form (ngSubmit)="requestOtpAndProceed($event)">
+                  <label>
+                    Mobile number
+                    <input
+                      name="otpMobile"
+                      [(ngModel)]="patientOtp.mobile"
+                      placeholder="Enter 10-digit mobile number"
+                      inputmode="tel"
+                      autocomplete="tel"
+                    />
+                  </label>
+                  <button class="primary" type="submit" [disabled]="isProcessing()">Get OTP</button>
+                </form>
+              }
+              @case ('otp') {
+                <button type="button" class="back-btn" (click)="backToPatientMobileStep()">← Back</button>
+                <h2>OTP</h2>
+                <form (ngSubmit)="loginPatientWithOtp()">
+                  <label>
+                    OTP
+                    <input
+                      name="otpCode"
+                      [(ngModel)]="patientOtp.otp"
+                      placeholder="Enter 6-digit OTP"
+                      inputmode="numeric"
+                      maxlength="6"
+                      autocomplete="one-time-code"
+                    />
+                  </label>
+                  <button class="primary" type="submit" [disabled]="isProcessing()">Login</button>
+                </form>
+              }
+            }
           }
 
           @case ('forgot') {
             <button type="button" class="back-btn" (click)="goPatientStep('signin')">← Back to login</button>
             <h2>Forgot password</h2>
-            <p class="muted">Enter the <strong>email</strong> on your account. We’ll send a reset link.</p>
 
             <form (ngSubmit)="forgotPassword()">
               <label>
@@ -125,14 +136,6 @@ type PatientAuthStep = 'signin' | 'register' | 'forgot' | 'forgot-sent' | 'reset
               <span class="notice-icon">✓</span>
               <h2>Reset link sent</h2>
             </div>
-            <p class="muted">
-              We’ve sent a password reset link to <strong>{{ forgot.email }}</strong>. Please check your inbox and click
-              the link.
-            </p>
-
-            <div class="step-divider">
-              <span>After clicking the link</span>
-            </div>
 
             <button class="primary" type="button" (click)="goPatientStep('reset')">
               I’ve clicked the link → Enter new password
@@ -144,7 +147,6 @@ type PatientAuthStep = 'signin' | 'register' | 'forgot' | 'forgot-sent' | 'reset
           @case ('reset') {
             <button type="button" class="back-btn" (click)="goPatientStep('signin')">← Back to login</button>
             <h2>Set new password</h2>
-            <p class="muted">Enter your new password below.</p>
 
             <form (ngSubmit)="resetPassword()">
               <label>
@@ -182,7 +184,6 @@ type PatientAuthStep = 'signin' | 'register' | 'forgot' | 'forgot-sent' | 'reset
           @case ('none') {
             <!-- Normal Login -->
             <h2>Doctor login</h2>
-            <p class="muted">Doctors and admins use internal credentials.</p>
 
             <form (ngSubmit)="loginStaff()">
               <label>
@@ -200,12 +201,8 @@ type PatientAuthStep = 'signin' | 'register' | 'forgot' | 'forgot-sent' | 'reset
               Forgot password?
             </button>
 
-            <div class="divider-text">or continue with Google</div>
             @if (googleClientId) {
               <app-google-sign-in-button [clientId]="googleClientId" (credential)="loginStaffWithGoogle($event)" />
-              <p class="muted">Staff Google sign-in: your Google email must match your doctor or admin account.</p>
-            } @else {
-              <p class="muted">For staff Google sign-in, set <code>googleClientId</code> in environment (same as API <code>GOOGLE_CLIENT_ID</code>).</p>
             }
           }
 
@@ -213,7 +210,6 @@ type PatientAuthStep = 'signin' | 'register' | 'forgot' | 'forgot-sent' | 'reset
             <!-- Step 1: Enter email -->
             <button type="button" class="back-btn" (click)="goToForgotStep('none')">← Back to login</button>
             <h2>Forgot password</h2>
-            <p class="muted">Enter your registered email to receive a password reset link.</p>
 
             <form (ngSubmit)="forgotPassword()">
               <label>
@@ -231,11 +227,6 @@ type PatientAuthStep = 'signin' | 'register' | 'forgot' | 'forgot-sent' | 'reset
               <span class="notice-icon">✓</span>
               <h2>Reset link sent</h2>
             </div>
-            <p class="muted">We've sent a password reset link to <strong>{{ forgot.email }}</strong>. Please check your inbox and click the link.</p>
-
-            <div class="step-divider">
-              <span>After clicking the link</span>
-            </div>
 
             <button class="primary" type="button" (click)="goToForgotStep('reset')">
               I've clicked the link → Enter new password
@@ -250,7 +241,6 @@ type PatientAuthStep = 'signin' | 'register' | 'forgot' | 'forgot-sent' | 'reset
             <!-- Step 3: Enter new password -->
             <button type="button" class="back-btn" (click)="goToForgotStep('sent')">← Back</button>
             <h2>Set new password</h2>
-            <p class="muted">Enter your new password below.</p>
 
             <form (ngSubmit)="resetPassword()">
               <label>
@@ -282,6 +272,7 @@ export class AuthFormOverlayComponent {
       ? 'reset'
       : 'signin'
   );
+  readonly patientOtpUiStep = signal<PatientOtpUiStep>('mobile');
   private activeOverlayRef?: AppOverlayRef;
 
   patientCredentials = {
@@ -324,7 +315,16 @@ export class AuthFormOverlayComponent {
       this.forgot.password = '';
       this.forgot.confirmPassword = '';
     }
+    if (step === 'register') {
+      this.patientOtpUiStep.set('mobile');
+      this.patientOtp.otp = '';
+    }
     this.patientStep.set(step);
+  }
+
+  backToPatientMobileStep() {
+    this.patientOtp.otp = '';
+    this.patientOtpUiStep.set('mobile');
   }
 
   canResetPassword(): boolean {
@@ -334,9 +334,19 @@ export class AuthFormOverlayComponent {
       this.forgot.password.length >= 8);
   }
 
-  requestOtp() {
-    this.process('Sending OTP...', this.auth.requestOtp(this.patientOtp.mobile)).subscribe({
-      next: (response) => this.showSuccess(`OTP sent successfully. Development OTP: ${response.devOtp}`),
+  requestOtpAndProceed(event: Event) {
+    event.preventDefault();
+    const mobile = this.patientOtp.mobile.trim().replace(/\s+/g, '');
+    if (mobile.length < 8) {
+      this.showError('Enter a valid mobile number.');
+      return;
+    }
+    this.patientOtp.mobile = mobile;
+    this.process('Sending OTP...', this.auth.requestOtp(mobile)).subscribe({
+      next: (response) => {
+        this.patientOtpUiStep.set('otp');
+        this.showSuccess(`OTP sent. Development code: ${response.devOtp}`);
+      },
       error: () => this.showError('Could not request OTP.')
     });
   }
