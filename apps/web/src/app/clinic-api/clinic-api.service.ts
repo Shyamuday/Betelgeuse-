@@ -38,12 +38,19 @@ export class ClinicApiService {
     intakeAnswers: Record<string, string>;
     purchaseType?: 'ONE_TIME' | 'PLAN';
     planCode?: string;
+    channel?: 'ONLINE_CHAT' | 'VIDEO' | 'PHONE' | 'IN_CLINIC';
+    locationId?: string | null;
   }) {
     return from(this.createConsultationViaApiOrSupabase(payload));
   }
 
   billingPlans() {
     return from(rest.restFetchBillingPlans(this.apiFetch));
+  }
+
+  /** Public catalog; token sent if present. */
+  clinicLocations() {
+    return from(rest.restFetchClinicLocations(this.apiFetch));
   }
 
   createPaymentOrder(consultationId: string) {
@@ -153,6 +160,8 @@ export class ClinicApiService {
     intakeAnswers: Record<string, string>;
     purchaseType?: 'ONE_TIME' | 'PLAN';
     planCode?: string;
+    channel?: 'ONLINE_CHAT' | 'VIDEO' | 'PHONE' | 'IN_CLINIC';
+    locationId?: string | null;
   }) {
     assertBackendSession(this.backendToken);
     return rest.restCreateConsultation(this.apiFetch, payload);

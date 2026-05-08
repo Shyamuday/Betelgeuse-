@@ -1,4 +1,5 @@
 import type {
+  ClinicLocation,
   Consultation,
   ConsultationAttachment,
   ConsultationAttachmentKind,
@@ -8,6 +9,24 @@ import type {
   Payment,
   Prescription
 } from './interfaces';
+
+export function mapClinicLocationFromApi(row: Record<string, unknown> | null | undefined): ClinicLocation | null {
+  if (!row || typeof row !== 'object') {
+    return null;
+  }
+  return {
+    id: row['id'] as string,
+    name: row['name'] as string,
+    slug: (row['slug'] as string | null) ?? null,
+    addressLine1: row['addressLine1'] as string,
+    addressLine2: (row['addressLine2'] as string | null) ?? null,
+    city: (row['city'] as string | null) ?? null,
+    state: (row['state'] as string | null) ?? null,
+    pincode: (row['pincode'] as string | null) ?? null,
+    phone: (row['phone'] as string | null) ?? null,
+    timezone: (row['timezone'] as string | null) ?? null
+  };
+}
 
 export function mapPatientPrescriptionFromApi(row: Record<string, unknown>): Prescription {
   return {
@@ -83,6 +102,8 @@ export function mapConsultationFromSupabaseRow(row: Record<string, unknown>): Co
   return {
     id: row['id'] as string,
     status: row['status'] as Consultation['status'],
+    channel: (row['channel'] as Consultation['channel']) || 'ONLINE_CHAT',
+    location: mapClinicLocationFromApi(row['location'] as Record<string, unknown> | null | undefined),
     intakeAnswers: (row['intake_answers'] as Record<string, string>) || {},
     createdAt: row['created_at'] as string,
     patient: mapUserFromSupabaseProfile(row['patient'] as Record<string, unknown> | null),
@@ -183,6 +204,8 @@ export function mapConsultationFromApi(row: Record<string, unknown>): Consultati
   return {
     id: row['id'] as string,
     status: row['status'] as Consultation['status'],
+    channel: (row['channel'] as Consultation['channel']) || 'ONLINE_CHAT',
+    location: mapClinicLocationFromApi(row['location'] as Record<string, unknown> | null | undefined),
     intakeAnswers: (row['intakeAnswers'] as Record<string, string>) || {},
     createdAt: row['createdAt'] as string,
     patient: row['patient'] as Consultation['patient'],

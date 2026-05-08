@@ -18,6 +18,8 @@ type DoseEvent = {
 type WorklistConsultation = {
   id: string;
   status: 'ASSIGNED' | 'IN_PROGRESS' | 'PRESCRIPTION_UPLOADED' | 'COMPLETED' | string;
+  channel?: string;
+  location?: { name?: string; city?: string | null } | null;
   createdAt: string;
   patient?: { id: string; name: string; mobile?: string | null };
   disease?: { name?: string };
@@ -149,7 +151,10 @@ export class PatientsPage {
       item.patient?.id || '',
       item.patient?.mobile || '',
       item.disease?.name || '',
-      item.status || ''
+      item.status || '',
+      item.channel || '',
+      item.location?.name || '',
+      item.location?.city || ''
     ]
       .join(' ')
       .toLowerCase();
@@ -185,6 +190,18 @@ export class PatientsPage {
 
   openInAppointments(consultationId: string) {
     void this.router.navigate(['/appointments'], { queryParams: { consultationId } });
+  }
+
+  worklistMeta(item: WorklistConsultation): string {
+    const parts: string[] = [];
+    if (item.channel) {
+      parts.push(item.channel.replaceAll('_', ' '));
+    }
+    if (item.location?.name) {
+      const c = item.location.city?.trim();
+      parts.push(c ? `${item.location.name} (${c})` : item.location.name);
+    }
+    return parts.join(' · ');
   }
 
   showSection(section: 'ASSIGNED' | 'IN_PROGRESS' | 'FOLLOW_UP_DUE') {

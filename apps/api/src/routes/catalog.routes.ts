@@ -27,4 +27,27 @@ export function registerCatalogRoutes(app: express.Application) {
       res.json({ plans });
     })
   );
+
+  app.get(
+    '/locations',
+    asyncRoute(async (_req, res) => {
+      const locations = await prisma.clinicLocation.findMany({
+        where: { isActive: true },
+        orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          addressLine1: true,
+          addressLine2: true,
+          city: true,
+          state: true,
+          pincode: true,
+          phone: true,
+          timezone: true
+        }
+      });
+      res.json({ locations });
+    })
+  );
 }

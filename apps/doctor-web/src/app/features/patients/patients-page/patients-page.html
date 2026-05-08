@@ -27,6 +27,9 @@
   @for (item of assignedCases(); track item.id) {
     <article class="card">
       <strong>{{ item.patient?.name || 'Patient' }} - {{ item.disease?.name || 'Consultation' }}</strong>
+      @if (worklistMeta(item)) {
+        <p class="meta">{{ worklistMeta(item) }}</p>
+      }
       <p>Status: {{ item.status }} | Created: {{ item.createdAt | date: 'medium' }}</p>
       <small>Patient ID: {{ item.patient?.id }}</small>
       <div class="actions"><button type="button" (click)="openInAppointments(item.id)">Open in Appointments</button></div>
@@ -43,6 +46,9 @@
   @for (item of inProgressCases(); track item.id) {
     <article class="card">
       <strong>{{ item.patient?.name || 'Patient' }} - {{ item.disease?.name || 'Consultation' }}</strong>
+      @if (worklistMeta(item)) {
+        <p class="meta">{{ worklistMeta(item) }}</p>
+      }
       <p>Status: {{ item.status }} | Created: {{ item.createdAt | date: 'medium' }}</p>
       <small>Patient ID: {{ item.patient?.id }}</small>
       <div class="actions"><button type="button" (click)="openInAppointments(item.id)">Open in Appointments</button></div>
@@ -59,6 +65,9 @@
   @for (item of followUpDueCases(); track item.id) {
     <article class="card follow-up-card" [class.urgent]="followUpUrgency(item) !== 'NORMAL'">
       <strong>{{ item.patient?.name || 'Patient' }} - {{ item.disease?.name || 'Consultation' }}</strong>
+      @if (worklistMeta(item)) {
+        <p class="meta">{{ worklistMeta(item) }}</p>
+      }
       <p>Status: {{ item.status }} | Created: {{ item.createdAt | date: 'medium' }}</p>
       @if (followUpUrgency(item) === 'OVERDUE') {
         <span class="badge overdue">Overdue</span>

@@ -1,9 +1,10 @@
 import {
+  mapClinicLocationFromApi,
   mapConsultationFromApi,
   mapDoseEventFromApi,
   mapPatientPrescriptionFromApi
 } from '../clinic-api-mappers';
-import type { BillingPlan, Consultation, Doctor, Prescription } from '../interfaces';
+import type { BillingPlan, ClinicLocation, Consultation, Doctor, Prescription } from '../interfaces';
 import type { JsonApiFetch } from './json-api-fetch';
 import type { RazorpayOrderResponse, ReminderPreferencePayload } from './clinic-api.types';
 
@@ -21,6 +22,8 @@ export async function restCreateConsultation(
     intakeAnswers: Record<string, string>;
     purchaseType?: 'ONE_TIME' | 'PLAN';
     planCode?: string;
+    channel?: 'ONLINE_CHAT' | 'VIDEO' | 'PHONE' | 'IN_CLINIC';
+    locationId?: string | null;
   }
 ) {
   return apiFetch('/consultations', {
@@ -53,6 +56,14 @@ export async function restVerifyRazorpayPayment(
 
 export async function restFetchBillingPlans(apiFetch: JsonApiFetch) {
   return apiFetch<{ plans: BillingPlan[] }>('/billing/plans');
+}
+
+export async function restFetchClinicLocations(apiFetch: JsonApiFetch): Promise<{ locations: ClinicLocation[] }> {
+  const response = await apiFetch<{ locations: Array<Record<string, unknown>> }>('/locations');
+  const locations = (response.locations || [])
+    .map((row) => mapClinicLocationFromApi(row))
+    .filter((loc): loc is ClinicLocation => loc != null);
+  return { locations };
 }
 
 export async function restSendConsultationMessage(apiFetch: JsonApiFetch, consultationId: string, body: string) {

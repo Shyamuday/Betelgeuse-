@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { type Consultation, type Role } from './interfaces';
+import { type Consultation, type Role, CONSULTATION_CHANNEL_LABELS } from './interfaces';
 
 @Component({
   selector: 'app-consultation-list',
@@ -16,6 +16,7 @@ import { type Consultation, type Role } from './interfaces';
             <button type="button" class="link-card" (click)="selected.emit(consultation)">
               <strong>{{ consultation.disease.name }}</strong>
               <span>{{ consultation.patient.name }}</span>
+              <small class="channel-pill">{{ channelLine(consultation) }}</small>
               @if (userRole === 'PATIENT') {
                 <small class="journey-hint">{{ patientJourneyLabel(consultation.status) }}</small>
               } @else {
@@ -78,6 +79,12 @@ import { type Consultation, type Role } from './interfaces';
       .patient-empty {
         padding: 0.25rem 0;
       }
+      .channel-pill {
+        display: block;
+        color: #475569;
+        font-weight: 600;
+        margin-top: 0.15rem;
+      }
     `
   ]
 })
@@ -90,6 +97,14 @@ export class ConsultationListComponent {
 
   @Output() selected = new EventEmitter<Consultation>();
   @Output() pay = new EventEmitter<Consultation>();
+
+  channelLine(c: Consultation): string {
+    const ch = CONSULTATION_CHANNEL_LABELS[c.channel] || c.channel;
+    if (c.location?.name) {
+      return `${ch} · ${c.location.name}`;
+    }
+    return ch;
+  }
 
   patientJourneyLabel(status: Consultation['status']): string {
     switch (status) {

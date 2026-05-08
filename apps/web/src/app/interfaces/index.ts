@@ -1,4 +1,6 @@
 export type { BillingPlan, Payment } from './billing.interface';
+export type { ConsultationChannel, ClinicLocation } from './clinic-location.interface';
+export { CONSULTATION_CHANNEL_LABELS } from './clinic-location.interface';
 export type { Consultation } from './consultation.interface';
 export type { ConsultationAttachment, ConsultationAttachmentKind } from './consultation-attachment.interface';
 export type { Disease, DiseaseInfo } from './disease.interface';

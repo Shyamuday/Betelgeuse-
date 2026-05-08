@@ -77,6 +77,64 @@ async function main() {
     }
   });
 
+  const demoLocations: Array<{
+    slug: string;
+    name: string;
+    addressLine1: string;
+    city: string | null;
+    state: string | null;
+    pincode: string | null;
+    phone: string | null;
+    sortOrder: number;
+  }> = [
+    {
+      slug: 'bengaluru-indiranagar',
+      name: 'Vitalis — Indiranagar',
+      addressLine1: '100 Demo Road, Indiranagar',
+      city: 'Bengaluru',
+      state: 'Karnataka',
+      pincode: '560038',
+      phone: '+91-80-0000-0001',
+      sortOrder: 0
+    },
+    {
+      slug: 'hyderabad-banjara',
+      name: 'Vitalis — Banjara Hills',
+      addressLine1: '200 Care Street, Banjara Hills',
+      city: 'Hyderabad',
+      state: 'Telangana',
+      pincode: '500034',
+      phone: '+91-40-0000-0002',
+      sortOrder: 1
+    }
+  ];
+
+  for (const loc of demoLocations) {
+    await prisma.clinicLocation.upsert({
+      where: { slug: loc.slug },
+      update: {
+        name: loc.name,
+        addressLine1: loc.addressLine1,
+        city: loc.city,
+        state: loc.state,
+        pincode: loc.pincode,
+        phone: loc.phone,
+        sortOrder: loc.sortOrder,
+        isActive: true
+      },
+      create: {
+        slug: loc.slug,
+        name: loc.name,
+        addressLine1: loc.addressLine1,
+        city: loc.city,
+        state: loc.state,
+        pincode: loc.pincode,
+        phone: loc.phone,
+        sortOrder: loc.sortOrder
+      }
+    });
+  }
+
   const defaultMethods = [
     'Classical Homeopathy',
     'Clinical Homeopathy',
@@ -136,7 +194,7 @@ async function main() {
     });
   }
 
-  console.log('Seeded demo admin, doctor, and disease catalog.');
+  console.log('Seeded demo admin, doctor, diseases, clinic locations, and catalog.');
   console.log(`Admin login: ${admin.email} / Password@123`);
 }
 

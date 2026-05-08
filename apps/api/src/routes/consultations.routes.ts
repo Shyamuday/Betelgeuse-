@@ -1,5 +1,5 @@
 import type express from 'express';
-import { ConsultationStatus, PaymentStatus, Role } from '@prisma/client';
+import { ConsultationChannel, ConsultationStatus, PaymentStatus, Role } from '@prisma/client';
 import { z } from 'zod';
 import { allowRoles, authRequired } from '../auth.js';
 import {
@@ -29,10 +29,34 @@ export function registerConsultationRoutes(app: express.Application) {
           diseaseId: z.string().min(1),
           intakeAnswers: z.record(z.string(), z.string().min(1)),
           purchaseType: z.enum(['ONE_TIME', 'PLAN']).optional().default('ONE_TIME'),
-          planCode: z.string().min(2).optional()
+          planCode: z.string().min(2).optional(),
+          channel: z
+            .enum(['ONLINE_CHAT', 'VIDEO', 'PHONE', 'IN_CLINIC'])
+            .optional()
+            .default('ONLINE_CHAT'),
+          locationId: z.string().min(1).optional().nullable()
         })
         .parse(req.body);
 
+      const channel = body.channel as ConsultationChannel;
+      let locationId: string | null = body.locationId?.trim() || null;
+
+      if (channel === ConsultationChannel.IN_CLINIC) {
+        if (!locationId) {
+          return res.status(400).json({ message: 'Choose a clinic location for in-person visits.' });
+        }
+      }
+
+      if (locationId) {
+        const loc = await prisma.clinicLocation.findFirst({
+          where: { id: locationId, isActive: true }
+        });
+        if (!loc) {
+          return res.status(400).json({ message: 'Invalid or inactive clinic location.' });
+        }
+      } else {
+        locationId = null;
+      }
       await ensureBillingPlans();
       const disease = await prisma.disease.findUniqueOrThrow({ where: { id: body.diseaseId } });
       const selectedPlan =
@@ -59,8 +83,12 @@ export function registerConsultationRoutes(app: express.Application) {
             diseaseFeeInPaise: disease.feeInPaise,
             selectedPlanCode: selectedPlan.code,
             selectedPlanName: selectedPlan.name,
-            selectedPlanPriceInPaise: selectedPlan.priceInPaise
+            selectedPlanPriceInPaise: selectedPlan.priceInPaise,
+            channel,
+            locationId
           },
+          channel,
+          locationId,
           payment: {
             create: {
               amountInPaise,

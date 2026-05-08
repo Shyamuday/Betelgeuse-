@@ -26,7 +26,7 @@ import {
 } from './patient/patient-worksheet-booking-bridge';
 import { ClinicApiService } from './clinic-api/clinic-api.service';
 import { AuthService } from './auth/auth.service';
-import type { BillingPlan, Consultation, Disease, Doctor, DoseEvent, Prescription } from './interfaces';
+import type { BillingPlan, ClinicLocation, Consultation, Disease, Doctor, DoseEvent, Prescription } from './interfaces';
 import { environment } from '../environments/environment';
 
 type PaymentFlowState = 'IDLE' | 'CREATING_ORDER' | 'OPENING_CHECKOUT' | 'VERIFYING' | 'SUCCESS' | 'ERROR';
@@ -59,6 +59,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.patientXp.whatsappMessage
   );
   readonly diseases = signal<Disease[]>([]);
+  readonly clinicLocations = signal<ClinicLocation[]>([]);
   readonly billingPlans = signal<BillingPlan[]>([]);
   readonly consultations = signal<Consultation[]>([]);
   readonly doctors = signal<Doctor[]>([]);
@@ -128,6 +129,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         diseaseId: payload.diseaseId,
         intakeAnswers: payload.intakeAnswers,
         purchaseType: payload.purchaseType,
+        channel: payload.channel,
+        locationId: payload.locationId,
         ...(payload.purchaseType === 'PLAN' ? { planCode: payload.planCode } : {})
       })
       .subscribe({
@@ -407,6 +410,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: ({ plans }) => this.billingPlans.set(plans || []),
       error: () => { /* keep disease-based one-time fallback */ }
     });
+    if (this.auth.user()?.role === 'PATIENT') {
+      this.api.clinicLocations().subscribe({
+        next: ({ locations }) => this.clinicLocations.set(locations || []),
+        error: () => this.clinicLocations.set([])
+      });
+    }
     this.loadConsultations();
     if (this.auth.user()?.role === 'PATIENT') {
       this.loadPatientMedicationData();

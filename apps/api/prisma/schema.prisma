@@ -58,6 +58,13 @@ enum ConsultationAttachmentKind {
   OTHER
 }
 
+enum ConsultationChannel {
+  ONLINE_CHAT
+  VIDEO
+  PHONE
+  IN_CLINIC
+}
+
 model User {
   id                  String         @id @default(cuid())
   name                String
@@ -153,6 +160,26 @@ model Doctor {
   updatedAt DateTime @updatedAt
 }
 
+model ClinicLocation {
+  id            String         @id @default(cuid())
+  name          String
+  slug          String?        @unique
+  addressLine1  String
+  addressLine2  String?
+  city          String?
+  state         String?
+  pincode       String?
+  phone         String?
+  timezone      String         @default("Asia/Kolkata")
+  isActive      Boolean        @default(true)
+  sortOrder     Int            @default(0)
+  consultations Consultation[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
 model Disease {
   id            String         @id @default(cuid())
   name          String         @unique
@@ -170,6 +197,8 @@ model Consultation {
   patientId       String
   diseaseId       String
   assignedDoctorId String?
+  locationId      String?
+  channel         ConsultationChannel @default(ONLINE_CHAT)
   status          ConsultationStatus @default(PAYMENT_PENDING)
   billingPlanCode String?
   pricingSnapshot Json?
@@ -177,6 +206,7 @@ model Consultation {
   patient         User               @relation("PatientConsultations", fields: [patientId], references: [id])
   disease         Disease            @relation(fields: [diseaseId], references: [id])
   assignedDoctor  User?              @relation("DoctorConsultations", fields: [assignedDoctorId], references: [id])
+  location        ClinicLocation?    @relation(fields: [locationId], references: [id], onDelete: SetNull)
   payment         Payment?
   messages        Message[]
   prescriptions   Prescription[]

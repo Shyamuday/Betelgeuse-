@@ -44,6 +44,19 @@ export function includeConsultationRelations() {
     attachments: {
       include: { uploadedBy: { select: publicUserSelect } },
       orderBy: { createdAt: 'desc' as const }
+    },
+    location: {
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        addressLine1: true,
+        addressLine2: true,
+        city: true,
+        state: true,
+        pincode: true,
+        phone: true
+      }
     }
   };
 }
@@ -55,6 +68,14 @@ export function includePrescriptionRelations() {
         id: true,
         patientId: true,
         assignedDoctorId: true,
+        channel: true,
+        location: {
+          select: {
+            id: true,
+            name: true,
+            city: true
+          }
+        },
         disease: { select: { id: true, name: true } }
       }
     },

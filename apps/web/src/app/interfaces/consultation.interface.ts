@@ -1,4 +1,5 @@
 import type { Payment } from './billing.interface';
+import type { ClinicLocation, ConsultationChannel } from './clinic-location.interface';
 import type { ConsultationAttachment } from './consultation-attachment.interface';
 import type { Disease } from './disease.interface';
 import type { Message } from './message.interface';
@@ -15,6 +16,8 @@ export type Consultation = {
     | 'PRESCRIPTION_UPLOADED'
     | 'COMPLETED'
     | 'CANCELLED';
+  channel: ConsultationChannel;
+  location?: ClinicLocation | null;
   intakeAnswers: Record<string, string>;
   createdAt: string;
   patient: User;

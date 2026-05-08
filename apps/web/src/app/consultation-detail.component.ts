@@ -3,7 +3,7 @@ import { Component, EventEmitter, inject, Input, type OnChanges, Output, type Si
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ClinicApiService } from './clinic-api/clinic-api.service';
-import { type Consultation, type Prescription, type Role } from './interfaces';
+import { CONSULTATION_CHANNEL_LABELS, type Consultation, type Prescription, type Role } from './interfaces';
 
 export type SendMessagePayload = { consultation: Consultation; body: string };
 export type PrescriptionPayload = { notes: string; fileUrl: string };
@@ -55,6 +55,15 @@ export type PrescriptionPayload = { notes: string; fileUrl: string };
     <div class="panel">
       @if (consultation) {
         <h2>{{ consultation.disease.name }}</h2>
+        <p class="muted channel-location-meta">
+          <span>{{ consultationChannelLabel(consultation) }}</span>
+          @if (consultation.location) {
+            <span> · {{ consultation.location.name }}</span>
+            @if (consultation.location.city) {
+              <span>, {{ consultation.location.city }}</span>
+            }
+          }
+        </p>
         <p class="muted">
           Patient: {{ consultation.patient.name }} |
           Doctor: {{ consultation.assignedDoctor?.name || 'Not assigned' }}
@@ -234,6 +243,10 @@ export class ConsultationDetailComponent implements OnChanges {
   attachmentBusy = false;
   attachmentNotice = '';
   private lastAppliedComposeToken = 0;
+
+  consultationChannelLabel(c: Consultation): string {
+    return CONSULTATION_CHANNEL_LABELS[c.channel] || c.channel;
+  }
 
   methodIntakeEntries(answers: Record<string, string>): { k: string; v: string }[] {
     return Object.entries(answers)

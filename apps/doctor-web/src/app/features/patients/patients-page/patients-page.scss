@@ -29,6 +29,13 @@ select {
   gap: 0.35rem;
 }
 
+.meta {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
 .follow-up-card.urgent {
   border-color: #f59e0b;
   background: #fffbeb;

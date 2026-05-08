@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, type OnChanges, Output, type SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { type BillingPlan, type Disease } from './interfaces';
+import { type BillingPlan, type ClinicLocation, type Disease, type ConsultationChannel, CONSULTATION_CHANNEL_LABELS } from './interfaces';
 import {
   SELF_ASSESSMENT_WORKSHEET_INTAKE_KEY,
   type WorksheetBookingDraft,
@@ -13,6 +13,8 @@ export type BookConsultationPayload = {
   intakeAnswers: Record<string, string>;
   purchaseType: 'ONE_TIME' | 'PLAN';
   planCode?: string;
+  channel: ConsultationChannel;
+  locationId: string | null;
 };
 
 @Component({
@@ -48,6 +50,42 @@ export type BookConsultationPayload = {
           <option value="PLAN">Plan purchase</option>
         </select>
       </label>
+
+      <label>
+        Consultation type
+        <select [(ngModel)]="channel">
+          <option value="ONLINE_CHAT">{{ channelLabels.ONLINE_CHAT }}</option>
+          <option value="VIDEO">{{ channelLabels.VIDEO }}</option>
+          <option value="PHONE">{{ channelLabels.PHONE }}</option>
+          <option value="IN_CLINIC">{{ channelLabels.IN_CLINIC }}</option>
+        </select>
+      </label>
+
+      @if (channel === 'IN_CLINIC') {
+        <label>
+          Clinic location <span class="req">*</span>
+          <select [(ngModel)]="selectedLocationId" [disabled]="!locations.length">
+            <option value="">— Select a centre —</option>
+            @for (loc of locations; track loc.id) {
+              <option [value]="loc.id">{{ locationOptionLabel(loc) }}</option>
+            }
+          </select>
+        </label>
+        @if (!locations.length) {
+          <p class="muted">No active clinic locations yet. Choose online consultation or contact support.</p>
+        }
+      } @else {
+        <label>
+          Preferred centre (optional)
+          <select [(ngModel)]="selectedLocationId">
+            <option value="">— No preference —</option>
+            @for (loc of locations; track loc.id) {
+              <option [value]="loc.id">{{ locationOptionLabel(loc) }}</option>
+            }
+          </select>
+        </label>
+        <p class="muted">We use this for records and follow-up; your visit stays {{ channelLabels[channel] }}.</p>
+      }
 
       @if (purchaseType === 'PLAN') {
         <label>
@@ -85,7 +123,10 @@ export type BookConsultationPayload = {
         </label>
       }
 
-      <button class="primary" [disabled]="disabled || !selectedDiseaseId" (click)="submit()">
+      <button
+        class="primary"
+        [disabled]="disabled || !selectedDiseaseId || !canSubmitChannelLocation()"
+        (click)="submit()">
         Create consultation
       </button>
       <p class="muted">
@@ -94,11 +135,22 @@ export type BookConsultationPayload = {
         After payment, consultation moves to doctor assignment.
       </p>
     </div>
-  `
+  `,
+  styles: [
+    `
+      .req {
+        color: #b91c1c;
+        font-weight: 700;
+      }
+    `
+  ]
 })
 export class BookConsultationPanelComponent implements OnChanges {
+  readonly channelLabels = CONSULTATION_CHANNEL_LABELS;
+
   @Input() diseases: Disease[] = [];
   @Input() plans: BillingPlan[] = [];
+  @Input() locations: ClinicLocation[] = [];
   @Input() disabled = false;
   /** When set, patient can edit and submit these notes as part of intake. */
   @Input() worksheetBookingDraft: WorksheetBookingDraft | null = null;
@@ -106,6 +158,8 @@ export class BookConsultationPanelComponent implements OnChanges {
   @Output() worksheetDraftDismissed = new EventEmitter<void>();
 
   purchaseType: 'ONE_TIME' | 'PLAN' = 'ONE_TIME';
+  channel: ConsultationChannel = 'ONLINE_CHAT';
+  selectedLocationId = '';
   selectedPlanCode = '';
   selectedDiseaseId = '';
   intakeAnswers: Record<string, string> = {};
@@ -125,6 +179,18 @@ export class BookConsultationPanelComponent implements OnChanges {
     if (!this.selectedPlanCode) {
       this.selectedPlanCode = this.plans.find((p) => p.code !== 'ONE_TIME')?.code || '';
     }
+  }
+
+  locationOptionLabel(loc: ClinicLocation): string {
+    const city = loc.city?.trim();
+    return city ? `${loc.name} — ${city}` : loc.name;
+  }
+
+  canSubmitChannelLocation(): boolean {
+    if (this.channel === 'IN_CLINIC') {
+      return Boolean(this.selectedLocationId.trim()) && this.locations.length > 0;
+    }
+    return true;
   }
 
   selectedDisease() {
@@ -161,6 +227,8 @@ export class BookConsultationPanelComponent implements OnChanges {
       diseaseId: this.selectedDiseaseId,
       intakeAnswers,
       purchaseType: this.purchaseType,
+      channel: this.channel,
+      locationId: this.selectedLocationId.trim() || null,
       ...(this.purchaseType === 'PLAN' ? { planCode: this.selectedPlanCode } : {})
     });
   }
