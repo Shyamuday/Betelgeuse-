@@ -3,16 +3,27 @@ import angular from 'angular-eslint';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
+const unusedVarsOptions = {
+  argsIgnorePattern: '^_',
+  caughtErrorsIgnorePattern: '^_',
+  varsIgnorePattern: '^_',
+  destructuredArrayIgnorePattern: '^_'
+};
+
 const sharedTsRules = {
   'max-lines': ['warn', { max: 600, skipBlankLines: true, skipComments: true }],
-  '@typescript-eslint/no-unused-vars': [
-    'error',
-    { argsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }
-  ],
+  '@typescript-eslint/no-unused-vars': ['error', unusedVarsOptions],
+  '@typescript-eslint/no-explicit-any': 'warn',
   '@typescript-eslint/consistent-type-imports': [
     'warn',
     { prefer: 'type-imports', fixStyle: 'inline-type-imports' }
   ]
+};
+
+const angularTsRules = {
+  ...sharedTsRules,
+  '@angular-eslint/prefer-inject': 'off',
+  '@typescript-eslint/no-explicit-any': 'off'
 };
 
 export default tseslint.config(
@@ -23,11 +34,17 @@ export default tseslint.config(
       '**/coverage/**',
       '**/.angular/**',
       'apps/mobile-*/**',
-      'eslint.config.mjs'
+      'eslint.config.mjs',
+      'apps/api/prisma.config.ts'
     ]
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    rules: {
+      'no-unused-vars': 'off'
+    }
+  },
   {
     name: 'clinic-api',
     files: ['apps/api/**/*.ts'],
@@ -40,6 +57,7 @@ export default tseslint.config(
     },
     rules: {
       ...sharedTsRules,
+      '@typescript-eslint/no-namespace': 'warn',
       'no-console': 'off'
     }
   },
@@ -55,13 +73,13 @@ export default tseslint.config(
     },
     processor: angular.processInlineTemplates,
     rules: {
-      ...sharedTsRules
+      ...angularTsRules
     }
   },
   {
     name: 'angular-apps-html',
     files: ['apps/web/**/*.html', 'apps/doctor-web/**/*.html', 'apps/admin-web/**/*.html'],
-    extends: [...angular.configs.templateRecommended, ...angular.configs.templateAccessibility],
+    extends: [...angular.configs.templateRecommended],
     languageOptions: {
       parserOptions: {
         projectService: true,

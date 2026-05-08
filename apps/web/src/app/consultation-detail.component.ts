@@ -2,7 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, EventEmitter, inject, Input, OnChanges, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { ClinicApiService } from './clinic-api.service';
+import { ClinicApiService } from './clinic-api/clinic-api.service';
 import { Consultation, Prescription, Role } from './interfaces';
 
 export type SendMessagePayload = { consultation: Consultation; body: string };

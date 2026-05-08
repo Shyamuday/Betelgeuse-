@@ -27,7 +27,7 @@ type PaymentFlowState = 'IDLE' | 'CREATING_ORDER' | 'OPENING_CHECKOUT' | 'VERIFY
               @if (state === 'ERROR' && canRetry) {
                 <button class="primary" type="button" (click)="retry.emit()">Retry payment</button>
               }
-              <button class="secondary" type="button" (click)="close.emit()">Close</button>
+              <button class="secondary" type="button" (click)="dismiss.emit()">Close</button>
             </div>
           }
         </article>
@@ -42,5 +42,5 @@ export class PaymentStatusOverlayComponent {
   @Input() canRetry = false;
 
   @Output() retry = new EventEmitter<void>();
-  @Output() close = new EventEmitter<void>();
+  @Output() dismiss = new EventEmitter<void>();
 }

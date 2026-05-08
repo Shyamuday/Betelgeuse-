@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import type express from 'express';
 import { Role } from '@prisma/client';
 import { z } from 'zod';
-import { allowRoles, authRequired } from '../auth.js';
+import { authRequired } from '../auth.js';
 import { asyncRoute } from '../middleware/async-route.js';
 import { prisma } from '../db.js';
 import { supabaseAdmin } from '../supabase.js';
@@ -86,7 +86,9 @@ export function registerAuthRoutes(app: express.Application) {
         return res.status(401).json({ message: 'Invalid credentials' });
       }
 
-      const { passwordHash: _passwordHash, isActive: _isActive, ...safeUser } = user;
+      const { passwordHash, isActive, ...safeUser } = user;
+      void passwordHash;
+      void isActive;
       logAuthEvent('staff_login_success', { userId: safeUser.id, role: safeUser.role });
       res.json(toAuthResponse(safeUser));
     })
