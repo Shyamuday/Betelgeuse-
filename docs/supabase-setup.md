@@ -63,14 +63,17 @@ After this, that user can access the admin dashboard.
 
 ## 5. Deploy Doctor Creation Function
 
-Install and login to Supabase CLI.
+The repo pins the [Supabase CLI](https://supabase.com/docs/guides/cli) at the monorepo root (`devDependency`). From the repository root, after `npm install`:
 
 ```powershell
-npm install -g supabase
-supabase login
-supabase link --project-ref your-project-ref
-supabase functions deploy create-doctor
+npm run supabase:login
+npm run supabase:link -- --project-ref your-project-ref
+npm run supabase:functions:deploy -- create-doctor
 ```
+
+Equivalent if you prefer calling the binary directly: `npx supabase login`, `npx supabase link --project-ref …`, `npx supabase functions deploy create-doctor`.
+
+`supabase init` has already been applied, so `supabase/config.toml` and `supabase/.gitignore` are present for local stacks and CLI commands.
 
 The function uses these Supabase environment values:
 
@@ -83,9 +86,9 @@ SUPABASE_SERVICE_ROLE_KEY
 Set them in Supabase Function secrets if they are not already available:
 
 ```powershell
-supabase secrets set SUPABASE_URL="https://your-project.supabase.co"
-supabase secrets set SUPABASE_ANON_KEY="your-anon-key"
-supabase secrets set SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+npx supabase secrets set SUPABASE_URL="https://your-project.supabase.co"
+npx supabase secrets set SUPABASE_ANON_KEY="your-anon-key"
+npx supabase secrets set SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
 ```
 
 Never expose the service role key in Angular or any frontend code.

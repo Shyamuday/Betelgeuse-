@@ -1,0 +1,2 @@
+-- Loaded only after `supabase db reset` when local development uses migrations.
+-- Canonical bootstrap SQL for hosted projects remains `supabase/schema.sql` (run in the dashboard SQL editor).

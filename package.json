@@ -25,7 +25,15 @@
     "lint": "npm run lint:eslint && npm run lint --prefix apps/api",
     "prisma:generate": "npm run prisma:generate --prefix apps/api",
     "prisma:migrate": "npm run prisma:migrate --prefix apps/api",
-    "seed": "npm run seed --prefix apps/api"
+    "seed": "npm run seed --prefix apps/api",
+    "supabase": "supabase",
+    "supabase:login": "supabase login",
+    "supabase:link": "supabase link",
+    "supabase:status": "supabase status",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:functions:deploy": "supabase functions deploy",
+    "supabase:secrets:list": "supabase secrets list"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -33,6 +41,7 @@
     "eslint": "^10.3.0",
     "globals": "^17.6.0",
     "prettier": "^3.8.1",
+    "supabase": "^2.98.2",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.59.2"
   }

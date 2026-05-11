@@ -21,10 +21,12 @@ Razorpay payment setup steps are in `docs/razorpay-setup.md`.
    - `YOUR_PROJECT_ID`
    - `YOUR_SUPABASE_ANON_KEY`
 4. Enable phone OTP and Google provider in Supabase Auth if you want those login methods live.
-5. Deploy the admin-only doctor creation Edge Function:
+5. Deploy the admin-only doctor creation Edge Function (from repo root, after `npm install`):
 
 ```powershell
-supabase functions deploy create-doctor
+npm run supabase:login
+npm run supabase:link -- --project-ref YOUR_PROJECT_REF
+npm run supabase:functions:deploy -- create-doctor
 ```
 
 The function needs the standard Supabase function environment variables:
@@ -38,6 +40,7 @@ SUPABASE_SERVICE_ROLE_KEY
 ## Local Development
 
 ```powershell
+npm install
 npm install --prefix apps/web
 npm install --prefix apps/api
 npm run dev:web
