@@ -149,6 +149,8 @@ Minimum acceptance:
 
 ### 5) Prescription PDF / Share
 
+**Status: Done** — improved PDF layout (patient ID, version, clinic branding); `disposition=inline` for view/print; share metadata API; patient UI with view/download/print/share/WhatsApp; doctor PDF actions on published prescriptions.
+
 - Better download and share experience
 
 ### 6) Product Analytics

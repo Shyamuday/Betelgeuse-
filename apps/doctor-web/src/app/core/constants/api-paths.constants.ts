@@ -9,6 +9,8 @@ export const API_PATHS = {
     PRESCRIPTION_OPTIONS: '/doctor/prescription-options',
     PRESCRIPTION_TEMPLATES: '/doctor/prescription-templates',
     PRESCRIPTIONS: '/doctor/prescriptions',
+    PRESCRIPTION_PDF: (id: string) => `/patient/prescriptions/${id}/pdf`,
+    PRESCRIPTION_SHARE: (id: string) => `/patient/prescriptions/${id}/share`,
     APPOINTMENT_PRESCRIPTIONS: (consultationId: string) => `/doctor/appointments/${consultationId}/prescriptions`
   },
   HR: {

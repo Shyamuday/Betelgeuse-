@@ -62,6 +62,11 @@
             <button type="button" (click)="openVersion(item)">Open</button>
             <button type="button" [disabled]="!canEditVersion(item)" (click)="openVersion(item)">Edit</button>
             <button type="button" (click)="startFollowUpFrom(item)">Follow-up</button>
+            @if (item.status === 'PUBLISHED') {
+              <button type="button" class="ghost" [disabled]="isPdfBusy(item.id)" (click)="viewPublishedPdf(item.id)">View PDF</button>
+              <button type="button" class="ghost" [disabled]="isPdfBusy(item.id)" (click)="downloadPublishedPdf(item.id)">Download</button>
+              <button type="button" class="ghost" [disabled]="isPdfBusy(item.id)" (click)="sharePublishedPdf(item.id)">Share</button>
+            }
           </div>
         </article>
       }
@@ -252,6 +257,9 @@
   </div>
 }
 
+@if (pdfError) {
+  <p class="error">{{ pdfError }}</p>
+}
 @if (message) {
   <p class="message">{{ message }}</p>
 }

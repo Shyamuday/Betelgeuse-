@@ -1,10 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, inject } from '@angular/core';
-import { API_PATHS } from './core/constants/api-paths.constants';
-import { BLOB_REVOKE_MS } from './core/constants/timing.constants';
+import { Component, Input, inject, signal } from '@angular/core';
 import { Prescription } from './models';
-import { environment } from '../environments/environment';
-import { AuthService } from './auth/auth.service';
+import { PrescriptionPdfService } from './core/services/prescription-pdf.service';
 
 @Component({
   selector: 'app-prescription-history',
@@ -15,21 +12,56 @@ import { AuthService } from './auth/auth.service';
 })
 export class PrescriptionHistoryComponent {
   @Input() prescriptions: Prescription[] = [];
-  private readonly auth = inject(AuthService);
 
-  async downloadPdf(prescriptionId: string) {
-    const token = this.auth.token;
-    const url = `${environment.apiUrl}${API_PATHS.PATIENT.PRESCRIPTION_PDF(prescriptionId)}`;
-    const response = await fetch(url, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
+  private readonly pdf = inject(PrescriptionPdfService);
+
+  readonly busyId = signal('');
+  readonly error = signal('');
+
+  canShare() {
+    return this.pdf.canNativeShareFiles();
+  }
+
+  isBusy(id: string) {
+    return this.busyId() === id;
+  }
+
+  async viewPdf(prescription: Prescription) {
+    await this.run(prescription.id, () => this.pdf.viewInBrowser(prescription.id));
+  }
+
+  async downloadPdf(prescription: Prescription) {
+    await this.run(prescription.id, () => this.pdf.download(prescription.id));
+  }
+
+  async printPdf(prescription: Prescription) {
+    await this.run(prescription.id, () => this.pdf.print(prescription.id));
+  }
+
+  async sharePdf(prescription: Prescription) {
+    await this.run(prescription.id, async () => {
+      const meta = await this.pdf.fetchShareMeta(prescription.id);
+      await this.pdf.shareNative(prescription.id, meta);
     });
-    if (!response.ok) return;
-    const blob = await response.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = blobUrl;
-    link.download = `vitalis-prescription-${prescriptionId.slice(0, 8)}.pdf`;
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(blobUrl), BLOB_REVOKE_MS);
+  }
+
+  async shareWhatsApp(prescription: Prescription) {
+    await this.run(prescription.id, async () => {
+      const meta = await this.pdf.fetchShareMeta(prescription.id);
+      const url = this.pdf.whatsAppShareUrl(meta.shareText);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    });
+  }
+
+  private async run(prescriptionId: string, action: () => Promise<void>) {
+    this.busyId.set(prescriptionId);
+    this.error.set('');
+    try {
+      await action();
+    } catch (err) {
+      this.error.set(err instanceof Error ? err.message : 'Could not complete PDF action.');
+    } finally {
+      this.busyId.set('');
+    }
   }
 }

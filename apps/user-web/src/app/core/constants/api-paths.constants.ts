@@ -8,6 +8,7 @@ export const API_PATHS = {
   PATIENT: {
     PRESCRIPTIONS: '/patient/prescriptions',
     PRESCRIPTION_PDF: (id: string) => `/patient/prescriptions/${id}/pdf`,
+    PRESCRIPTION_SHARE: (id: string) => `/patient/prescriptions/${id}/share`,
     TODAY_DOSES: '/patient/today-doses',
     MEDICINE_REMINDERS: '/patient/medicine-reminders',
     DOSE_TAKE: (id: string) => `/patient/dose-events/${id}/take`,

@@ -1,9 +1,10 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { AppointmentsPrescriptionsService } from './appointments-prescriptions.service';
+import { PrescriptionPdfService } from '../../../core/services/prescription-pdf.service';
 import type {
   LoadedPrescription,
   MedicineRow,
@@ -56,9 +57,12 @@ export class AppointmentsPage {
   deletingTemplateId = '';
   medicineRows: MedicineRow[] = [this.newMedicineRow()];
   patientClinical: PatientClinicalProfile | null = null;
+  pdfBusyId = '';
+  pdfError = '';
 
   constructor(
     private readonly prescriptions: AppointmentsPrescriptionsService,
+    private readonly prescriptionPdf: PrescriptionPdfService,
     private readonly route: ActivatedRoute
   ) {
     this.consultationId = this.route.snapshot.queryParamMap.get('consultationId') || '';
@@ -436,6 +440,39 @@ export class AppointmentsPage {
       this.error = 'Could not delete template.';
     } finally {
       this.deletingTemplateId = '';
+    }
+  }
+
+  async sharePublishedPdf(prescriptionId: string) {
+    await this.runPdfAction(prescriptionId, async () => {
+      const meta = await this.prescriptionPdf.fetchShareMeta(prescriptionId);
+      const url = this.prescriptionPdf.whatsAppUrl(meta.shareText);
+      window.open(url, '_blank', 'noopener,noreferrer');
+      this.message = 'WhatsApp share opened — attach the PDF if needed after download.';
+    });
+  }
+
+  async downloadPublishedPdf(prescriptionId: string) {
+    await this.runPdfAction(prescriptionId, () => this.prescriptionPdf.download(prescriptionId));
+  }
+
+  async viewPublishedPdf(prescriptionId: string) {
+    await this.runPdfAction(prescriptionId, () => this.prescriptionPdf.view(prescriptionId));
+  }
+
+  isPdfBusy(prescriptionId: string) {
+    return this.pdfBusyId === prescriptionId;
+  }
+
+  private async runPdfAction(prescriptionId: string, action: () => Promise<void>) {
+    this.pdfBusyId = prescriptionId;
+    this.pdfError = '';
+    try {
+      await action();
+    } catch {
+      this.pdfError = 'Could not open prescription PDF.';
+    } finally {
+      this.pdfBusyId = '';
     }
   }
 

@@ -1,6 +1,9 @@
 
     <div class="panel">
       <h2>Prescription History</h2>
+      @if (error()) {
+        <p class="rx-error">{{ error() }}</p>
+      }
       <div class="cards">
         @for (prescription of prescriptions; track prescription.id) {
           <article class="consult-card">
@@ -17,8 +20,22 @@
                 }
               </div>
               <div class="rx-actions">
-                <button class="btn-pdf" type="button" (click)="downloadPdf(prescription.id)">
-                  &#x21E9; PDF
+                <button class="btn-pdf ghost" type="button" [disabled]="isBusy(prescription.id)" (click)="viewPdf(prescription)">
+                  {{ isBusy(prescription.id) ? '…' : 'View' }}
+                </button>
+                <button class="btn-pdf" type="button" [disabled]="isBusy(prescription.id)" (click)="downloadPdf(prescription)">
+                  Download
+                </button>
+                <button class="btn-pdf ghost" type="button" [disabled]="isBusy(prescription.id)" (click)="printPdf(prescription)">
+                  Print
+                </button>
+                @if (canShare()) {
+                  <button class="btn-pdf share" type="button" [disabled]="isBusy(prescription.id)" (click)="sharePdf(prescription)">
+                    Share
+                  </button>
+                }
+                <button class="btn-pdf wa" type="button" [disabled]="isBusy(prescription.id)" (click)="shareWhatsApp(prescription)">
+                  WhatsApp
                 </button>
               </div>
             </div>
