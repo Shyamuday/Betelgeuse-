@@ -615,7 +615,7 @@ export class ContactComponent {
         <section class="content-grid two">
           <div class="panel">
             <h2>Privacy</h2>
-            <p>We store account, consultation, chat, payment, and prescription data using secure third-party services such as Supabase and Razorpay.</p>
+            <p>We store account, consultation, chat, payment, and prescription data securely. Payment processing is handled by Razorpay.</p>
           </div>
           <div class="panel">
             <h2>Terms</h2>

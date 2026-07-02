@@ -1,8 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AppOverlayService } from '../overlay.service';
 import { AuthFormOverlayComponent } from './auth-form-overlay.component';
-import { supabase } from '../supabase.client';
 
 @Component({
   selector: 'app-auth-reset-callback',
@@ -22,22 +21,19 @@ import { supabase } from '../supabase.client';
 export class AuthResetCallbackComponent implements OnInit {
   private readonly overlayService = inject(AppOverlayService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
-  async ngOnInit() {
-    // Give Supabase a moment to process the URL fragment
-    await new Promise((resolve) => setTimeout(resolve, 300));
+  ngOnInit() {
+    const token = this.route.snapshot.queryParamMap.get('token');
 
-    const { data } = await supabase.auth.getSession();
-
-    if (data.session) {
+    if (token) {
       this.overlayService.open(AuthFormOverlayComponent, {
-        data: { mode: 'patient', initialForgotStep: 'reset' },
+        data: { mode: 'patient', initialForgotStep: 'reset', resetToken: token },
         width: '480px',
         panelClass: 'app-overlay-panel'
       });
-      void this.router.navigateByUrl('/');
-    } else {
-      void this.router.navigateByUrl('/');
     }
+
+    void this.router.navigateByUrl('/');
   }
 }

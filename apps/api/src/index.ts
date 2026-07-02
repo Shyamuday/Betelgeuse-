@@ -1,10 +1,14 @@
 import 'dotenv/config';
+import { createServer } from 'node:http';
 import express from 'express';
 import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import Razorpay from 'razorpay';
 import crypto from 'node:crypto';
 import { OAuth2Client } from 'google-auth-library';
+import nodemailer from 'nodemailer';
+import jwt from 'jsonwebtoken';
+import { Server as SocketIoServer } from 'socket.io';
 import {
   BillingPlanType,
   ConsultationStatus,
@@ -16,14 +20,65 @@ import {
   Role
 } from '@prisma/client';
 import { z } from 'zod';
-import { allowRoles, authRequired, signToken } from './auth.js';
+import { allowRoles, authRequired, type AuthUser, signToken } from './auth.js';
 import { prisma } from './db.js';
-import { supabaseAdmin } from './supabase.js';
 import { createNotificationService, type NotificationChannel } from './notifications.js';
 
 const app = express();
+const httpServer = createServer(app);
 const port = Number(process.env.PORT || 4000);
 const webOrigin = process.env.WEB_ORIGIN || 'http://localhost:4200';
+
+const io = new SocketIoServer(httpServer, {
+  cors: { origin: webOrigin, credentials: true }
+});
+
+io.use((socket, next) => {
+  const token = socket.handshake.auth['token'] as string | undefined;
+  if (!token) {
+    return next(new Error('Unauthorized'));
+  }
+
+  const socketJwtSecret = process.env.JWT_SECRET || 'dev-only-secret';
+  try {
+    const decoded = jwt.verify(token, socketJwtSecret) as AuthUser;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (socket as any).userId = decoded.id;
+    next();
+  } catch {
+    next(new Error('Unauthorized'));
+  }
+});
+
+io.on('connection', (socket) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userId = (socket as any).userId as string;
+  void socket.join(`user:${userId}`);
+  socket.on('subscribe:consultation', (consultationId: unknown) => {
+    if (typeof consultationId === 'string') {
+      void socket.join(`consultation:${consultationId}`);
+    }
+  });
+});
+
+const smtpHost = process.env.SMTP_HOST || '';
+const smtpPort = Number(process.env.SMTP_PORT || 587);
+const smtpUser = process.env.SMTP_USER || '';
+const smtpPass = process.env.SMTP_PASS || '';
+const smtpFrom = process.env.SMTP_FROM || 'noreply@vitaliscare.in';
+
+function getMailTransporter() {
+  if (!smtpHost || !smtpUser || !smtpPass) {
+    return null;
+  }
+
+  return nodemailer.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpPort === 465,
+    auth: { user: smtpUser, pass: smtpPass }
+  });
+}
 const devOtp = process.env.DEV_OTP || '123456';
 const googleClientId = process.env.GOOGLE_CLIENT_ID || '';
 const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null;
@@ -271,7 +326,7 @@ function hashToken(token: string) {
   return crypto.createHash('sha256').update(token).digest('hex');
 }
 
-function logAuthEvent(event: 'staff_login_success' | 'staff_login_failure' | 'supabase_exchange', details: Record<string, unknown>) {
+function logAuthEvent(event: 'staff_login_success' | 'staff_login_failure' | 'patient_login', details: Record<string, unknown>) {
   console.info(`[auth] ${event}`, {
     at: new Date().toISOString(),
     ...details
@@ -709,47 +764,149 @@ app.post(
 );
 
 app.post(
-  '/auth/supabase-exchange',
+  '/auth/patient-register',
   asyncRoute(async (req, res) => {
-    const body = z.object({ supabaseToken: z.string().min(10) }).parse(req.body);
+    const body = z
+      .object({
+        name: z.string().min(2),
+        email: z.string().email().optional().or(z.literal('')),
+        mobile: z.string().min(8).optional().or(z.literal('')),
+        password: z.string().min(8)
+      })
+      .parse(req.body);
 
-    if (!supabaseAdmin) {
-      return res.status(503).json({ message: 'Supabase is not configured on the server.' });
+    const email = body.email || null;
+    const mobile = body.mobile || null;
+
+    if (!email && !mobile) {
+      return res.status(400).json({ message: 'Email or mobile is required.' });
     }
 
-    const { data, error } = await supabaseAdmin.auth.getUser(body.supabaseToken);
-    if (error || !data.user) {
-      return res.status(401).json({ message: 'Invalid or expired Supabase token.' });
-    }
-
-    const supabaseUser = data.user;
-    const email = supabaseUser.email ?? null;
-    const mobile = supabaseUser.phone ?? null;
-
-    const whereClause = email
-      ? { email }
-      : mobile
-        ? { mobile }
-        : null;
-
-    if (!whereClause) {
-      return res.status(400).json({ message: 'Supabase user has no email or mobile to match.' });
-    }
-
-    const user = await prisma.user.upsert({
-      where: whereClause,
-      update: {},
-      create: {
-        name: supabaseUser.user_metadata?.['full_name'] || email || mobile || 'Patient',
-        email,
-        mobile,
-        role: Role.PATIENT
-      },
-      select: publicUserSelect
+    const existing = await prisma.user.findFirst({
+      where: email ? { email } : { mobile: mobile! },
+      select: { id: true, passwordHash: true }
     });
 
-    logAuthEvent('supabase_exchange', { userId: user.id, role: user.role });
-    res.json(toAuthResponse(user));
+    if (existing?.passwordHash) {
+      return res.status(409).json({ message: 'Account already exists. Please log in.' });
+    }
+
+    const passwordHash = await bcrypt.hash(body.password, 10);
+
+    const user = existing
+      ? await prisma.user.update({
+          where: { id: existing.id },
+          data: { name: body.name, passwordHash },
+          select: publicUserSelect
+        })
+      : await prisma.user.create({
+          data: { name: body.name, email, mobile, passwordHash, role: Role.PATIENT },
+          select: publicUserSelect
+        });
+
+    logAuthEvent('patient_login', { userId: user.id, event: 'register' });
+    res.status(201).json(toAuthResponse(user));
+  })
+);
+
+app.post(
+  '/auth/patient-login-password',
+  asyncRoute(async (req, res) => {
+    const body = z
+      .object({
+        identifier: z.string().min(3),
+        password: z.string().min(1)
+      })
+      .parse(req.body);
+
+    const isEmail = body.identifier.includes('@');
+    const user = await prisma.user.findFirst({
+      where: isEmail ? { email: body.identifier } : { mobile: body.identifier },
+      select: { ...publicUserSelect, passwordHash: true, isActive: true, role: true }
+    });
+
+    if (!user || !user.passwordHash || user.role !== Role.PATIENT) {
+      return res.status(401).json({ message: 'Invalid credentials.' });
+    }
+
+    const isValid = await bcrypt.compare(body.password, user.passwordHash);
+    if (!isValid) {
+      return res.status(401).json({ message: 'Invalid credentials.' });
+    }
+
+    const { passwordHash: _ph, isActive: _ia, ...safeUser } = user;
+    logAuthEvent('patient_login', { userId: safeUser.id, event: 'password_login' });
+    res.json(toAuthResponse(safeUser));
+  })
+);
+
+app.post(
+  '/auth/patient-forgot-password',
+  asyncRoute(async (req, res) => {
+    const body = z.object({ email: z.string().email() }).parse(req.body);
+    const user = await prisma.user.findUnique({
+      where: { email: body.email },
+      select: { id: true, role: true, email: true, isActive: true }
+    });
+
+    if (!user || !user.isActive || user.role !== Role.PATIENT) {
+      return res.json({ message: 'If the account exists, a reset link has been sent.' });
+    }
+
+    const token = randomToken();
+    await prisma.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: hashToken(token),
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000)
+      }
+    });
+
+    const resetUrl = `${webOrigin}/auth/reset?token=${token}`;
+
+    const mailer = getMailTransporter();
+    if (mailer) {
+      await mailer.sendMail({
+        from: smtpFrom,
+        to: body.email,
+        subject: 'Reset your Vitalis Care password',
+        html: `<p>Click the link below to reset your password. It expires in 30 minutes.</p>
+               <p><a href="${resetUrl}">${resetUrl}</a></p>`
+      });
+    } else if (process.env.NODE_ENV !== 'production') {
+      console.log(`[dev] Patient password reset token for ${body.email}: ${token}`);
+      console.log(`[dev] Reset URL: ${resetUrl}`);
+    }
+
+    res.json({ message: 'If the account exists, a reset link has been sent.' });
+  })
+);
+
+app.post(
+  '/auth/patient-reset-password',
+  asyncRoute(async (req, res) => {
+    const body = z.object({ token: z.string().min(20), password: z.string().min(8) }).parse(req.body);
+    const resetToken = await prisma.passwordResetToken.findUnique({
+      where: { tokenHash: hashToken(body.token) },
+      include: { user: { select: { ...publicUserSelect, role: true } } }
+    });
+
+    if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
+      return res.status(400).json({ message: 'Invalid or expired reset token.' });
+    }
+
+    if (resetToken.user.role !== Role.PATIENT) {
+      return res.status(400).json({ message: 'Invalid reset token.' });
+    }
+
+    const passwordHash = await bcrypt.hash(body.password, 10);
+    await prisma.$transaction([
+      prisma.user.update({ where: { id: resetToken.userId }, data: { passwordHash } }),
+      prisma.passwordResetToken.update({ where: { id: resetToken.id }, data: { usedAt: new Date() } })
+    ]);
+
+    const { role: _r, ...safeUser } = resetToken.user;
+    res.json(toAuthResponse({ ...safeUser, role: resetToken.user.role }));
   })
 );
 
@@ -1456,6 +1613,7 @@ app.post(
           body: `Dr. ${doctor.name} has been assigned to your consultation. You can now chat with your doctor in the app.`
         }))
       );
+      io.to(`user:${patient.id}`).emit('consultation:updated', { consultationId: consultation.id, status: consultation.status });
     }
 
     res.json({ consultation });
@@ -1492,6 +1650,12 @@ app.post(
         where: { id: consultation.id },
         data: { status: ConsultationStatus.IN_PROGRESS }
       });
+    }
+
+    io.to(`consultation:${consultation.id}`).emit('message:new', message);
+    io.to(`user:${consultation.patientId}`).emit('message:new', message);
+    if (consultation.assignedDoctorId) {
+      io.to(`user:${consultation.assignedDoctorId}`).emit('message:new', message);
     }
 
     res.status(201).json({ message });
@@ -1824,6 +1988,7 @@ app.post(
             body: `Your doctor has published a new prescription. Open the app to view your medicines and dosage schedule.`
           }))
         );
+        io.to(`user:${rxPatient.id}`).emit('prescription:new', { prescriptionId: prescription.id, consultationId: consultation.id });
       }
     }
 
@@ -1946,6 +2111,7 @@ app.put(
             body: `Your doctor has published a new prescription. Open the app to view your medicines and dosage schedule.`
           }))
         );
+        io.to(`user:${updatedPatient.id}`).emit('prescription:new', { prescriptionId: updated.id, consultationId: updated.consultation.id });
       }
     }
 
@@ -2594,6 +2760,7 @@ app.post(
           body: `Your consultation for ${consultation.disease?.name || 'your concern'} has been booked and payment received. A doctor will be assigned shortly.`
         }))
       );
+      io.to(`user:${patient.id}`).emit('payment:updated', { consultationId, status: 'PAID' });
     }
 
     res.json({ ok: true });
@@ -2679,6 +2846,7 @@ app.post(
           body: `Your consultation for ${consultationForNotif?.disease?.name || 'your concern'} has been booked and payment received. A doctor will be assigned shortly.`
         }))
       );
+      io.to(`user:${webhookPatient.id}`).emit('payment:updated', { consultationId: payment.consultationId, status: 'PAID' });
     }
 
     res.json({ ok: true });
@@ -2859,7 +3027,7 @@ app.use((error: unknown, _req: express.Request, res: express.Response, _next: ex
   res.status(500).json({ message: 'Internal server error' });
 });
 
-app.listen(port, () => {
+httpServer.listen(port, () => {
   console.log(`Clinic API running on http://localhost:${port}`);
   void ensureBillingPlans().catch((error) => {
     console.error('[billing] Failed to ensure billing plans', error);

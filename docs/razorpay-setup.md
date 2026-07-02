@@ -25,11 +25,9 @@ Required values:
 RAZORPAY_KEY_ID="your_key_id"
 RAZORPAY_KEY_SECRET="your_key_secret"
 RAZORPAY_WEBHOOK_SECRET="your_webhook_secret"
-SUPABASE_URL="https://your-project.supabase.co"
-SUPABASE_SERVICE_ROLE_KEY="your_supabase_service_role_key"
 ```
 
-Never put Razorpay secret or Supabase service role key in Angular/frontend code.
+Never put Razorpay secrets in frontend code.
 
 ## 3. Payment Flow
 
@@ -48,9 +46,10 @@ Current production-style flow:
    POST /payments/:consultationId/verify
    ```
 7. API verifies Razorpay signature.
-8. API updates Supabase:
+8. API updates database via Prisma:
    - `payments.status = PAID`
    - `consultations.status = PAID`
+9. API emits `payment:updated` Socket.io event to patient client.
 
 ## 4. Webhook Setup
 
@@ -108,9 +107,8 @@ https://your-ngrok-url.ngrok-free.app/payments/razorpay-webhook
 - Deploy `apps/api` to a secure HTTPS domain.
 - Set `WEB_ORIGIN` to the deployed Angular domain.
 - Set `RAZORPAY_WEBHOOK_SECRET`.
-- Set `SUPABASE_SERVICE_ROLE_KEY` only on the API server.
 - Test successful payment.
 - Test cancelled payment.
 - Test failed payment.
 - Test webhook delivery from Razorpay Dashboard.
-- Confirm Supabase status updates only after verified payment.
+- Confirm database status updates only after verified payment.

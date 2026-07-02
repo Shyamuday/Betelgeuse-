@@ -11,6 +11,7 @@ import { AuthService } from './auth.service';
 type AuthFormOverlayData = {
   mode?: 'patient' | 'staff';
   initialForgotStep?: ForgotStep;
+  resetToken?: string;
 };
 
 type ForgotStep = 'none' | 'email' | 'sent' | 'reset';
@@ -50,7 +51,7 @@ type ForgotStep = 'none' | 'email' | 'sent' | 'reset';
         <div class="divider-text">or continue with Gmail</div>
         <form (ngSubmit)="loginWithGoogle()">
           <button class="secondary" type="submit" [disabled]="isProcessing()">Continue with Gmail</button>
-          <p class="muted">Uses the Google provider configured in Supabase Auth.</p>
+          <p class="muted">Sign in with your Google account.</p>
         </form>
 
         <div class="divider-text">or login with mobile OTP</div>
@@ -165,6 +166,7 @@ export class AuthFormOverlayComponent {
   readonly mode = signal<'patient' | 'staff'>(this.overlayData.mode || 'patient');
   readonly isProcessing = signal(false);
   readonly forgotStep = signal<ForgotStep>(this.overlayData.initialForgotStep || 'none');
+  readonly resetToken = signal<string>(this.overlayData.resetToken || '');
   private activeOverlayRef?: AppOverlayRef;
 
   patientCredentials = {
@@ -243,7 +245,7 @@ export class AuthFormOverlayComponent {
   }
 
   forgotPassword() {
-    this.process('Sending reset link...', this.auth.forgotPassword(this.forgot.email)).subscribe({
+    this.process('Sending reset link...', this.auth.staffForgotPassword(this.forgot.email)).subscribe({
       next: () => {
         this.closeActiveOverlay();
         this.goToForgotStep('sent');
@@ -253,7 +255,13 @@ export class AuthFormOverlayComponent {
   }
 
   resetPassword() {
-    this.process('Resetting password...', this.auth.resetPassword({ token: '', password: this.forgot.password })).subscribe({
+    const token = this.resetToken();
+    if (!token) {
+      this.showError('Reset token is missing. Please request a new password reset link.');
+      return;
+    }
+
+    this.process('Resetting password...', this.auth.resetPassword({ token, password: this.forgot.password })).subscribe({
       next: ({ user }) => {
         this.closeAllOverlays();
         this.router.navigateByUrl(this.auth.dashboardFor(user.role));
@@ -263,10 +271,31 @@ export class AuthFormOverlayComponent {
   }
 
   loginWithGoogle() {
-    this.process('Signing in with Google...', this.auth.googleLogin()).subscribe({
-      next: (response) => this.showSuccess(response.message || 'Google sign-in initiated.'),
-      error: (error) => this.showError(error.error?.message || 'Google login failed.')
+    const w = window as unknown as Record<string, unknown>;
+    const googleAccounts = (w['google'] as Record<string, unknown> | undefined)?.['accounts'] as
+      | { id: { initialize(cfg: Record<string, unknown>): void; prompt(): void } }
+      | undefined;
+
+    if (!googleAccounts?.id) {
+      this.showError('Google Sign-In is not available. Ensure GOOGLE_CLIENT_ID is configured.');
+      return;
+    }
+
+    googleAccounts.id.initialize({
+      client_id: (window as unknown as Record<string, unknown>)['GOOGLE_CLIENT_ID'] as string || '',
+      callback: (response: Record<string, unknown>) => {
+        const idToken = response['credential'] as string;
+        this.process('Signing in with Google...', this.auth.googleLogin(idToken)).subscribe({
+          next: ({ user }) => {
+            this.closeAllOverlays();
+            this.router.navigateByUrl(this.auth.dashboardFor(user.role));
+          },
+          error: (error) => this.showError(error.error?.message || 'Google login failed.')
+        });
+      }
     });
+
+    googleAccounts.id.prompt();
   }
 
   private process<T>(label: string, request$: Observable<T>) {

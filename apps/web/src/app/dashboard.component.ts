@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { RealtimeChannel } from '@supabase/supabase-js';
 import { AppFooterComponent } from './app-footer.component';
 import { AppHeaderComponent } from './app-header.component';
 import { AdminStatsComponent } from './admin-stats.component';
@@ -214,7 +213,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly title = computed(() => `${this.auth.user()?.role?.toLowerCase()} dashboard`);
   readonly whatsappLink =
     'https://wa.me/919876543210?text=Hi%20Vitalis%20Care%20and%20Research%20Centre%2C%20I%20need%20help%20with%20my%20consultation';
-  private realtimeChannel?: RealtimeChannel;
+  private realtimeChannel?: { unsubscribe(): void };
 
   snoozeMinutes = 15;
   assignment = { consultationId: '', doctorId: '' };
