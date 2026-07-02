@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { createServer } from 'node:http';
 import express from 'express';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import bcrypt from 'bcryptjs';
 import Razorpay from 'razorpay';
 import crypto from 'node:crypto';
@@ -11,7 +12,6 @@ import jwt from 'jsonwebtoken';
 import { Server as SocketIoServer } from 'socket.io';
 import PDFDocument from 'pdfkit';
 import {
-  BillingPlanType,
   ConsultationStatus,
   DoseEventStatus,
   PaymentStatus,
@@ -22,6 +22,11 @@ import {
 } from '@prisma/client';
 import { z } from 'zod';
 import { allowRoles, authRequired, type AuthUser, signToken } from './auth.js';
+import { DEFAULT_JWT_SECRET } from './constants/auth.constants.js';
+import { DEFAULT_BILLING_PLANS } from './constants/billing.constants.js';
+import { SERVER_CONFIG, SCHEDULER_CONFIG } from './constants/config.constants.js';
+import { DEFAULT_REMINDER_PREFERENCE } from './constants/reminder-preferences.constants.js';
+import { SOCKET_EVENTS, SOCKET_ROOM_PREFIXES } from './constants/socket.constants.js';
 import { prisma } from './db.js';
 import { createNotificationService, type NotificationChannel } from './notifications.js';
 import { storeRouter } from './store-routes.js';
@@ -29,12 +34,12 @@ import { hrRouter } from './hr-routes.js';
 
 const app = express();
 const httpServer = createServer(app);
-const port = Number(process.env.PORT || 4000);
-const webOrigin = process.env.WEB_ORIGIN || 'http://localhost:4200';
-const adminOrigin = process.env.ADMIN_ORIGIN || 'http://localhost:4201';
-const doctorOrigin = process.env.DOCTOR_ORIGIN || 'http://localhost:4202';
-const storeOrigin = process.env.STORE_ORIGIN || 'http://localhost:4300';
-const hrOrigin = process.env.HR_ORIGIN || 'http://localhost:4400';
+const port = Number(process.env.PORT || SERVER_CONFIG.DEFAULT_PORT);
+const webOrigin = SERVER_CONFIG.ORIGINS.WEB;
+const adminOrigin = SERVER_CONFIG.ORIGINS.ADMIN;
+const doctorOrigin = SERVER_CONFIG.ORIGINS.DOCTOR;
+const storeOrigin = SERVER_CONFIG.ORIGINS.STORE;
+const hrOrigin = SERVER_CONFIG.ORIGINS.HR;
 
 const io = new SocketIoServer(httpServer, {
   cors: { origin: webOrigin, credentials: true }
@@ -46,7 +51,7 @@ io.use((socket, next) => {
     return next(new Error('Unauthorized'));
   }
 
-  const socketJwtSecret = process.env.JWT_SECRET || 'dev-only-secret';
+  const socketJwtSecret = process.env.JWT_SECRET || DEFAULT_JWT_SECRET;
   try {
     const decoded = jwt.verify(token, socketJwtSecret) as AuthUser;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,19 +65,19 @@ io.use((socket, next) => {
 io.on('connection', (socket) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const userId = (socket as any).userId as string;
-  void socket.join(`user:${userId}`);
-  socket.on('subscribe:consultation', (consultationId: unknown) => {
+  void socket.join(`${SOCKET_ROOM_PREFIXES.USER}${userId}`);
+  socket.on(SOCKET_EVENTS.SUBSCRIBE_CONSULTATION, (consultationId: unknown) => {
     if (typeof consultationId === 'string') {
-      void socket.join(`consultation:${consultationId}`);
+      void socket.join(`${SOCKET_ROOM_PREFIXES.CONSULTATION}${consultationId}`);
     }
   });
 });
 
 const smtpHost = process.env.SMTP_HOST || '';
-const smtpPort = Number(process.env.SMTP_PORT || 587);
+const smtpPort = Number(process.env.SMTP_PORT || SERVER_CONFIG.SMTP.DEFAULT_PORT);
 const smtpUser = process.env.SMTP_USER || '';
 const smtpPass = process.env.SMTP_PASS || '';
-const smtpFrom = process.env.SMTP_FROM || 'noreply@vitaliscare.in';
+const smtpFrom = process.env.SMTP_FROM || SERVER_CONFIG.SMTP.DEFAULT_FROM;
 
 function getMailTransporter() {
   if (!smtpHost || !smtpUser || !smtpPass) {
@@ -86,78 +91,72 @@ function getMailTransporter() {
     auth: { user: smtpUser, pass: smtpPass }
   });
 }
-const devOtp = process.env.DEV_OTP || '123456';
+const devOtp = SERVER_CONFIG.DEV_OTP;
+const isProduction = process.env.NODE_ENV === 'production';
+
+// In-memory OTP store: mobile → { otp, expiresAt }
+// For multi-instance deployments replace with Redis.
+const otpStore = new Map<string, { otp: string; expiresAt: number }>();
+
+function generateOtp(): string {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function storeOtp(mobile: string, otp: string): void {
+  otpStore.set(mobile, { otp, expiresAt: Date.now() + 10 * 60 * 1000 }); // 10 min TTL
+}
+
+function verifyOtp(mobile: string, otp: string): boolean {
+  const entry = otpStore.get(mobile);
+  if (!entry) return false;
+  if (Date.now() > entry.expiresAt) { otpStore.delete(mobile); return false; }
+  if (entry.otp !== otp) return false;
+  otpStore.delete(mobile); // single-use
+  return true;
+}
+
+const twilioAccountSid  = process.env.TWILIO_ACCOUNT_SID  || '';
+const twilioAuthToken   = process.env.TWILIO_AUTH_TOKEN   || '';
+const twilioSmsFrom     = process.env.TWILIO_SMS_FROM     || '';
+
+async function sendOtpSms(mobile: string, otp: string): Promise<void> {
+  if (!twilioAccountSid || !twilioAuthToken || !twilioSmsFrom) {
+    console.info(`[otp] DEV — OTP for ${mobile}: ${otp}`);
+    return;
+  }
+  const { default: twilio } = await import('twilio');
+  const client = twilio(twilioAccountSid, twilioAuthToken);
+  const to = mobile.startsWith('+') ? mobile : `+${mobile.replace(/\D/g, '')}`;
+  await client.messages.create({
+    to,
+    from: twilioSmsFrom,
+    body: `Your Vitalis Care OTP is: ${otp}. Valid for 10 minutes. Do not share it with anyone.`
+  });
+}
 const googleClientId = process.env.GOOGLE_CLIENT_ID || '';
 const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null;
 const razorpayKeyId = process.env.RAZORPAY_KEY_ID || '';
 const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET || '';
 const razorpayWebhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || '';
 const doseOverdueSweepEnabled = (process.env.DOSE_OVERDUE_SWEEP_ENABLED || 'true').toLowerCase() !== 'false';
-const doseOverdueSweepIntervalMs = Math.max(60_000, Number(process.env.DOSE_OVERDUE_SWEEP_INTERVAL_MS || 5 * 60_000));
+const doseOverdueSweepIntervalMs = Math.max(
+  SCHEDULER_CONFIG.DOSE_OVERDUE_SWEEP_MIN_MS,
+  Number(process.env.DOSE_OVERDUE_SWEEP_INTERVAL_MS || SCHEDULER_CONFIG.DOSE_OVERDUE_SWEEP_DEFAULT_MS)
+);
 const doseReminderSweepEnabled = (process.env.DOSE_REMINDER_SWEEP_ENABLED || 'true').toLowerCase() !== 'false';
-const doseReminderWindowMinutes = Math.max(5, Number(process.env.DOSE_REMINDER_WINDOW_MINUTES || 30));
+const doseReminderWindowMinutes = Math.max(
+  SCHEDULER_CONFIG.DOSE_REMINDER_WINDOW_MIN_MINUTES,
+  Number(process.env.DOSE_REMINDER_WINDOW_MINUTES || SCHEDULER_CONFIG.DOSE_REMINDER_WINDOW_DEFAULT_MINUTES)
+);
 const enabledNotificationChannels = (process.env.NOTIFICATION_CHANNELS || 'IN_APP')
   .split(',')
   .map((value) => value.trim().toUpperCase())
   .filter(Boolean) as NotificationChannel[];
 const notificationService = createNotificationService(enabledNotificationChannels);
-const defaultBillingPlans: Array<{
-  code: string;
-  name: string;
-  description: string;
-  planType: BillingPlanType;
-  priceInPaise: number;
-  consultationsLimit: number | null;
-  sortOrder: number;
-}> = [
-  {
-    code: 'ONE_TIME',
-    name: 'One-Time Appointment',
-    description: 'Single consultation with diagnosis, chat, and prescription follow-up.',
-    planType: BillingPlanType.ONE_TIME_APPOINTMENT,
-    priceInPaise: 150000,
-    consultationsLimit: 1,
-    sortOrder: 1
-  },
-  {
-    code: 'STARTER_MONTHLY',
-    name: 'Starter Monthly Plan',
-    description: 'Monthly care plan with up to 3 consultations and follow-up support.',
-    planType: BillingPlanType.STARTER_MONTHLY,
-    priceInPaise: 350000,
-    consultationsLimit: 3,
-    sortOrder: 2
-  },
-  {
-    code: 'CONTINUITY_QUARTERLY',
-    name: 'Continuity Quarterly Plan',
-    description: 'Quarterly continuity plan with up to 10 consultations and medicine adherence tracking.',
-    planType: BillingPlanType.CONTINUITY_QUARTERLY,
-    priceInPaise: 900000,
-    consultationsLimit: 10,
-    sortOrder: 3
-  }
-];
-type ReminderPreference = {
-  inApp: boolean;
-  sms: boolean;
-  whatsapp: boolean;
-  push: boolean;
-  quietHoursStart: string;
-  quietHoursEnd: string;
-};
-const defaultReminderPreference: ReminderPreference = {
-  inApp: true,
-  sms: true,
-  whatsapp: false,
-  push: false,
-  quietHoursStart: '22:00',
-  quietHoursEnd: '07:00'
-};
 
 async function ensureBillingPlans() {
   await Promise.all(
-    defaultBillingPlans.map((plan) =>
+    DEFAULT_BILLING_PLANS.map((plan) =>
       prisma.billingPlan.upsert({
         where: { code: plan.code },
         update: {
@@ -178,6 +177,30 @@ async function ensureBillingPlans() {
 app.use(cors({ origin: [webOrigin, adminOrigin, doctorOrigin, storeOrigin, hrOrigin], credentials: true }));
 app.use('/payments/razorpay-webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
+
+// Rate limiting — OTP endpoint: max 5 requests per 15 min per IP
+const otpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { message: 'Too many OTP requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Auth endpoints: max 20 requests per 15 min
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { message: 'Too many requests, please slow down.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+app.use('/auth/request-otp', otpLimiter);
+app.use('/auth/patient-login', authLimiter);
+app.use('/auth/staff-login', authLimiter);
+app.use('/hr/auth/login', authLimiter);
+app.use('/store/auth/manager-login', authLimiter);
 
 const asyncRoute =
   (handler: express.RequestHandler): express.RequestHandler =>
@@ -516,20 +539,46 @@ async function runDoseSchedulers() {
   await Promise.all([markOverdueDosesAsMissed(), emitUpcomingDoseReminders()]);
 }
 
-app.get('/health', (_req, res) => {
-  res.json({ ok: true, service: 'clinic-api' });
-});
+app.get(
+  '/health',
+  asyncRoute(async (_req, res) => {
+    let dbOk = false;
+    let dbLatencyMs: number | undefined;
+    try {
+      const t0 = Date.now();
+      await prisma.$queryRaw`SELECT 1`;
+      dbLatencyMs = Date.now() - t0;
+      dbOk = true;
+    } catch { /* DB unreachable */ }
+
+    const status = dbOk ? 200 : 503;
+    res.status(status).json({
+      ok: dbOk,
+      service: 'clinic-api',
+      database: dbOk ? 'connected' : 'unreachable',
+      dbLatencyMs,
+      timestamp: new Date().toISOString()
+    });
+  })
+);
 
 app.post(
   '/auth/request-otp',
   asyncRoute(async (req, res) => {
     const body = z.object({ mobile: z.string().min(8) }).parse(req.body);
+    const otp = isProduction ? generateOtp() : devOtp;
+    storeOtp(body.mobile, otp);
 
-    res.json({
+    await sendOtpSms(body.mobile, otp);
+
+    const response: Record<string, unknown> = {
       mobile: body.mobile,
-      message: 'OTP generated for development.',
-      devOtp
-    });
+      message: isProduction ? 'OTP sent to your mobile.' : 'OTP generated for development.'
+    };
+    if (!isProduction) {
+      response['devOtp'] = otp;
+    }
+    res.json(response);
   })
 );
 
@@ -2351,7 +2400,8 @@ app.get(
       doc.fontSize(9).fillColor(GRAY).font('Helvetica').text(title, 50, y);
       y += 12;
       doc.rect(50, y, W, 0).fillColor('#f9fafb').fill();
-      const textH = doc.heightOfString(text, { width: W - 16, fontSize: 10 });
+      doc.fontSize(10);
+      const textH = doc.heightOfString(text, { width: W - 16 });
       doc.rect(50, y, W, textH + 14).strokeColor('#e5e7eb').lineWidth(0.5).stroke();
       doc.fontSize(10).fillColor('#374151').font('Helvetica').text(text, 58, y + 7, { width: W - 16 });
       y += textH + 20;
@@ -2425,7 +2475,7 @@ app.get(
         quietHoursEnd: true
       }
     });
-    const preferences = stored || defaultReminderPreference;
+    const preferences = stored || DEFAULT_REMINDER_PREFERENCE;
     res.json({ preferences });
   })
 );
@@ -3107,7 +3157,7 @@ app.put(
 
     const consultation = await prisma.consultation.update({
       where: { id },
-      data: { assignedDoctorId: doctor.userId, status: ConsultationStatus.ACTIVE },
+      data: { assignedDoctorId: doctor.userId, status: 'ACTIVE' as ConsultationStatus },
       include: {
         patient: { select: { id: true, name: true, mobile: true, email: true } },
         disease: { select: { name: true } },

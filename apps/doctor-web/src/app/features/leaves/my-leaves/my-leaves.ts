@@ -4,14 +4,15 @@ import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-
-const LEAVE_TYPES = ['CASUAL', 'SICK', 'EARNED', 'UNPAID', 'MATERNITY', 'PATERNITY'];
-const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
-  PENDING:  { bg: 'rgba(251,146,60,0.12)',  color: '#fb923c' },
-  APPROVED: { bg: 'rgba(74,222,128,0.12)',  color: '#4ade80' },
-  REJECTED: { bg: 'rgba(248,113,113,0.12)', color: '#f87171' },
-  CANCELLED:{ bg: 'rgba(148,163,184,0.12)', color: '#94a3b8' }
-};
+import { API_PATHS } from '../../../core/constants/api-paths.constants';
+import { TOAST_DURATION_MS } from '../../../core/constants/timing.constants';
+import { Auth } from '../../../core/services/auth';
+import {
+  DEFAULT_LEAVE_TYPE,
+  LEAVE_STATUS_FALLBACK_STYLE,
+  LEAVE_STATUS_STYLES,
+  LEAVE_TYPES
+} from '../constants/leave.constants';
 
 @Component({
   selector: 'app-my-leaves',
@@ -129,6 +130,7 @@ const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
 })
 export class MyLeaves implements OnInit {
   private http = inject(HttpClient);
+  private auth = inject(Auth);
   private base = environment.apiUrl;
 
   leaves = signal<any[]>([]);
@@ -138,32 +140,32 @@ export class MyLeaves implements OnInit {
   err = signal('');
   toast = signal('');
 
-  form = { type: 'CASUAL', startDate: '', endDate: '', reason: '' };
+  form = { type: DEFAULT_LEAVE_TYPE, startDate: '', endDate: '', reason: '' };
   leaveTypes = LEAVE_TYPES;
 
   ngOnInit(): void { this.load(); }
 
   load(): void {
     this.loading.set(true);
-    const token = localStorage.getItem('doctor_app_token') ?? '';
+    const token = this.auth.token();
     firstValueFrom(
-      this.http.get<{ leaves: any[] }>(`${this.base}/hr/self/doctor-leaves`, {
+      this.http.get<{ leaves: any[] }>(`${this.base}${API_PATHS.HR.SELF_DOCTOR_LEAVES}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
     ).then(r => { this.leaves.set(r.leaves); this.loading.set(false); })
      .catch(() => this.loading.set(false));
   }
 
-  openModal(): void { this.form = { type: 'CASUAL', startDate: '', endDate: '', reason: '' }; this.err.set(''); this.modal.set(true); }
+  openModal(): void { this.form = { type: DEFAULT_LEAVE_TYPE, startDate: '', endDate: '', reason: '' }; this.err.set(''); this.modal.set(true); }
   closeModal(): void { this.modal.set(false); }
 
   async submit(): Promise<void> {
     if (!this.form.startDate || !this.form.endDate) { this.err.set('Start and end dates are required'); return; }
     this.saving.set(true);
-    const token = localStorage.getItem('doctor_app_token') ?? '';
+    const token = this.auth.token();
     try {
       await firstValueFrom(
-        this.http.post(`${this.base}/hr/self/doctor-leave`, this.form, {
+        this.http.post(`${this.base}${API_PATHS.HR.SELF_DOCTOR_LEAVE}`, this.form, {
           headers: { Authorization: `Bearer ${token}` }
         })
       );
@@ -178,11 +180,11 @@ export class MyLeaves implements OnInit {
   }
 
   statusStyle(s: string): { bg: string; color: string } {
-    return STATUS_STYLES[s] ?? { bg: 'rgba(255,255,255,0.06)', color: '#94a3b8' };
+    return LEAVE_STATUS_STYLES[s] ?? LEAVE_STATUS_FALLBACK_STYLE;
   }
 
   private showToast(msg: string): void {
     this.toast.set(msg);
-    setTimeout(() => this.toast.set(''), 2500);
+    setTimeout(() => this.toast.set(''), TOAST_DURATION_MS);
   }
 }

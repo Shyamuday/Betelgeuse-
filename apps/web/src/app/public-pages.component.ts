@@ -8,10 +8,10 @@ import { diseaseCategoryList } from './disease/disease-category-list.constants';
 import { diseaseInfos } from './disease/disease-info.constants';
 import { DiseaseInfo } from './models';
 import { AppOverlayService } from './overlay.service';
+import { WHATSAPP_CONTACT_URL } from './core/constants/branding.constants';
 import { homeopathyApproaches } from './treatment-approach/homeopathy-approaches.constants';
 
-const whatsappLink =
-  'https://wa.me/919876543210?text=Hi%20Vitalis%20Care%20and%20Research%20Centre%2C%20I%20want%20to%20know%20more';
+const whatsappLink = WHATSAPP_CONTACT_URL;
 
 @Component({
   selector: 'app-treatments',

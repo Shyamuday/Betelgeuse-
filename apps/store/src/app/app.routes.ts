@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { DEFAULT_AUTHED_ROUTE, ROUTE_PATHS } from './core/constants/app-routes.constants';
 import { LoginComponent } from './pages/login/login.component';
 import { ShellComponent } from './layout/shell/shell.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
@@ -15,24 +16,24 @@ import { StaffActivityComponent } from './pages/staff-activity/staff-activity.co
 import { StaffHrComponent } from './pages/staff-hr/staff-hr.component';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
+  { path: ROUTE_PATHS.LOGIN, component: LoginComponent },
   {
     path: '',
     component: ShellComponent,
     canActivate: [authGuard],
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'search', component: SearchComponent },
-      { path: 'medicines/:id', component: MedicineDetailComponent },
-      { path: 'stock-in', component: StockInComponent },
-      { path: 'stock-out', component: StockOutComponent },
-      { path: 'alerts', component: AlertsComponent },
-      { path: 'rack-map', component: RackMapComponent },
-      { path: 'medicines', component: MedicinesAdminComponent },
-      { path: 'movements', component: MovementsComponent },
-      { path: 'staff-activity', component: StaffActivityComponent },
-      { path: 'staff-hr', component: StaffHrComponent },
+      { path: '', pathMatch: 'full', redirectTo: DEFAULT_AUTHED_ROUTE },
+      { path: ROUTE_PATHS.DASHBOARD, component: DashboardComponent },
+      { path: ROUTE_PATHS.SEARCH, component: SearchComponent },
+      { path: ROUTE_PATHS.MEDICINE_DETAIL, component: MedicineDetailComponent },
+      { path: ROUTE_PATHS.STOCK_IN, component: StockInComponent },
+      { path: ROUTE_PATHS.STOCK_OUT, component: StockOutComponent },
+      { path: ROUTE_PATHS.ALERTS, component: AlertsComponent },
+      { path: ROUTE_PATHS.RACK_MAP, component: RackMapComponent },
+      { path: ROUTE_PATHS.MEDICINES, component: MedicinesAdminComponent },
+      { path: ROUTE_PATHS.MOVEMENTS, component: MovementsComponent },
+      { path: ROUTE_PATHS.STAFF_ACTIVITY, component: StaffActivityComponent },
+      { path: ROUTE_PATHS.STAFF_HR, component: StaffHrComponent },
     ]
   },
   { path: '**', redirectTo: '' }

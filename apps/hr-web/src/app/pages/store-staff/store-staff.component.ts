@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { HrApiService } from '../../services/hr-api.service';
 import { StoreStaff } from '../../models';
 import { EmployeeDrawerComponent } from '../../shared/employee-drawer/employee-drawer.component';
+import { employeeStatusBadgeClass } from '../../shared/constants/employee-status.constants';
 
 @Component({
   selector: 'app-store-staff',
@@ -215,13 +216,5 @@ export class StoreStaffComponent implements OnInit {
     this.selectedMember.set(emp);
   }
 
-  statusClass(status: string): string {
-    const map: Record<string, string> = {
-      'ACTIVE': 'badge-active',
-      'ON_LEAVE': 'badge-on-leave',
-      'RESIGNED': 'badge-resigned',
-      'TERMINATED': 'badge-terminated'
-    };
-    return map[status] ?? 'badge-resigned';
-  }
+  statusClass = employeeStatusBadgeClass;
 }

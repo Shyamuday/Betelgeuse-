@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { AUTH_PATHS, ROLE_DASHBOARD_PATHS } from '../core/constants/auth.constants';
 import { Role, User } from '../models';
 import { environment } from '../../environments/environment';
 
@@ -19,7 +20,7 @@ export class PatientAuthService {
 
   async register(payload: { name: string; email?: string; mobile?: string; password: string }): Promise<AuthResponse> {
     return firstValueFrom(
-      this.http.post<AuthResponse>(`${this.apiBase}/auth/patient-register`, payload)
+      this.http.post<AuthResponse>(`${this.apiBase}${AUTH_PATHS.PATIENT_REGISTER}`, payload)
     );
   }
 
@@ -42,8 +43,8 @@ export class PatientAuthService {
   }
 
   dashboardFor(role: Role) {
-    if (role === 'ADMIN') return '/admin/dashboard';
-    if (role === 'DOCTOR') return '/doctor/dashboard';
-    return '/patient/dashboard';
+    if (role === 'ADMIN') return ROLE_DASHBOARD_PATHS.ADMIN;
+    if (role === 'DOCTOR') return ROLE_DASHBOARD_PATHS.DOCTOR;
+    return ROLE_DASHBOARD_PATHS.PATIENT;
   }
 }

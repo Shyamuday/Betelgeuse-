@@ -1,6 +1,7 @@
 import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from './auth/auth.service';
+import { ROUTE_PATHS } from './core/constants/app-routes.constants';
 import { Role } from './models';
 
 export const roleGuard: CanActivateFn = async (route) => {
@@ -10,7 +11,7 @@ export const roleGuard: CanActivateFn = async (route) => {
   const roles = route.data['roles'] as Role[] | undefined;
 
   if (!user) {
-    return router.createUrlTree(['/login']);
+    return router.createUrlTree([`/${ROUTE_PATHS.LOGIN}`]);
   }
 
   if (roles?.length && !roles.includes(user.role)) {

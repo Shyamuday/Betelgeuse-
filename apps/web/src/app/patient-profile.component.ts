@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { API_PATHS } from './core/constants/api-paths.constants';
 import { environment } from '../environments/environment';
 import { AuthService } from './auth/auth.service';
 
@@ -137,7 +138,7 @@ export class PatientProfileComponent implements OnInit {
   async load() {
     this.loading.set(true);
     try {
-      const { profile } = await this.apiFetch<{ profile: Profile }>('/patient/profile');
+      const { profile } = await this.apiFetch<{ profile: Profile }>(API_PATHS.PATIENT.PROFILE);
       this.profile.set(profile);
       this.name = profile.name;
       this.allergies = profile.allergies || '';
@@ -155,7 +156,7 @@ export class PatientProfileComponent implements OnInit {
     this.successMsg.set('');
     this.errorMsg.set('');
     try {
-      const { profile } = await this.apiFetch<{ profile: Profile }>('/patient/profile', {
+      const { profile } = await this.apiFetch<{ profile: Profile }>(API_PATHS.PATIENT.PROFILE, {
         method: 'PUT',
         body: JSON.stringify({
           name: this.name.trim(),

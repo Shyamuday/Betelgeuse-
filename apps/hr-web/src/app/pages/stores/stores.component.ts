@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HrApiService } from '../../services/hr-api.service';
 import { StoreInfo } from '../../models';
+import { TOAST_DURATION_MS } from '../../core/constants/timing.constants';
 
 @Component({
   selector: 'app-stores',
@@ -409,6 +410,6 @@ export class StoresComponent implements OnInit {
 
   private showToast(msg: string): void {
     this.toast.set(msg);
-    setTimeout(() => this.toast.set(''), 3000);
+    setTimeout(() => this.toast.set(''), TOAST_DURATION_MS);
   }
 }

@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HrAuthService } from '../../services/hr-auth.service';
+import { DEFAULT_AUTHED_ROUTE } from '../../core/constants/app-routes.constants';
 
 @Component({
   selector: 'app-login',
@@ -241,7 +242,7 @@ export class LoginComponent {
     this.auth.login(this.email, this.password).subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigate(['/dashboard']);
+        this.router.navigate([`/${DEFAULT_AUTHED_ROUTE}`]);
       },
       error: (err) => {
         this.loading.set(false);

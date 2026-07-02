@@ -4,6 +4,9 @@ import { DatePipe } from '@angular/common';
 import { HrApiService } from '../../services/hr-api.service';
 import { Employee } from '../../models';
 import { EmployeeDrawerComponent } from '../../shared/employee-drawer/employee-drawer.component';
+import { EMPLOYEE_STATUS_FILTER_OPTIONS, employeeStatusBadgeClass } from '../../shared/constants/employee-status.constants';
+import { EMPLOYEE_TYPE_FILTER_OPTIONS } from '../../shared/constants/employee-type.constants';
+import { SEARCH_DEBOUNCE_MS } from '../../core/constants/timing.constants';
 
 type FilterType = 'ALL' | 'DOCTOR' | 'STORE_STAFF';
 type FilterStatus = 'ALL' | 'ACTIVE' | 'ON_LEAVE' | 'RESIGNED' | 'TERMINATED';
@@ -315,17 +318,8 @@ export class EmployeesComponent implements OnInit {
 
   private searchTimer: any = null;
 
-  typeFilters = [
-    { value: 'ALL' as FilterType, label: 'All Types' },
-    { value: 'DOCTOR' as FilterType, label: '🩺 Doctors' },
-    { value: 'STORE_STAFF' as FilterType, label: '🏪 Store Staff' }
-  ];
-
-  statusFilters = [
-    { value: 'ALL' as FilterStatus, label: 'All Status' },
-    { value: 'ACTIVE' as FilterStatus, label: 'Active' },
-    { value: 'ON_LEAVE' as FilterStatus, label: 'On Leave' }
-  ];
+  typeFilters = EMPLOYEE_TYPE_FILTER_OPTIONS;
+  statusFilters = EMPLOYEE_STATUS_FILTER_OPTIONS;
 
   ngOnInit() { this.loadEmployees(); }
 
@@ -347,7 +341,7 @@ export class EmployeesComponent implements OnInit {
 
   onSearch() {
     clearTimeout(this.searchTimer);
-    this.searchTimer = setTimeout(() => this.loadEmployees(), 400);
+    this.searchTimer = setTimeout(() => this.loadEmployees(), SEARCH_DEBOUNCE_MS);
   }
 
   setTypeFilter(v: FilterType) { this.typeFilter.set(v); this.loadEmployees(); }
@@ -363,13 +357,5 @@ export class EmployeesComponent implements OnInit {
     this.selectedEmployee.set(emp);
   }
 
-  statusClass(status: string): string {
-    const map: Record<string, string> = {
-      'ACTIVE': 'badge-active',
-      'ON_LEAVE': 'badge-on-leave',
-      'RESIGNED': 'badge-resigned',
-      'TERMINATED': 'badge-terminated'
-    };
-    return map[status] ?? 'badge-resigned';
-  }
+  statusClass = employeeStatusBadgeClass;
 }

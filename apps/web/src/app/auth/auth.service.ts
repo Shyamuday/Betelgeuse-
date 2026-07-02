@@ -1,6 +1,7 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, from, tap } from 'rxjs';
+import { AUTH_PATHS, AUTH_TOKEN_KEY, ROLE_DASHBOARD_PATHS } from '../core/constants/auth.constants';
 import { Role, User } from '../models';
 import { PatientAuthService } from './patient-auth.service';
 import { environment } from '../../environments/environment';
@@ -9,8 +10,6 @@ type AuthResponse = {
   token: string;
   user: User;
 };
-
-const tokenKey = 'clinic_token';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -34,29 +33,29 @@ export class AuthService {
 
     try {
       const response = await firstValueFrom(
-        this.http.get<{ user: User }>(`${this.apiBase}/me`, {
+        this.http.get<{ user: User }>(`${this.apiBase}${AUTH_PATHS.ME}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       );
       this.patientAuth.setAuthenticatedUser(response.user);
       return response.user;
     } catch {
-      localStorage.removeItem(tokenKey);
+      localStorage.removeItem(AUTH_TOKEN_KEY);
       this.patientAuth.setAuthenticatedUser(null);
       return null;
     }
   }
 
   get token() {
-    return localStorage.getItem(tokenKey);
+    return localStorage.getItem(AUTH_TOKEN_KEY);
   }
 
   requestOtp(mobile: string) {
-    return this.http.post<{ devOtp?: string }>(`${this.apiBase}/auth/request-otp`, { mobile });
+    return this.http.post<{ devOtp?: string }>(`${this.apiBase}${AUTH_PATHS.REQUEST_OTP}`, { mobile });
   }
 
   patientLogin(payload: { name: string; mobile: string; otp: string }) {
-    return this.http.post<AuthResponse>(`${this.apiBase}/auth/patient-login`, payload).pipe(
+    return this.http.post<AuthResponse>(`${this.apiBase}${AUTH_PATHS.PATIENT_LOGIN}`, payload).pipe(
       tap((response) => this.persistSession(response))
     );
   }
@@ -74,13 +73,13 @@ export class AuthService {
   }
 
   staffLogin(payload: { email: string; password: string }) {
-    return this.http.post<AuthResponse>(`${this.apiBase}/auth/staff-login`, payload).pipe(
+    return this.http.post<AuthResponse>(`${this.apiBase}${AUTH_PATHS.STAFF_LOGIN}`, payload).pipe(
       tap((response) => this.persistSession(response))
     );
   }
 
   googleLogin(idToken: string) {
-    return this.http.post<AuthResponse>(`${this.apiBase}/auth/google`, { idToken }).pipe(
+    return this.http.post<AuthResponse>(`${this.apiBase}${AUTH_PATHS.GOOGLE}`, { idToken }).pipe(
       tap((response) => this.persistSession(response))
     );
   }
@@ -90,7 +89,7 @@ export class AuthService {
   }
 
   staffForgotPassword(email: string) {
-    return this.http.post<{ message: string }>(`${this.apiBase}/auth/forgot-password`, { email });
+    return this.http.post<{ message: string }>(`${this.apiBase}${AUTH_PATHS.FORGOT_PASSWORD}`, { email });
   }
 
   resetPassword(payload: { token: string; password: string }) {
@@ -100,19 +99,19 @@ export class AuthService {
   }
 
   logout() {
-    localStorage.removeItem(tokenKey);
+    localStorage.removeItem(AUTH_TOKEN_KEY);
     this.patientAuth.setAuthenticatedUser(null);
   }
 
   dashboardFor(role: Role) {
-    if (role === 'ADMIN') return '/admin/dashboard';
-    if (role === 'DOCTOR') return '/doctor/dashboard';
-    return '/patient/dashboard';
+    if (role === 'ADMIN') return ROLE_DASHBOARD_PATHS.ADMIN;
+    if (role === 'DOCTOR') return ROLE_DASHBOARD_PATHS.DOCTOR;
+    return ROLE_DASHBOARD_PATHS.PATIENT;
   }
 
   private persistSession(response: AuthResponse) {
     if (response.token) {
-      localStorage.setItem(tokenKey, response.token);
+      localStorage.setItem(AUTH_TOKEN_KEY, response.token);
     }
 
     this.patientAuth.setAuthenticatedUser(response.user);

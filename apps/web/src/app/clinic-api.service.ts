@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
 import { from } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import { AUTH_TOKEN_KEY } from './core/constants/auth.constants';
+import { API_PATHS } from './core/constants/api-paths.constants';
+import { DEFAULT_SNOOZE_MINUTES } from './core/constants/timing.constants';
+import { RAZORPAY_CHECKOUT } from './core/constants/branding.constants';
+import { SOCKET_EVENTS, SOCKET_TRANSPORTS } from './core/constants/socket.constants';
 import { environment } from '../environments/environment';
 import { BillingPlan, Consultation, Disease, Doctor, DoseEvent, Payment, Prescription } from './models';
 
@@ -29,8 +34,6 @@ export interface RealtimeSubscription {
 
 @Injectable({ providedIn: 'root' })
 export class ClinicApiService {
-  private readonly backendTokenKey = 'clinic_token';
-
   diseases() {
     return from(this.fetchDiseases());
   }
@@ -45,25 +48,25 @@ export class ClinicApiService {
     purchaseType?: 'ONE_TIME' | 'PLAN';
     planCode?: string;
   }) {
-    return from(this.apiFetch('/consultations', {
+    return from(this.apiFetch(API_PATHS.CONSULTATIONS, {
       method: 'POST',
       body: JSON.stringify(payload)
     }));
   }
 
   billingPlans() {
-    return from(this.apiFetch<{ plans: BillingPlan[] }>('/billing/plans'));
+    return from(this.apiFetch<{ plans: BillingPlan[] }>(API_PATHS.BILLING_PLANS));
   }
 
   createPaymentOrder(consultationId: string) {
-    return from(this.apiFetch<RazorpayOrderResponse>(`/payments/${consultationId}/create-order`, {
+    return from(this.apiFetch<RazorpayOrderResponse>(API_PATHS.PAYMENTS.CREATE_ORDER(consultationId), {
       method: 'POST',
       body: JSON.stringify({})
     }));
   }
 
   verifyPayment(consultationId: string, payment: RazorpayCheckoutResponse) {
-    return from(this.apiFetch(`/payments/${consultationId}/verify`, {
+    return from(this.apiFetch(API_PATHS.PAYMENTS.VERIFY(consultationId), {
       method: 'POST',
       body: JSON.stringify({
         razorpayOrderId: payment.razorpay_order_id,
@@ -94,7 +97,7 @@ export class ClinicApiService {
   }
 
   doctors() {
-    return from(this.apiFetch<{ doctors: Doctor[] }>('/admin/doctors'));
+    return from(this.apiFetch<{ doctors: Doctor[] }>(API_PATHS.ADMIN.DOCTORS));
   }
 
   createDoctor(payload: {
@@ -105,7 +108,7 @@ export class ClinicApiService {
     specialty: string;
     registrationNo?: string;
   }) {
-    return from(this.apiFetch('/admin/doctors', {
+    return from(this.apiFetch(API_PATHS.ADMIN.DOCTORS, {
       method: 'POST',
       body: JSON.stringify(payload)
     }));
@@ -119,7 +122,7 @@ export class ClinicApiService {
   }
 
   reports() {
-    return from(this.apiFetch<{ revenueInPaise: number; activeDoctors: number; consultations: unknown[] }>('/admin/reports'));
+    return from(this.apiFetch<{ revenueInPaise: number; activeDoctors: number; consultations: unknown[] }>(API_PATHS.ADMIN.REPORTS));
   }
 
   patientPrescriptions() {
@@ -131,18 +134,18 @@ export class ClinicApiService {
   }
 
   markDoseTaken(doseEventId: string) {
-    return from(this.apiFetch(`/patient/dose-events/${doseEventId}/take`, { method: 'POST' }));
+    return from(this.apiFetch(API_PATHS.PATIENT.DOSE_TAKE(doseEventId), { method: 'POST' }));
   }
 
   skipDose(doseEventId: string, note?: string) {
-    return from(this.apiFetch(`/patient/dose-events/${doseEventId}/skip`, {
+    return from(this.apiFetch(API_PATHS.PATIENT.DOSE_SKIP(doseEventId), {
       method: 'POST',
       body: JSON.stringify(note ? { note } : {})
     }));
   }
 
-  snoozeDose(doseEventId: string, minutes = 15) {
-    return from(this.apiFetch(`/patient/dose-events/${doseEventId}/snooze`, {
+  snoozeDose(doseEventId: string, minutes = DEFAULT_SNOOZE_MINUTES) {
+    return from(this.apiFetch(API_PATHS.PATIENT.DOSE_SNOOZE(doseEventId), {
       method: 'POST',
       body: JSON.stringify({ minutes })
     }));
@@ -158,7 +161,7 @@ export class ClinicApiService {
         quietHoursStart: string;
         quietHoursEnd: string;
       };
-    }>('/patient/reminder-preferences'));
+    }>(API_PATHS.PATIENT.REMINDER_PREFERENCES));
   }
 
   saveReminderPreferences(preferences: {
@@ -169,7 +172,7 @@ export class ClinicApiService {
     quietHoursStart: string;
     quietHoursEnd: string;
   }) {
-    return from(this.apiFetch('/patient/reminder-preferences', {
+    return from(this.apiFetch(API_PATHS.PATIENT.REMINDER_PREFERENCES, {
       method: 'PUT',
       body: JSON.stringify(preferences)
     }));
@@ -179,7 +182,7 @@ export class ClinicApiService {
     const token = this.backendToken;
     const socket: Socket = io(environment.apiUrl, {
       auth: { token },
-      transports: ['websocket']
+      transports: [...SOCKET_TRANSPORTS]
     });
 
     socket.on('consultation:updated', onChange);
@@ -191,7 +194,7 @@ export class ClinicApiService {
   }
 
   subscribeToConsultation(socket: Socket, consultationId: string) {
-    socket.emit('subscribe:consultation', consultationId);
+    socket.emit(SOCKET_EVENTS.SUBSCRIBE_CONSULTATION, consultationId);
   }
 
   async openRazorpayCheckout(consultation: Consultation, order: RazorpayOrderResponse) {
@@ -207,14 +210,14 @@ export class ClinicApiService {
         key: order.razorpayKeyId,
         amount: order.amountInPaise,
         currency: order.currency,
-        name: 'Vitalis Care and Research Centre',
+        name: RAZORPAY_CHECKOUT.NAME,
         description: consultation.disease.name,
         order_id: order.orderId,
         prefill: {
           name: consultation.patient.name,
           contact: consultation.patient.mobile || ''
         },
-        theme: { color: '#0f62fe' },
+        theme: { color: RAZORPAY_CHECKOUT.THEME_COLOR },
         handler: (response: RazorpayCheckoutResponse) => resolve(response),
         modal: { ondismiss: () => reject(new Error('Payment was cancelled.')) }
       });
@@ -224,7 +227,7 @@ export class ClinicApiService {
   }
 
   private get backendToken() {
-    return localStorage.getItem(this.backendTokenKey) || '';
+    return localStorage.getItem(AUTH_TOKEN_KEY) || '';
   }
 
   private async apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -260,7 +263,7 @@ export class ClinicApiService {
       throw new Error('Backend session missing. Please login again.');
     }
 
-    const response = await this.apiFetch<{ consultations: Array<Record<string, unknown>> }>('/consultations');
+    const response = await this.apiFetch<{ consultations: Array<Record<string, unknown>> }>(API_PATHS.CONSULTATIONS);
     return { consultations: (response.consultations || []).map((row) => this.toConsultationFromApi(row)) };
   }
 
@@ -269,7 +272,7 @@ export class ClinicApiService {
       throw new Error('Backend session missing. Please login again.');
     }
 
-    const response = await this.apiFetch<{ prescriptions: Array<Record<string, unknown>> }>('/patient/prescriptions');
+    const response = await this.apiFetch<{ prescriptions: Array<Record<string, unknown>> }>(API_PATHS.PATIENT.PRESCRIPTIONS);
     return { prescriptions: (response.prescriptions || []).map((row) => this.toPatientPrescriptionFromApi(row)) };
   }
 
@@ -278,7 +281,7 @@ export class ClinicApiService {
       throw new Error('Backend session missing. Please login again.');
     }
 
-    const response = await this.apiFetch<{ doses: Array<Record<string, unknown>> }>('/patient/today-doses');
+    const response = await this.apiFetch<{ doses: Array<Record<string, unknown>> }>(API_PATHS.PATIENT.TODAY_DOSES);
     return { doseEvents: (response.doses || []).map((row) => this.toDoseEventFromApi(row)) };
   }
 
@@ -289,7 +292,7 @@ export class ClinicApiService {
 
     return new Promise<void>((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.src = RAZORPAY_CHECKOUT.SCRIPT_URL;
       script.onload = () => resolve();
       script.onerror = () => reject(new Error('Unable to load Razorpay Checkout.'));
       document.body.appendChild(script);

@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DEFAULT_QUIET_HOURS } from './core/constants/timing.constants';
 
 export type ReminderPrefs = {
   inApp: boolean;
@@ -23,17 +24,18 @@ export type ReminderPrefs = {
       <label><input type="checkbox" [(ngModel)]="prefs.push" /> Push</label>
       <label>
         Quiet hours start
-        <input [(ngModel)]="prefs.quietHoursStart" placeholder="22:00" />
+        <input [(ngModel)]="prefs.quietHoursStart" [placeholder]="DEFAULT_QUIET_HOURS.START" />
       </label>
       <label>
         Quiet hours end
-        <input [(ngModel)]="prefs.quietHoursEnd" placeholder="07:00" />
+        <input [(ngModel)]="prefs.quietHoursEnd" [placeholder]="DEFAULT_QUIET_HOURS.END" />
       </label>
       <button class="primary" [disabled]="disabled" (click)="saved.emit(prefs)">Save preferences</button>
     </div>
   `
 })
 export class ReminderPreferencesComponent {
+  readonly DEFAULT_QUIET_HOURS = DEFAULT_QUIET_HOURS;
   @Input() prefs: ReminderPrefs = { inApp: true, sms: false, whatsapp: false, push: false, quietHoursStart: '', quietHoursEnd: '' };
   @Input() disabled = false;
 

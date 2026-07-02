@@ -2,23 +2,16 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { StoreApiService } from '../../services/store-api.service';
 import { StaffActivity, StaffDetailResponse } from '../../models';
+import { ACTIVITY_PERIODS } from '../../core/constants/pagination.constants';
+import { STORE_STAFF_ROLES } from '../../core/constants/auth.constants';
+import { STAFF_ACTIVITY_DISPLAY, OUTBOUND_MOVEMENT_TYPES } from '../../shared/constants/stock-movement.constants';
 
-const TYPE_ICONS: Record<string, string> = {
-  PURCHASE_IN: '📦', SALE_OUT: '🛒',
-  ADJUSTMENT_IN: '➕', ADJUSTMENT_OUT: '✏️',
-  TRANSFER_IN: '↙️', TRANSFER_OUT: '↗️', EXPIRED_REMOVAL: '🗑️'
-};
-const TYPE_LABELS: Record<string, string> = {
-  PURCHASE_IN: 'Stock Received', SALE_OUT: 'Dispensed',
-  ADJUSTMENT_IN: 'Adj. In', ADJUSTMENT_OUT: 'Adj. Out',
-  TRANSFER_IN: 'Transfer In', TRANSFER_OUT: 'Transfer Out',
-  EXPIRED_REMOVAL: 'Expired Removed'
-};
-const TYPE_COLORS: Record<string, string> = {
-  PURCHASE_IN: '#4ade80', ADJUSTMENT_IN: '#4ade80', TRANSFER_IN: '#4ade80',
-  SALE_OUT: '#60a5fa', ADJUSTMENT_OUT: '#fb923c',
-  TRANSFER_OUT: '#fb923c', EXPIRED_REMOVAL: '#f87171'
-};
+type ActivityDisplayKey = keyof typeof STAFF_ACTIVITY_DISPLAY.ICONS;
+
+function activityDisplayKey(type: string): ActivityDisplayKey | null {
+  if (type === 'EXPIRED_REMOVAL') return 'EXPIRED_OUT';
+  return type in STAFF_ACTIVITY_DISPLAY.ICONS ? type as ActivityDisplayKey : null;
+}
 
 @Component({
   selector: 'app-staff-activity',
@@ -68,14 +61,14 @@ const TYPE_COLORS: Record<string, string> = {
           @for (s of staffList(); track s.staffId) {
             <div class="staff-row" (click)="openDetail(s)">
               <div class="staff-left">
-                <div class="staff-avatar" [class.manager]="s.role === 'MANAGER'">
+                <div class="staff-avatar" [class.manager]="s.role === managerRole">
                   {{ s.name.charAt(0).toUpperCase() }}
                 </div>
                 <div class="staff-info">
                   <div class="staff-name">{{ s.name }}</div>
                   <div class="staff-meta">
                     <span class="staff-code">{{ s.staffCode }}</span>
-                    <span class="staff-role" [class.manager]="s.role === 'MANAGER'">{{ s.role }}</span>
+                    <span class="staff-role" [class.manager]="s.role === managerRole">{{ s.role }}</span>
                   </div>
                 </div>
               </div>
@@ -121,14 +114,14 @@ const TYPE_COLORS: Record<string, string> = {
       <div class="drawer-overlay" (click)="closeDetail()">
         <div class="drawer" (click)="$event.stopPropagation()">
           <div class="drawer-header">
-            <div class="detail-avatar" [class.manager]="detail()!.staff.role === 'MANAGER'">
+            <div class="detail-avatar" [class.manager]="detail()!.staff.role === managerRole">
               {{ detail()!.staff.name.charAt(0).toUpperCase() }}
             </div>
             <div>
               <div class="detail-name">{{ detail()!.staff.name }}</div>
               <div class="detail-meta">
                 <span class="staff-code">{{ detail()!.staff.staffCode }}</span>
-                <span class="staff-role" [class.manager]="detail()!.staff.role === 'MANAGER'">{{ detail()!.staff.role }}</span>
+                <span class="staff-role" [class.manager]="detail()!.staff.role === managerRole">{{ detail()!.staff.role }}</span>
               </div>
             </div>
             <button class="close-btn" (click)="closeDetail()">✕</button>
@@ -501,13 +494,15 @@ const TYPE_COLORS: Record<string, string> = {
 export class StaffActivityComponent implements OnInit {
   private api = inject(StoreApiService);
 
-  period = signal('today');
+  readonly managerRole = STORE_STAFF_ROLES.MANAGER;
+
+  period = signal(ACTIVITY_PERIODS.TODAY);
   loading = signal(true);
   staffList = signal<StaffActivity[]>([]);
 
   detailOpen = signal(false);
   detail = signal<StaffDetailResponse | null>(null);
-  detailPeriod = signal('week');
+  detailPeriod = signal(ACTIVITY_PERIODS.WEEK);
   private selectedStaffId = '';
 
   periods = [
@@ -539,7 +534,7 @@ export class StaffActivityComponent implements OnInit {
 
   openDetail(s: StaffActivity): void {
     this.selectedStaffId = s.staffId;
-    this.detailPeriod.set('week');
+    this.detailPeriod.set(ACTIVITY_PERIODS.WEEK);
     this.loadDetail();
     this.detailOpen.set(true);
   }
@@ -557,8 +552,20 @@ export class StaffActivityComponent implements OnInit {
     });
   }
 
-  typeIcon(type: string): string { return TYPE_ICONS[type] ?? '📝'; }
-  typeLabel(type: string): string { return TYPE_LABELS[type] ?? type; }
-  typeColor(type: string): string { return TYPE_COLORS[type] ?? '#94a3b8'; }
-  isOut(type: string): boolean { return ['SALE_OUT', 'ADJUSTMENT_OUT', 'TRANSFER_OUT', 'EXPIRED_REMOVAL'].includes(type); }
+  typeIcon(type: string): string {
+    const key = activityDisplayKey(type);
+    return key ? STAFF_ACTIVITY_DISPLAY.ICONS[key] : STAFF_ACTIVITY_DISPLAY.FALLBACK.ICON;
+  }
+
+  typeLabel(type: string): string {
+    const key = activityDisplayKey(type);
+    return key ? STAFF_ACTIVITY_DISPLAY.LABELS[key] : type;
+  }
+
+  typeColor(type: string): string {
+    const key = activityDisplayKey(type);
+    return key ? STAFF_ACTIVITY_DISPLAY.COLORS[key] : STAFF_ACTIVITY_DISPLAY.FALLBACK.COLOR;
+  }
+
+  isOut(type: string): boolean { return OUTBOUND_MOVEMENT_TYPES.has(type); }
 }

@@ -3,6 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StoreApiService } from '../../services/store-api.service';
 import { MedicineWithStock, StoreRack } from '../../models';
+import { ROUTE_PATHS } from '../../core/constants/app-routes.constants';
+import { PAGE_SIZES } from '../../core/constants/pagination.constants';
 
 @Component({
   selector: 'app-stock-in',
@@ -447,7 +449,7 @@ export class StockInComponent implements OnInit {
     }
     this.searching.set(true);
     this.searchTimer = setTimeout(() => {
-      this.api.getMedicines({ q: this.medicineSearch, pageSize: 10 }).subscribe({
+      this.api.getMedicines({ q: this.medicineSearch, pageSize: PAGE_SIZES.STOCK_LOOKUP }).subscribe({
         next: (res) => {
           this.searchResults.set(res.medicines);
           this.searching.set(false);
@@ -509,5 +511,5 @@ export class StockInComponent implements OnInit {
     });
   }
 
-  goBack(): void { this.router.navigate(['/dashboard']); }
+  goBack(): void { this.router.navigate(['/', ROUTE_PATHS.DASHBOARD]); }
 }

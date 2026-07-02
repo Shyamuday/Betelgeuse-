@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { API_PATHS } from '../../../core/constants/api-paths.constants';
 
 @Component({
   selector: 'app-profile-page',
@@ -44,7 +45,7 @@ export class ProfilePage {
               isAvailable?: boolean;
             } | null;
           };
-        }>(`${this.apiBase}/doctor/profile`)
+        }>(`${this.apiBase}${API_PATHS.DOCTOR.PROFILE}`)
       );
 
       const profile = response.profile;
@@ -67,7 +68,7 @@ export class ProfilePage {
     this.saving = true;
     try {
       await firstValueFrom(
-        this.http.put(`${this.apiBase}/doctor/profile`, {
+        this.http.put(`${this.apiBase}${API_PATHS.DOCTOR.PROFILE}`, {
           name: this.name,
           mobile: this.mobile,
           specialty: this.specialty,

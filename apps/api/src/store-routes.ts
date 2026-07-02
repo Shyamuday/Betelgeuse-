@@ -4,17 +4,24 @@ import crypto from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import { StockMovementType, StockStatus } from '@prisma/client';
+import { DEFAULT_JWT_SECRET, STORE_TOKEN_EXPIRY } from './constants/auth.constants.js';
+import {
+  STORE_API_ROUTES,
+  STORE_AUTH_MESSAGES,
+  STORE_EXPIRY,
+  STORE_PAGINATION,
+  STORE_ROLES
+} from './constants/store-api-routes.constants.js';
 import { prisma } from './db.js';
 
 export const storeRouter = express.Router();
 
-const STORE_JWT_SECRET = process.env.JWT_SECRET || 'dev-only-secret';
-const STORE_TOKEN_EXPIRY = '12h';
+const STORE_JWT_SECRET = process.env.JWT_SECRET || DEFAULT_JWT_SECRET;
 
 type StoreTokenPayload = {
   staffId: string;
   storeId: string;
-  role: 'MANAGER' | 'STAFF';
+  role: typeof STORE_ROLES.MANAGER | typeof STORE_ROLES.STAFF;
   name: string;
 };
 
@@ -37,7 +44,7 @@ async function storeAuthMiddleware(
   const header = req.header('authorization');
   const token = header?.startsWith('Bearer ') ? header.slice(7) : undefined;
   if (!token) {
-    return res.status(401).json({ message: 'Store authentication required.' });
+    return res.status(401).json({ message: STORE_AUTH_MESSAGES.REQUIRED });
   }
 
   try {
@@ -45,7 +52,7 @@ async function storeAuthMiddleware(
     (req as express.Request & { storeStaff?: StoreTokenPayload }).storeStaff = decoded;
     next();
   } catch {
-    return res.status(401).json({ message: 'Invalid or expired store token.' });
+    return res.status(401).json({ message: STORE_AUTH_MESSAGES.INVALID_TOKEN });
   }
 }
 
@@ -55,8 +62,8 @@ function requireManager(
   next: express.NextFunction
 ) {
   const staff = (req as express.Request & { storeStaff?: StoreTokenPayload }).storeStaff;
-  if (staff?.role !== 'MANAGER') {
-    return res.status(403).json({ message: 'Manager access required.' });
+  if (staff?.role !== STORE_ROLES.MANAGER) {
+    return res.status(403).json({ message: STORE_AUTH_MESSAGES.MANAGER_REQUIRED });
   }
 
   next();
@@ -82,14 +89,14 @@ function enrichBatch(batch: { expiryDate: Date; [key: string]: unknown }) {
     ...batch,
     daysToExpiry: days,
     isExpired: days <= 0,
-    isExpiringSoon: days > 0 && days <= 60
+    isExpiringSoon: days > 0 && days <= STORE_EXPIRY.SOON_THRESHOLD_DAYS
   };
 }
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
 storeRouter.post(
-  '/auth/login',
+  STORE_API_ROUTES.AUTH_LOGIN,
   asyncRoute(async (req, res) => {
     const body = z
       .object({ staffCode: z.string().min(1), pin: z.string().min(4).max(8) })
@@ -112,7 +119,7 @@ storeRouter.post(
     const token = signStoreToken({
       staffId: staff.id,
       storeId: staff.storeId,
-      role: staff.role as 'MANAGER' | 'STAFF',
+      role: staff.role as typeof STORE_ROLES.MANAGER | typeof STORE_ROLES.STAFF,
       name: staff.name
     });
 
@@ -131,13 +138,13 @@ storeRouter.post(
 );
 
 storeRouter.post(
-  '/auth/manager-login',
+  STORE_API_ROUTES.AUTH_MANAGER_LOGIN,
   asyncRoute(async (req, res) => {
     const body = z.object({ email: z.string().email(), password: z.string().min(1) }).parse(req.body);
 
     // Manager uses the existing platform user (ADMIN role) with store staff record
     const staff = await prisma.storeStaff.findFirst({
-      where: { role: 'MANAGER', isActive: true, email: body.email },
+      where: { role: STORE_ROLES.MANAGER, isActive: true, email: body.email },
       include: { store: { select: { id: true, name: true } } }
     });
 
@@ -153,7 +160,7 @@ storeRouter.post(
     const token = signStoreToken({
       staffId: staff.id,
       storeId: staff.storeId,
-      role: 'MANAGER',
+      role: STORE_ROLES.MANAGER,
       name: staff.name
     });
 
@@ -184,7 +191,7 @@ storeRouter.get(
     }
 
     const staff = await prisma.storeStaff.findMany({
-      where: { storeId: store.id, isActive: true, role: 'STAFF' },
+      where: { storeId: store.id, isActive: true, role: STORE_ROLES.STAFF },
       select: { id: true, name: true, staffCode: true, role: true }
     });
 
@@ -195,15 +202,18 @@ storeRouter.get(
 // ─── Medicines ────────────────────────────────────────────────────────────────
 
 storeRouter.get(
-  '/medicines',
+  STORE_API_ROUTES.MEDICINES,
   storeAuthMiddleware,
   asyncRoute(async (req, res) => {
     const { storeId } = getStoreStaff(req);
     const q = (req.query['q'] as string || '').trim().toLowerCase();
     const potency = (req.query['potency'] as string || '').trim();
     const statusFilter = req.query['status'] as string | undefined;
-    const page = Math.max(1, Number(req.query['page']) || 1);
-    const pageSize = Math.min(50, Math.max(5, Number(req.query['pageSize']) || 20));
+    const page = Math.max(STORE_PAGINATION.DEFAULT_PAGE, Number(req.query['page']) || STORE_PAGINATION.DEFAULT_PAGE);
+    const pageSize = Math.min(
+      STORE_PAGINATION.MAX_PAGE_SIZE,
+      Math.max(STORE_PAGINATION.MIN_PAGE_SIZE, Number(req.query['pageSize']) || STORE_PAGINATION.DEFAULT_PAGE_SIZE)
+    );
 
     const where = {
       isActive: true,
@@ -285,7 +295,7 @@ storeRouter.get(
 );
 
 storeRouter.get(
-  '/medicines/:id',
+  STORE_API_ROUTES.MEDICINE_BY_ID,
   storeAuthMiddleware,
   asyncRoute(async (req, res) => {
     const { storeId } = getStoreStaff(req);
@@ -398,7 +408,7 @@ storeRouter.put(
 // ─── Racks ────────────────────────────────────────────────────────────────────
 
 storeRouter.get(
-  '/racks',
+  STORE_API_ROUTES.RACKS,
   storeAuthMiddleware,
   asyncRoute(async (req, res) => {
     const { storeId } = getStoreStaff(req);
@@ -463,7 +473,7 @@ storeRouter.post(
 // ─── Stock Operations ─────────────────────────────────────────────────────────
 
 storeRouter.post(
-  '/stock/add',
+  STORE_API_ROUTES.STOCK_ADD,
   storeAuthMiddleware,
   asyncRoute(async (req, res) => {
     const { storeId, staffId } = getStoreStaff(req);
@@ -545,7 +555,7 @@ storeRouter.post(
 );
 
 storeRouter.post(
-  '/stock/remove',
+  STORE_API_ROUTES.STOCK_REMOVE,
   storeAuthMiddleware,
   asyncRoute(async (req, res) => {
     const { storeId, staffId } = getStoreStaff(req);
@@ -659,7 +669,7 @@ storeRouter.post(
 // ─── Alerts ───────────────────────────────────────────────────────────────────
 
 storeRouter.get(
-  '/alerts/low-stock',
+  STORE_API_ROUTES.ALERTS_LOW_STOCK,
   storeAuthMiddleware,
   asyncRoute(async (req, res) => {
     const { storeId } = getStoreStaff(req);
@@ -695,11 +705,14 @@ storeRouter.get(
 );
 
 storeRouter.get(
-  '/alerts/expiring',
+  STORE_API_ROUTES.ALERTS_EXPIRING,
   storeAuthMiddleware,
   asyncRoute(async (req, res) => {
     const { storeId } = getStoreStaff(req);
-    const days = Math.min(365, Math.max(1, Number(req.query['days']) || 60));
+    const days = Math.min(
+      STORE_EXPIRY.ALERT_MAX_DAYS,
+      Math.max(1, Number(req.query['days']) || STORE_EXPIRY.ALERT_DEFAULT_DAYS)
+    );
     const cutoff = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 
     const batches = await prisma.stockBatch.findMany({
@@ -745,7 +758,7 @@ storeRouter.get(
 // ─── Dashboard & Reports ──────────────────────────────────────────────────────
 
 storeRouter.get(
-  '/dashboard',
+  STORE_API_ROUTES.DASHBOARD,
   storeAuthMiddleware,
   asyncRoute(async (req, res) => {
     const { storeId } = getStoreStaff(req);
@@ -767,7 +780,7 @@ storeRouter.get(
         where: {
           qty: { gt: 0 },
           stock: { storeId },
-          expiryDate: { lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) }
+          expiryDate: { lte: new Date(Date.now() + STORE_EXPIRY.DASHBOARD_SHORT_DAYS * 24 * 60 * 60 * 1000) }
         }
       }),
       prisma.stockBatch.count({
@@ -775,8 +788,8 @@ storeRouter.get(
           qty: { gt: 0 },
           stock: { storeId },
           expiryDate: {
-            gt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-            lte: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)
+            gt: new Date(Date.now() + STORE_EXPIRY.DASHBOARD_SHORT_DAYS * 24 * 60 * 60 * 1000),
+            lte: new Date(Date.now() + STORE_EXPIRY.DASHBOARD_LONG_DAYS * 24 * 60 * 60 * 1000)
           }
         }
       }),
@@ -836,12 +849,15 @@ storeRouter.get(
 );
 
 storeRouter.get(
-  '/movements',
+  STORE_API_ROUTES.MOVEMENTS,
   storeAuthMiddleware,
   asyncRoute(async (req, res) => {
     const { storeId } = getStoreStaff(req);
-    const page = Math.max(1, Number(req.query['page']) || 1);
-    const pageSize = Math.min(50, Math.max(5, Number(req.query['pageSize']) || 20));
+    const page = Math.max(STORE_PAGINATION.DEFAULT_PAGE, Number(req.query['page']) || STORE_PAGINATION.DEFAULT_PAGE);
+    const pageSize = Math.min(
+      STORE_PAGINATION.MAX_PAGE_SIZE,
+      Math.max(STORE_PAGINATION.MIN_PAGE_SIZE, Number(req.query['pageSize']) || STORE_PAGINATION.DEFAULT_PAGE_SIZE)
+    );
 
     const [total, movements] = await Promise.all([
       prisma.stockMovement.count({ where: { storeId } }),
@@ -905,7 +921,7 @@ storeRouter.post(
         name: z.string().min(2),
         staffCode: z.string().min(2).toUpperCase(),
         pin: z.string().min(4).max(8),
-        role: z.enum(['MANAGER', 'STAFF']).default('STAFF')
+        role: z.enum([STORE_ROLES.MANAGER, STORE_ROLES.STAFF]).default(STORE_ROLES.STAFF)
       })
       .parse(req.body);
 
@@ -958,7 +974,7 @@ storeRouter.post(
             name: body.managerName,
             staffCode: `${body.storeCode}-MGR`,
             pinHash,
-            role: 'MANAGER'
+            role: STORE_ROLES.MANAGER
           }
         }
       },
@@ -969,7 +985,7 @@ storeRouter.post(
     const token = signStoreToken({
       staffId: manager.id,
       storeId: store.id,
-      role: 'MANAGER',
+      role: STORE_ROLES.MANAGER,
       name: manager.name
     });
 
@@ -984,7 +1000,7 @@ storeRouter.post(
 // ─── Staff Activity Tracking ──────────────────────────────────────────────────
 
 storeRouter.get(
-  '/staff/activity',
+  STORE_API_ROUTES.STAFF_ACTIVITY,
   storeAuthMiddleware,
   requireManager,
   asyncRoute(async (req, res) => {
@@ -1076,7 +1092,7 @@ storeRouter.get(
 );
 
 storeRouter.get(
-  '/staff/:staffId/activity',
+  STORE_API_ROUTES.STAFF_DETAIL_ACTIVITY,
   storeAuthMiddleware,
   requireManager,
   asyncRoute(async (req, res) => {

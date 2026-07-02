@@ -4,20 +4,19 @@ import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { AuthResponse, HrUser } from '../models';
+import { ROUTE_PATHS } from '../core/constants/app-routes.constants';
+import { AUTH_TOKEN_KEY, AUTH_USER_KEY, AUTH_PATHS } from '../core/constants/auth.constants';
 
 @Injectable({ providedIn: 'root' })
 export class HrAuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
 
-  private readonly TOKEN_KEY = 'hr_token';
-  private readonly USER_KEY = 'hr_user';
-
   currentUser = signal<HrUser | null>(this.loadUser());
 
   private loadUser(): HrUser | null {
     try {
-      const raw = localStorage.getItem(this.USER_KEY);
+      const raw = localStorage.getItem(AUTH_USER_KEY);
       return raw ? JSON.parse(raw) : null;
     } catch {
       return null;
@@ -25,7 +24,7 @@ export class HrAuthService {
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    return localStorage.getItem(AUTH_TOKEN_KEY);
   }
 
   isLoggedIn(): boolean {
@@ -33,26 +32,26 @@ export class HrAuthService {
   }
 
   login(email: string, password: string) {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/hr/auth/login`, { email, password }).pipe(
+    return this.http.post<AuthResponse>(`${environment.apiUrl}${AUTH_PATHS.LOGIN}`, { email, password }).pipe(
       tap(res => {
-        localStorage.setItem(this.TOKEN_KEY, res.token);
-        localStorage.setItem(this.USER_KEY, JSON.stringify(res.user));
+        localStorage.setItem(AUTH_TOKEN_KEY, res.token);
+        localStorage.setItem(AUTH_USER_KEY, JSON.stringify(res.user));
         this.currentUser.set(res.user);
       })
     );
   }
 
   logout() {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(AUTH_USER_KEY);
     this.currentUser.set(null);
-    this.router.navigate(['/login']);
+    this.router.navigate([`/${ROUTE_PATHS.LOGIN}`]);
   }
 
   fetchMe() {
-    return this.http.get<{ user: HrUser }>(`${environment.apiUrl}/hr/auth/me`).pipe(
+    return this.http.get<{ user: HrUser }>(`${environment.apiUrl}${AUTH_PATHS.ME}`).pipe(
       tap(res => {
-        localStorage.setItem(this.USER_KEY, JSON.stringify(res.user));
+        localStorage.setItem(AUTH_USER_KEY, JSON.stringify(res.user));
         this.currentUser.set(res.user);
       })
     );

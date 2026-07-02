@@ -24,25 +24,27 @@ import {
   StaffActivityResponse,
   StaffDetailResponse
 } from '../models';
+import { API_BASE, HR_API_PATHS, STORE_API_PATHS } from '../core/constants/api-paths.constants';
+import { ACTIVITY_PERIODS, DEFAULT_PAGE, EXPIRING_ALERTS_DEFAULT_DAYS, PAGE_SIZES } from '../core/constants/pagination.constants';
 
 @Injectable({ providedIn: 'root' })
 export class StoreApiService {
   private http = inject(HttpClient);
-  private base = `${environment.apiUrl}/store`;
-  private hrBase = `${environment.apiUrl}/hr`;
+  private base = `${environment.apiUrl}${API_BASE.STORE}`;
+  private hrBase = `${environment.apiUrl}${API_BASE.HR}`;
 
   // Auth
   loginPin(staffId: string, pin: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.base}/auth/login`, { staffId, pin });
+    return this.http.post<AuthResponse>(`${this.base}${STORE_API_PATHS.AUTH.LOGIN}`, { staffId, pin });
   }
 
   loginManager(email: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.base}/auth/manager-login`, { email, password });
+    return this.http.post<AuthResponse>(`${this.base}${STORE_API_PATHS.AUTH.MANAGER_LOGIN}`, { email, password });
   }
 
   // Dashboard
   getDashboard(): Observable<DashboardStats> {
-    return this.http.get<DashboardStats>(`${this.base}/dashboard`);
+    return this.http.get<DashboardStats>(`${this.base}${STORE_API_PATHS.DASHBOARD}`);
   }
 
   // Medicines
@@ -52,86 +54,86 @@ export class StoreApiService {
     if (query?.potency) params = params.set('potency', query.potency);
     if (query?.page) params = params.set('page', query.page.toString());
     if (query?.pageSize) params = params.set('pageSize', query.pageSize.toString());
-    return this.http.get<MedicinesResponse>(`${this.base}/medicines`, { params });
+    return this.http.get<MedicinesResponse>(`${this.base}${STORE_API_PATHS.MEDICINES}`, { params });
   }
 
   getMedicine(id: string): Observable<MedicineDetailResponse> {
-    return this.http.get<MedicineDetailResponse>(`${this.base}/medicines/${id}`);
+    return this.http.get<MedicineDetailResponse>(`${this.base}${STORE_API_PATHS.MEDICINES}/${id}`);
   }
 
   createMedicine(data: MedicineCreateRequest): Observable<{ medicine: Medicine }> {
-    return this.http.post<{ medicine: Medicine }>(`${this.base}/medicines`, data);
+    return this.http.post<{ medicine: Medicine }>(`${this.base}${STORE_API_PATHS.MEDICINES}`, data);
   }
 
   updateMedicine(id: string, data: Partial<MedicineCreateRequest>): Observable<{ medicine: Medicine }> {
-    return this.http.put<{ medicine: Medicine }>(`${this.base}/medicines/${id}`, data);
+    return this.http.put<{ medicine: Medicine }>(`${this.base}${STORE_API_PATHS.MEDICINES}/${id}`, data);
   }
 
   // Racks
   getRacks(): Observable<{ racks: StoreRack[] }> {
-    return this.http.get<{ racks: StoreRack[] }>(`${this.base}/racks`);
+    return this.http.get<{ racks: StoreRack[] }>(`${this.base}${STORE_API_PATHS.RACKS}`);
   }
 
   createRack(data: RackCreateRequest): Observable<{ rack: StoreRack }> {
-    return this.http.post<{ rack: StoreRack }>(`${this.base}/racks`, data);
+    return this.http.post<{ rack: StoreRack }>(`${this.base}${STORE_API_PATHS.RACKS}`, data);
   }
 
   // Stock
   addStock(data: StockAddRequest): Observable<{ stock: StockBatch }> {
-    return this.http.post<{ stock: StockBatch }>(`${this.base}/stock/add`, data);
+    return this.http.post<{ stock: StockBatch }>(`${this.base}${STORE_API_PATHS.STOCK.ADD}`, data);
   }
 
   removeStock(data: StockRemoveRequest): Observable<{ movement: StockMovement }> {
-    return this.http.post<{ movement: StockMovement }>(`${this.base}/stock/remove`, data);
+    return this.http.post<{ movement: StockMovement }>(`${this.base}${STORE_API_PATHS.STOCK.REMOVE}`, data);
   }
 
   // Alerts
   getLowStockAlerts(): Observable<AlertsLowStockResponse> {
-    return this.http.get<AlertsLowStockResponse>(`${this.base}/alerts/low-stock`);
+    return this.http.get<AlertsLowStockResponse>(`${this.base}${STORE_API_PATHS.ALERTS.LOW_STOCK}`);
   }
 
-  getExpiringAlerts(days = 30): Observable<AlertsExpiringResponse> {
+  getExpiringAlerts(days = EXPIRING_ALERTS_DEFAULT_DAYS): Observable<AlertsExpiringResponse> {
     const params = new HttpParams().set('days', days.toString());
-    return this.http.get<AlertsExpiringResponse>(`${this.base}/alerts/expiring`, { params });
+    return this.http.get<AlertsExpiringResponse>(`${this.base}${STORE_API_PATHS.ALERTS.EXPIRING}`, { params });
   }
 
   // Movements
-  getMovements(page = 1, pageSize = 20): Observable<MovementsResponse> {
+  getMovements(page = DEFAULT_PAGE, pageSize = PAGE_SIZES.MOVEMENTS): Observable<MovementsResponse> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
-    return this.http.get<MovementsResponse>(`${this.base}/movements`, { params });
+    return this.http.get<MovementsResponse>(`${this.base}${STORE_API_PATHS.MOVEMENTS}`, { params });
   }
 
   // Staff Activity
-  getStaffActivity(period = 'today'): Observable<StaffActivityResponse> {
+  getStaffActivity(period = ACTIVITY_PERIODS.TODAY): Observable<StaffActivityResponse> {
     const params = new HttpParams().set('period', period);
-    return this.http.get<StaffActivityResponse>(`${this.base}/staff/activity`, { params });
+    return this.http.get<StaffActivityResponse>(`${this.base}${STORE_API_PATHS.STAFF.ACTIVITY}`, { params });
   }
 
-  getStaffDetail(staffId: string, period = 'week'): Observable<StaffDetailResponse> {
+  getStaffDetail(staffId: string, period = ACTIVITY_PERIODS.WEEK): Observable<StaffDetailResponse> {
     const params = new HttpParams().set('period', period);
-    return this.http.get<StaffDetailResponse>(`${this.base}/staff/${staffId}/activity`, { params });
+    return this.http.get<StaffDetailResponse>(`${this.base}${STORE_API_PATHS.STAFF.DETAIL_ACTIVITY(staffId)}`, { params });
   }
 
   // HR — Staff
   getHrStaffList(): Observable<{ staff: StaffHrProfile[] }> {
-    return this.http.get<{ staff: StaffHrProfile[] }>(`${this.hrBase}/store/staff`);
+    return this.http.get<{ staff: StaffHrProfile[] }>(`${this.hrBase}${HR_API_PATHS.STORE_STAFF}`);
   }
 
   getHrStaff(id: string): Observable<{ staff: StaffHrProfile }> {
-    return this.http.get<{ staff: StaffHrProfile }>(`${this.hrBase}/store/staff/${id}`);
+    return this.http.get<{ staff: StaffHrProfile }>(`${this.hrBase}${HR_API_PATHS.STORE_STAFF}/${id}`);
   }
 
   updateHrStaff(id: string, data: Partial<StaffHrProfile>): Observable<{ staff: StaffHrProfile }> {
-    return this.http.put<{ staff: StaffHrProfile }>(`${this.hrBase}/store/staff/${id}`, data);
+    return this.http.put<{ staff: StaffHrProfile }>(`${this.hrBase}${HR_API_PATHS.STORE_STAFF}/${id}`, data);
   }
 
   generateStaffLetter(id: string): Observable<{ letter: JoiningLetterDoc }> {
-    return this.http.post<{ letter: JoiningLetterDoc }>(`${this.hrBase}/store/staff/${id}/letter`, {});
+    return this.http.post<{ letter: JoiningLetterDoc }>(`${this.hrBase}${HR_API_PATHS.STORE_STAFF}/${id}/letter`, {});
   }
 
   getStaffLetter(id: string): Observable<{ letter: JoiningLetterDoc }> {
-    return this.http.get<{ letter: JoiningLetterDoc }>(`${this.hrBase}/store/staff/${id}/letter`);
+    return this.http.get<{ letter: JoiningLetterDoc }>(`${this.hrBase}${HR_API_PATHS.STORE_STAFF}/${id}/letter`);
   }
 }

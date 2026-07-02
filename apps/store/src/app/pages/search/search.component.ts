@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, takeUntil } from 'rxjs';
 import { StoreApiService } from '../../services/store-api.service';
 import { MedicineWithStock } from '../../models';
+import { DEFAULT_PAGE, PAGE_SIZES } from '../../core/constants/pagination.constants';
 
 @Component({
   selector: 'app-search',
@@ -383,8 +384,8 @@ export class SearchComponent implements OnDestroy {
       distinctUntilChanged((a, b) => a.q === b.q && a.potency === b.potency),
       switchMap(({ q, potency }) => {
         this.loading.set(true);
-        this.page.set(1);
-        return this.api.getMedicines({ q, potency, page: 1, pageSize: 20 });
+        this.page.set(DEFAULT_PAGE);
+        return this.api.getMedicines({ q, potency, page: DEFAULT_PAGE, pageSize: PAGE_SIZES.SEARCH });
       }),
       takeUntil(this.destroy$)
     ).subscribe({
@@ -416,7 +417,7 @@ export class SearchComponent implements OnDestroy {
 
   loadMore(): void {
     const next = this.page() + 1;
-    this.api.getMedicines({ q: this.query(), potency: this.selectedPotency(), page: next, pageSize: 20 }).subscribe({
+    this.api.getMedicines({ q: this.query(), potency: this.selectedPotency(), page: next, pageSize: PAGE_SIZES.SEARCH }).subscribe({
       next: (res) => {
         this.medicines.update(list => [...list, ...res.medicines]);
         this.page.set(next);

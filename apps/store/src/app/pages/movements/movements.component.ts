@@ -2,21 +2,15 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { StoreApiService } from '../../services/store-api.service';
 import { StockMovement } from '../../models';
 import { DatePipe } from '@angular/common';
+import { PAGE_SIZES } from '../../core/constants/pagination.constants';
+import { STOCK_MOVEMENT_DISPLAY, OUTBOUND_MOVEMENT_TYPES } from '../../shared/constants/stock-movement.constants';
 
-const TYPE_ICONS: Record<string, string> = {
-  PURCHASE_IN: '📦', SALE_OUT: '🛒',
-  ADJUSTMENT_IN: '➕', ADJUSTMENT_OUT: '✏️',
-  TRANSFER_IN: '↙️', TRANSFER_OUT: '↗️', EXPIRED_REMOVAL: '🗑️'
-};
-const TYPE_LABELS: Record<string, string> = {
-  PURCHASE_IN: 'Purchase In', SALE_OUT: 'Sale Out',
-  ADJUSTMENT_IN: 'Adjustment In', ADJUSTMENT_OUT: 'Adjustment Out',
-  TRANSFER_IN: 'Transfer In', TRANSFER_OUT: 'Transfer Out', EXPIRED_REMOVAL: 'Expired Removal'
-};
-const TYPE_COLORS: Record<string, string> = {
-  PURCHASE_IN: '#4ade80', ADJUSTMENT_IN: '#4ade80', TRANSFER_IN: '#4ade80',
-  SALE_OUT: '#60a5fa', ADJUSTMENT_OUT: '#fb923c', TRANSFER_OUT: '#fb923c', EXPIRED_REMOVAL: '#f87171'
-};
+type MovementDisplayKey = keyof typeof STOCK_MOVEMENT_DISPLAY.ICONS;
+
+function movementDisplayKey(type: string): MovementDisplayKey | null {
+  if (type === 'EXPIRED_REMOVAL') return 'EXPIRED_OUT';
+  return type in STOCK_MOVEMENT_DISPLAY.ICONS ? type as MovementDisplayKey : null;
+}
 
 @Component({
   selector: 'app-movements',
@@ -114,7 +108,7 @@ export class MovementsComponent implements OnInit {
 
   load(append = false): void {
     this.loading.set(true);
-    this.api.getMovements(this.page(), 20).subscribe({
+    this.api.getMovements(this.page(), PAGE_SIZES.MOVEMENTS).subscribe({
       next: (res) => {
         this.movements.update(prev => append ? [...prev, ...res.movements] : res.movements);
         this.hasMore.set(this.page() < res.pagination.totalPages);
@@ -126,8 +120,20 @@ export class MovementsComponent implements OnInit {
 
   loadMore(): void { this.page.update(p => p + 1); this.load(true); }
 
-  typeIcon(type: string): string { return TYPE_ICONS[type] ?? '📝'; }
-  typeLabel(type: string): string { return TYPE_LABELS[type] ?? type; }
-  typeColor(type: string): string { return TYPE_COLORS[type] ?? '#94a3b8'; }
-  isOut(type: string): boolean { return ['SALE_OUT', 'ADJUSTMENT_OUT', 'TRANSFER_OUT', 'EXPIRED_REMOVAL'].includes(type); }
+  typeIcon(type: string): string {
+    const key = movementDisplayKey(type);
+    return key ? STOCK_MOVEMENT_DISPLAY.ICONS[key] : STOCK_MOVEMENT_DISPLAY.FALLBACK.ICON;
+  }
+
+  typeLabel(type: string): string {
+    const key = movementDisplayKey(type);
+    return key ? STOCK_MOVEMENT_DISPLAY.LABELS[key] : type;
+  }
+
+  typeColor(type: string): string {
+    const key = movementDisplayKey(type);
+    return key ? STOCK_MOVEMENT_DISPLAY.COLORS[key] : STOCK_MOVEMENT_DISPLAY.FALLBACK.COLOR;
+  }
+
+  isOut(type: string): boolean { return OUTBOUND_MOVEMENT_TYPES.has(type); }
 }

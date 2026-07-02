@@ -3,6 +3,7 @@ import { Component, Input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { POST_LOGIN_REDIRECT_DELAY_MS } from './core/constants/timing.constants';
 import { AuthService } from './auth/auth.service';
 
 type BookStep = 'form' | 'otp' | 'loading' | 'done';
@@ -252,7 +253,7 @@ export class HomeHeroSectionComponent {
         this.auth.patientLogin({ name: this.name.trim(), mobile: this.mobile, otp: this.otp.trim() })
       );
       this.step.set('done');
-      setTimeout(() => void this.router.navigateByUrl(this.auth.dashboardFor(response.user.role)), 600);
+      setTimeout(() => void this.router.navigateByUrl(this.auth.dashboardFor(response.user.role)), POST_LOGIN_REDIRECT_DELAY_MS);
     } catch (err: any) {
       this.step.set('otp');
       this.error.set(err?.error?.message || 'Incorrect OTP. Please try again.');

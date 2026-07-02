@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, inject } from '@angular/core';
+import { API_PATHS } from './core/constants/api-paths.constants';
+import { BLOB_REVOKE_MS } from './core/constants/timing.constants';
 import { Prescription } from './models';
 import { environment } from '../environments/environment';
 import { AuthService } from './auth/auth.service';
@@ -57,7 +59,7 @@ export class PrescriptionHistoryComponent {
 
   async downloadPdf(prescriptionId: string) {
     const token = this.auth.token;
-    const url = `${environment.apiUrl}/patient/prescriptions/${prescriptionId}/pdf`;
+    const url = `${environment.apiUrl}${API_PATHS.PATIENT.PRESCRIPTION_PDF(prescriptionId)}`;
     const response = await fetch(url, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
@@ -68,6 +70,6 @@ export class PrescriptionHistoryComponent {
     link.href = blobUrl;
     link.download = `vitalis-prescription-${prescriptionId.slice(0, 8)}.html`;
     link.click();
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), BLOB_REVOKE_MS);
   }
 }

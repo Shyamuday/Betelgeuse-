@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { BILLING_PLAN_CODES, CURRENCY_CODE, PURCHASE_TYPES } from './core/constants/billing.constants';
 import { BillingPlan, Disease } from './models';
 
 export type BookConsultationPayload = {
   diseaseId: string;
   intakeAnswers: Record<string, string>;
-  purchaseType: 'ONE_TIME' | 'PLAN';
+  purchaseType: typeof PURCHASE_TYPES.ONE_TIME | typeof PURCHASE_TYPES.PLAN;
   planCode?: string;
 };
 
@@ -21,19 +22,19 @@ export type BookConsultationPayload = {
       <label>
         Purchase type
         <select [(ngModel)]="purchaseType">
-          <option value="ONE_TIME">One-time appointment</option>
-          <option value="PLAN">Plan purchase</option>
+          <option [value]="PURCHASE_TYPES.ONE_TIME">One-time appointment</option>
+          <option [value]="PURCHASE_TYPES.PLAN">Plan purchase</option>
         </select>
       </label>
 
-      @if (purchaseType === 'PLAN') {
+      @if (purchaseType === PURCHASE_TYPES.PLAN) {
         <label>
           Select plan
           <select [(ngModel)]="selectedPlanCode">
             @for (plan of plans; track plan.code) {
-              @if (plan.code !== 'ONE_TIME') {
+              @if (plan.code !== BILLING_PLAN_CODES.ONE_TIME) {
                 <option [value]="plan.code">
-                  {{ plan.name }} — {{ plan.priceInPaise / 100 | currency: 'INR' }}
+                  {{ plan.name }} — {{ plan.priceInPaise / 100 | currency: CURRENCY_CODE }}
                 </option>
               }
             }
@@ -49,7 +50,7 @@ export type BookConsultationPayload = {
         <select [(ngModel)]="selectedDiseaseId" (ngModelChange)="resetAnswers()">
           @for (disease of diseases; track disease.id) {
             <option [value]="disease.id">
-              {{ disease.name }} — {{ disease.feeInPaise / 100 | currency: 'INR' }}
+              {{ disease.name }} — {{ disease.feeInPaise / 100 | currency: CURRENCY_CODE }}
             </option>
           }
         </select>
@@ -67,19 +68,22 @@ export type BookConsultationPayload = {
       </button>
       <p class="muted">
         Payable now:
-        <strong>{{ estimatedAmount() / 100 | currency: 'INR' }}</strong>.
+        <strong>{{ estimatedAmount() / 100 | currency: CURRENCY_CODE }}</strong>.
         After payment, consultation moves to doctor assignment.
       </p>
     </div>
   `
 })
 export class BookConsultationPanelComponent implements OnChanges {
+  readonly PURCHASE_TYPES = PURCHASE_TYPES;
+  readonly BILLING_PLAN_CODES = BILLING_PLAN_CODES;
+  readonly CURRENCY_CODE = CURRENCY_CODE;
   @Input() diseases: Disease[] = [];
   @Input() plans: BillingPlan[] = [];
   @Input() disabled = false;
   @Output() booked = new EventEmitter<BookConsultationPayload>();
 
-  purchaseType: 'ONE_TIME' | 'PLAN' = 'ONE_TIME';
+  purchaseType: typeof PURCHASE_TYPES.ONE_TIME | typeof PURCHASE_TYPES.PLAN = PURCHASE_TYPES.ONE_TIME;
   selectedPlanCode = '';
   selectedDiseaseId = '';
   intakeAnswers: Record<string, string> = {};
@@ -89,7 +93,7 @@ export class BookConsultationPanelComponent implements OnChanges {
       this.selectedDiseaseId = this.diseases[0].id;
     }
     if (!this.selectedPlanCode) {
-      this.selectedPlanCode = this.plans.find((p) => p.code !== 'ONE_TIME')?.code || '';
+      this.selectedPlanCode = this.plans.find((p) => p.code !== BILLING_PLAN_CODES.ONE_TIME)?.code || '';
     }
   }
 
@@ -106,7 +110,7 @@ export class BookConsultationPanelComponent implements OnChanges {
   }
 
   estimatedAmount() {
-    if (this.purchaseType === 'PLAN') {
+    if (this.purchaseType === PURCHASE_TYPES.PLAN) {
       return this.plans.find((p) => p.code === this.selectedPlanCode)?.priceInPaise || 0;
     }
     return this.selectedDisease()?.feeInPaise || 0;
@@ -122,7 +126,7 @@ export class BookConsultationPanelComponent implements OnChanges {
       diseaseId: this.selectedDiseaseId,
       intakeAnswers: { ...this.intakeAnswers },
       purchaseType: this.purchaseType,
-      ...(this.purchaseType === 'PLAN' ? { planCode: this.selectedPlanCode } : {})
+      ...(this.purchaseType === PURCHASE_TYPES.PLAN ? { planCode: this.selectedPlanCode } : {})
     });
   }
 }

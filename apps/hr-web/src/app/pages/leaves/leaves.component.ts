@@ -3,12 +3,10 @@ import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { HrApiService } from '../../services/hr-api.service';
 import { Leave, LeaveStatus, LeaveType, EmpType } from '../../models';
+import { LEAVE_STATUS_TABS, LEAVE_TYPES, leaveStatusBadgeClass, leaveTypeIcon } from '../../shared/constants/leave.constants';
+import { PAGE_SIZES } from '../../core/constants/pagination.constants';
 
 type TabStatus = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED';
-
-const LEAVE_ICONS: Record<LeaveType, string> = {
-  CASUAL: '📅', SICK: '🤒', EARNED: '⭐', UNPAID: '💸', MATERNITY: '👶', PATERNITY: '👨‍👶'
-};
 
 @Component({
   selector: 'app-leaves',
@@ -529,7 +527,7 @@ export class LeavesComponent implements OnInit {
   activeTab = signal<TabStatus>('ALL');
   hrNotes: Record<string, string> = {};
 
-  leaveTypes: LeaveType[] = ['CASUAL', 'SICK', 'EARNED', 'UNPAID', 'MATERNITY', 'PATERNITY'];
+  leaveTypes = LEAVE_TYPES;
 
   addForm = {
     employeeType: 'DOCTOR' as EmpType,
@@ -540,12 +538,7 @@ export class LeavesComponent implements OnInit {
     reason: ''
   };
 
-  tabs = [
-    { value: 'ALL' as TabStatus, label: 'All' },
-    { value: 'PENDING' as TabStatus, label: '⏳ Pending' },
-    { value: 'APPROVED' as TabStatus, label: '✓ Approved' },
-    { value: 'REJECTED' as TabStatus, label: '✕ Rejected' }
-  ];
+  tabs = LEAVE_STATUS_TABS;
 
   ngOnInit() { this.loadLeaves(); }
 
@@ -554,7 +547,7 @@ export class LeavesComponent implements OnInit {
     this.api.getLeaves({
       status: this.activeTab() !== 'ALL' ? this.activeTab() : undefined,
       page: 1,
-      pageSize: 50
+      pageSize: PAGE_SIZES.LEAVES
     }).subscribe({
       next: (res) => { this.leaves.set(res.leaves); this.total.set(res.total); this.loading.set(false); },
       error: () => this.loading.set(false)
@@ -614,15 +607,6 @@ export class LeavesComponent implements OnInit {
     });
   }
 
-  leaveIcon(type: LeaveType): string { return LEAVE_ICONS[type] ?? '📋'; }
-
-  statusClass(status: LeaveStatus): string {
-    const map: Record<string, string> = {
-      'PENDING': 'badge-pending',
-      'APPROVED': 'badge-approved',
-      'REJECTED': 'badge-rejected',
-      'CANCELLED': 'badge-cancelled'
-    };
-    return map[status] ?? 'badge-cancelled';
-  }
+  leaveIcon = leaveTypeIcon;
+  statusClass = leaveStatusBadgeClass;
 }

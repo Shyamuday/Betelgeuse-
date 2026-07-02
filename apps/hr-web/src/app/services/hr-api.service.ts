@@ -6,6 +6,7 @@ import {
   Leave, Letter, EmployeesResponse, LeavesResponse,
   LeaveStatus, EmpType, EmployeeStatus
 } from '../models';
+import { API_PATHS } from '../core/constants/api-paths.constants';
 
 @Injectable({ providedIn: 'root' })
 export class HrApiService {
@@ -14,7 +15,7 @@ export class HrApiService {
 
   // Dashboard
   getDashboard() {
-    return this.http.get<DashboardData>(`${this.base}/hr/dashboard`);
+    return this.http.get<DashboardData>(`${this.base}${API_PATHS.HR.DASHBOARD}`);
   }
 
   // Employees
@@ -23,49 +24,49 @@ export class HrApiService {
     if (params.q) p = p.set('q', params.q);
     if (params.type) p = p.set('type', params.type);
     if (params.status) p = p.set('status', params.status);
-    return this.http.get<EmployeesResponse>(`${this.base}/hr/employees`, { params: p });
+    return this.http.get<EmployeesResponse>(`${this.base}${API_PATHS.HR.EMPLOYEES}`, { params: p });
   }
 
   // Doctors
   getDoctors() {
-    return this.http.get<{ doctors: Doctor[] }>(`${this.base}/hr/doctors`);
+    return this.http.get<{ doctors: Doctor[] }>(`${this.base}${API_PATHS.HR.DOCTORS}`);
   }
 
   getDoctor(id: string) {
-    return this.http.get<{ doctor: Doctor }>(`${this.base}/hr/doctors/${id}`);
+    return this.http.get<{ doctor: Doctor }>(`${this.base}${API_PATHS.HR.DOCTORS}/${id}`);
   }
 
   updateDoctor(id: string, data: Partial<Employee>) {
-    return this.http.put<{ doctor: Doctor }>(`${this.base}/hr/doctors/${id}`, data);
+    return this.http.put<{ doctor: Doctor }>(`${this.base}${API_PATHS.HR.DOCTORS}/${id}`, data);
   }
 
   generateDoctorLetter(id: string, opts: { clinicName?: string; clinicAddress?: string } = {}) {
-    return this.http.post<{ letter: Letter }>(`${this.base}/hr/doctors/${id}/letter`, opts);
+    return this.http.post<{ letter: Letter }>(`${this.base}${API_PATHS.HR.DOCTORS}/${id}/letter`, opts);
   }
 
   getDoctorLetter(id: string) {
-    return this.http.get<{ letter: Letter }>(`${this.base}/hr/doctors/${id}/letter`);
+    return this.http.get<{ letter: Letter }>(`${this.base}${API_PATHS.HR.DOCTORS}/${id}/letter`);
   }
 
   // Store Staff
   getStoreStaff() {
-    return this.http.get<{ staff: StoreStaff[] }>(`${this.base}/hr/store/staff`);
+    return this.http.get<{ staff: StoreStaff[] }>(`${this.base}${API_PATHS.HR.STORE_STAFF}`);
   }
 
   getStoreStaffById(id: string) {
-    return this.http.get<{ staff: StoreStaff }>(`${this.base}/hr/store/staff/${id}`);
+    return this.http.get<{ staff: StoreStaff }>(`${this.base}${API_PATHS.HR.STORE_STAFF}/${id}`);
   }
 
   updateStoreStaff(id: string, data: Partial<Employee>) {
-    return this.http.put<{ staff: StoreStaff }>(`${this.base}/hr/store/staff/${id}`, data);
+    return this.http.put<{ staff: StoreStaff }>(`${this.base}${API_PATHS.HR.STORE_STAFF}/${id}`, data);
   }
 
   generateStoreStaffLetter(id: string) {
-    return this.http.post<{ letter: Letter }>(`${this.base}/hr/store/staff/${id}/letter`, {});
+    return this.http.post<{ letter: Letter }>(`${this.base}${API_PATHS.HR.STORE_STAFF}/${id}/letter`, {});
   }
 
   getStoreStaffLetter(id: string) {
-    return this.http.get<{ letter: Letter }>(`${this.base}/hr/store/staff/${id}/letter`);
+    return this.http.get<{ letter: Letter }>(`${this.base}${API_PATHS.HR.STORE_STAFF}/${id}/letter`);
   }
 
   // Leaves
@@ -75,7 +76,7 @@ export class HrApiService {
     if (params.empType) p = p.set('empType', params.empType);
     if (params.page) p = p.set('page', params.page.toString());
     if (params.pageSize) p = p.set('pageSize', params.pageSize.toString());
-    return this.http.get<LeavesResponse>(`${this.base}/hr/leaves`, { params: p });
+    return this.http.get<LeavesResponse>(`${this.base}${API_PATHS.HR.LEAVES}`, { params: p });
   }
 
   createLeave(data: {
@@ -87,31 +88,31 @@ export class HrApiService {
     endDate: string;
     reason?: string;
   }) {
-    return this.http.post<{ leave: Leave }>(`${this.base}/hr/leaves`, data);
+    return this.http.post<{ leave: Leave }>(`${this.base}${API_PATHS.HR.LEAVES}`, data);
   }
 
   updateLeave(id: string, data: { status: LeaveStatus; hrNote?: string }) {
-    return this.http.patch<{ leave: Leave }>(`${this.base}/hr/leaves/${id}`, data);
+    return this.http.patch<{ leave: Leave }>(`${this.base}${API_PATHS.HR.LEAVES}/${id}`, data);
   }
 
   // Stores
   getStores() {
-    return this.http.get<{ stores: StoreInfo[] }>(`${this.base}/hr/stores`);
+    return this.http.get<{ stores: StoreInfo[] }>(`${this.base}${API_PATHS.HR.STORES}`);
   }
 
   createStore(data: { name: string; code: string; address?: string; phone?: string }) {
-    return this.http.post<{ store: StoreInfo }>(`${this.base}/hr/stores`, data);
+    return this.http.post<{ store: StoreInfo }>(`${this.base}${API_PATHS.HR.STORES}`, data);
   }
 
   createManager(storeId: string, data: { name: string; email: string; password: string; designation?: string; joiningDate?: string }) {
-    return this.http.post<{ staff: StoreStaff }>(`${this.base}/hr/stores/${storeId}/managers`, data);
+    return this.http.post<{ staff: StoreStaff }>(`${this.base}${API_PATHS.HR.STORES}/${storeId}/managers`, data);
   }
 
   createStoreStaff(storeId: string, data: { name: string; staffCode: string; pin: string; designation?: string; phone?: string; joiningDate?: string }) {
-    return this.http.post<{ staff: StoreStaff }>(`${this.base}/hr/stores/${storeId}/staff`, data);
+    return this.http.post<{ staff: StoreStaff }>(`${this.base}${API_PATHS.HR.STORES}/${storeId}/staff`, data);
   }
 
   setStoreStaffStatus(id: string, data: { isActive?: boolean; employeeStatus?: string }) {
-    return this.http.patch<{ staff: StoreStaff }>(`${this.base}/hr/store/staff/${id}/status`, data);
+    return this.http.patch<{ staff: StoreStaff }>(`${this.base}${API_PATHS.HR.STORE_STAFF}/${id}/status`, data);
   }
 }

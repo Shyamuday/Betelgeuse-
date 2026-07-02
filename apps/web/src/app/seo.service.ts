@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
+import { SEO_DEFAULTS } from './core/constants/branding.constants';
 import { diseaseInfos } from './disease/disease-info.constants';
 import { homeopathyApproaches } from './treatment-approach/homeopathy-approaches.constants';
 
@@ -14,8 +15,7 @@ export class SeoService {
   private readonly meta = inject(Meta);
   private readonly document = inject(DOCUMENT);
 
-  // Replace with your production domain after deployment.
-  private readonly siteUrl = 'https://vitalisclinic.com';
+  private readonly siteUrl = SEO_DEFAULTS.SITE_URL;
   private readonly defaultTitle = 'Vitalis Care and Research Centre | Doctor-Led Digital Care';
   private readonly defaultDescription =
     'Vitalis Care and Research Centre provides doctor-led online consultations with structured intake, follow-up, and secure digital care.';

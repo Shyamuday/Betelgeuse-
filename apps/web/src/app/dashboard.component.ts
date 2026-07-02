@@ -15,6 +15,10 @@ import { TodayMedicinesComponent } from './today-medicines.component';
 import { PatientProfileComponent } from './patient-profile.component';
 import { ClinicApiService } from './clinic-api.service';
 import { AuthService } from './auth/auth.service';
+import { ROUTE_PATHS } from './core/constants/app-routes.constants';
+import { WHATSAPP_CONTACT_URL } from './core/constants/branding.constants';
+import { DEFAULT_QUIET_HOURS, DEFAULT_SNOOZE_MINUTES, NOTICE_DISMISS_MS } from './core/constants/timing.constants';
+import { PURCHASE_TYPES } from './core/constants/billing.constants';
 import { BillingPlan, Consultation, Disease, Doctor, DoseEvent, Prescription } from './models';
 
 type PaymentFlowState = 'IDLE' | 'CREATING_ORDER' | 'OPENING_CHECKOUT' | 'VERIFYING' | 'SUCCESS' | 'ERROR';
@@ -211,11 +215,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly paymentFlowConsultation = signal<Consultation | null>(null);
   readonly paymentFlowError = signal('');
   readonly title = computed(() => `${this.auth.user()?.role?.toLowerCase()} dashboard`);
-  readonly whatsappLink =
-    'https://wa.me/919876543210?text=Hi%20Vitalis%20Care%20and%20Research%20Centre%2C%20I%20need%20help%20with%20my%20consultation';
+  readonly whatsappLink = WHATSAPP_CONTACT_URL;
   private realtimeChannel?: { unsubscribe(): void };
 
-  snoozeMinutes = 15;
+  snoozeMinutes = DEFAULT_SNOOZE_MINUTES;
   assignment = { consultationId: '', doctorId: '' };
   doctorForm = {
     name: 'Dr. New Doctor',
@@ -229,8 +232,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     sms: true,
     whatsapp: false,
     push: false,
-    quietHoursStart: '22:00',
-    quietHoursEnd: '07:00'
+    quietHoursStart: DEFAULT_QUIET_HOURS.START,
+    quietHoursEnd: DEFAULT_QUIET_HOURS.END
   };
 
   constructor(
@@ -257,7 +260,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         diseaseId: payload.diseaseId,
         intakeAnswers: payload.intakeAnswers,
         purchaseType: payload.purchaseType,
-        ...(payload.purchaseType === 'PLAN' ? { planCode: payload.planCode } : {})
+        ...(payload.purchaseType === PURCHASE_TYPES.PLAN ? { planCode: payload.planCode } : {})
       })
       .subscribe({
         next: () => {
@@ -432,7 +435,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   snoozeDose(doseEventId: string) {
     this.isProcessing.set(true);
-    this.api.snoozeDose(doseEventId, Number(this.snoozeMinutes) || 15).subscribe({
+    this.api.snoozeDose(doseEventId, Number(this.snoozeMinutes) || DEFAULT_SNOOZE_MINUTES).subscribe({
       next: () => {
         this.showNotice('Dose snoozed.');
         this.loadPatientMedicationData();
@@ -493,7 +496,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   logout() {
     this.auth.logout();
-    this.router.navigateByUrl('/login');
+    this.router.navigateByUrl(`/${ROUTE_PATHS.LOGIN}`);
   }
 
   private loadBaseData() {
@@ -567,6 +570,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private showNotice(message: string) {
     this.notice.set(message);
-    setTimeout(() => this.notice.set(''), 3500);
+    setTimeout(() => this.notice.set(''), NOTICE_DISMISS_MS);
   }
 }

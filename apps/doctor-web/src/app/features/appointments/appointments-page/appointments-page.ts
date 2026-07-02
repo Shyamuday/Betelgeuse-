@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { API_PATHS } from '../../../core/constants/api-paths.constants';
 
 type OptionType = 'METHOD' | 'DIAGNOSED_DISEASE';
 
@@ -121,7 +122,7 @@ export class AppointmentsPage {
 
   private async loadByType(type: OptionType) {
     const response = await firstValueFrom(
-      this.http.get<{ options: PrescriptionOption[] }>(`${this.apiBase}/doctor/prescription-options`, {
+      this.http.get<{ options: PrescriptionOption[] }>(`${this.apiBase}${API_PATHS.DOCTOR.PRESCRIPTION_OPTIONS}`, {
         params: { type }
       })
     );
@@ -164,7 +165,7 @@ export class AppointmentsPage {
     try {
       const response = await firstValueFrom(
         this.http.post<{ option: PrescriptionOption }>(
-          `${this.apiBase}/doctor/prescription-options`,
+          `${this.apiBase}${API_PATHS.DOCTOR.PRESCRIPTION_OPTIONS}`,
           { type, label }
         )
       );
@@ -210,7 +211,7 @@ export class AppointmentsPage {
     try {
       const response = await firstValueFrom(
         this.http.get<{ prescriptions: LoadedPrescription[]; consultation?: { status: string } }>(
-          `${this.apiBase}/doctor/appointments/${this.consultationId}/prescriptions`
+          `${this.apiBase}${API_PATHS.DOCTOR.APPOINTMENT_PRESCRIPTIONS(this.consultationId)}`
         )
       );
       this.loadedPrescriptions = response.prescriptions || [];
@@ -426,12 +427,12 @@ export class AppointmentsPage {
       const payload = this.buildPayload(targetStatus);
       if (this.editingPrescriptionId) {
         await firstValueFrom(
-          this.http.put(`${this.apiBase}/doctor/prescriptions/${this.editingPrescriptionId}`, payload)
+          this.http.put(`${this.apiBase}${API_PATHS.DOCTOR.PRESCRIPTIONS}/${this.editingPrescriptionId}`, payload)
         );
         this.message = targetStatus === 'PUBLISHED' ? 'Draft updated and published.' : 'Draft updated.';
       } else {
         await firstValueFrom(
-          this.http.post(`${this.apiBase}/doctor/appointments/${this.consultationId}/prescriptions`, payload)
+          this.http.post(`${this.apiBase}${API_PATHS.DOCTOR.APPOINTMENT_PRESCRIPTIONS(this.consultationId)}`, payload)
         );
         this.message = targetStatus === 'PUBLISHED' ? 'Follow-up prescription created and published.' : 'Draft created.';
       }
@@ -447,7 +448,7 @@ export class AppointmentsPage {
     this.templatesLoading = true;
     try {
       const res = await firstValueFrom(
-        this.http.get<{ templates: PrescriptionTemplate[] }>(`${this.apiBase}/doctor/prescription-templates`)
+        this.http.get<{ templates: PrescriptionTemplate[] }>(`${this.apiBase}${API_PATHS.DOCTOR.PRESCRIPTION_TEMPLATES}`)
       );
       this.templates = res.templates || [];
     } catch {
@@ -486,7 +487,7 @@ export class AppointmentsPage {
     this.savingTemplateError = '';
     try {
       await firstValueFrom(
-        this.http.post(`${this.apiBase}/doctor/prescription-templates`, {
+        this.http.post(`${this.apiBase}${API_PATHS.DOCTOR.PRESCRIPTION_TEMPLATES}`, {
           name,
           diagnosis: this.diagnosis,
           advice: this.advice,
@@ -518,7 +519,7 @@ export class AppointmentsPage {
   async deleteTemplate(id: string) {
     this.deletingTemplateId = id;
     try {
-      await firstValueFrom(this.http.delete(`${this.apiBase}/doctor/prescription-templates/${id}`));
+      await firstValueFrom(this.http.delete(`${this.apiBase}${API_PATHS.DOCTOR.PRESCRIPTION_TEMPLATES}/${id}`));
       this.templates = this.templates.filter((t) => t.id !== id);
     } catch {
       this.error = 'Could not delete template.';
@@ -532,7 +533,7 @@ export class AppointmentsPage {
     this.error = '';
     try {
       await firstValueFrom(
-        this.http.post(`${this.apiBase}/consultations/${this.consultationId}/complete`, {})
+        this.http.post(`${this.apiBase}${API_PATHS.CONSULTATIONS}/${this.consultationId}/complete`, {})
       );
       this.consultationStatus = 'COMPLETED';
       this.confirmingClose = false;

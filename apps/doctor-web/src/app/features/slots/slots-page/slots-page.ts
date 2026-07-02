@@ -3,15 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { API_PATHS } from '../../../core/constants/api-paths.constants';
+import { TOAST_DURATION_MS } from '../../../core/constants/timing.constants';
+import { Auth } from '../../../core/services/auth';
+import { SLOT_TEMPLATES, WEEKDAY_SHORT_LABELS } from '../constants/slot-templates.constants';
 
 interface Slot { id: string; date: string; startTime: string; endTime: string; isBooked: boolean; isBlocked: boolean; }
-
-const SLOT_TEMPLATES = [
-  { label: '9 AM - 1 PM (30 min slots)',  start: '09:00', end: '13:00', step: 30 },
-  { label: '2 PM - 6 PM (30 min slots)',  start: '14:00', end: '18:00', step: 30 },
-  { label: '9 AM - 5 PM (1 hr slots)',    start: '09:00', end: '17:00', step: 60 },
-  { label: '6 PM - 9 PM (30 min slots)',  start: '18:00', end: '21:00', step: 30 },
-];
 
 function addMinutes(time: string, mins: number): string {
   const [h, m] = time.split(':').map(Number);
@@ -148,6 +145,7 @@ function generateSlots(start: string, end: string, stepMins: number): { startTim
 })
 export class SlotsPage implements OnInit {
   private http = inject(HttpClient);
+  private auth = inject(Auth);
   private base = environment.apiUrl;
 
   slots = signal<Slot[]>([]);
@@ -177,7 +175,7 @@ export class SlotsPage implements OnInit {
       d.setDate(monday.getDate() + i);
       return {
         iso: d.toISOString().slice(0, 10),
-        day: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i],
+        day: WEEKDAY_SHORT_LABELS[i],
         num: String(d.getDate())
       };
     });
@@ -201,9 +199,9 @@ export class SlotsPage implements OnInit {
 
   load(): void {
     this.loading.set(true);
-    const token = localStorage.getItem('doctor_app_token') ?? '';
+    const token = this.auth.token();
     firstValueFrom(
-      this.http.get<{ slots: Slot[] }>(`${this.base}/doctor/slots`, {
+      this.http.get<{ slots: Slot[] }>(`${this.base}${API_PATHS.DOCTOR.SLOTS}`, {
         params: { date: this.selectedDate() },
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -215,10 +213,10 @@ export class SlotsPage implements OnInit {
     if (!this.newStart || !this.newEnd || this.newEnd <= this.newStart) {
       this.showToast('Invalid time range'); return;
     }
-    const token = localStorage.getItem('doctor_app_token') ?? '';
+    const token = this.auth.token();
     try {
       await firstValueFrom(
-        this.http.post<{ slot: Slot }>(`${this.base}/doctor/slots`, {
+        this.http.post<{ slot: Slot }>(`${this.base}${API_PATHS.DOCTOR.SLOTS}`, {
           date: this.selectedDate(), startTime: this.newStart, endTime: this.newEnd
         }, { headers: { Authorization: `Bearer ${token}` } })
       );
@@ -230,12 +228,12 @@ export class SlotsPage implements OnInit {
 
   async addTemplate(t: { start: string; end: string; step: number }): Promise<void> {
     const slotsToCreate = generateSlots(t.start, t.end, t.step);
-    const token = localStorage.getItem('doctor_app_token') ?? '';
+    const token = this.auth.token();
     let added = 0;
     for (const s of slotsToCreate) {
       try {
         await firstValueFrom(
-          this.http.post(`${this.base}/doctor/slots`, {
+          this.http.post(`${this.base}${API_PATHS.DOCTOR.SLOTS}`, {
             date: this.selectedDate(), startTime: s.startTime, endTime: s.endTime
           }, { headers: { Authorization: `Bearer ${token}` } })
         );
@@ -248,10 +246,10 @@ export class SlotsPage implements OnInit {
 
   async clearDay(): Promise<void> {
     const openSlots = this.slots().filter(s => !s.isBooked);
-    const token = localStorage.getItem('doctor_app_token') ?? '';
+    const token = this.auth.token();
     for (const s of openSlots) {
       await firstValueFrom(
-        this.http.delete(`${this.base}/doctor/slots/${s.id}`, { headers: { Authorization: `Bearer ${token}` } })
+        this.http.delete(`${this.base}${API_PATHS.DOCTOR.SLOTS}/${s.id}`, { headers: { Authorization: `Bearer ${token}` } })
       ).catch(() => {});
     }
     this.showToast('Day cleared');
@@ -259,23 +257,23 @@ export class SlotsPage implements OnInit {
   }
 
   async toggleBlock(s: Slot): Promise<void> {
-    const token = localStorage.getItem('doctor_app_token') ?? '';
+    const token = this.auth.token();
     await firstValueFrom(
-      this.http.patch(`${this.base}/doctor/slots/${s.id}`, { isBlocked: !s.isBlocked }, { headers: { Authorization: `Bearer ${token}` } })
+      this.http.patch(`${this.base}${API_PATHS.DOCTOR.SLOTS}/${s.id}`, { isBlocked: !s.isBlocked }, { headers: { Authorization: `Bearer ${token}` } })
     );
     this.load();
   }
 
   async deleteSlot(id: string): Promise<void> {
-    const token = localStorage.getItem('doctor_app_token') ?? '';
+    const token = this.auth.token();
     await firstValueFrom(
-      this.http.delete(`${this.base}/doctor/slots/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+      this.http.delete(`${this.base}${API_PATHS.DOCTOR.SLOTS}/${id}`, { headers: { Authorization: `Bearer ${token}` } })
     );
     this.slots.update(list => list.filter(s => s.id !== id));
   }
 
   private showToast(msg: string): void {
     this.toast.set(msg);
-    setTimeout(() => this.toast.set(''), 2500);
+    setTimeout(() => this.toast.set(''), TOAST_DURATION_MS);
   }
 }

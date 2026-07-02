@@ -1,12 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { HrAuthService } from '../../services/hr-auth.service';
-
-interface NavItem {
-  path: string;
-  label: string;
-  icon: string;
-}
+import { NAV_ITEMS } from '../../core/constants/app-routes.constants';
 
 @Component({
   selector: 'app-shell',
@@ -408,15 +403,7 @@ export class ShellComponent {
   auth = inject(HrAuthService);
   sidebarOpen = signal(false);
 
-  navItems: NavItem[] = [
-    { path: '/dashboard', label: 'Dashboard', icon: '📊' },
-    { path: '/employees', label: 'Employees', icon: '👥' },
-    { path: '/doctors', label: 'Doctors', icon: '🩺' },
-    { path: '/store-staff', label: 'Store Staff', icon: '🧑‍💼' },
-    { path: '/stores', label: 'Stores', icon: '🏪' },
-    { path: '/leaves', label: 'Leaves', icon: '📋' },
-    { path: '/payroll', label: 'Payroll', icon: '💰' }
-  ];
+  navItems = NAV_ITEMS;
 
   userInitial() {
     const name = this.auth.currentUser()?.name ?? 'H';

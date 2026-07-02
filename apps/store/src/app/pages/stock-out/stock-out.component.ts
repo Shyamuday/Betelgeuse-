@@ -3,6 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { StoreApiService } from '../../services/store-api.service';
 import { MedicineWithStock } from '../../models';
+import { ROUTE_PATHS } from '../../core/constants/app-routes.constants';
+import { PAGE_SIZES } from '../../core/constants/pagination.constants';
 
 type RemoveType = 'SALE_OUT' | 'ADJUSTMENT_OUT' | 'EXPIRED_REMOVAL';
 
@@ -12,7 +14,7 @@ type RemoveType = 'SALE_OUT' | 'ADJUSTMENT_OUT' | 'EXPIRED_REMOVAL';
   template: `
     <div class="page">
       <div class="page-header">
-        <button class="back-btn" (click)="router.navigate(['/dashboard'])">← Back</button>
+        <button class="back-btn" (click)="router.navigate(['/', routePaths.DASHBOARD])">← Back</button>
         <div>
           <h1 class="page-title">📤 Remove Stock</h1>
           <p class="page-sub">Dispense, adjust, or remove expired medicine</p>
@@ -277,6 +279,8 @@ export class StockOutComponent {
   private api = inject(StoreApiService);
   router = inject(Router);
 
+  readonly routePaths = ROUTE_PATHS;
+
   searchQuery = '';
   searchResults = signal<MedicineWithStock[]>([]);
   selectedMedicine = signal<MedicineWithStock | null>(null);
@@ -295,7 +299,7 @@ export class StockOutComponent {
     if (!this.searchQuery.trim()) { this.searchResults.set([]); return; }
     this.searching.set(true);
     this.timer = setTimeout(() => {
-      this.api.getMedicines({ q: this.searchQuery, pageSize: 10 }).subscribe({
+      this.api.getMedicines({ q: this.searchQuery, pageSize: PAGE_SIZES.STOCK_LOOKUP }).subscribe({
         next: (r) => { this.searchResults.set(r.medicines); this.searching.set(false); },
         error: () => this.searching.set(false)
       });

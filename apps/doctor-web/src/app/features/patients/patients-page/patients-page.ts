@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
+import { API_PATHS } from '../../../core/constants/api-paths.constants';
+import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
 
 type DoseEvent = {
   id: string;
@@ -95,10 +97,10 @@ export class PatientsPage {
 
     const [trendResult, eventsResult] = await Promise.allSettled([
       firstValueFrom(
-        this.http.get<PatientsPage['summary']>(`${this.apiBase}/doctor/patients/${id}/adherence-trend`, { params })
+        this.http.get<PatientsPage['summary']>(`${this.apiBase}${API_PATHS.PATIENTS.ADHERENCE_TREND(id)}`, { params })
       ),
       firstValueFrom(
-        this.http.get<{ events: DoseEvent[] }>(`${this.apiBase}/doctor/patients/${id}/dose-events`, { params })
+        this.http.get<{ events: DoseEvent[] }>(`${this.apiBase}${API_PATHS.PATIENTS.DOSE_EVENTS(id)}`, { params })
       )
     ]);
 
@@ -124,7 +126,7 @@ export class PatientsPage {
     this.worklistLoading = true;
     try {
       const response = await firstValueFrom(
-        this.http.get<{ consultations: WorklistConsultation[] }>(`${this.apiBase}/consultations`)
+        this.http.get<{ consultations: WorklistConsultation[] }>(`${this.apiBase}${API_PATHS.CONSULTATIONS}`)
       );
       this.consultations = response.consultations || [];
     } catch {
@@ -184,7 +186,7 @@ export class PatientsPage {
   }
 
   openInAppointments(consultationId: string) {
-    void this.router.navigate(['/appointments'], { queryParams: { consultationId } });
+    void this.router.navigate(['/', ROUTE_PATHS.APPOINTMENTS], { queryParams: { consultationId } });
   }
 
   showSection(section: 'ASSIGNED' | 'IN_PROGRESS' | 'FOLLOW_UP_DUE') {

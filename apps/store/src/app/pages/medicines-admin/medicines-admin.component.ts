@@ -3,9 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { StoreApiService } from '../../services/store-api.service';
 import { Medicine, MedicineWithStock } from '../../models';
-
-const POTENCIES = ['Q', '3X', '6X', '12X', '6C', '12C', '30C', '200C', '1M', '10M', 'CM', 'LM1'];
-const CATEGORIES = ['Plant', 'Mineral', 'Animal', 'Nosode', 'Sarcode', 'Biotherapic', 'Imponderabilia'];
+import { PAGE_SIZES } from '../../core/constants/pagination.constants';
+import {
+  CUSTOM_POTENCY_VALUE,
+  MEDICINE_CATEGORIES,
+  MEDICINE_POTENCIES
+} from '../../shared/constants/medicine-form.constants';
 
 @Component({
   selector: 'app-medicines-admin',
@@ -114,9 +117,9 @@ const CATEGORIES = ['Plant', 'Mineral', 'Animal', 'Nosode', 'Sarcode', 'Biothera
                 <select class="input" [(ngModel)]="form.potency">
                   <option value="">Select potency</option>
                   @for (p of potencies; track p) { <option [value]="p">{{ p }}</option> }
-                  <option value="custom">Custom...</option>
+                  <option [value]="customPotencyValue">Custom...</option>
                 </select>
-                @if (form.potency === 'custom') {
+                @if (form.potency === customPotencyValue) {
                   <input class="input" style="margin-top: 8px;" [(ngModel)]="form.customPotency" placeholder="Enter custom potency" />
                 }
               </div>
@@ -285,8 +288,9 @@ export class MedicinesAdminComponent implements OnInit {
   saving = signal(false);
   saveError = signal('');
 
-  potencies = POTENCIES;
-  categories = CATEGORIES;
+  potencies = MEDICINE_POTENCIES;
+  categories = MEDICINE_CATEGORIES;
+  customPotencyValue = CUSTOM_POTENCY_VALUE;
 
   form = {
     name: '', shortName: '', alternateName: '', potency: '', customPotency: '',
@@ -299,7 +303,7 @@ export class MedicinesAdminComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
-    this.api.getMedicines({ q: this.searchQuery, potency: this.potencyFilter, page: this.page(), pageSize: 20 }).subscribe({
+    this.api.getMedicines({ q: this.searchQuery, potency: this.potencyFilter, page: this.page(), pageSize: PAGE_SIZES.MEDICINES_ADMIN }).subscribe({
       next: (res) => {
         this.medicines.set(res.medicines);
         this.totalPages.set(res.pagination.totalPages);
@@ -325,7 +329,8 @@ export class MedicinesAdminComponent implements OnInit {
 
   openEdit(m: Medicine): void {
     this.editingId.set(m.id);
-    this.form = { name: m.name, shortName: m.shortName ?? '', alternateName: m.alternateName ?? '', potency: POTENCIES.includes(m.potency) ? m.potency : 'custom', customPotency: POTENCIES.includes(m.potency) ? '' : m.potency, category: m.category ?? '', manufacturer: m.manufacturer ?? '', minStockLevel: m.minStockLevel, description: m.description ?? '' };
+    const isKnownPotency = (MEDICINE_POTENCIES as readonly string[]).includes(m.potency);
+    this.form = { name: m.name, shortName: m.shortName ?? '', alternateName: m.alternateName ?? '', potency: isKnownPotency ? m.potency : CUSTOM_POTENCY_VALUE, customPotency: isKnownPotency ? '' : m.potency, category: m.category ?? '', manufacturer: m.manufacturer ?? '', minStockLevel: m.minStockLevel, description: m.description ?? '' };
     this.saveError.set('');
     this.showModal.set(true);
   }
@@ -333,10 +338,10 @@ export class MedicinesAdminComponent implements OnInit {
   closeModal(): void { this.showModal.set(false); }
 
   isFormValid(): boolean {
-    return !!(this.form.name.trim() && (this.form.potency && this.form.potency !== 'custom' || this.form.customPotency.trim()));
+    return !!(this.form.name.trim() && (this.form.potency && this.form.potency !== CUSTOM_POTENCY_VALUE || this.form.customPotency.trim()));
   }
 
-  getPotency(): string { return this.form.potency === 'custom' ? this.form.customPotency : this.form.potency; }
+  getPotency(): string { return this.form.potency === CUSTOM_POTENCY_VALUE ? this.form.customPotency : this.form.potency; }
 
   save(): void {
     if (!this.isFormValid()) return;

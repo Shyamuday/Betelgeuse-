@@ -5,7 +5,8 @@ export const ROUTE_PATHS = {
   DOCTORS: 'doctors',
   STORE_STAFF: 'store-staff',
   LEAVES: 'leaves',
-  STORES: 'stores'
+  STORES: 'stores',
+  PAYROLL: 'payroll'
 } as const;
 
 export const DEFAULT_AUTHED_ROUTE = ROUTE_PATHS.DASHBOARD;
@@ -16,5 +17,6 @@ export const NAV_ITEMS = [
   { path: `/${ROUTE_PATHS.DOCTORS}`, label: 'Doctors', icon: '🩺' },
   { path: `/${ROUTE_PATHS.STORE_STAFF}`, label: 'Store Staff', icon: '🧑‍💼' },
   { path: `/${ROUTE_PATHS.STORES}`, label: 'Stores', icon: '🏪' },
-  { path: `/${ROUTE_PATHS.LEAVES}`, label: 'Leaves', icon: '📋' }
+  { path: `/${ROUTE_PATHS.LEAVES}`, label: 'Leaves', icon: '📋' },
+  { path: `/${ROUTE_PATHS.PAYROLL}`, label: 'Payroll', icon: '💰' }
 ] as const;

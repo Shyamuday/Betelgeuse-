@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
 import { Auth } from '../../../core/services/auth';
 
 @Component({
@@ -37,7 +38,7 @@ export class Login {
         this.error = result.message;
         return;
       }
-      void this.router.navigateByUrl('/dashboard');
+      void this.router.navigateByUrl(`/${ROUTE_PATHS.DASHBOARD}`);
     } finally {
       this.submitting = false;
     }

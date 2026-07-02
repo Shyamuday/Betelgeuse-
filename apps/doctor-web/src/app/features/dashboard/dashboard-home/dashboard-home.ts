@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { API_PATHS } from '../../../core/constants/api-paths.constants';
 
 @Component({
   selector: 'app-dashboard-home',
@@ -33,7 +34,7 @@ export class DashboardHome {
     this.error = '';
     try {
       this.summary = await firstValueFrom(
-        this.http.get<DashboardHome['summary']>(`${this.apiBase}/doctor/payments/summary`)
+        this.http.get<DashboardHome['summary']>(`${this.apiBase}${API_PATHS.DOCTOR.PAYMENTS_SUMMARY}`)
       );
     } catch {
       this.error = 'Could not load payment summary.';

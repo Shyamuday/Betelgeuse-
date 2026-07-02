@@ -2,6 +2,7 @@ import { HttpInterceptorFn, HttpRequest, HttpHandlerFn } from '@angular/common/h
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
+import { ROUTE_PATHS } from '../constants/app-routes.constants';
 import { StoreAuthService } from '../../services/store-auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
@@ -17,7 +18,7 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
     catchError((err) => {
       if (err.status === 401) {
         auth.logout();
-        router.navigate(['/login']);
+        router.navigate(['/', ROUTE_PATHS.LOGIN]);
       }
       return throwError(() => err);
     })

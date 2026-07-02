@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import type { Role } from '@prisma/client';
+import { AUTH_MESSAGES, DEFAULT_JWT_SECRET, JWT_EXPIRY } from './constants/auth.constants.js';
 import { prisma } from './db.js';
 
 export type AuthUser = {
@@ -19,10 +20,9 @@ declare global {
   }
 }
 
-const DEFAULT_SECRET = 'dev-only-secret';
-const jwtSecret = process.env.JWT_SECRET || DEFAULT_SECRET;
+const jwtSecret = process.env.JWT_SECRET || DEFAULT_JWT_SECRET;
 
-if (jwtSecret === DEFAULT_SECRET) {
+if (jwtSecret === DEFAULT_JWT_SECRET) {
   if (process.env.NODE_ENV === 'production') {
     console.error('FATAL: JWT_SECRET must be set in production. Refusing to start.');
     process.exit(1);
@@ -32,7 +32,7 @@ if (jwtSecret === DEFAULT_SECRET) {
 }
 
 export function signToken(user: AuthUser) {
-  return jwt.sign(user, jwtSecret, { expiresIn: '7d' });
+  return jwt.sign(user, jwtSecret, { expiresIn: JWT_EXPIRY });
 }
 
 export async function authRequired(req: Request, res: Response, next: NextFunction) {
@@ -40,7 +40,7 @@ export async function authRequired(req: Request, res: Response, next: NextFuncti
   const token = header?.startsWith('Bearer ') ? header.slice(7) : undefined;
 
   if (!token) {
-    return res.status(401).json({ message: 'Authentication required' });
+    return res.status(401).json({ message: AUTH_MESSAGES.REQUIRED });
   }
 
   try {
@@ -51,20 +51,20 @@ export async function authRequired(req: Request, res: Response, next: NextFuncti
     });
 
     if (!user?.isActive) {
-      return res.status(401).json({ message: 'User is inactive or missing' });
+      return res.status(401).json({ message: AUTH_MESSAGES.INACTIVE_USER });
     }
 
     req.user = user;
     next();
   } catch {
-    return res.status(401).json({ message: 'Invalid or expired token' });
+    return res.status(401).json({ message: AUTH_MESSAGES.INVALID_TOKEN });
   }
 }
 
 export function allowRoles(...roles: Role[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user || !roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'You do not have access to this resource' });
+      return res.status(403).json({ message: AUTH_MESSAGES.FORBIDDEN });
     }
 
     next();

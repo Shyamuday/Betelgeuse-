@@ -1,10 +1,12 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { WorkShift, EmployeeStatus, LeaveStatus, LeaveType, EmployeeType } from '@prisma/client';
+import { DEFAULT_JWT_SECRET, HR_JWT_EXPIRY } from './constants/auth.constants.js';
+import { HR_API_ROUTES, HR_DEFAULT_PAGE_SIZE, HR_ROLES } from './constants/hr-api-routes.constants.js';
 import { prisma } from './db.js';
 
 const hrRouter = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'changeme';
+const JWT_SECRET = process.env.JWT_SECRET || DEFAULT_JWT_SECRET;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -24,13 +26,13 @@ function hrAuthMiddleware(req: Request, res: Response, next: NextFunction): void
   if (!header?.startsWith('Bearer ')) { res.status(401).json({ error: 'Unauthorized' }); return; }
   try {
     const payload = jwt.verify(header.slice(7), JWT_SECRET) as AuthPayload;
-    if (payload.role !== 'ADMIN' && payload.role !== 'HR') {
+    if (payload.role !== HR_ROLES.ADMIN && payload.role !== HR_ROLES.HR) {
       res.status(403).json({ error: 'HR or Admin access required' }); return;
     }
     const hrReq = req as HrRequest;
     hrReq.hrPayload = payload;
 
-    if (payload.role === 'ADMIN') {
+    if (payload.role === HR_ROLES.ADMIN) {
       // Admin sees everything
       hrReq.accessibleStoreIds = null;
       next();
@@ -53,7 +55,7 @@ function adminOnly(req: Request, res: Response, next: NextFunction): void {
   if (!header?.startsWith('Bearer ')) { res.status(401).json({ error: 'Unauthorized' }); return; }
   try {
     const payload = jwt.verify(header.slice(7), JWT_SECRET) as AuthPayload;
-    if (payload.role !== 'ADMIN') { res.status(403).json({ error: 'Admin only' }); return; }
+    if (payload.role !== HR_ROLES.ADMIN) { res.status(403).json({ error: 'Admin only' }); return; }
     (req as HrRequest).hrPayload = payload;
     (req as HrRequest).accessibleStoreIds = null;
     next();
@@ -73,7 +75,7 @@ function storeManagerMiddleware(req: Request, res: Response, next: NextFunction)
   if (!header?.startsWith('Bearer ')) { res.status(401).json({ error: 'Unauthorized' }); return; }
   try {
     const payload = jwt.verify(header.slice(7), JWT_SECRET) as StorePayload;
-    if (payload.role !== 'MANAGER') { res.status(403).json({ error: 'Manager only' }); return; }
+    if (payload.role !== HR_ROLES.MANAGER) { res.status(403).json({ error: 'Manager only' }); return; }
     (req as Request & { storePayload: StorePayload }).storePayload = payload;
     next();
   } catch { res.status(401).json({ error: 'Invalid token' }); }
@@ -106,7 +108,7 @@ function formatShift(shift: WorkShift, start?: string | null, end?: string | nul
 
 // POST /hr/auth/login
 hrRouter.post(
-  '/auth/login',
+  HR_API_ROUTES.AUTH_LOGIN,
   asyncRoute(async (req, res) => {
     const { email, password } = req.body as { email: string; password: string };
     if (!email || !password) { res.status(400).json({ error: 'Email and password required' }); return; }
@@ -117,14 +119,14 @@ hrRouter.post(
       include: { hrProfile: true }
     });
 
-    if (!user || user.role !== 'HR') { res.status(401).json({ error: 'Invalid credentials' }); return; }
+    if (!user || user.role !== HR_ROLES.HR) { res.status(401).json({ error: 'Invalid credentials' }); return; }
     if (!user.isActive) { res.status(401).json({ error: 'Account deactivated' }); return; }
     if (!user.passwordHash) { res.status(401).json({ error: 'Password not set' }); return; }
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) { res.status(401).json({ error: 'Invalid credentials' }); return; }
 
-    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '12h' });
+    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: HR_JWT_EXPIRY });
     res.json({
       token,
       user: {
@@ -137,7 +139,7 @@ hrRouter.post(
 
 // GET /hr/auth/me
 hrRouter.get(
-  '/auth/me',
+  HR_API_ROUTES.AUTH_ME,
   hrAuthMiddleware,
   asyncRoute(async (req, res) => {
     const { userId } = (req as Request & { hrPayload: AuthPayload }).hrPayload;
@@ -152,7 +154,7 @@ hrRouter.get(
 // ─── HR Dashboard ─────────────────────────────────────────────────────────────
 
 hrRouter.get(
-  '/dashboard',
+  HR_API_ROUTES.DASHBOARD,
   hrAuthMiddleware,
   asyncRoute(async (req, res) => {
     const { storeIds } = getAccess(req);
@@ -203,7 +205,7 @@ hrRouter.get(
 // ─── Employee Directory ────────────────────────────────────────────────────────
 
 hrRouter.get(
-  '/employees',
+  HR_API_ROUTES.EMPLOYEES,
   hrAuthMiddleware,
   asyncRoute(async (req, res) => {
     const { storeIds } = getAccess(req);
@@ -274,7 +276,7 @@ hrRouter.get(
 
 // ─── Doctor HR (accessible to HR + Admin) ────────────────────────────────────
 
-hrRouter.get('/doctors', hrAuthMiddleware, asyncRoute(async (req, res) => {
+hrRouter.get(HR_API_ROUTES.DOCTORS, hrAuthMiddleware, asyncRoute(async (req, res) => {
   const { storeIds } = getAccess(req);
   const docWhere = storeIds
     ? { OR: [{ isOnline: true }, { clinicStoreId: { in: storeIds } }] }
@@ -291,7 +293,7 @@ hrRouter.get('/doctors', hrAuthMiddleware, asyncRoute(async (req, res) => {
   res.json({ doctors });
 }));
 
-hrRouter.get('/doctors/:id', hrAuthMiddleware, asyncRoute(async (req, res) => {
+hrRouter.get(HR_API_ROUTES.DOCTOR_BY_ID, hrAuthMiddleware, asyncRoute(async (req, res) => {
   const doctor = await prisma.doctor.findUniqueOrThrow({
     where: { id: req.params['id'] as string },
     include: {
@@ -336,7 +338,7 @@ hrRouter.put('/doctors/:id', hrAuthMiddleware, asyncRoute(async (req, res) => {
   res.json({ doctor: updated });
 }));
 
-hrRouter.post('/doctors/:id/letter', hrAuthMiddleware, asyncRoute(async (req, res) => {
+hrRouter.post(HR_API_ROUTES.DOCTOR_LETTER, hrAuthMiddleware, asyncRoute(async (req, res) => {
   const id = req.params['id'] as string;
   const { clinicName, clinicAddress } = req.body as { clinicName?: string; clinicAddress?: string };
 
@@ -372,7 +374,7 @@ hrRouter.post('/doctors/:id/letter', hrAuthMiddleware, asyncRoute(async (req, re
   res.json({ letter });
 }));
 
-hrRouter.get('/doctors/:id/letter', hrAuthMiddleware, asyncRoute(async (req, res) => {
+hrRouter.get(HR_API_ROUTES.DOCTOR_LETTER, hrAuthMiddleware, asyncRoute(async (req, res) => {
   const letter = await prisma.joiningLetter.findUnique({ where: { doctorUserId: req.params['id'] as string } });
   if (!letter) { res.status(404).json({ error: 'Letter not yet generated' }); return; }
   res.json({ letter });
@@ -380,7 +382,7 @@ hrRouter.get('/doctors/:id/letter', hrAuthMiddleware, asyncRoute(async (req, res
 
 // ─── Store Staff HR (accessible to HR + store manager) ────────────────────────
 
-hrRouter.get('/store/staff', hrAuthMiddleware, asyncRoute(async (req, res) => {
+hrRouter.get(HR_API_ROUTES.STORE_STAFF, hrAuthMiddleware, asyncRoute(async (req, res) => {
   const { storeIds } = getAccess(req);
   const staff = await prisma.storeStaff.findMany({
     where: storeIds ? { storeId: { in: storeIds } } : {},
@@ -390,7 +392,7 @@ hrRouter.get('/store/staff', hrAuthMiddleware, asyncRoute(async (req, res) => {
   res.json({ staff });
 }));
 
-hrRouter.get('/store/staff/:id', hrAuthMiddleware, asyncRoute(async (req, res) => {
+hrRouter.get(HR_API_ROUTES.STORE_STAFF_BY_ID, hrAuthMiddleware, asyncRoute(async (req, res) => {
   const staff = await prisma.storeStaff.findUniqueOrThrow({
     where: { id: req.params['id'] as string },
     include: {
@@ -473,11 +475,11 @@ hrRouter.get('/store/staff/:id/letter', hrAuthMiddleware, asyncRoute(async (req,
 // ─── Leave Management ─────────────────────────────────────────────────────────
 
 // GET /hr/leaves?status=PENDING&type=ALL&empType=ALL
-hrRouter.get('/leaves', hrAuthMiddleware, asyncRoute(async (req, res) => {
+hrRouter.get(HR_API_ROUTES.LEAVES, hrAuthMiddleware, asyncRoute(async (req, res) => {
   const status = (req.query['status'] as string) ?? 'ALL';
   const empType = (req.query['empType'] as string) ?? 'ALL';
   const page = parseInt(req.query['page'] as string) || 1;
-  const pageSize = parseInt(req.query['pageSize'] as string) || 20;
+  const pageSize = parseInt(req.query['pageSize'] as string) || HR_DEFAULT_PAGE_SIZE;
 
   const where = {
     status: status !== 'ALL' ? (status as LeaveStatus) : undefined,
@@ -503,7 +505,7 @@ hrRouter.get('/leaves', hrAuthMiddleware, asyncRoute(async (req, res) => {
 }));
 
 // GET /hr/leaves/:id
-hrRouter.get('/leaves/:id', hrAuthMiddleware, asyncRoute(async (req, res) => {
+hrRouter.get(HR_API_ROUTES.LEAVE_BY_ID, hrAuthMiddleware, asyncRoute(async (req, res) => {
   const leave = await prisma.leaveRequest.findUniqueOrThrow({
     where: { id: req.params['id'] as string },
     include: {
@@ -516,7 +518,7 @@ hrRouter.get('/leaves/:id', hrAuthMiddleware, asyncRoute(async (req, res) => {
 }));
 
 // POST /hr/leaves  — HR can manually add a leave record
-hrRouter.post('/leaves', hrAuthMiddleware, asyncRoute(async (req, res) => {
+hrRouter.post(HR_API_ROUTES.LEAVES, hrAuthMiddleware, asyncRoute(async (req, res) => {
   const {
     employeeType, doctorId, storeStaffId, type, startDate, endDate, reason
   } = req.body as {
@@ -564,13 +566,13 @@ hrRouter.patch('/leaves/:id', hrAuthMiddleware, asyncRoute(async (req, res) => {
 // ─── Store & Manager Management (HR can create/manage) ───────────────────────
 
 // GET /hr/stores — list only accessible stores
-hrRouter.get('/stores', hrAuthMiddleware, asyncRoute(async (req, res) => {
+hrRouter.get(HR_API_ROUTES.STORES, hrAuthMiddleware, asyncRoute(async (req, res) => {
   const { storeIds } = getAccess(req);
   const stores = await prisma.store.findMany({
     where: storeIds ? { id: { in: storeIds } } : {},
     include: {
       _count: { select: { staff: true } },
-      staff: { where: { role: 'MANAGER' }, select: { id: true, name: true, email: true, isActive: true, employeeStatus: true } },
+      staff: { where: { role: HR_ROLES.MANAGER }, select: { id: true, name: true, email: true, isActive: true, employeeStatus: true } },
       hrAccess: { include: { hrUser: { select: { id: true, name: true, email: true } } } }
     },
     orderBy: { createdAt: 'asc' }
@@ -595,7 +597,7 @@ hrRouter.post('/stores', hrAuthMiddleware, asyncRoute(async (req, res) => {
 }));
 
 // POST /hr/stores/:storeId/managers — HR creates a store manager
-hrRouter.post('/stores/:storeId/managers', hrAuthMiddleware, asyncRoute(async (req, res) => {
+hrRouter.post(HR_API_ROUTES.STORE_MANAGERS, hrAuthMiddleware, asyncRoute(async (req, res) => {
   const storeId = req.params['storeId'] as string;
   const { name, email, password, designation, joiningDate } = req.body as {
     name: string; email: string; password: string; designation?: string; joiningDate?: string;
@@ -619,7 +621,7 @@ hrRouter.post('/stores/:storeId/managers', hrAuthMiddleware, asyncRoute(async (r
       staffCode,
       email,
       pinHash,
-      role: 'MANAGER',
+      role: HR_ROLES.MANAGER,
       storeId,
       designation: designation ?? 'Store Manager',
       department: 'Store Management',
@@ -641,7 +643,7 @@ hrRouter.post('/stores/:storeId/managers', hrAuthMiddleware, asyncRoute(async (r
 }));
 
 // POST /hr/stores/:storeId/staff — HR creates a regular store staff member
-hrRouter.post('/stores/:storeId/staff', hrAuthMiddleware, asyncRoute(async (req, res) => {
+hrRouter.post(HR_API_ROUTES.STORE_STAFF_CREATE, hrAuthMiddleware, asyncRoute(async (req, res) => {
   const storeId = req.params['storeId'] as string;
   const { name, staffCode, pin, designation, phone, joiningDate } = req.body as {
     name: string; staffCode: string; pin: string;
@@ -687,7 +689,7 @@ hrRouter.post('/stores/:storeId/staff', hrAuthMiddleware, asyncRoute(async (req,
 }));
 
 // PATCH /hr/store/staff/:id/status — HR can activate/deactivate staff
-hrRouter.patch('/store/staff/:id/status', hrAuthMiddleware, asyncRoute(async (req, res) => {
+hrRouter.patch(HR_API_ROUTES.STORE_STAFF_STATUS, hrAuthMiddleware, asyncRoute(async (req, res) => {
   const { isActive, employeeStatus } = req.body as { isActive?: boolean; employeeStatus?: EmployeeStatus };
   const staff = await prisma.storeStaff.update({
     where: { id: req.params['id'] as string },
@@ -699,7 +701,7 @@ hrRouter.patch('/store/staff/:id/status', hrAuthMiddleware, asyncRoute(async (re
 // ─── HR User Management (Admin only) ─────────────────────────────────────────
 
 // POST /hr/users  — super admin creates an HR user
-hrRouter.post('/users', adminOnly, asyncRoute(async (req, res) => {
+hrRouter.post(HR_API_ROUTES.USERS, adminOnly, asyncRoute(async (req, res) => {
   const { name, email, password, designation, department } = req.body as {
     name: string; email: string; password: string; designation?: string; department?: string;
   };
@@ -716,7 +718,7 @@ hrRouter.post('/users', adminOnly, asyncRoute(async (req, res) => {
 
   const user = await prisma.user.create({
     data: {
-      name, email, passwordHash, role: 'HR',
+      name, email, passwordHash, role: HR_ROLES.HR,
       hrProfile: { create: { designation: designation ?? 'HR Manager', department: department ?? 'Human Resources' } }
     },
     include: { hrProfile: true }
@@ -728,9 +730,9 @@ hrRouter.post('/users', adminOnly, asyncRoute(async (req, res) => {
 }));
 
 // GET /hr/users  — list all HR users
-hrRouter.get('/users', adminOnly, asyncRoute(async (_req, res) => {
+hrRouter.get(HR_API_ROUTES.USERS, adminOnly, asyncRoute(async (_req, res) => {
   const hrUsers = await prisma.user.findMany({
-    where: { role: 'HR' },
+    where: { role: HR_ROLES.HR },
     include: { hrProfile: true },
     orderBy: { createdAt: 'desc' }
   });
@@ -738,7 +740,7 @@ hrRouter.get('/users', adminOnly, asyncRoute(async (_req, res) => {
 }));
 
 // PATCH /hr/users/:id/status — activate/deactivate HR user
-hrRouter.patch('/users/:id/status', adminOnly, asyncRoute(async (req, res) => {
+hrRouter.patch(HR_API_ROUTES.USER_STATUS, adminOnly, asyncRoute(async (req, res) => {
   const { isActive } = req.body as { isActive: boolean };
   const user = await prisma.user.update({
     where: { id: req.params['id'] as string },
@@ -748,7 +750,7 @@ hrRouter.patch('/users/:id/status', adminOnly, asyncRoute(async (req, res) => {
 }));
 
 // GET /hr/users/:id/stores — list stores this HR user can access
-hrRouter.get('/users/:id/stores', adminOnly, asyncRoute(async (req, res) => {
+hrRouter.get(HR_API_ROUTES.USER_STORES, adminOnly, asyncRoute(async (req, res) => {
   const hrUserId = req.params['id'] as string;
   const accesses = await prisma.hrStoreAccess.findMany({
     where: { hrUserId },
@@ -759,12 +761,12 @@ hrRouter.get('/users/:id/stores', adminOnly, asyncRoute(async (req, res) => {
 }));
 
 // POST /hr/users/:id/stores — grant HR user access to a store
-hrRouter.post('/users/:id/stores', adminOnly, asyncRoute(async (req, res) => {
+hrRouter.post(HR_API_ROUTES.USER_STORES, adminOnly, asyncRoute(async (req, res) => {
   const hrUserId = req.params['id'] as string;
   const { storeId } = req.body as { storeId: string };
   const { userId } = (req as HrRequest).hrPayload;
 
-  await prisma.user.findUniqueOrThrow({ where: { id: hrUserId, role: 'HR' } });
+  await prisma.user.findUniqueOrThrow({ where: { id: hrUserId, role: HR_ROLES.HR } });
   await prisma.store.findUniqueOrThrow({ where: { id: storeId } });
 
   const access = await prisma.hrStoreAccess.upsert({
@@ -776,7 +778,7 @@ hrRouter.post('/users/:id/stores', adminOnly, asyncRoute(async (req, res) => {
 }));
 
 // DELETE /hr/users/:id/stores/:storeId — revoke HR user access to a store
-hrRouter.delete('/users/:id/stores/:storeId', adminOnly, asyncRoute(async (req, res) => {
+hrRouter.delete(HR_API_ROUTES.USER_STORE_BY_ID, adminOnly, asyncRoute(async (req, res) => {
   const hrUserId = req.params['id'] as string;
   const storeId = req.params['storeId'] as string;
   await prisma.hrStoreAccess.deleteMany({ where: { hrUserId, storeId } });
@@ -784,7 +786,7 @@ hrRouter.delete('/users/:id/stores/:storeId', adminOnly, asyncRoute(async (req, 
 }));
 
 // POST /hr/users/:id/stores/all — grant access to ALL stores (bulk)
-hrRouter.post('/users/:id/stores/all', adminOnly, asyncRoute(async (req, res) => {
+hrRouter.post(HR_API_ROUTES.USER_STORES_ALL, adminOnly, asyncRoute(async (req, res) => {
   const hrUserId = req.params['id'] as string;
   const { userId } = (req as HrRequest).hrPayload;
   const stores = await prisma.store.findMany({ select: { id: true } });
@@ -798,7 +800,7 @@ hrRouter.post('/users/:id/stores/all', adminOnly, asyncRoute(async (req, res) =>
 // ─── Doctor isOnline / clinicStore assignment ─────────────────────────────────
 
 // PUT /hr/doctors/:id/assignment — HR or Admin sets doctor online/offline + clinic store
-hrRouter.put('/doctors/:id/assignment', hrAuthMiddleware, asyncRoute(async (req, res) => {
+hrRouter.put(HR_API_ROUTES.DOCTOR_ASSIGNMENT, hrAuthMiddleware, asyncRoute(async (req, res) => {
   const { storeIds } = getAccess(req);
   const id = req.params['id'] as string;
   const { isOnline, clinicStoreId } = req.body as { isOnline?: boolean; clinicStoreId?: string | null };
@@ -822,7 +824,7 @@ hrRouter.put('/doctors/:id/assignment', hrAuthMiddleware, asyncRoute(async (req,
 // ─── Payroll Summary ──────────────────────────────────────────────────────────
 
 // GET /hr/payroll?month=YYYY-MM — monthly payroll summary
-hrRouter.get('/payroll', hrAuthMiddleware, asyncRoute(async (req, res) => {
+hrRouter.get(HR_API_ROUTES.PAYROLL, hrAuthMiddleware, asyncRoute(async (req, res) => {
   const { storeIds } = getAccess(req);
   const monthStr = (req.query['month'] as string) ?? new Date().toISOString().slice(0, 7);
   const [year, month] = monthStr.split('-').map(Number);
@@ -908,7 +910,7 @@ hrRouter.get('/payroll', hrAuthMiddleware, asyncRoute(async (req, res) => {
 // Doctors and store staff submit their own leave requests (status = PENDING)
 
 // POST /hr/self/doctor-leave — authenticated doctor submits leave
-hrRouter.post('/self/doctor-leave', asyncRoute(async (req, res) => {
+hrRouter.post(HR_API_ROUTES.SELF_DOCTOR_LEAVE, asyncRoute(async (req, res) => {
   const authHeader = req.header('authorization');
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
   if (!token) { res.status(401).json({ error: 'Unauthorized' }); return; }
@@ -941,7 +943,7 @@ hrRouter.post('/self/doctor-leave', asyncRoute(async (req, res) => {
 }));
 
 // POST /hr/self/staff-leave — store staff submits own leave
-hrRouter.post('/self/staff-leave', asyncRoute(async (req, res) => {
+hrRouter.post(HR_API_ROUTES.SELF_STAFF_LEAVE, asyncRoute(async (req, res) => {
   const { staffCode, storeCode, type, startDate, endDate, reason } = req.body as {
     staffCode: string; storeCode: string; type: LeaveType;
     startDate: string; endDate: string; reason?: string;
@@ -970,7 +972,7 @@ hrRouter.post('/self/staff-leave', asyncRoute(async (req, res) => {
 }));
 
 // GET /hr/self/doctor-leaves — doctor views their own leaves
-hrRouter.get('/self/doctor-leaves', asyncRoute(async (req, res) => {
+hrRouter.get(HR_API_ROUTES.SELF_DOCTOR_LEAVES, asyncRoute(async (req, res) => {
   const authHeader = req.header('authorization');
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
   if (!token) { res.status(401).json({ error: 'Unauthorized' }); return; }

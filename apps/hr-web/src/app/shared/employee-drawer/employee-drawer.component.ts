@@ -3,16 +3,9 @@ import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { HrApiService } from '../../services/hr-api.service';
 import { Employee, Letter, WorkShift, EmployeeStatus } from '../../models';
-
-const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const SHIFTS: { value: WorkShift; label: string }[] = [
-  { value: 'MORNING', label: 'Morning' },
-  { value: 'AFTERNOON', label: 'Afternoon' },
-  { value: 'EVENING', label: 'Evening' },
-  { value: 'NIGHT', label: 'Night' },
-  { value: 'FULL_DAY', label: 'Full Day' },
-  { value: 'CUSTOM', label: 'Custom' }
-];
+import { employeeStatusBadgeClass } from '../constants/employee-status.constants';
+import { WEEK_DAYS, WORK_SHIFT_OPTIONS } from '../constants/shift.constants';
+import { SAVE_SUCCESS_DURATION_MS } from '../../core/constants/timing.constants';
 
 interface EmployeeForm {
   employeeId: string;
@@ -597,8 +590,8 @@ export class EmployeeDrawerComponent implements OnChanges {
   clinicAddress = '';
   today = new Date();
 
-  shifts = SHIFTS;
-  weekdays = WEEKDAYS;
+  shifts = WORK_SHIFT_OPTIONS;
+  weekdays = WEEK_DAYS;
 
   form: EmployeeForm = this.emptyForm();
 
@@ -653,15 +646,7 @@ export class EmployeeDrawerComponent implements OnChanges {
     this.form.weeklyOffDays = days;
   }
 
-  statusClass(status: string): string {
-    const map: Record<string, string> = {
-      'ACTIVE': 'badge-active',
-      'ON_LEAVE': 'badge-on-leave',
-      'RESIGNED': 'badge-resigned',
-      'TERMINATED': 'badge-terminated'
-    };
-    return map[status] ?? 'badge-resigned';
-  }
+  statusClass = employeeStatusBadgeClass;
 
   setLetterTab() {
     this.activeTab.set('letter');
@@ -700,7 +685,7 @@ export class EmployeeDrawerComponent implements OnChanges {
         this.saveSuccess.set(true);
         const updated: Employee = res.doctor ?? res.staff;
         if (updated) this.saved.emit(updated);
-        setTimeout(() => this.saveSuccess.set(false), 3000);
+        setTimeout(() => this.saveSuccess.set(false), SAVE_SUCCESS_DURATION_MS);
       },
       error: (err: any) => {
         this.saving.set(false);

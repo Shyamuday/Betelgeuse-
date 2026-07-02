@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { WHATSAPP_CONTACT_URL } from './core/constants/branding.constants';
 import { AppFooterComponent } from './app-footer.component';
 import { AppHeaderComponent } from './app-header.component';
 import { HomeFinalCtaSectionComponent } from './home-final-cta-section.component';
@@ -41,6 +42,5 @@ import { HomeTreatmentsSectionComponent } from './home-treatments-section.compon
   `
 })
 export class HomeComponent {
-  readonly whatsappLink =
-    'https://wa.me/919876543210?text=Hi%20Vitalis%20Care%20and%20Research%20Centre%2C%20I%20want%20to%20book%20a%20consultation';
+  readonly whatsappLink = WHATSAPP_CONTACT_URL;
 }

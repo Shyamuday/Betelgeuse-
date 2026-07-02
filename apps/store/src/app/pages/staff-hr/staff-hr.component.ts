@@ -3,16 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { StoreApiService } from '../../services/store-api.service';
 import { StaffHrProfile, JoiningLetterDoc, WorkShift, EmployeeStatus } from '../../models';
-
-const SHIFT_LABELS: Record<WorkShift, string> = {
-  MORNING: '🌅 Morning', AFTERNOON: '🌤️ Afternoon',
-  EVENING: '🌆 Evening', NIGHT: '🌙 Night',
-  FULL_DAY: '☀️ Full Day', CUSTOM: '⚙️ Custom'
-};
-const STATUS_STYLES: Record<EmployeeStatus, string> = {
-  ACTIVE: '#4ade80', ON_LEAVE: '#fb923c', RESIGNED: '#94a3b8', TERMINATED: '#f87171'
-};
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+import { STORE_STAFF_ROLES } from '../../core/constants/auth.constants';
+import { EMPLOYEE_STATUS_STYLES, SHIFT_LABELS, WEEK_DAYS } from '../../shared/constants/hr.constants';
 
 @Component({
   selector: 'app-staff-hr',
@@ -30,14 +22,14 @@ const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
         <div class="staff-grid">
           @for (s of staff(); track s.id) {
             <div class="staff-card" (click)="openProfile(s)">
-              <div class="card-avatar" [class.manager]="s.role === 'MANAGER'">
+              <div class="card-avatar" [class.manager]="s.role === managerRole">
                 {{ s.name.charAt(0).toUpperCase() }}
               </div>
               <div class="card-body">
                 <div class="card-name">{{ s.name }}</div>
                 <div class="card-meta">
                   <span class="code">{{ s.employeeId ?? s.staffCode }}</span>
-                  <span class="role-tag" [class.manager]="s.role === 'MANAGER'">{{ s.role }}</span>
+                  <span class="role-tag" [class.manager]="s.role === managerRole">{{ s.role }}</span>
                   <span class="status-dot" [style.color]="statusColor(s.employeeStatus)">●</span>
                 </div>
                 <div class="card-info-row">
@@ -71,7 +63,7 @@ const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
       <div class="drawer-overlay" (click)="closeProfile()">
         <div class="drawer" (click)="$event.stopPropagation()">
           <div class="drawer-header">
-            <div class="detail-avatar" [class.manager]="selected()!.role === 'MANAGER'">
+            <div class="detail-avatar" [class.manager]="selected()!.role === managerRole">
               {{ selected()!.name.charAt(0).toUpperCase() }}
             </div>
             <div class="dh-info">
@@ -476,6 +468,8 @@ const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 export class StaffHrComponent implements OnInit {
   private api = inject(StoreApiService);
 
+  readonly managerRole = STORE_STAFF_ROLES.MANAGER;
+
   staff = signal<StaffHrProfile[]>([]);
   loading = signal(true);
   profileOpen = signal(false);
@@ -489,7 +483,7 @@ export class StaffHrComponent implements OnInit {
   salaryDisplay = 0;
 
   shifts = Object.entries(SHIFT_LABELS).map(([value, label]) => ({ value: value as WorkShift, label }));
-  days = DAYS;
+  days = WEEK_DAYS;
 
   ngOnInit(): void { this.load(); }
 
@@ -554,7 +548,7 @@ export class StaffHrComponent implements OnInit {
   printLetter(): void { window.print(); }
 
   shiftLabel(s: WorkShift): string { return SHIFT_LABELS[s] ?? s; }
-  statusColor(s: EmployeeStatus): string { return STATUS_STYLES[s] ?? '#94a3b8'; }
+  statusColor(s: EmployeeStatus): string { return EMPLOYEE_STATUS_STYLES[s]?.color ?? '#94a3b8'; }
   isOffDay(d: string): boolean { return (this.form.weeklyOffDays ?? []).includes(d); }
   toggleOffDay(d: string): void {
     const current = this.form.weeklyOffDays ?? [];

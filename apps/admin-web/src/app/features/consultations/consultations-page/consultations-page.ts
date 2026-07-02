@@ -2,19 +2,11 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { AdminApi } from '../../../core/services/admin-api';
-
-const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
-  PENDING:   { bg: 'rgba(251,146,60,0.12)',  color: '#fb923c' },
-  ACTIVE:    { bg: 'rgba(99,102,241,0.12)',   color: '#a5b4fc' },
-  COMPLETED: { bg: 'rgba(74,222,128,0.12)',   color: '#4ade80' },
-  CANCELLED: { bg: 'rgba(148,163,184,0.12)', color: '#94a3b8' }
-};
-const PAYMENT_STYLES: Record<string, { bg: string; color: string }> = {
-  CREATED:   { bg: 'rgba(251,146,60,0.1)', color: '#fb923c' },
-  PAID:      { bg: 'rgba(74,222,128,0.1)', color: '#4ade80' },
-  FAILED:    { bg: 'rgba(248,113,113,0.1)',color: '#f87171' },
-  REFUNDED:  { bg: 'rgba(148,163,184,0.1)',color: '#94a3b8' }
-};
+import {
+  CONSULTATION_PAYMENT_STYLES,
+  CONSULTATION_STATUS_FALLBACK_STYLE,
+  CONSULTATION_STATUS_STYLES
+} from '../constants/consultation-status.constants';
 
 @Component({
   selector: 'app-consultations-page',
@@ -287,8 +279,12 @@ export class ConsultationsPage implements OnInit {
   nextPage(): void { if (this.page() < this.totalPages()) { this.page.update(p => p + 1); this.load(); } }
   totalPages(): number { return Math.ceil(this.total() / this.pageSize); }
 
-  ss(s: string): { bg: string; color: string } { return STATUS_STYLES[s] ?? { bg: 'rgba(255,255,255,0.06)', color: '#94a3b8' }; }
-  ps(s: string): { bg: string; color: string } { return PAYMENT_STYLES[s] ?? { bg: 'rgba(255,255,255,0.06)', color: '#94a3b8' }; }
+  ss(s: string): { bg: string; color: string } {
+    return CONSULTATION_STATUS_STYLES[s] ?? CONSULTATION_STATUS_FALLBACK_STYLE;
+  }
+  ps(s: string): { bg: string; color: string } {
+    return CONSULTATION_PAYMENT_STYLES[s] ?? CONSULTATION_STATUS_FALLBACK_STYLE;
+  }
 
   openAssign(c: any): void {
     this.selectedConsult.set(c);
