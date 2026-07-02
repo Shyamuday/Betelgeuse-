@@ -19,7 +19,7 @@ import { SERVER_CONFIG, SCHEDULER_CONFIG } from './constants/config.constants.js
 import { SOCKET_EVENTS, SOCKET_ROOM_PREFIXES } from './constants/socket.constants.js';
 
 import { storeRouter } from './routes/store/index.js';
-import { hrRouter } from './hr-routes.js';
+import { hrRouter } from './routes/hr/index.js';
 
 // ── Route modules ──────────────────────────────────────────────────────────────
 import { router as authRouter } from './routes/auth.js';
