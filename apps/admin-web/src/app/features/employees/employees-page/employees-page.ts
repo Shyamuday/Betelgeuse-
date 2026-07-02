@@ -379,8 +379,8 @@ export class EmployeesPage implements OnInit {
   employees = signal<any[]>([]);
   loading = signal(true);
   q = '';
-  activeFilter = signal(FILTER_ALL);
-  activeStatus = signal(FILTER_ALL);
+  activeFilter = signal<string>(FILTER_ALL);
+  activeStatus = signal<string>(FILTER_ALL);
 
   drawerOpen = signal(false);
   selected = signal<any>(null);

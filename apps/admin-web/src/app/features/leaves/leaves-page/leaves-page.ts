@@ -245,8 +245,8 @@ export class LeavesPage implements OnInit {
   page = signal(1);
   pageSize = PAGE_SIZES.LEAVES;
 
-  statusFilter = signal(FILTER_ALL);
-  empTypeFilter = signal(FILTER_ALL);
+  statusFilter = signal<string>(FILTER_ALL);
+  empTypeFilter = signal<string>(FILTER_ALL);
   modal = signal<'add'|'reject'|null>(null);
   saving = signal(false);
   toast = signal('');

@@ -8,7 +8,8 @@ export const ROUTE_PATHS = {
   HR_USERS: 'hr-users',
   EMPLOYEES: 'employees',
   LEAVES: 'leaves',
-  STORES: 'stores'
+  STORES: 'stores',
+  CONSULTATIONS: 'consultations'
 } as const;
 
 export const DEFAULT_AUTHED_ROUTE = ROUTE_PATHS.DASHBOARD;
@@ -22,5 +23,6 @@ export const NAV_ITEMS = [
   { path: `/${ROUTE_PATHS.HR_USERS}`, label: '👥 HR Managers' },
   { path: `/${ROUTE_PATHS.EMPLOYEES}`, label: '👥 Employees' },
   { path: `/${ROUTE_PATHS.LEAVES}`, label: '📋 Leaves' },
-  { path: `/${ROUTE_PATHS.STORES}`, label: '🏪 Stores' }
+  { path: `/${ROUTE_PATHS.STORES}`, label: '🏪 Stores' },
+  { path: `/${ROUTE_PATHS.CONSULTATIONS}`, label: '🩺 Consultations' }
 ] as const;

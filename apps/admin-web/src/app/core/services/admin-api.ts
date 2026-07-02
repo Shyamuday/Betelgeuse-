@@ -26,7 +26,7 @@ export class AdminApi {
     return firstValueFrom(this.http.get(`${this.apiBase}${API_PATHS.ADMIN.REPORTS}`));
   }
 
-  getAuditLogs(page = 1, pageSize = PAGE_SIZES.AUDIT_LOGS_API_DEFAULT) {
+  getAuditLogs(page = 1, pageSize: number = PAGE_SIZES.AUDIT_LOGS_API_DEFAULT) {
     return firstValueFrom(
       this.http.get<{ logs: Array<any>; pagination: any }>(`${this.apiBase}${API_PATHS.ADMIN.AUDIT_LOGS}`, {
         params: { page: String(page), pageSize: String(pageSize) }
@@ -353,5 +353,26 @@ export class AdminApi {
 
   setAdminStoreStaffStatus(id: string, data: any) {
     return firstValueFrom(this.http.patch(`${this.apiBase}${API_PATHS.HR.STORE_STAFF}/${id}/status`, data));
+  }
+
+  // Admin Consultations
+  getAdminConsultations(params: { status?: string; assigned?: string; q?: string; page?: number; pageSize?: number }) {
+    return firstValueFrom(
+      this.http.get<{ consultations: any[]; total: number }>(`${this.apiBase}/admin/consultations`, {
+        params: {
+          status:   params.status   ?? '',
+          assigned: params.assigned ?? '',
+          q:        params.q        ?? '',
+          page:     String(params.page     ?? 1),
+          pageSize: String(params.pageSize ?? 20)
+        }
+      })
+    );
+  }
+
+  assignConsultationDoctor(consultationId: string, doctorId: string) {
+    return firstValueFrom(
+      this.http.put<{ consultation: any }>(`${this.apiBase}/admin/consultations/${consultationId}/assign`, { doctorId })
+    );
   }
 }

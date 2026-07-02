@@ -11,6 +11,7 @@
     "dev:hr": "npm start --prefix apps/hr-web",
     "dev:api": "npm run dev --prefix apps/api",
     "build": "npm run build --prefix apps/api && npm run build --prefix apps/web",
+    "build:all": "npm run build --prefix apps/api && npm run build --prefix apps/web && npm run build --prefix apps/doctor-web && npm run build --prefix apps/admin-web && npm run build --prefix apps/store && npm run build --prefix apps/hr-web",
     "build:web": "npm run build --prefix apps/web",
     "build:doctor": "npm run build --prefix apps/doctor-web",
     "build:admin": "npm run build --prefix apps/admin-web",

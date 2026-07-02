@@ -137,7 +137,7 @@ storeRouter.post(
 
     // Manager uses the existing platform user (ADMIN role) with store staff record
     const staff = await prisma.storeStaff.findFirst({
-      where: { role: 'MANAGER', isActive: true },
+      where: { role: 'MANAGER', isActive: true, email: body.email },
       include: { store: { select: { id: true, name: true } } }
     });
 

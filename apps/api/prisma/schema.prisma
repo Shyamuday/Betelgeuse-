@@ -155,6 +155,7 @@ model Doctor {
 
   joiningLetter    JoiningLetter?
   leaveRequests    LeaveRequest[]
+  slots            DoctorSlot[]
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 }
@@ -611,4 +612,23 @@ model StockMovement {
 
   @@index([storeId, createdAt])
   @@index([stockId])
+}
+
+// ─── Doctor Slot Scheduling ───────────────────────────────────────────────────
+
+model DoctorSlot {
+  id          String   @id @default(cuid())
+  doctorId    String
+  date        DateTime @db.Date        // e.g. 2026-07-10
+  startTime   String                   // "09:00"
+  endTime     String                   // "09:30"
+  isBooked    Boolean  @default(false)
+  isBlocked   Boolean  @default(false) // doctor blocked it (holiday, etc.)
+  doctor      Doctor   @relation(fields: [doctorId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([doctorId, date, startTime])
+  @@index([doctorId, date])
+  @@index([date, isBooked])
 }

@@ -9,6 +9,7 @@ import { OAuth2Client } from 'google-auth-library';
 import nodemailer from 'nodemailer';
 import jwt from 'jsonwebtoken';
 import { Server as SocketIoServer } from 'socket.io';
+import PDFDocument from 'pdfkit';
 import {
   BillingPlanType,
   ConsultationStatus,
@@ -30,6 +31,8 @@ const app = express();
 const httpServer = createServer(app);
 const port = Number(process.env.PORT || 4000);
 const webOrigin = process.env.WEB_ORIGIN || 'http://localhost:4200';
+const adminOrigin = process.env.ADMIN_ORIGIN || 'http://localhost:4201';
+const doctorOrigin = process.env.DOCTOR_ORIGIN || 'http://localhost:4202';
 const storeOrigin = process.env.STORE_ORIGIN || 'http://localhost:4300';
 const hrOrigin = process.env.HR_ORIGIN || 'http://localhost:4400';
 
@@ -172,7 +175,7 @@ async function ensureBillingPlans() {
   );
 }
 
-app.use(cors({ origin: [webOrigin, storeOrigin, hrOrigin], credentials: true }));
+app.use(cors({ origin: [webOrigin, adminOrigin, doctorOrigin, storeOrigin, hrOrigin], credentials: true }));
 app.use('/payments/razorpay-webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
@@ -426,6 +429,44 @@ async function markOverdueDosesAsMissed() {
       }))
     )
   );
+}
+
+// Runs daily — restores employees to ACTIVE when their approved leave has ended
+async function restoreEmployeesFromLeave() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const expiredLeaves = await prisma.leaveRequest.findMany({
+    where: { status: 'APPROVED', endDate: { lt: today } },
+    select: { id: true, employeeType: true, doctorId: true, storeStaffId: true }
+  });
+
+  if (!expiredLeaves.length) return;
+
+  let restored = 0;
+  for (const leave of expiredLeaves) {
+    try {
+      if (leave.employeeType === 'DOCTOR' && leave.doctorId) {
+        await prisma.doctor.update({
+          where: { id: leave.doctorId, employeeStatus: 'ON_LEAVE' },
+          data: { employeeStatus: 'ACTIVE' }
+        });
+        restored++;
+      } else if (leave.employeeType === 'STORE_STAFF' && leave.storeStaffId) {
+        await prisma.storeStaff.update({
+          where: { id: leave.storeStaffId, employeeStatus: 'ON_LEAVE' },
+          data: { employeeStatus: 'ACTIVE' }
+        });
+        restored++;
+      }
+    } catch {
+      // Employee status already changed manually — skip
+    }
+  }
+
+  if (restored > 0) {
+    console.info(`[scheduler] Restored ${restored} employee(s) to ACTIVE after leave ended`);
+  }
 }
 
 async function emitUpcomingDoseReminders() {
@@ -2211,84 +2252,129 @@ app.get(
       ? new Date(prescription.followUpDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
       : null;
 
-    const medicineRows = items.map((item, i) => `
-      <tr>
-        <td>${i + 1}</td>
-        <td><strong>${item.medicineName}</strong>${item.strength ? ` <small>(${item.strength})</small>` : ''}</td>
-        <td>${item.dose || '—'}</td>
-        <td>${item.frequency || '—'}</td>
-        <td>${item.duration || '—'}</td>
-        <td>${item.instructions || '—'}</td>
-      </tr>`).join('');
+    // Generate real PDF using pdfkit
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+    const filename = `prescription-${prescription.id.slice(0, 8)}.pdf`;
 
-    const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<title>Prescription — Vitalis Care</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; font-size: 13px; color: #111; padding: 32px; }
-  .clinic-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-  .clinic-name { font-size: 18px; font-weight: bold; color: #1d4ed8; }
-  .clinic-sub { font-size: 11px; color: #6b7280; margin-top: 2px; }
-  .rx-symbol { font-size: 40px; color: #1d4ed8; font-style: italic; line-height: 1; }
-  .divider { border: none; border-top: 2px solid #1d4ed8; margin: 8px 0 16px; }
-  .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 32px; margin-bottom: 16px; }
-  .meta-item label { font-size: 10px; text-transform: uppercase; color: #6b7280; letter-spacing: .05em; }
-  .meta-item p { font-size: 13px; font-weight: 600; margin-top: 2px; }
-  .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: #6b7280; margin-bottom: 6px; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  th { background: #1d4ed8; color: #fff; font-size: 11px; text-align: left; padding: 6px 8px; }
-  td { border-bottom: 1px solid #e5e7eb; padding: 6px 8px; font-size: 12px; vertical-align: top; }
-  tr:nth-child(even) td { background: #f8faff; }
-  .notes-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px 12px; margin-bottom: 16px; font-size: 12px; }
-  .footer { margin-top: 32px; display: flex; justify-content: flex-end; }
-  .sig-box { text-align: center; border-top: 1px solid #374151; padding-top: 6px; min-width: 180px; font-size: 11px; color: #6b7280; }
-  .followup { background: #dbeafe; border-radius: 6px; padding: 8px 12px; font-size: 12px; margin-bottom: 16px; }
-  @media print { body { padding: 16px; } }
-</style>
-</head>
-<body>
-  <div class="clinic-header">
-    <div>
-      <div class="clinic-name">Vitalis Care and Research Centre</div>
-      <div class="clinic-sub">Doctor-led digital consultations &nbsp;|&nbsp; vitaliscare.in</div>
-    </div>
-    <div class="rx-symbol">&#x211E;</div>
-  </div>
-  <hr class="divider" />
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    doc.pipe(res);
 
-  <div class="meta-grid">
-    <div class="meta-item"><label>Patient</label><p>${rxPatient?.name || 'Patient'}</p></div>
-    <div class="meta-item"><label>Date</label><p>${date}</p></div>
-    <div class="meta-item"><label>Diagnosis</label><p>${prescription.diagnosis || '—'}</p></div>
-    <div class="meta-item"><label>Doctor</label><p>${prescription.uploadedBy?.name || '—'}</p></div>
-    ${prescription.methodOption ? `<div class="meta-item"><label>Method</label><p>${prescription.methodOption.label}</p></div>` : ''}
-    ${prescription.diagnosedDiseaseOption ? `<div class="meta-item"><label>Condition</label><p>${prescription.diagnosedDiseaseOption.label}</p></div>` : ''}
-  </div>
+    const PRIMARY = '#1d4ed8';
+    const GRAY = '#6b7280';
+    const W = doc.page.width - 100; // usable width
 
-  <p class="section-title">Medicines</p>
-  <table>
-    <thead><tr><th>#</th><th>Medicine</th><th>Dose</th><th>Frequency</th><th>Duration</th><th>Instructions</th></tr></thead>
-    <tbody>${medicineRows || '<tr><td colspan="6" style="color:#9ca3af">No items</td></tr>'}</tbody>
-  </table>
+    // ── Header ────────────────────────────────────────────────
+    doc.fontSize(18).fillColor(PRIMARY).font('Helvetica-Bold')
+       .text('Vitalis Care and Research Centre', 50, 50);
+    doc.fontSize(10).fillColor(GRAY).font('Helvetica')
+       .text('Doctor-led digital consultations  |  vitaliscare.in', 50, 72);
+    // Rx symbol (right-aligned)
+    doc.fontSize(36).fillColor(PRIMARY).font('Helvetica-Oblique')
+       .text('Rx', doc.page.width - 90, 45, { width: 60, align: 'right' });
+    // Divider
+    doc.moveTo(50, 98).lineTo(doc.page.width - 50, 98).strokeColor(PRIMARY).lineWidth(1.5).stroke();
 
-  ${prescription.notes ? `<p class="section-title">Clinical Notes</p><div class="notes-box">${prescription.notes}</div>` : ''}
-  ${prescription.advice ? `<p class="section-title">Advice</p><div class="notes-box">${prescription.advice}</div>` : ''}
-  ${followUp ? `<div class="followup">&#x1F4C5; <strong>Follow-up due:</strong> ${followUp}</div>` : ''}
+    // ── Patient / meta grid ───────────────────────────────────
+    let y = 110;
+    const metaCol = (label: string, value: string, x: number, cy: number) => {
+      doc.fontSize(8).fillColor(GRAY).font('Helvetica').text(label.toUpperCase(), x, cy);
+      doc.fontSize(11).fillColor('#111').font('Helvetica-Bold').text(value || '—', x, cy + 11, { width: W / 2 - 10 });
+    };
+    metaCol('Patient', rxPatient?.name || 'Patient', 50, y);
+    metaCol('Date', date, 50 + W / 2, y);
+    y += 35;
+    metaCol('Diagnosis', prescription.diagnosis || '—', 50, y);
+    metaCol('Doctor', prescription.uploadedBy?.name || '—', 50 + W / 2, y);
+    y += 35;
+    if (prescription.methodOption) {
+      metaCol('Method', prescription.methodOption.label, 50, y);
+      y += 28;
+    }
+    if (prescription.diagnosedDiseaseOption) {
+      metaCol('Condition', prescription.diagnosedDiseaseOption.label, 50, y);
+      y += 28;
+    }
+    y += 5;
+    doc.moveTo(50, y).lineTo(doc.page.width - 50, y).strokeColor('#e5e7eb').lineWidth(0.5).stroke();
+    y += 10;
 
-  <div class="footer">
-    <div class="sig-box">
-      ${prescription.uploadedBy?.name || 'Doctor'}<br />Vitalis Care
-    </div>
-  </div>
-</body>
-</html>`;
+    // ── Medicines table ───────────────────────────────────────
+    doc.fontSize(9).fillColor(GRAY).font('Helvetica').text('MEDICINES', 50, y);
+    y += 14;
+    const colWidths = [24, 140, 60, 80, 70, W - 374];
+    const colX = colWidths.reduce<number[]>((acc, w, i) => {
+      acc.push(i === 0 ? 50 : acc[i - 1] + colWidths[i - 1]);
+      return acc;
+    }, []);
+    const headers = ['#', 'Medicine', 'Dose', 'Frequency', 'Duration', 'Instructions'];
 
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Content-Disposition', `inline; filename="prescription-${prescription.id.slice(0, 8)}.html"`);
-    res.send(html);
+    // Header row
+    doc.rect(50, y, W, 18).fillColor(PRIMARY).fill();
+    headers.forEach((h, i) => {
+      doc.fontSize(9).fillColor('white').font('Helvetica-Bold')
+         .text(h, colX[i] + 3, y + 4, { width: colWidths[i] - 6, ellipsis: true });
+    });
+    y += 18;
+
+    if (items.length === 0) {
+      doc.rect(50, y, W, 20).fillColor('#f8faff').fill();
+      doc.fontSize(10).fillColor(GRAY).font('Helvetica').text('No items', 50, y + 5, { width: W, align: 'center' });
+      y += 20;
+    } else {
+      items.forEach((item, i) => {
+        const bg = i % 2 === 0 ? 'white' : '#f8faff';
+        const rowH = 20;
+        doc.rect(50, y, W, rowH).fillColor(bg).fill();
+        const rowData = [
+          String(i + 1),
+          item.medicineName + (item.strength ? ` (${item.strength})` : ''),
+          item.dose || '—',
+          item.frequency || '—',
+          item.duration || '—',
+          item.instructions || '—'
+        ];
+        rowData.forEach((val, ci) => {
+          doc.fontSize(9).fillColor('#111').font('Helvetica')
+             .text(val, colX[ci] + 3, y + 5, { width: colWidths[ci] - 6, ellipsis: true });
+        });
+        y += rowH;
+      });
+    }
+    // table bottom border
+    doc.moveTo(50, y).lineTo(doc.page.width - 50, y).strokeColor('#e5e7eb').lineWidth(0.5).stroke();
+    y += 14;
+
+    // ── Notes / Advice ────────────────────────────────────────
+    const infoBox = (title: string, text: string) => {
+      if (!text) return;
+      doc.fontSize(9).fillColor(GRAY).font('Helvetica').text(title, 50, y);
+      y += 12;
+      doc.rect(50, y, W, 0).fillColor('#f9fafb').fill();
+      const textH = doc.heightOfString(text, { width: W - 16, fontSize: 10 });
+      doc.rect(50, y, W, textH + 14).strokeColor('#e5e7eb').lineWidth(0.5).stroke();
+      doc.fontSize(10).fillColor('#374151').font('Helvetica').text(text, 58, y + 7, { width: W - 16 });
+      y += textH + 20;
+    };
+    if (prescription.notes)  infoBox('CLINICAL NOTES', prescription.notes);
+    if (prescription.advice) infoBox('ADVICE', prescription.advice);
+
+    if (followUp) {
+      doc.rect(50, y, W, 22).fillColor('#dbeafe').fill();
+      doc.fontSize(10).fillColor('#1e40af').font('Helvetica-Bold')
+         .text(`Follow-up due: ${followUp}`, 58, y + 6);
+      y += 30;
+    }
+
+    // ── Signature ─────────────────────────────────────────────
+    const sigY = doc.page.height - 80;
+    doc.moveTo(doc.page.width - 200, sigY).lineTo(doc.page.width - 50, sigY)
+       .strokeColor('#374151').lineWidth(0.5).stroke();
+    doc.fontSize(10).fillColor(GRAY).font('Helvetica')
+       .text(prescription.uploadedBy?.name || 'Doctor', doc.page.width - 200, sigY + 5, { width: 150, align: 'center' });
+    doc.fontSize(9).text('Vitalis Care', doc.page.width - 200, sigY + 17, { width: 150, align: 'center' });
+
+    doc.end();
   })
 );
 
@@ -2857,6 +2943,185 @@ app.post(
   })
 );
 
+// ─── Doctor Slot Scheduling ──────────────────────────────────────────────────
+
+// GET /doctor/slots?date=YYYY-MM-DD — doctor views their own slots for a date
+app.get(
+  '/doctor/slots',
+  authRequired,
+  allowRoles(Role.DOCTOR),
+  asyncRoute(async (req, res) => {
+    const dateStr = queryText(req, 'date');
+    const doctor = await prisma.doctor.findUnique({ where: { userId: req.user!.id }, select: { id: true } });
+    if (!doctor) return res.status(404).json({ message: 'Doctor profile not found' });
+
+    const where = dateStr
+      ? { doctorId: doctor.id, date: new Date(dateStr) }
+      : { doctorId: doctor.id };
+
+    const slots = await prisma.doctorSlot.findMany({ where, orderBy: [{ date: 'asc' }, { startTime: 'asc' }] });
+    res.json({ slots });
+  })
+);
+
+// POST /doctor/slots — doctor creates/opens a slot
+app.post(
+  '/doctor/slots',
+  authRequired,
+  allowRoles(Role.DOCTOR),
+  asyncRoute(async (req, res) => {
+    const body = z.object({
+      date:      z.string().min(1),
+      startTime: z.string().min(1),
+      endTime:   z.string().min(1)
+    }).parse(req.body);
+
+    const doctor = await prisma.doctor.findUnique({ where: { userId: req.user!.id }, select: { id: true } });
+    if (!doctor) return res.status(404).json({ message: 'Doctor profile not found' });
+
+    const slot = await prisma.doctorSlot.upsert({
+      where: { doctorId_date_startTime: { doctorId: doctor.id, date: new Date(body.date), startTime: body.startTime } },
+      create: { doctorId: doctor.id, date: new Date(body.date), startTime: body.startTime, endTime: body.endTime, isBlocked: false },
+      update: { endTime: body.endTime, isBlocked: false }
+    });
+    res.status(201).json({ slot });
+  })
+);
+
+// PATCH /doctor/slots/:id — toggle blocked
+app.patch(
+  '/doctor/slots/:id',
+  authRequired,
+  allowRoles(Role.DOCTOR),
+  asyncRoute(async (req, res) => {
+    const doctor = await prisma.doctor.findUnique({ where: { userId: req.user!.id }, select: { id: true } });
+    if (!doctor) return res.status(404).json({ message: 'Doctor profile not found' });
+
+    const slot = await prisma.doctorSlot.update({
+      where: { id: routeParam(req, 'id'), doctorId: doctor.id },
+      data: { isBlocked: req.body.isBlocked ?? false }
+    });
+    res.json({ slot });
+  })
+);
+
+// DELETE /doctor/slots/:id
+app.delete(
+  '/doctor/slots/:id',
+  authRequired,
+  allowRoles(Role.DOCTOR),
+  asyncRoute(async (req, res) => {
+    const doctor = await prisma.doctor.findUnique({ where: { userId: req.user!.id }, select: { id: true } });
+    if (!doctor) return res.status(404).json({ message: 'Doctor profile not found' });
+
+    await prisma.doctorSlot.delete({ where: { id: routeParam(req, 'id'), doctorId: doctor.id } });
+    res.json({ ok: true });
+  })
+);
+
+// GET /doctors/:id/slots?date=YYYY-MM-DD — patient views available slots for a doctor
+app.get(
+  '/doctors/:id/slots',
+  authRequired,
+  asyncRoute(async (req, res) => {
+    const dateStr = queryText(req, 'date');
+    const doctor = await prisma.doctor.findUnique({ where: { id: routeParam(req, 'id') }, select: { id: true } });
+    if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
+
+    const where = {
+      doctorId: doctor.id,
+      isBooked: false,
+      isBlocked: false,
+      ...(dateStr ? { date: new Date(dateStr) } : {})
+    };
+
+    const slots = await prisma.doctorSlot.findMany({
+      where,
+      select: { id: true, date: true, startTime: true, endTime: true },
+      orderBy: [{ date: 'asc' }, { startTime: 'asc' }]
+    });
+    res.json({ slots });
+  })
+);
+
+// ─── Admin Consultations ─────────────────────────────────────────────────────
+
+// GET /admin/consultations?status=PENDING&page=1&pageSize=20&q=
+app.get(
+  '/admin/consultations',
+  authRequired,
+  allowRoles(Role.ADMIN),
+  asyncRoute(async (req, res) => {
+    const page = queryPositiveInt(req, 'page', 1);
+    const pageSize = queryPositiveInt(req, 'pageSize', 20);
+    const status = queryText(req, 'status');
+    const assigned = queryText(req, 'assigned'); // 'yes' | 'no' | ''
+    const q = queryText(req, 'q').trim().toLowerCase();
+
+    const where: Record<string, unknown> = {};
+    if (status) where['status'] = status;
+    if (assigned === 'no') where['assignedDoctorId'] = null;
+    if (assigned === 'yes') where['assignedDoctorId'] = { not: null };
+
+    const [consultations, total] = await Promise.all([
+      prisma.consultation.findMany({
+        where,
+        include: {
+          patient:       { select: { id: true, name: true, mobile: true, email: true } },
+          disease:       { select: { id: true, name: true } },
+          assignedDoctor:{ select: { id: true, name: true } },
+          payment:       { select: { status: true, amountInPaise: true } }
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize
+      }),
+      prisma.consultation.count({ where })
+    ]);
+
+    const filtered = q
+      ? consultations.filter(c =>
+          c.patient?.name?.toLowerCase().includes(q) ||
+          c.disease?.name?.toLowerCase().includes(q)
+        )
+      : consultations;
+
+    res.json({ consultations: filtered, total, page, pageSize });
+  })
+);
+
+// PUT /admin/consultations/:id/assign
+app.put(
+  '/admin/consultations/:id/assign',
+  authRequired,
+  allowRoles(Role.ADMIN),
+  asyncRoute(async (req, res) => {
+    const { id } = req.params as { id: string };
+    const { doctorId } = req.body as { doctorId: string };
+    if (!doctorId) return res.status(400).json({ message: 'doctorId required' });
+
+    const doctor = await prisma.doctor.findUniqueOrThrow({
+      where: { id: doctorId },
+      include: { user: { select: { id: true, name: true } } }
+    });
+
+    const consultation = await prisma.consultation.update({
+      where: { id },
+      data: { assignedDoctorId: doctor.userId, status: ConsultationStatus.ACTIVE },
+      include: {
+        patient: { select: { id: true, name: true, mobile: true, email: true } },
+        disease: { select: { name: true } },
+        assignedDoctor: { select: { name: true } }
+      }
+    });
+
+    io.to(`user:${consultation.patientId}`).emit('consultation:updated', { consultationId: id, status: 'ACTIVE' });
+    io.to(`user:${doctor.userId}`).emit('consultation:assigned', { consultationId: id });
+
+    res.json({ consultation });
+  })
+);
+
 app.get(
   '/admin/payments',
   authRequired,
@@ -3061,4 +3326,11 @@ httpServer.listen(port, () => {
     });
   }, doseOverdueSweepIntervalMs);
   timer.unref();
+
+  // Run leave restore once at startup, then every 24 hours
+  void restoreEmployeesFromLeave().catch((e) => console.error('[scheduler] Leave restore failed', e));
+  const leaveTimer = setInterval(() => {
+    void restoreEmployeesFromLeave().catch((e) => console.error('[scheduler] Leave restore failed', e));
+  }, 24 * 60 * 60 * 1000);
+  leaveTimer.unref();
 });

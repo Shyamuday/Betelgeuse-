@@ -12,6 +12,7 @@ import { HrUsersComponent } from './features/hr/hr-users/hr-users';
 import { EmployeesPage } from './features/employees/employees-page/employees-page';
 import { LeavesPage } from './features/leaves/leaves-page/leaves-page';
 import { StoresPage } from './features/stores/stores-page/stores-page';
+import { ConsultationsPage } from './features/consultations/consultations-page/consultations-page';
 
 export const routes: Routes = [
   { path: ROUTE_PATHS.LOGIN, component: AdminLogin },
@@ -29,7 +30,8 @@ export const routes: Routes = [
       { path: ROUTE_PATHS.HR_USERS, component: HrUsersComponent },
       { path: ROUTE_PATHS.EMPLOYEES, component: EmployeesPage },
       { path: ROUTE_PATHS.LEAVES, component: LeavesPage },
-      { path: ROUTE_PATHS.STORES, component: StoresPage }
+      { path: ROUTE_PATHS.STORES, component: StoresPage },
+      { path: ROUTE_PATHS.CONSULTATIONS, component: ConsultationsPage }
     ]
   },
   { path: '**', redirectTo: '' }
