@@ -197,6 +197,29 @@ async function main() {
         skipDuplicates: true
       });
     }
+
+    const followUpDue = new Date();
+    followUpDue.setDate(followUpDue.getDate() - 1);
+    followUpDue.setHours(12, 0, 0, 0);
+
+    await prisma.prescription.updateMany({
+      where: { consultationId: consultation.id, status: PrescriptionStatus.PUBLISHED },
+      data: { followUpDate: followUpDue }
+    });
+
+    await prisma.consultation.upsert({
+      where: { id: 'seed-consultation-priya-assigned' },
+      update: {},
+      create: {
+        id: 'seed-consultation-priya-assigned',
+        patientId: patientTwo.id,
+        assignedDoctorId: doctorUser.id,
+        diseaseId: hairFall.id,
+        clinicStoreId: ranchiStore.id,
+        status: ConsultationStatus.ASSIGNED,
+        intakeAnswers: []
+      }
+    });
   }
 
   await prisma.disease.upsert({

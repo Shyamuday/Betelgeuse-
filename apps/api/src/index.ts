@@ -33,6 +33,7 @@ import { createPaymentsRouter } from './routes/payments.js';
 import { financeRouter } from './routes/finance.js';
 import { patientsRouter } from './routes/patients.js';
 import { scanRouter } from './routes/scan.js';
+import { doctorWorklistRouter } from './routes/doctor-worklist.js';
 
 // ── Schedulers ─────────────────────────────────────────────────────────────────
 import {
@@ -143,6 +144,7 @@ app.use(createPrescriptionsRouter(io));
 app.use(createPaymentsRouter(io));
 app.use(financeRouter);
 app.use(patientsRouter);
+app.use(doctorWorklistRouter);
 app.use(scanRouter);
 app.use('/store', storeRouter);
 app.use('/hr', hrRouter);

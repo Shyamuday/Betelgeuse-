@@ -1,6 +1,7 @@
 export const API_PATHS = {
   CONSULTATIONS: '/consultations',
   DOCTOR: {
+    WORKLIST: '/doctor/worklist',
     PROFILE: '/doctor/profile',
     PAYMENTS_SUMMARY: '/doctor/payments/summary',
     MY_PAYSLIP: '/doctor/my-payslip',

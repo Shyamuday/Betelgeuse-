@@ -6,6 +6,8 @@ This document defines what should be completed next across consumer, admin, and 
 
 ### 1) Doctor Worklist + Follow-up Visibility
 
+**Status: Done** — dedicated Worklist page (`/worklist`), `GET /doctor/worklist` API, dashboard summary, follow-up urgency badges.
+
 Build a doctor-facing worklist with at least these sections:
 
 - Assigned

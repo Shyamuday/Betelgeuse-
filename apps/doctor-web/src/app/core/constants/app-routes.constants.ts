@@ -1,5 +1,6 @@
 export const ROUTE_PATHS = {
   LOGIN: 'login',
+  WORKLIST: 'worklist',
   DASHBOARD: 'dashboard',
   APPOINTMENTS: 'appointments',
   PATIENTS: 'patients',
@@ -9,9 +10,10 @@ export const ROUTE_PATHS = {
   EARNINGS: 'earnings'
 } as const;
 
-export const DEFAULT_AUTHED_ROUTE = ROUTE_PATHS.DASHBOARD;
+export const DEFAULT_AUTHED_ROUTE = ROUTE_PATHS.WORKLIST;
 
 export const NAV_ITEMS = [
+  { path: `/${ROUTE_PATHS.WORKLIST}`, label: 'Worklist' },
   { path: `/${ROUTE_PATHS.DASHBOARD}`, label: 'Dashboard' },
   { path: `/${ROUTE_PATHS.APPOINTMENTS}`, label: 'Appointments' },
   { path: `/${ROUTE_PATHS.PATIENTS}`, label: 'Patients' },

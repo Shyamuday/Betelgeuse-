@@ -1,4 +1,10 @@
 <section class="panel">
+  <p class="muted">
+    For assigned cases and follow-ups, use the <a [routerLink]="worklistPath">Worklist</a>.
+  </p>
+</section>
+
+<section class="panel">
   <h2>Find Patient</h2>
   <p class="muted">Search your clinic branch first (e.g. Ranchi). One mobile can have multiple family members — pick the right profile.</p>
   <div class="toolbar">
@@ -74,85 +80,6 @@
   <h2>Patient reference card</h2>
   <p class="muted">Print and give this card to the patient. They should bring it to every visit.</p>
   <app-patient-id-card [card]="patientCard" />
-</section>
-}
-
-<section class="panel">
-  <h2>Doctor Worklist</h2>
-  <div class="toolbar">
-    <input placeholder="Search patient, disease, status, id" name="worklistSearch" [(ngModel)]="worklistSearch" />
-    <select name="worklistView" [(ngModel)]="worklistView">
-      <option value="ALL">All sections</option>
-      <option value="ASSIGNED">Assigned only</option>
-      <option value="IN_PROGRESS">In-progress only</option>
-      <option value="FOLLOW_UP_DUE">Follow-up due only</option>
-    </select>
-    <button type="button" (click)="loadWorklist()" [disabled]="worklistLoading">
-      {{ worklistLoading ? 'Refreshing...' : 'Refresh Worklist' }}
-    </button>
-  </div>
-  <small class="muted">
-    Assigned: {{ assignedCases().length }} | In-progress: {{ inProgressCases().length }} | Follow-up due:
-    {{ followUpDueCases().length }}
-  </small>
-  @if (worklistError) {
-    <p class="error">{{ worklistError }}</p>
-  }
-</section>
-
-@if (showSection('ASSIGNED')) {
-<section class="panel">
-  <h3>Assigned</h3>
-  @for (item of assignedCases(); track item.id) {
-    <article class="card">
-      <strong>{{ item.patient?.name || 'Patient' }} - {{ item.disease?.name || 'Consultation' }}</strong>
-      <p>Status: {{ item.status }} | Created: {{ item.createdAt | date: 'medium' }}</p>
-      <small>Patient: {{ item.patient?.patientCode || item.patient?.id }}</small>
-      <div class="actions"><button type="button" (click)="openInAppointments(item.id)">Open in Appointments</button></div>
-    </article>
-  } @empty {
-    <p>No assigned cases.</p>
-  }
-</section>
-}
-
-@if (showSection('IN_PROGRESS')) {
-<section class="panel">
-  <h3>In Progress</h3>
-  @for (item of inProgressCases(); track item.id) {
-    <article class="card">
-      <strong>{{ item.patient?.name || 'Patient' }} - {{ item.disease?.name || 'Consultation' }}</strong>
-      <p>Status: {{ item.status }} | Created: {{ item.createdAt | date: 'medium' }}</p>
-      <small>Patient: {{ item.patient?.patientCode || item.patient?.id }}</small>
-      <div class="actions"><button type="button" (click)="openInAppointments(item.id)">Open in Appointments</button></div>
-    </article>
-  } @empty {
-    <p>No in-progress cases.</p>
-  }
-</section>
-}
-
-@if (showSection('FOLLOW_UP_DUE')) {
-<section class="panel">
-  <h3>Follow-up Due</h3>
-  @for (item of followUpDueCases(); track item.id) {
-    <article class="card follow-up-card" [class.urgent]="followUpUrgency(item) !== 'NORMAL'">
-      <strong>{{ item.patient?.name || 'Patient' }} - {{ item.disease?.name || 'Consultation' }}</strong>
-      <p>Status: {{ item.status }} | Created: {{ item.createdAt | date: 'medium' }}</p>
-      @if (followUpUrgency(item) === 'OVERDUE') {
-        <span class="badge overdue">Overdue</span>
-      } @else if (followUpUrgency(item) === 'DUE_TODAY') {
-        <span class="badge due-today">Due today</span>
-      }
-      <small>
-        Follow-up date:
-        {{ (publishedFollowUpDate(item) || item.createdAt) | date: 'mediumDate' }}
-      </small>
-      <div class="actions"><button type="button" (click)="openInAppointments(item.id)">Open in Appointments</button></div>
-    </article>
-  } @empty {
-    <p>No follow-up due cases.</p>
-  }
 </section>
 }
 

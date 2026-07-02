@@ -1,3 +1,39 @@
+.worklist-summary {
+  border-color: #c7d2fe;
+}
+
+.muted {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0.25rem 0 0;
+}
+
+.primary-link {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  background: #4f46e5;
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.stat-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+
+  &:hover {
+    border-color: #6366f1;
+    background: #f8fafc;
+  }
+
+  &.urgent p {
+    color: #b45309;
+  }
+}
+
 .panel {
   background: #fff;
   border: 1px solid #e5e7eb;

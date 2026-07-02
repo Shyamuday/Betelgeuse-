@@ -1,20 +1,27 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { API_PATHS } from '../../../core/constants/api-paths.constants';
+import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
+import { WorklistApiService } from '../../worklist/worklist-api.service';
 
 @Component({
   selector: 'app-dashboard-home',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './dashboard-home.html',
   styleUrl: './dashboard-home.scss',
 })
 export class DashboardHome {
+  readonly worklistPath = `/${ROUTE_PATHS.WORKLIST}`;
   private readonly apiBase = environment.apiUrl;
   loading = false;
+  worklistLoading = false;
   error = '';
+  worklistError = '';
+  worklistCounts = { assigned: 0, inProgress: 0, followUpDue: 0 };
   summary: {
     doctorSharePercent: number;
     totals: {
@@ -25,8 +32,25 @@ export class DashboardHome {
     payments: Array<any>;
   } | null = null;
 
-  constructor(private readonly http: HttpClient) {
+  constructor(
+    private readonly http: HttpClient,
+    private readonly worklistApi: WorklistApiService
+  ) {
     void this.loadSummary();
+    void this.loadWorklistCounts();
+  }
+
+  async loadWorklistCounts() {
+    this.worklistError = '';
+    this.worklistLoading = true;
+    try {
+      const response = await this.worklistApi.loadWorklist();
+      this.worklistCounts = response.counts;
+    } catch {
+      this.worklistError = 'Could not load worklist summary.';
+    } finally {
+      this.worklistLoading = false;
+    }
   }
 
   async loadSummary() {

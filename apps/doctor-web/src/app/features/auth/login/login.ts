@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
+import { DEFAULT_AUTHED_ROUTE, ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
 import { Auth } from '../../../core/services/auth';
 
 @Component({
@@ -31,7 +31,7 @@ export class Login {
 
   private navigateAfterLogin(): void {
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-    void this.router.navigateByUrl(returnUrl && returnUrl.startsWith('/') ? returnUrl : `/${ROUTE_PATHS.DASHBOARD}`);
+    void this.router.navigateByUrl(returnUrl && returnUrl.startsWith('/') ? returnUrl : `/${DEFAULT_AUTHED_ROUTE}`);
   }
 
   async submit() {

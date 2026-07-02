@@ -3,6 +3,7 @@ import { DEFAULT_AUTHED_ROUTE, ROUTE_PATHS } from './core/constants/app-routes.c
 import { doctorAuthGuard } from './core/guards/doctor-auth-guard';
 import { Login } from './features/auth/login/login';
 import { AppointmentsPage } from './features/appointments/appointments-page/appointments-page';
+import { WorklistPage } from './features/worklist/worklist-page/worklist-page';
 import { DashboardHome } from './features/dashboard/dashboard-home/dashboard-home';
 import { PatientsPage } from './features/patients/patients-page/patients-page';
 import { ProfilePage } from './features/profile/profile-page/profile-page';
@@ -20,6 +21,7 @@ export const routes: Routes = [
     canActivate: [doctorAuthGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: DEFAULT_AUTHED_ROUTE },
+      { path: ROUTE_PATHS.WORKLIST, component: WorklistPage },
       { path: ROUTE_PATHS.DASHBOARD, component: DashboardHome },
       { path: ROUTE_PATHS.APPOINTMENTS, component: AppointmentsPage },
       { path: ROUTE_PATHS.PATIENTS, component: PatientsPage },
