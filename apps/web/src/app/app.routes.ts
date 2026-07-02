@@ -1,16 +1,14 @@
 import { Routes } from '@angular/router';
 import { AboutComponent } from './about.component';
 import { DashboardComponent } from './dashboard.component';
-import {
-  ChronicCareComponent,
-  ContactComponent,
-  DiseaseDetailComponent,
-  FaqComponent,
-  PrivacyTermsComponent,
-  SafetyComponent,
-  TreatmentsComponent,
-  WhySuccessfulComponent
-} from './public-pages.component';
+import { ChronicCareComponent } from './chronic-care.component';
+import { ContactComponent } from './contact.component';
+import { DiseaseDetailComponent } from './disease-detail.component';
+import { FaqComponent } from './faq.component';
+import { PrivacyTermsComponent } from './privacy-terms.component';
+import { SafetyComponent } from './safety.component';
+import { TreatmentsComponent } from './treatments.component';
+import { WhySuccessfulComponent } from './why-successful.component';
 import { roleGuard } from './role.guard';
 import { HomeComponent } from './home.component';
 import { AuthResetCallbackComponent } from './auth/auth-reset-callback.component';
