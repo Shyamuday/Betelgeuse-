@@ -59,6 +59,41 @@ async function main() {
     data: { clinicStoreId: ranchiStore.id }
   });
 
+  const managerPinHash = await bcrypt.hash('Password@123', 10);
+  await prisma.storeStaff.upsert({
+    where: { staffCode: 'RNC-MGR' },
+    update: {
+      email: 'manager@ranchi.vitalis.local',
+      pinHash: managerPinHash,
+      role: 'MANAGER',
+      isActive: true
+    },
+    create: {
+      name: 'Ranchi Store Manager',
+      staffCode: 'RNC-MGR',
+      email: 'manager@ranchi.vitalis.local',
+      pinHash: managerPinHash,
+      role: 'MANAGER',
+      storeId: ranchiStore.id,
+      designation: 'Store Manager',
+      department: 'Operations',
+      joiningDate: new Date()
+    }
+  });
+
+  await prisma.storeStaff.upsert({
+    where: { staffCode: 'RNC-STF1' },
+    update: { pinHash: managerPinHash, isActive: true },
+    create: {
+      name: 'Counter Staff Demo',
+      staffCode: 'RNC-STF1',
+      pinHash: managerPinHash,
+      role: 'STAFF',
+      storeId: ranchiStore.id,
+      designation: 'Dispensary Staff'
+    }
+  });
+
   const sharedMobile = '9876543210';
   const patientOne = await prisma.user.upsert({
     where: { email: 'patient1@vitalisclinic.local' },
@@ -259,6 +294,8 @@ async function main() {
   console.log('Seeded demo admin, doctor, disease catalog, and demo patients.');
   console.log(`Admin login: ${admin.email} / Password@123`);
   console.log(`Demo patients: ${patientOne.patientCode} (Rahul), ${patientTwo.patientCode} (Priya) — shared mobile ${sharedMobile}`);
+  console.log('Store manager login: manager@ranchi.vitalis.local / Password@123');
+  console.log('Store staff PIN: RNC-STF1 / Password@123');
   console.log('Scan QR: http://localhost:4000/go/p/RNC-000001');
 }
 

@@ -1,0 +1,59 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --navy: #0a1628;
+  --navy-light: #0f2040;
+  --navy-card: #132238;
+  --teal: #0891b2;
+  --teal-light: #06b6d4;
+  --teal-dark: #0e7490;
+  --white: #ffffff;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --red: #ef4444;
+  --red-light: #fef2f2;
+  --yellow: #f59e0b;
+  --yellow-light: #fffbeb;
+  --green: #10b981;
+  --green-light: #ecfdf5;
+  --orange: #f97316;
+  --orange-light: #fff7ed;
+  --gradient: linear-gradient(135deg, #0a1628 0%, #0f2040 50%, #0e3a5c 100%);
+  --card-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  --bottom-nav-height: 68px;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: var(--navy);
+  color: var(--white);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+app-root {
+  display: block;
+  height: 100%;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+

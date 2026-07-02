@@ -51,7 +51,14 @@ const app = express();
 const httpServer = createServer(app);
 const port = Number(process.env.PORT || SERVER_CONFIG.DEFAULT_PORT);
 
-const { WEB: webOrigin, ADMIN: adminOrigin, DOCTOR: doctorOrigin, STORE: storeOrigin, HR: hrOrigin } = SERVER_CONFIG.ORIGINS;
+const {
+  WEB: webOrigin,
+  ADMIN: adminOrigin,
+  DOCTOR: doctorOrigin,
+  STORE: storeOrigin,
+  STORE_MANAGER: storeManagerOrigin,
+  HR: hrOrigin
+} = SERVER_CONFIG.ORIGINS;
 
 // ── Socket.IO ──────────────────────────────────────────────────────────────────
 
@@ -87,7 +94,10 @@ io.on('connection', (socket) => {
 
 // ── Middleware ─────────────────────────────────────────────────────────────────
 
-app.use(cors({ origin: [webOrigin, adminOrigin, doctorOrigin, storeOrigin, hrOrigin], credentials: true }));
+app.use(cors({
+  origin: [webOrigin, adminOrigin, doctorOrigin, storeOrigin, storeManagerOrigin, hrOrigin],
+  credentials: true
+}));
 app.use('/payments/razorpay-webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 

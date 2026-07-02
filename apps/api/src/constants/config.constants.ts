@@ -5,6 +5,7 @@ export const SERVER_CONFIG = {
     ADMIN: process.env.ADMIN_ORIGIN || 'http://localhost:4201',
     DOCTOR: process.env.DOCTOR_ORIGIN || 'http://localhost:4202',
     STORE: process.env.STORE_ORIGIN || 'http://localhost:4300',
+    STORE_MANAGER: process.env.STORE_MANAGER_ORIGIN || 'http://localhost:4301',
     HR: process.env.HR_ORIGIN || 'http://localhost:4400'
   },
   API_PUBLIC_URL: process.env.API_PUBLIC_URL || process.env.API_URL || 'http://localhost:4000',

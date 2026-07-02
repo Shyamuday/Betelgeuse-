@@ -1,0 +1,39 @@
+<div class="my-pay">
+  <div class="hdr">
+    <div>
+      <h2>My Pay</h2>
+      <p>Your monthly salary and leave deductions</p>
+    </div>
+    <input type="month" [(ngModel)]="selectedMonth" (change)="load()" />
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading payslip…</div>
+  } @else if (error()) {
+    <div class="error">{{ error() }}</div>
+  } @else {
+    <div class="cards">
+      <div class="card"><div class="lbl">Gross Salary</div><div class="val">₹{{ formatPaise(payslip()?.salary?.grossPaise ?? 0) }}</div></div>
+      <div class="card"><div class="lbl">Leave Days</div><div class="val">{{ payslip()?.salary?.leaveDays ?? 0 }}</div></div>
+      <div class="card"><div class="lbl">Deduction</div><div class="val">₹{{ formatPaise(payslip()?.salary?.deductionPaise ?? 0) }}</div></div>
+      <div class="card net"><div class="lbl">Net Pay</div><div class="val">₹{{ formatPaise(payslip()?.salary?.netPaise ?? 0) }}</div></div>
+    </div>
+
+    <div class="panel">
+      <h3>Last 3 Months</h3>
+      <table>
+        <thead><tr><th>Month</th><th class="num">Gross (₹)</th><th class="num">Leave</th><th class="num">Net (₹)</th></tr></thead>
+        <tbody>
+          @for (row of history(); track row.month) {
+            <tr>
+              <td>{{ row.month }}</td>
+              <td class="num">{{ formatPaise(row.grossPaise) }}</td>
+              <td class="num">{{ row.leaveDays }}</td>
+              <td class="num">{{ formatPaise(row.netPaise) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -1,0 +1,72 @@
+<div class="store-exp">
+  <div class="hdr">
+    <div>
+      <h2>Store Expenses</h2>
+      <p>Log rent, utilities, stationery, and other store costs</p>
+    </div>
+    <button class="btn-primary" (click)="openForm()">+ Add Expense</button>
+  </div>
+
+  <div class="filters">
+    <select [(ngModel)]="categoryFilter" (change)="load()">
+      <option value="">All Categories</option>
+      @for (c of categories; track c) {
+        <option [value]="c">{{ categoryLabels[c] }}</option>
+      }
+    </select>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading expenses…</div>
+  } @else {
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Vendor</th>
+            <th class="num">Amount (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of expenses(); track e.id) {
+            <tr>
+              <td>{{ e.expenseDate | date:'mediumDate' }}</td>
+              <td>{{ categoryLabels[e.category] ?? e.category }}</td>
+              <td>{{ e.description }}</td>
+              <td>{{ e.vendor ?? '—' }}</td>
+              <td class="num">{{ formatPaise(e.amountInPaise) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (showForm()) {
+    <div class="modal-backdrop" (click)="showForm.set(false)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <h3>Log Store Expense</h3>
+        <label>Category
+          <select [(ngModel)]="form.category">
+            @for (c of categories; track c) {
+              <option [value]="c">{{ categoryLabels[c] }}</option>
+            }
+          </select>
+        </label>
+        <label>Description <input [(ngModel)]="form.description" /></label>
+        <label>Vendor <input [(ngModel)]="form.vendor" /></label>
+        <label>Bill No <input [(ngModel)]="form.billNo" /></label>
+        <label>Amount (paise) <input type="number" [(ngModel)]="form.amountInPaise" /></label>
+        <label>Date <input type="date" [(ngModel)]="form.expenseDate" /></label>
+        <div class="actions">
+          <button (click)="showForm.set(false)">Cancel</button>
+          <button class="btn-primary" [disabled]="saving()" (click)="submit()">{{ saving() ? 'Saving…' : 'Save' }}</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+@if (toast()) { <div class="toast">{{ toast() }}</div> }

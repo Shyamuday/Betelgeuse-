@@ -28,9 +28,10 @@ scanRouter.get('/go/p/:patientCode', asyncRoute(async (req, res) => {
   }
 
   const code = encodeURIComponent(patient.patientCode);
-  const { DOCTOR, STORE, WEB } = SERVER_CONFIG.ORIGINS;
+  const { DOCTOR, STORE, STORE_MANAGER, WEB } = SERVER_CONFIG.ORIGINS;
   const doctorUrl = `${DOCTOR}/scan/patient/${code}`;
   const storeUrl = `${STORE}/scan/patient/${code}`;
+  const managerUrl = `${STORE_MANAGER}/patients`;
   const patientUrl = `${WEB}/dashboard`;
 
   res.type('html').send(`<!DOCTYPE html>
@@ -62,6 +63,7 @@ scanRouter.get('/go/p/:patientCode', asyncRoute(async (req, res) => {
       <div class="actions">
         <a class="btn doctor" href="${doctorUrl}">Doctor — prescribe / consult</a>
         <a class="btn store" href="${storeUrl}">Store staff — medicines to give</a>
+        <a class="btn patient" href="${managerUrl}">Store manager — patients</a>
         <a class="btn patient" href="${patientUrl}">Patient app</a>
       </div>
     </div>
