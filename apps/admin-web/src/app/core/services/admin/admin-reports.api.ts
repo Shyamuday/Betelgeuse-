@@ -66,15 +66,11 @@ export class AdminReportsApi extends AdminApiBase {
   }
 
   async exportPaymentsCsv(params: {
-    page?: number;
-    pageSize?: number;
     status?: PaymentStatus;
     from?: string;
     to?: string;
   }) {
     const query = new URLSearchParams({
-      page: String(params.page ?? 1),
-      pageSize: String(params.pageSize ?? PAGE_SIZES.PAYMENTS_EXPORT),
       status: params.status ?? FILTER_ALL,
       export: API_EXPORT_FORMAT.CSV
     });

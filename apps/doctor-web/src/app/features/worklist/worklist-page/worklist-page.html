@@ -49,7 +49,10 @@
     <button type="button" (click)="load()" [disabled]="loading">Search</button>
   </div>
   @if (error) {
-    <p class="error">{{ error }}</p>
+    <div class="error-row">
+      <p class="error">{{ error }}</p>
+      <button type="button" class="retry-btn" (click)="load()">Retry</button>
+    </div>
   }
 </section>
 
@@ -57,7 +60,7 @@
 <section class="panel follow-up-panel">
   <h3>Follow-up due</h3>
   @if (loading && !followUpDue.length) {
-    <p class="muted">Loading...</p>
+    <p class="loading-text">Loading worklist…</p>
   }
   @for (item of followUpDue; track item.id) {
     <article class="card follow-up-card" [class.urgent]="item.followUpUrgency === 'OVERDUE' || item.followUpUrgency === 'DUE_TODAY'">
@@ -85,7 +88,7 @@
     </article>
   } @empty {
     @if (!loading) {
-      <p class="muted">No follow-ups due right now.</p>
+      <p class="empty-state">No follow-ups due right now.</p>
     }
   }
 </section>
@@ -105,7 +108,7 @@
     </article>
   } @empty {
     @if (!loading) {
-      <p class="muted">No newly assigned cases.</p>
+      <p class="empty-state">No newly assigned cases.</p>
     }
   }
 </section>
@@ -128,7 +131,7 @@
     </article>
   } @empty {
     @if (!loading) {
-      <p class="muted">No in-progress cases.</p>
+      <p class="empty-state">No in-progress cases.</p>
     }
   }
 </section>

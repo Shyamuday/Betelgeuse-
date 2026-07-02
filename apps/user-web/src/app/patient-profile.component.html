@@ -35,6 +35,11 @@
 
       @if (loading()) {
         <p class="loading-text">Loading profile…</p>
+      } @else if (errorMsg()) {
+        <div class="error-row">
+          <p class="error">{{ errorMsg() }}</p>
+          <button type="button" class="retry-btn" (click)="load()">Retry</button>
+        </div>
       } @else {
         @if (profile()?.patientCode) {
           <div class="field">

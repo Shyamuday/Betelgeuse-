@@ -70,6 +70,7 @@ export class PatientProfileComponent implements OnInit {
 
   async load() {
     this.loading.set(true);
+    this.errorMsg.set('');
     try {
       const { profile } = await this.apiFetch<{ profile: Profile }>(API_PATHS.PATIENT.PROFILE);
       this.profile.set(profile);

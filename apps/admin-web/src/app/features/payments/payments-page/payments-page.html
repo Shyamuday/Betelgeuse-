@@ -2,16 +2,16 @@
   <div class="pay-hdr">
     <div>
       <h2>Payments</h2>
-      <p>Consultation payment records and export</p>
+      <p>Filter consultation payments and export records for reconciliation</p>
     </div>
-    <button class="btn-primary" [disabled]="exporting()" (click)="exportCsv()">
+    <button class="btn-primary" [disabled]="exporting() || loading()" (click)="exportCsv()">
       {{ exporting() ? 'Exporting…' : 'Export CSV' }}
     </button>
   </div>
 
   <div class="summary-cards">
-    <div class="card"><div class="val">{{ summary().total }}</div><div class="lbl">Total</div></div>
-    <div class="card paid"><div class="val">{{ summary().paid }}</div><div class="lbl">Paid</div></div>
+    <div class="card"><div class="val">₹{{ formatPaise(summary().total) }}</div><div class="lbl">Gross billed</div></div>
+    <div class="card paid"><div class="val">₹{{ formatPaise(summary().paid) }}</div><div class="lbl">Collected</div></div>
     <div class="card pending"><div class="val">{{ summary().pendingCount }}</div><div class="lbl">Pending</div></div>
     <div class="card failed"><div class="val">{{ summary().failedCount }}</div><div class="lbl">Failed</div></div>
   </div>
@@ -20,12 +20,21 @@
     @for (opt of statusOptions; track opt.value) {
       <button class="ftab" [class.active]="statusFilter() === opt.value" (click)="setStatus(opt.value)">{{ opt.label }}</button>
     }
-    <input type="date" [(ngModel)]="from" (change)="load()" />
-    <input type="date" [(ngModel)]="to" (change)="load()" />
+    <input type="date" [(ngModel)]="from" />
+    <input type="date" [(ngModel)]="to" />
+    <button type="button" class="btn-apply" (click)="applyFilters()" [disabled]="loading()">Apply</button>
+    <button type="button" class="btn-clear" (click)="clearFilters()" [disabled]="loading()">Clear</button>
   </div>
 
   @if (loading()) {
-    <div class="loading">Loading payments…</div>
+    <p class="loading-text">Loading payments…</p>
+  } @else if (error()) {
+    <div class="error-row">
+      <p class="error">{{ error() }}</p>
+      <button type="button" class="retry-btn" (click)="load()">Retry</button>
+    </div>
+  } @else if (!payments().length) {
+    <p class="empty-state">No payments match your filters.</p>
   } @else {
     <div class="table-wrap">
       <table>

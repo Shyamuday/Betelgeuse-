@@ -23,6 +23,7 @@ export class FinancePage implements OnInit {
 
   tab = signal<FinanceTabId>('overview');
   loading = signal(true);
+  error = signal('');
   selectedMonth = new Date().toISOString().slice(0, 7);
   toast = signal('');
 
@@ -64,6 +65,7 @@ export class FinancePage implements OnInit {
 
   loadAll(): void {
     this.loading.set(true);
+    this.error.set('');
     Promise.all([
       this.api.getFinanceSummary(this.selectedMonth),
       this.api.getRevenueTrend(6),
@@ -81,7 +83,10 @@ export class FinancePage implements OnInit {
       this.clinicExpenses.set(clinicExpenses.expenses);
       this.storeExpenses.set(storeExpenses.expenses);
       this.loading.set(false);
-    }).catch(() => this.loading.set(false));
+    }).catch(() => {
+      this.error.set('Could not load finance data. Please try again.');
+      this.loading.set(false);
+    });
   }
 
   loadTab(): void {

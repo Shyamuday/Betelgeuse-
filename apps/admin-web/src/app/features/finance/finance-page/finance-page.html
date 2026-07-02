@@ -14,7 +14,12 @@
   </div>
 
   @if (loading()) {
-    <div class="loading">Loading finance data…</div>
+    <p class="loading-text">Loading finance data…</p>
+  } @else if (error()) {
+    <div class="error-row">
+      <p class="error">{{ error() }}</p>
+      <button type="button" class="retry-btn" (click)="loadAll()">Retry</button>
+    </div>
   } @else {
   @switch (tab()) {
     @case ('overview') {

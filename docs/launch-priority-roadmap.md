@@ -89,6 +89,8 @@ Minimum acceptance:
 
 ### 5) Admin Finance/Ops Basics
 
+**Status: Done** — payments page and dashboard with status/date filters, summary cards (gross/collected/pending/failed), paginated list, and CSV export of all matching records (up to 10k).
+
 Enhance admin payments/reports view with:
 
 - Payment status filters (paid/pending/failed)
@@ -106,6 +108,8 @@ Minimum acceptance:
 ---
 
 ### 6) UX Reliability Pass Across All Apps
+
+**Status: Done** — shared `_ux-states.scss` in admin/doctor/user-web; standardized loading, empty, error + retry patterns on key pages (payments, finance, audit, consumers, worklist, patient profile, dashboard); store apps use matching layout utilities.
 
 Standardize:
 
