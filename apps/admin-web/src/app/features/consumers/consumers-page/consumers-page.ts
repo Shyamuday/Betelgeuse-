@@ -8,8 +8,9 @@ import {
   CONSUMERS_PAGE_SIZE,
   type ConsumerSortField
 } from '../constants/consumers-list.constants';
+import { type SortDirection } from '../../../shared/constants/filter.constants';
 import { PatientIdCardComponent, type PatientIdCardData } from '../../../shared/patient-id-card/patient-id-card';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import {
   SUPPORT_NOTE_CATEGORIES,
   SUPPORT_NOTE_CATEGORY_STYLES,

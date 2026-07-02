@@ -39,18 +39,18 @@ export class AuthFormOverlayComponent {
   } | null>(null);
   private activeOverlayRef?: AppOverlayRef;
 
-  patientCredentials = {
+  patientCredentials: { identifier: string; password: string } = {
     identifier: DEV_DEMO_ACCOUNTS.patientRahul.email,
     password: DEV_DEMO_ACCOUNTS.password
   };
 
-  patientOtp = {
+  patientOtp: { name: string; mobile: string; otp: string } = {
     name: DEV_DEMO_ACCOUNTS.patientRahul.name,
     mobile: DEV_DEMO_ACCOUNTS.patientMobile,
     otp: DEV_DEMO_ACCOUNTS.otp
   };
 
-  staff = {
+  staff: { email: string; password: string } = {
     email: DEV_DEMO_ACCOUNTS.doctor.email,
     password: DEV_DEMO_ACCOUNTS.password
   };

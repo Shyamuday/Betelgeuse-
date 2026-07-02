@@ -28,7 +28,7 @@ export class HomeHeroSectionComponent {
   constructor(
     private readonly auth: AuthService,
     private readonly router: Router
-  ) {}
+  ) { }
 
   async sendOtp() {
     const name = this.name.trim();
@@ -59,7 +59,9 @@ export class HomeHeroSectionComponent {
         this.auth.patientLogin({ name: this.name.trim(), mobile: this.mobile, otp: this.otp.trim() })
       );
       this.step.set('done');
-      setTimeout(() => void this.router.navigateByUrl(this.auth.dashboardFor(response.user.role)), POST_LOGIN_REDIRECT_DELAY_MS);
+      if ('user' in response) {
+        setTimeout(() => void this.router.navigateByUrl(this.auth.dashboardFor(response.user.role)), POST_LOGIN_REDIRECT_DELAY_MS);
+      }
     } catch (err: any) {
       this.step.set('otp');
       this.error.set(err?.error?.message || 'Incorrect OTP. Please try again.');

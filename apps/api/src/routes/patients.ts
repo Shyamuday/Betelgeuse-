@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import { Role } from '@prisma/client';
 import { authRequired, allowRoles } from '../auth.js';
 import { prisma } from '../db.js';
-import { asyncRoute, queryText, routeParam } from '../../utils/helpers.js';
+import { asyncRoute, queryText, routeParam } from '../utils/helpers.js';
 import {
   buildPatientIdCard,
   createPatientRecord,
@@ -13,7 +13,7 @@ import {
   patientListSelect,
   resolveActorClinicStoreId,
   searchPatients
-} from '../../services/patient-identity.js';
+} from '../services/patient-identity.js';
 
 export const patientsRouter = Router();
 
@@ -215,4 +215,5 @@ patientsRouter.post(
     res.json({ patient });
   })
 );
+
 

@@ -1,12 +1,12 @@
-@import '@angular/cdk/overlay-prebuilt.css';
+@use '@angular/cdk/overlay-prebuilt.css';
 
-@import 'styles/base';
-@import 'styles/shell';
-@import 'styles/public-pages';
-@import 'styles/home';
-@import 'styles/home-sections';
-@import 'styles/sections';
-@import 'styles/dashboard';
-@import 'styles/ux-states';
-@import 'styles/animations';
-@import 'styles/responsive';
+@use 'styles/base';
+@use 'styles/shell';
+@use 'styles/public-pages';
+@use 'styles/home';
+@use 'styles/home-sections';
+@use 'styles/sections';
+@use 'styles/dashboard';
+@use 'styles/ux-states';
+@use 'styles/animations';
+@use 'styles/responsive';

@@ -14,15 +14,15 @@ import type { DevFillCredentials } from '../../../core/types/dev-demo.types';
   styleUrl: './admin-login.scss'
 })
 export class AdminLogin {
-  email = DEV_DEMO_ACCOUNTS.admin.email;
-  password = DEV_DEMO_ACCOUNTS.password;
+  email: string = DEV_DEMO_ACCOUNTS.admin.email;
+  password: string = DEV_DEMO_ACCOUNTS.password;
   error = '';
   submitting = false;
 
   constructor(
     private readonly auth: AdminAuth,
     private readonly router: Router
-  ) {}
+  ) { }
 
   async submit() {
     this.error = '';
