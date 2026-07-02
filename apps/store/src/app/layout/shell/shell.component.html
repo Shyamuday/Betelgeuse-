@@ -89,7 +89,13 @@
                 <a class="more-link" [routerLink]="['/', routePaths.STAFF_HR]" (click)="showMore.set(false)">
                   <span>🪪</span> HR Records
                 </a>
+                <a class="more-link" [routerLink]="['/', routePaths.STORE_EXPENSES]" (click)="showMore.set(false)">
+                  <span>🧾</span> Store Expenses
+                </a>
               }
+              <a class="more-link" [routerLink]="['/', routePaths.MY_PAY]" (click)="showMore.set(false)">
+                <span>💰</span> My Pay
+              </a>
             </nav>
             <div class="divider"></div>
             <button class="more-logout" (click)="logout()">

@@ -91,6 +91,12 @@
               <label>Note</label>
               <input class="input" [(ngModel)]="note" [placeholder]="notePlaceholder()" />
             </div>
+            @if (removeType() === 'SALE_OUT') {
+              <div class="form-group" style="margin-top: 14px;">
+                <label>Sale Amount (paise)</label>
+                <input class="input" type="number" [(ngModel)]="saleAmountInPaise" min="0" placeholder="e.g. 25000 for ₹250" />
+              </div>
+            }
           </div>
 
           <!-- Confirm bar -->

@@ -1,0 +1,22 @@
+import { Router } from 'express';
+import { registerStoreAlertRoutes } from './alerts.js';
+import { registerStoreAuthRoutes } from './auth.js';
+import { registerStoreDashboardRoutes } from './dashboard.js';
+import { registerStoreExpenseRoutes } from './expenses.js';
+import { registerStoreMedicineRoutes } from './medicines.js';
+import { registerStoreRackRoutes } from './racks.js';
+import { registerStoreSetupRoutes } from './setup.js';
+import { registerStoreStaffRoutes } from './staff.js';
+import { registerStoreStockRoutes } from './stock.js';
+
+export const storeRouter = Router();
+
+registerStoreAuthRoutes(storeRouter);
+registerStoreMedicineRoutes(storeRouter);
+registerStoreRackRoutes(storeRouter);
+registerStoreStockRoutes(storeRouter);
+registerStoreAlertRoutes(storeRouter);
+registerStoreDashboardRoutes(storeRouter);
+registerStoreSetupRoutes(storeRouter);
+registerStoreStaffRoutes(storeRouter);
+registerStoreExpenseRoutes(storeRouter);

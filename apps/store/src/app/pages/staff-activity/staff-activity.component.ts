@@ -24,13 +24,13 @@ export class StaffActivityComponent implements OnInit {
 
   readonly managerRole = STORE_STAFF_ROLES.MANAGER;
 
-  period = signal(ACTIVITY_PERIODS.TODAY);
+  period = signal<string>(ACTIVITY_PERIODS.TODAY);
   loading = signal(true);
   staffList = signal<StaffActivity[]>([]);
 
   detailOpen = signal(false);
   detail = signal<StaffDetailResponse | null>(null);
-  detailPeriod = signal(ACTIVITY_PERIODS.WEEK);
+  detailPeriod = signal<string>(ACTIVITY_PERIODS.WEEK);
   private selectedStaffId = '';
 
   periods = [
@@ -44,7 +44,7 @@ export class StaffActivityComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
-    this.api.getStaffActivity(this.period()).subscribe({
+    this.api.getStaffActivity(this.period() as typeof ACTIVITY_PERIODS.TODAY).subscribe({
       next: (res) => { this.staffList.set(res.staff); this.loading.set(false); },
       error: () => this.loading.set(false)
     });
@@ -75,7 +75,7 @@ export class StaffActivityComponent implements OnInit {
   }
 
   private loadDetail(): void {
-    this.api.getStaffDetail(this.selectedStaffId, this.detailPeriod()).subscribe({
+    this.api.getStaffDetail(this.selectedStaffId, this.detailPeriod() as typeof ACTIVITY_PERIODS.WEEK).subscribe({
       next: (res) => this.detail.set(res)
     });
   }

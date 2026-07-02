@@ -125,6 +125,8 @@ export interface StockRemoveRequest {
   stockId: string;
   qty: number;
   note?: string;
+  type?: 'SALE_OUT' | 'ADJUSTMENT_OUT' | 'EXPIRED_REMOVAL';
+  saleAmountInPaise?: number;
 }
 
 export interface RackCreateRequest {

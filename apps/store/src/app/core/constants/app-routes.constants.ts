@@ -10,7 +10,9 @@ export const ROUTE_PATHS = {
   RACK_MAP: 'rack-map',
   MOVEMENTS: 'movements',
   STAFF_ACTIVITY: 'staff-activity',
-  STAFF_HR: 'staff-hr'
+  STAFF_HR: 'staff-hr',
+  MY_PAY: 'my-pay',
+  STORE_EXPENSES: 'store-expenses'
 } as const;
 
 export const DEFAULT_AUTHED_ROUTE = ROUTE_PATHS.DASHBOARD;
@@ -24,6 +26,8 @@ export const NAV_ITEMS = [
   { path: `/${ROUTE_PATHS.RACK_MAP}`, label: 'Rack Map', icon: '🗺️' },
   { path: `/${ROUTE_PATHS.MEDICINES}`, label: 'Medicines', icon: '💊' },
   { path: `/${ROUTE_PATHS.MOVEMENTS}`, label: 'Movements', icon: '📋' },
+  { path: `/${ROUTE_PATHS.MY_PAY}`, label: 'My Pay', icon: '💰' },
   { path: `/${ROUTE_PATHS.STAFF_ACTIVITY}`, label: 'Staff Activity', icon: '👥' },
-  { path: `/${ROUTE_PATHS.STAFF_HR}`, label: 'Staff HR', icon: '🪪' }
+  { path: `/${ROUTE_PATHS.STAFF_HR}`, label: 'Staff HR', icon: '🪪' },
+  { path: `/${ROUTE_PATHS.STORE_EXPENSES}`, label: 'Store Expenses', icon: '🧾' }
 ] as const;

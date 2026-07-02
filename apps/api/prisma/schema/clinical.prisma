@@ -1,0 +1,91 @@
+enum ConsultationStatus {
+  PAYMENT_PENDING
+  PAID
+  ASSIGNED
+  IN_PROGRESS
+  PRESCRIPTION_UPLOADED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  CREATED
+  PAID
+  FAILED
+}
+
+enum BillingPlanType {
+  ONE_TIME_APPOINTMENT
+  STARTER_MONTHLY
+  CONTINUITY_QUARTERLY
+}
+
+model Disease {
+  id            String         @id @default(cuid())
+  name          String         @unique
+  description   String
+  feeInPaise    Int
+  intakeQuestions Json
+  isActive      Boolean        @default(true)
+  consultations Consultation[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Consultation {
+  id              String             @id @default(cuid())
+  patientId       String
+  diseaseId       String
+  assignedDoctorId String?
+  status          ConsultationStatus @default(PAYMENT_PENDING)
+  billingPlanCode String?
+  pricingSnapshot Json?
+  intakeAnswers   Json
+  patient         User               @relation("PatientConsultations", fields: [patientId], references: [id])
+  disease         Disease            @relation(fields: [diseaseId], references: [id])
+  assignedDoctor  User?              @relation("DoctorConsultations", fields: [assignedDoctorId], references: [id])
+  payment         Payment?
+  messages        Message[]
+  prescriptions   Prescription[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  consultationId  String        @unique
+  provider        String        @default("razorpay")
+  billingPlanCode String?
+  providerOrderId String?
+  providerPaymentId String?
+  amountInPaise   Int
+  lineItems       Json?
+  status          PaymentStatus @default(CREATED)
+  consultation    Consultation  @relation(fields: [consultationId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model BillingPlan {
+  id                 String          @id @default(cuid())
+  code               String          @unique
+  name               String
+  description        String?
+  planType           BillingPlanType
+  priceInPaise       Int
+  consultationsLimit Int?
+  isActive           Boolean         @default(true)
+  sortOrder          Int             @default(0)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  consultationId String
+  senderId       String
+  body           String
+  consultation   Consultation @relation(fields: [consultationId], references: [id])
+  sender         User         @relation(fields: [senderId], references: [id])
+  createdAt      DateTime     @default(now())
+}

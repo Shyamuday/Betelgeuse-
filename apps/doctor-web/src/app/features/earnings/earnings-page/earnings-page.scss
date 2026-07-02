@@ -1,0 +1,17 @@
+.earn-page { padding: 1.25rem; }
+.earn-hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+.earn-hdr h2 { margin: 0; }
+.earn-hdr p { margin: 0.25rem 0 0; color: #64748b; }
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; }
+.card .val { font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem; }
+.card .lbl { color: #64748b; font-size: 0.85rem; }
+.card .sub { color: #94a3b8; font-size: 0.8rem; margin-top: 0.35rem; }
+.card.net { background: #ecfdf5; border-color: #6ee7b7; }
+.panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 0.65rem; border-bottom: 1px solid #f1f5f9; text-align: left; }
+.num { text-align: right; }
+.loading, .error { padding: 2rem; text-align: center; }
+.error { color: #b91c1c; }
+@media (max-width: 900px) { .cards { grid-template-columns: 1fr; } }

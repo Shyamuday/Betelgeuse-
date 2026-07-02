@@ -11,7 +11,9 @@ export const STORE_API_ROUTES = {
   ALERTS_EXPIRING: '/alerts/expiring',
   MOVEMENTS: '/movements',
   STAFF_ACTIVITY: '/staff/activity',
-  STAFF_DETAIL_ACTIVITY: '/staff/:staffId/activity'
+  STAFF_DETAIL_ACTIVITY: '/staff/:staffId/activity',
+  STAFF_MY_PAYSLIP: '/staff/my-payslip',
+  EXPENSES: '/expenses'
 } as const;
 
 export const STORE_ROLES = {

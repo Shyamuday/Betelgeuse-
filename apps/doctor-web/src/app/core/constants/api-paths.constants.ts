@@ -3,6 +3,7 @@ export const API_PATHS = {
   DOCTOR: {
     PROFILE: '/doctor/profile',
     PAYMENTS_SUMMARY: '/doctor/payments/summary',
+    MY_PAYSLIP: '/doctor/my-payslip',
     SLOTS: '/doctor/slots',
     PRESCRIPTION_OPTIONS: '/doctor/prescription-options',
     PRESCRIPTION_TEMPLATES: '/doctor/prescription-templates',

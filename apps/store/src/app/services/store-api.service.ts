@@ -136,4 +136,26 @@ export class StoreApiService {
   getStaffLetter(id: string): Observable<{ letter: JoiningLetterDoc }> {
     return this.http.get<{ letter: JoiningLetterDoc }>(`${this.hrBase}${HR_API_PATHS.STORE_STAFF}/${id}/letter`);
   }
+
+  getMyPayslip(month: string): Observable<{ payslip: any; history: any[] }> {
+    const params = new HttpParams().set('month', month);
+    return this.http.get<{ payslip: any; history: any[] }>(`${this.base}${STORE_API_PATHS.STAFF.MY_PAYSLIP}`, { params });
+  }
+
+  getStoreExpenses(category?: string): Observable<{ expenses: any[] }> {
+    let params = new HttpParams();
+    if (category) params = params.set('category', category);
+    return this.http.get<{ expenses: any[] }>(`${this.base}${STORE_API_PATHS.EXPENSES}`, { params });
+  }
+
+  createStoreExpense(data: {
+    category: string;
+    description: string;
+    vendor?: string;
+    billNo?: string;
+    amountInPaise: number;
+    expenseDate: string;
+  }): Observable<{ expense: any }> {
+    return this.http.post<{ expense: any }>(`${this.base}${STORE_API_PATHS.EXPENSES}`, data);
+  }
 }

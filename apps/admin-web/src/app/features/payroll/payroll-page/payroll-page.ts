@@ -1,9 +1,12 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
-import { environment } from '../../../../environments/environment';
-import { AdminAuth } from '../../../core/services/admin-auth';
+import { AdminApi } from '../../../core/services/admin-api';
+import {
+  EMPLOYEE_STATUS_COLORS,
+  formatPaise,
+  paiseToK,
+  PAYROLL_TYPE_FILTERS
+} from '../constants/payroll.constants';
 
 interface PayrollRow {
   id: string; empType: string; name: string;
@@ -19,9 +22,7 @@ interface PayrollRow {
   styleUrl: './payroll-page.scss'
 })
 export class PayrollPage implements OnInit {
-  private http = inject(HttpClient);
-  private auth = inject(AdminAuth);
-  private base = environment.apiUrl;
+  private api = inject(AdminApi);
 
   rows = signal<PayrollRow[]>([]);
   loading = signal(true);
@@ -32,24 +33,15 @@ export class PayrollPage implements OnInit {
 
   selectedMonth = new Date().toISOString().slice(0, 7);
 
-  typeFilters = [
-    { label: 'All', value: 'ALL' },
-    { label: '🩺 Doctors', value: 'DOCTOR' },
-    { label: '🏪 Staff', value: 'STORE_STAFF' }
-  ];
+  typeFilters = PAYROLL_TYPE_FILTERS;
 
   ngOnInit(): void { this.load(); }
 
   load(): void {
     this.loading.set(true);
-    const token = this.auth.token();
-    firstValueFrom(
-      this.http.get<{ rows: PayrollRow[]; summary: any }>(`${this.base}/hr/payroll`, {
-        params: { month: this.selectedMonth },
-        headers: { Authorization: `Bearer ${token}` }
-      })
-    ).then(r => { this.rows.set(r.rows); this.summary.set(r.summary); this.loading.set(false); })
-     .catch(() => this.loading.set(false));
+    this.api.getPayroll(this.selectedMonth)
+      .then(r => { this.rows.set(r.rows); this.summary.set(r.summary); this.loading.set(false); })
+      .catch(() => this.loading.set(false));
   }
 
   filtered(): PayrollRow[] {
@@ -64,18 +56,11 @@ export class PayrollPage implements OnInit {
   filteredNet():   number { return this.filtered().reduce((a, r) => a + r.netPaise,   0); }
   filteredLeave(): number { return this.filtered().reduce((a, r) => a + r.leaveDays,  0); }
 
-  fmt(paise: number): string {
-    return (paise / 100).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-  }
-
-  paise2k(paise: number): string {
-    const val = paise / 100;
-    return val >= 100000 ? `${(val / 100000).toFixed(1)}L` : val >= 1000 ? `${(val / 1000).toFixed(1)}K` : String(Math.round(val));
-  }
+  fmt(paise: number): string { return formatPaise(paise); }
+  paise2k(paise: number): string { return paiseToK(paise); }
 
   statusColor(s: string): string {
-    const m: Record<string,string> = { ACTIVE: '#4ade80', ON_LEAVE: '#fb923c', RESIGNED: '#94a3b8', TERMINATED: '#f87171' };
-    return m[s] ?? '#94a3b8';
+    return EMPLOYEE_STATUS_COLORS[s] ?? '#94a3b8';
   }
 
   exportCSV(): void {

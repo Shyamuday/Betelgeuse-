@@ -11,7 +11,18 @@ export const API_PATHS = {
     DOCTORS_PENDING: '/admin/doctors/pending',
     CONSUMERS: '/admin/consumers',
     DISEASES: '/admin/diseases',
-    DISEASES_LIST: '/admin/diseases/list'
+    DISEASES_LIST: '/admin/diseases/list',
+    FINANCE: {
+      SUMMARY: '/admin/finance/summary',
+      REVENUE_TREND: '/admin/finance/revenue/trend',
+      REVENUE_BY_DOCTOR: '/admin/finance/revenue/by-doctor',
+      REVENUE_BY_DISEASE: '/admin/finance/revenue/by-disease',
+      MEDICINE_REVENUE: '/admin/finance/medicine-revenue',
+      OUTSTANDING: '/admin/finance/outstanding',
+      PAYSLIP: (type: string, id: string) => `/admin/finance/payslip/${type}/${id}`,
+      EXPENSES: '/admin/finance/expenses',
+      EXPENSES_SUMMARY: '/admin/finance/expenses/summary'
+    }
   },
   CONSULTATIONS: '/consultations',
   HR: {
@@ -20,7 +31,8 @@ export const API_PATHS = {
     EMPLOYEES: '/hr/employees',
     LEAVES: '/hr/leaves',
     STORES: '/hr/stores',
-    STORE_STAFF: '/hr/store/staff'
+    STORE_STAFF: '/hr/store/staff',
+    PAYROLL: '/hr/payroll'
   }
 } as const;
 

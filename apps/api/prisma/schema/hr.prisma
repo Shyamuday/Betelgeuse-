@@ -1,0 +1,150 @@
+enum LeaveType {
+  CASUAL
+  SICK
+  EARNED
+  UNPAID
+  MATERNITY
+  PATERNITY
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum EmployeeType {
+  DOCTOR
+  STORE_STAFF
+}
+
+enum WorkShift {
+  MORNING
+  AFTERNOON
+  EVENING
+  NIGHT
+  FULL_DAY
+  CUSTOM
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  ON_LEAVE
+  RESIGNED
+  TERMINATED
+}
+
+model Doctor {
+  id               String         @id @default(cuid())
+  userId           String         @unique
+  specialty        String
+  registrationNo   String?
+  isAvailable      Boolean        @default(true)
+  isOnline         Boolean        @default(true)
+  clinicStoreId    String?
+  clinicStore      Store?         @relation("DoctorClinic", fields: [clinicStoreId], references: [id])
+  user             User           @relation(fields: [userId], references: [id])
+
+  employeeId       String?        @unique
+  designation      String?
+  department       String?
+  joiningDate      DateTime?
+  probationEndDate DateTime?
+  salaryPerMonth   Int?
+  consultationFee  Int?
+  workShift        WorkShift      @default(FULL_DAY)
+  shiftStart       String?
+  shiftEnd         String?
+  weeklyOffDays    String[]       @default([])
+  employeeStatus   EmployeeStatus @default(ACTIVE)
+  phone            String?
+  address          String?
+  emergencyContact String?
+  emergencyPhone   String?
+
+  joiningLetter    JoiningLetter?
+  leaveRequests    LeaveRequest[]
+  slots            DoctorSlot[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model HrProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  employeeId  String?  @unique
+  designation String   @default("HR Manager")
+  department  String   @default("Human Resources")
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model HrStoreAccess {
+  id          String   @id @default(cuid())
+  hrUserId    String
+  storeId     String
+  grantedById String
+  hrUser      User     @relation("HrUserAccess",  fields: [hrUserId],    references: [id], onDelete: Cascade)
+  store       Store    @relation(fields: [storeId],     references: [id], onDelete: Cascade)
+  grantedBy   User     @relation("HrAccessGrantor", fields: [grantedById], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@unique([hrUserId, storeId])
+  @@index([hrUserId])
+  @@index([storeId])
+}
+
+model LeaveRequest {
+  id           String       @id @default(cuid())
+  employeeType EmployeeType
+  doctorId     String?
+  storeStaffId String?
+  type         LeaveType
+  status       LeaveStatus  @default(PENDING)
+  startDate    DateTime
+  endDate      DateTime
+  totalDays    Int
+  reason       String
+  hrNote       String?
+  approvedById String?
+  approvedBy   User?        @relation("LeaveApprovals", fields: [approvedById], references: [id])
+  doctor       Doctor?      @relation(fields: [doctorId], references: [id])
+  storeStaff   StoreStaff?  @relation(fields: [storeStaffId], references: [id])
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([employeeType, status])
+  @@index([startDate, endDate])
+}
+
+model JoiningLetter {
+  id           String      @id @default(cuid())
+  letterNumber String      @unique
+  issuedDate   DateTime    @default(now())
+  content      Json
+  staffId      String?     @unique
+  doctorUserId String?     @unique
+  staff        StoreStaff? @relation(fields: [staffId], references: [id])
+  doctor       Doctor?     @relation(fields: [doctorUserId], references: [id])
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model DoctorSlot {
+  id          String   @id @default(cuid())
+  doctorId    String
+  date        DateTime @db.Date
+  startTime   String
+  endTime     String
+  isBooked    Boolean  @default(false)
+  isBlocked   Boolean  @default(false)
+  doctor      Doctor   @relation(fields: [doctorId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([doctorId, date, startTime])
+  @@index([doctorId, date])
+  @@index([date, isBooked])
+}

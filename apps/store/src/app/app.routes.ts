@@ -14,6 +14,8 @@ import { MedicinesAdminComponent } from './pages/medicines-admin/medicines-admin
 import { MovementsComponent } from './pages/movements/movements.component';
 import { StaffActivityComponent } from './pages/staff-activity/staff-activity.component';
 import { StaffHrComponent } from './pages/staff-hr/staff-hr.component';
+import { MyPayPage } from './pages/my-pay/my-pay-page';
+import { StoreExpensesPage } from './pages/store-expenses/store-expenses-page';
 
 export const routes: Routes = [
   { path: ROUTE_PATHS.LOGIN, component: LoginComponent },
@@ -34,6 +36,8 @@ export const routes: Routes = [
       { path: ROUTE_PATHS.MOVEMENTS, component: MovementsComponent },
       { path: ROUTE_PATHS.STAFF_ACTIVITY, component: StaffActivityComponent },
       { path: ROUTE_PATHS.STAFF_HR, component: StaffHrComponent },
+      { path: ROUTE_PATHS.MY_PAY, component: MyPayPage },
+      { path: ROUTE_PATHS.STORE_EXPENSES, component: StoreExpensesPage },
     ]
   },
   { path: '**', redirectTo: '' }

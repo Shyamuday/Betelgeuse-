@@ -27,6 +27,7 @@ export class StockOutComponent {
   removeType = signal<RemoveType>('SALE_OUT');
   qty = 1;
   note = '';
+  saleAmountInPaise = 0;
   loading = signal(false);
   error = signal('');
   success = signal('');
@@ -68,7 +69,9 @@ export class StockOutComponent {
     this.api.removeStock({
       stockId: med.stockId,
       qty: this.qty,
-      note: this.note || undefined
+      type: this.removeType(),
+      note: this.note || undefined,
+      saleAmountInPaise: this.removeType() === 'SALE_OUT' && this.saleAmountInPaise > 0 ? this.saleAmountInPaise : undefined
     }).subscribe({
       next: () => {
         this.loading.set(false);

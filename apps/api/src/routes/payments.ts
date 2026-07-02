@@ -8,6 +8,7 @@ import { prisma } from '../db.js';
 import { asyncRoute, routeParam } from '../utils/helpers.js';
 import { getRazorpayClient, verifyRazorpaySignature, razorpayKeyId, razorpayWebhookSecret } from '../services/razorpay.js';
 import { enabledNotificationChannels, notificationService } from '../services/notification-service.js';
+import { buildDoctorPayslip, buildPayslipHistory } from '../services/payroll.js';
 
 export function createPaymentsRouter(io: SocketIoServer) {
   const router = Router();
@@ -230,6 +231,23 @@ export function createPaymentsRouter(io: SocketIoServer) {
         },
         payments
       });
+    })
+  );
+
+  // GET /doctor/my-payslip?month=YYYY-MM
+  router.get(
+    '/doctor/my-payslip',
+    authRequired,
+    allowRoles(Role.DOCTOR),
+    asyncRoute(async (req, res) => {
+      const doctor = await prisma.doctor.findUnique({ where: { userId: req.user!.id }, select: { id: true } });
+      if (!doctor) return res.status(404).json({ message: 'Doctor profile not found.' });
+
+      const month = typeof req.query['month'] === 'string' ? req.query['month'] : undefined;
+      const payslip = await buildDoctorPayslip(doctor.id, month);
+      if (!payslip) return res.status(404).json({ message: 'Doctor record not found.' });
+      const history = await buildPayslipHistory('DOCTOR', doctor.id, 3);
+      res.json({ payslip, history });
     })
   );
 

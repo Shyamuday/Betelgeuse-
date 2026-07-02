@@ -22,8 +22,10 @@ export const STORE_API_PATHS = {
   MOVEMENTS: '/movements',
   STAFF: {
     ACTIVITY: '/staff/activity',
-    DETAIL_ACTIVITY: (staffId: string) => `/staff/${staffId}/activity`
-  }
+    DETAIL_ACTIVITY: (staffId: string) => `/staff/${staffId}/activity`,
+    MY_PAYSLIP: '/staff/my-payslip'
+  },
+  EXPENSES: '/expenses'
 } as const;
 
 export const HR_API_PATHS = {

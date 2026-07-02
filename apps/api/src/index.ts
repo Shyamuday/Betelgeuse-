@@ -18,7 +18,7 @@ import { DEFAULT_JWT_SECRET } from './constants/auth.constants.js';
 import { SERVER_CONFIG, SCHEDULER_CONFIG } from './constants/config.constants.js';
 import { SOCKET_EVENTS, SOCKET_ROOM_PREFIXES } from './constants/socket.constants.js';
 
-import { storeRouter } from './store-routes.js';
+import { storeRouter } from './routes/store/index.js';
 import { hrRouter } from './hr-routes.js';
 
 // ── Route modules ──────────────────────────────────────────────────────────────
@@ -30,6 +30,7 @@ import { createAdminRouter } from './routes/admin.js';
 import { createConsultationsRouter } from './routes/consultations.js';
 import { createPrescriptionsRouter } from './routes/prescriptions.js';
 import { createPaymentsRouter } from './routes/payments.js';
+import { financeRouter } from './routes/finance.js';
 
 // ── Schedulers ─────────────────────────────────────────────────────────────────
 import {
@@ -126,6 +127,7 @@ app.use(createAdminRouter(io));
 app.use(createConsultationsRouter(io));
 app.use(createPrescriptionsRouter(io));
 app.use(createPaymentsRouter(io));
+app.use(financeRouter);
 app.use('/store', storeRouter);
 app.use('/hr', hrRouter);
 

@@ -1,0 +1,68 @@
+<div class="pay-page">
+  <div class="pay-hdr">
+    <div>
+      <h2>Payments</h2>
+      <p>Consultation payment records and export</p>
+    </div>
+    <button class="btn-primary" [disabled]="exporting()" (click)="exportCsv()">
+      {{ exporting() ? 'Exporting…' : 'Export CSV' }}
+    </button>
+  </div>
+
+  <div class="summary-cards">
+    <div class="card"><div class="val">{{ summary().total }}</div><div class="lbl">Total</div></div>
+    <div class="card paid"><div class="val">{{ summary().paid }}</div><div class="lbl">Paid</div></div>
+    <div class="card pending"><div class="val">{{ summary().pendingCount }}</div><div class="lbl">Pending</div></div>
+    <div class="card failed"><div class="val">{{ summary().failedCount }}</div><div class="lbl">Failed</div></div>
+  </div>
+
+  <div class="filters">
+    @for (opt of statusOptions; track opt.value) {
+      <button class="ftab" [class.active]="statusFilter() === opt.value" (click)="setStatus(opt.value)">{{ opt.label }}</button>
+    }
+    <input type="date" [(ngModel)]="from" (change)="load()" />
+    <input type="date" [(ngModel)]="to" (change)="load()" />
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading payments…</div>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Patient</th>
+            <th>Disease</th>
+            <th>Doctor</th>
+            <th>Status</th>
+            <th class="num">Amount (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of payments(); track p.id) {
+            <tr>
+              <td>{{ p.createdAt | date:'medium' }}</td>
+              <td>{{ p.consultation?.patient?.name ?? '—' }}</td>
+              <td>{{ p.consultation?.disease?.name ?? '—' }}</td>
+              <td>{{ p.consultation?.assignedDoctor?.name ?? 'Unassigned' }}</td>
+              <td>
+                <span class="badge" [style.background]="statusStyles[p.status]?.bg" [style.color]="statusStyles[p.status]?.color">
+                  {{ p.status }}
+                </span>
+              </td>
+              <td class="num">₹{{ formatPaise(p.amountInPaise) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pager">
+      <button (click)="prevPage()" [disabled]="page() <= 1">Prev</button>
+      <span>Page {{ page() }} / {{ totalPages() }}</span>
+      <button (click)="nextPage()" [disabled]="page() >= totalPages()">Next</button>
+    </div>
+  }
+</div>
+@if (toast()) { <div class="toast">{{ toast() }}</div> }

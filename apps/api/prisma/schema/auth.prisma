@@ -1,0 +1,77 @@
+enum Role {
+  PATIENT
+  DOCTOR
+  ADMIN
+  HR
+}
+
+model User {
+  id                  String         @id @default(cuid())
+  name                String
+  email               String?        @unique
+  mobile              String?        @unique
+  passwordHash        String?
+  role                Role
+  isActive            Boolean        @default(true)
+  allergies           String?
+  currentMedications  String?
+  chronicConditions   String?
+  doctorProfile       Doctor?
+  patientConsults     Consultation[] @relation("PatientConsultations")
+  doctorConsults      Consultation[] @relation("DoctorConsultations")
+  messages            Message[]
+  uploadedPrescriptions Prescription[]
+  patientPrescriptions Prescription[] @relation("PatientPrescriptions")
+  createdPrescriptionOptions PrescriptionOption[] @relation("PrescriptionOptionCreator")
+  prescriptionTemplates      PrescriptionTemplate[] @relation("DoctorTemplates")
+  doseEvents           MedicineDoseEvent[] @relation("PatientDoseEvents")
+  reminderPreference  ReminderPreference?
+  auditLogs          AuditLog[]      @relation("AuditActor")
+  passwordResetTokens PasswordResetToken[]
+  hrProfile          HrProfile?
+  hrStoreAccess      HrStoreAccess[] @relation("HrUserAccess")
+  hrStoreGrants      HrStoreAccess[] @relation("HrAccessGrantor")
+  leaveApprovals     LeaveRequest[]  @relation("LeaveApprovals")
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actorRole Role?
+  action    String
+  targetType String
+  targetId  String
+  summary   String?
+  metadata  Json?
+  actor     User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  @@index([targetType, targetId])
+  @@index([createdAt])
+}
+
+model ReminderPreference {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  inApp           Boolean  @default(true)
+  sms             Boolean  @default(true)
+  whatsapp        Boolean  @default(false)
+  push            Boolean  @default(false)
+  quietHoursStart String   @default("22:00")
+  quietHoursEnd   String   @default("07:00")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}

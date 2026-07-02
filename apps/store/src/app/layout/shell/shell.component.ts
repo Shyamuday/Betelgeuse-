@@ -17,7 +17,8 @@ export class ShellComponent {
   private readonly managerOnlyPaths = new Set([
     `/${ROUTE_PATHS.MEDICINES}`,
     `/${ROUTE_PATHS.STAFF_ACTIVITY}`,
-    `/${ROUTE_PATHS.STAFF_HR}`
+    `/${ROUTE_PATHS.STAFF_HR}`,
+    `/${ROUTE_PATHS.STORE_EXPENSES}`
   ]);
 
   showMore = signal(false);

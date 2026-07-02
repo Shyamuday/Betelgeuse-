@@ -10,7 +10,9 @@ export const ROUTE_PATHS = {
   LEAVES: 'leaves',
   STORES: 'stores',
   CONSULTATIONS: 'consultations',
-  PAYROLL: 'payroll'
+  PAYROLL: 'payroll',
+  PAYMENTS: 'payments',
+  FINANCE: 'finance'
 } as const;
 
 export const DEFAULT_AUTHED_ROUTE = ROUTE_PATHS.DASHBOARD;
@@ -26,5 +28,7 @@ export const NAV_ITEMS = [
   { path: `/${ROUTE_PATHS.LEAVES}`, label: '📋 Leaves' },
   { path: `/${ROUTE_PATHS.STORES}`, label: '🏪 Stores' },
   { path: `/${ROUTE_PATHS.CONSULTATIONS}`, label: '🩺 Consultations' },
+  { path: `/${ROUTE_PATHS.PAYMENTS}`, label: '💳 Payments' },
+  { path: `/${ROUTE_PATHS.FINANCE}`, label: '📊 Finance' },
   { path: `/${ROUTE_PATHS.PAYROLL}`, label: '💰 Payroll' }
 ] as const;
