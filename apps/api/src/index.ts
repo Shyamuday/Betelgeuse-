@@ -31,6 +31,7 @@ const httpServer = createServer(app);
 const port = Number(process.env.PORT || 4000);
 const webOrigin = process.env.WEB_ORIGIN || 'http://localhost:4200';
 const storeOrigin = process.env.STORE_ORIGIN || 'http://localhost:4300';
+const hrOrigin = process.env.HR_ORIGIN || 'http://localhost:4400';
 
 const io = new SocketIoServer(httpServer, {
   cors: { origin: webOrigin, credentials: true }
@@ -171,7 +172,7 @@ async function ensureBillingPlans() {
   );
 }
 
-app.use(cors({ origin: [webOrigin, storeOrigin], credentials: true }));
+app.use(cors({ origin: [webOrigin, storeOrigin, hrOrigin], credentials: true }));
 app.use('/payments/razorpay-webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 

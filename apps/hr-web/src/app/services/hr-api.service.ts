@@ -35,7 +35,7 @@ export class HrApiService {
     return this.http.get<{ doctor: Doctor }>(`${this.base}/hr/doctors/${id}`);
   }
 
-  updateDoctor(id: string, data: Partial<Doctor>) {
+  updateDoctor(id: string, data: Partial<Employee>) {
     return this.http.put<{ doctor: Doctor }>(`${this.base}/hr/doctors/${id}`, data);
   }
 
@@ -56,7 +56,7 @@ export class HrApiService {
     return this.http.get<{ staff: StoreStaff }>(`${this.base}/hr/store/staff/${id}`);
   }
 
-  updateStoreStaff(id: string, data: Partial<StoreStaff>) {
+  updateStoreStaff(id: string, data: Partial<Employee>) {
     return this.http.put<{ staff: StoreStaff }>(`${this.base}/hr/store/staff/${id}`, data);
   }
 

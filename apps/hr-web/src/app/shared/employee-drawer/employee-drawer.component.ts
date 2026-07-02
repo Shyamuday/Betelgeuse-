@@ -690,11 +690,11 @@ export class EmployeeDrawerComponent implements OnChanges {
       ...(this.form.probationEndDate ? { probationEndDate: this.form.probationEndDate } as any : {})
     };
 
-    const obs = emp.empType === 'DOCTOR'
+    const obs$ = emp.empType === 'DOCTOR'
       ? this.api.updateDoctor(emp.id, payload)
       : this.api.updateStoreStaff(emp.id, payload);
 
-    obs.subscribe({
+    (obs$ as any).subscribe({
       next: (res: any) => {
         this.saving.set(false);
         this.saveSuccess.set(true);
