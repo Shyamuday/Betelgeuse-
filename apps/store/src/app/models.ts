@@ -171,6 +171,41 @@ export interface StaffActivityResponse {
   staff: StaffActivity[];
 }
 
+export type WorkShift = 'MORNING' | 'AFTERNOON' | 'EVENING' | 'NIGHT' | 'FULL_DAY' | 'CUSTOM';
+export type EmployeeStatus = 'ACTIVE' | 'ON_LEAVE' | 'RESIGNED' | 'TERMINATED';
+
+export interface StaffHrProfile {
+  id: string;
+  name: string;
+  staffCode: string;
+  employeeId?: string;
+  role: 'MANAGER' | 'STAFF';
+  employeeStatus: EmployeeStatus;
+  designation?: string;
+  department?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  joiningDate?: string;
+  probationEndDate?: string;
+  salaryPerMonth?: number;
+  workShift: WorkShift;
+  shiftStart?: string;
+  shiftEnd?: string;
+  weeklyOffDays: string[];
+  emergencyContact?: string;
+  emergencyPhone?: string;
+  joiningLetter?: JoiningLetterDoc;
+  store?: { id: string; name: string; code: string };
+}
+
+export interface JoiningLetterDoc {
+  id: string;
+  letterNumber: string;
+  issuedDate: string;
+  content: Record<string, string | null>;
+}
+
 export interface StaffDetailResponse {
   staff: { id: string; name: string; staffCode: string; role: string; createdAt: string };
   period: string;

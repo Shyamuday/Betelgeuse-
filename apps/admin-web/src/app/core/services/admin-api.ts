@@ -216,4 +216,27 @@ export class AdminApi {
   updateDisease(id: string, payload: { name: string; description: string; feeInPaise: number; isActive: boolean; intakeQuestions: string[] }) {
     return firstValueFrom(this.http.put(`${this.apiBase}/admin/diseases/${id}`, payload));
   }
+
+  // HR — Doctors
+  getHrDoctors() {
+    return firstValueFrom(this.http.get<{ doctors: Array<any> }>(`${this.apiBase}/hr/doctors`));
+  }
+
+  getHrDoctor(id: string) {
+    return firstValueFrom(this.http.get<{ doctor: any }>(`${this.apiBase}/hr/doctors/${id}`));
+  }
+
+  updateHrDoctor(id: string, data: Record<string, unknown>) {
+    return firstValueFrom(this.http.put<{ doctor: any }>(`${this.apiBase}/hr/doctors/${id}`, data));
+  }
+
+  generateDoctorLetter(id: string, clinicName?: string, clinicAddress?: string) {
+    return firstValueFrom(
+      this.http.post<{ letter: any }>(`${this.apiBase}/hr/doctors/${id}/letter`, { clinicName, clinicAddress })
+    );
+  }
+
+  getDoctorLetter(id: string) {
+    return firstValueFrom(this.http.get<{ letter: any }>(`${this.apiBase}/hr/doctors/${id}/letter`));
+  }
 }

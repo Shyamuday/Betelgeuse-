@@ -24,6 +24,7 @@ import { allowRoles, authRequired, type AuthUser, signToken } from './auth.js';
 import { prisma } from './db.js';
 import { createNotificationService, type NotificationChannel } from './notifications.js';
 import { storeRouter } from './store-routes.js';
+import { hrRouter } from './hr-routes.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -3022,6 +3023,7 @@ app.get(
 
 // ─── Store Management Routes ──────────────────────────────────────────────────
 app.use('/store', storeRouter);
+app.use('/hr', hrRouter);
 
 app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (error instanceof z.ZodError) {

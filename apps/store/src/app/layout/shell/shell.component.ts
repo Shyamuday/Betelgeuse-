@@ -51,6 +51,10 @@ import { StoreAuthService } from '../../services/store-auth.service';
               <span class="link-icon">👥</span>
               <span>Staff Activity</span>
             </a>
+            <a class="sidebar-link" routerLink="/staff-hr" routerLinkActive="active">
+              <span class="link-icon">🪪</span>
+              <span>HR Records</span>
+            </a>
           }
         </div>
 
@@ -120,6 +124,9 @@ import { StoreAuthService } from '../../services/store-auth.service';
               @if (auth.isManager()) {
                 <a class="more-link" routerLink="/staff-activity" (click)="showMore.set(false)">
                   <span>👥</span> Staff Activity
+                </a>
+                <a class="more-link" routerLink="/staff-hr" (click)="showMore.set(false)">
+                  <span>🪪</span> HR Records
                 </a>
               }
             </nav>

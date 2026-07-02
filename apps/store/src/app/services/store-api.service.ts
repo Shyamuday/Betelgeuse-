@@ -3,6 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
+  StaffHrProfile,
+  JoiningLetterDoc,
   AuthResponse,
   Medicine,
   MedicineWithStock,
@@ -27,6 +29,7 @@ import {
 export class StoreApiService {
   private http = inject(HttpClient);
   private base = `${environment.apiUrl}/store`;
+  private hrBase = `${environment.apiUrl}/hr`;
 
   // Auth
   loginPin(staffId: string, pin: string): Observable<AuthResponse> {
@@ -109,5 +112,26 @@ export class StoreApiService {
   getStaffDetail(staffId: string, period = 'week'): Observable<StaffDetailResponse> {
     const params = new HttpParams().set('period', period);
     return this.http.get<StaffDetailResponse>(`${this.base}/staff/${staffId}/activity`, { params });
+  }
+
+  // HR — Staff
+  getHrStaffList(): Observable<{ staff: StaffHrProfile[] }> {
+    return this.http.get<{ staff: StaffHrProfile[] }>(`${this.hrBase}/store/staff`);
+  }
+
+  getHrStaff(id: string): Observable<{ staff: StaffHrProfile }> {
+    return this.http.get<{ staff: StaffHrProfile }>(`${this.hrBase}/store/staff/${id}`);
+  }
+
+  updateHrStaff(id: string, data: Partial<StaffHrProfile>): Observable<{ staff: StaffHrProfile }> {
+    return this.http.put<{ staff: StaffHrProfile }>(`${this.hrBase}/store/staff/${id}`, data);
+  }
+
+  generateStaffLetter(id: string): Observable<{ letter: JoiningLetterDoc }> {
+    return this.http.post<{ letter: JoiningLetterDoc }>(`${this.hrBase}/store/staff/${id}/letter`, {});
+  }
+
+  getStaffLetter(id: string): Observable<{ letter: JoiningLetterDoc }> {
+    return this.http.get<{ letter: JoiningLetterDoc }>(`${this.hrBase}/store/staff/${id}/letter`);
   }
 }

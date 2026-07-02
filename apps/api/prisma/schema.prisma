@@ -120,14 +120,34 @@ model PasswordResetToken {
 }
 
 model Doctor {
-  id             String   @id @default(cuid())
-  userId         String   @unique
-  specialty      String
-  registrationNo String?
-  isAvailable    Boolean  @default(true)
-  user           User     @relation(fields: [userId], references: [id])
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id               String         @id @default(cuid())
+  userId           String         @unique
+  specialty        String
+  registrationNo   String?
+  isAvailable      Boolean        @default(true)
+  user             User           @relation(fields: [userId], references: [id])
+
+  // HR / Onboarding
+  employeeId       String?        @unique
+  designation      String?
+  department       String?
+  joiningDate      DateTime?
+  probationEndDate DateTime?
+  salaryPerMonth   Int?           // in paise
+  consultationFee  Int?           // in paise
+  workShift        WorkShift      @default(FULL_DAY)
+  shiftStart       String?
+  shiftEnd         String?
+  weeklyOffDays    String[]       @default([])
+  employeeStatus   EmployeeStatus @default(ACTIVE)
+  phone            String?
+  address          String?
+  emergencyContact String?
+  emergencyPhone   String?
+
+  joiningLetter    JoiningLetter?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 }
 
 model Disease {
@@ -311,6 +331,37 @@ model PrescriptionTemplateItem {
   sortOrder    Int                  @default(0)
 }
 
+// ─── HR / Employee Management ─────────────────────────────────────────────────
+
+enum WorkShift {
+  MORNING
+  AFTERNOON
+  EVENING
+  NIGHT
+  FULL_DAY
+  CUSTOM
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  ON_LEAVE
+  RESIGNED
+  TERMINATED
+}
+
+model JoiningLetter {
+  id           String      @id @default(cuid())
+  letterNumber String      @unique
+  issuedDate   DateTime    @default(now())
+  content      Json
+  staffId      String?     @unique
+  doctorUserId String?     @unique
+  staff        StoreStaff? @relation(fields: [staffId], references: [id])
+  doctor       Doctor?     @relation(fields: [doctorUserId], references: [id])
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
 // ─── Medicine Store Management ───────────────────────────────────────────────
 
 enum StoreRole {
@@ -351,17 +402,37 @@ model Store {
 }
 
 model StoreStaff {
-  id        String      @id @default(cuid())
-  name      String
-  staffCode String      @unique
-  pinHash   String
-  role      StoreRole   @default(STAFF)
-  storeId   String
-  store     Store       @relation(fields: [storeId], references: [id])
-  isActive  Boolean     @default(true)
-  movements StockMovement[]
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id               String         @id @default(cuid())
+  name             String
+  staffCode        String         @unique
+  employeeId       String?        @unique
+  pinHash          String
+  role             StoreRole      @default(STAFF)
+  storeId          String
+  store            Store          @relation(fields: [storeId], references: [id])
+  isActive         Boolean        @default(true)
+  employeeStatus   EmployeeStatus @default(ACTIVE)
+
+  // HR / Onboarding
+  phone            String?
+  email            String?
+  address          String?
+  designation      String?
+  department       String?
+  joiningDate      DateTime?
+  probationEndDate DateTime?
+  salaryPerMonth   Int?           // in paise
+  workShift        WorkShift      @default(FULL_DAY)
+  shiftStart       String?        // "09:00"
+  shiftEnd         String?        // "18:00"
+  weeklyOffDays    String[]       @default([])
+  emergencyContact String?
+  emergencyPhone   String?
+
+  movements        StockMovement[]
+  joiningLetter    JoiningLetter?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 }
 
 model StoreRack {
