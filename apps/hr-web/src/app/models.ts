@@ -106,3 +106,14 @@ export interface LeavesResponse {
   leaves: Leave[];
   total: number;
 }
+
+export interface StoreInfo {
+  id: string;
+  name: string;
+  code: string;
+  address?: string;
+  phone?: string;
+  isActive: boolean;
+  _count?: { staff: number };
+  staff?: Array<{ id: string; name: string; email?: string; isActive: boolean; employeeStatus: EmployeeStatus }>;
+}

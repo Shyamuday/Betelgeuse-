@@ -412,7 +412,8 @@ export class ShellComponent {
     { path: '/dashboard', label: 'Dashboard', icon: '📊' },
     { path: '/employees', label: 'Employees', icon: '👥' },
     { path: '/doctors', label: 'Doctors', icon: '🩺' },
-    { path: '/store-staff', label: 'Store Staff', icon: '🏪' },
+    { path: '/store-staff', label: 'Store Staff', icon: '🧑‍💼' },
+    { path: '/stores', label: 'Stores', icon: '🏪' },
     { path: '/leaves', label: 'Leaves', icon: '📋' }
   ];
 

@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import {
-  DashboardData, Employee, Doctor, StoreStaff,
+  DashboardData, Employee, Doctor, StoreStaff, StoreInfo,
   Leave, Letter, EmployeesResponse, LeavesResponse,
   LeaveStatus, EmpType, EmployeeStatus
 } from '../models';
@@ -92,5 +92,26 @@ export class HrApiService {
 
   updateLeave(id: string, data: { status: LeaveStatus; hrNote?: string }) {
     return this.http.patch<{ leave: Leave }>(`${this.base}/hr/leaves/${id}`, data);
+  }
+
+  // Stores
+  getStores() {
+    return this.http.get<{ stores: StoreInfo[] }>(`${this.base}/hr/stores`);
+  }
+
+  createStore(data: { name: string; code: string; address?: string; phone?: string }) {
+    return this.http.post<{ store: StoreInfo }>(`${this.base}/hr/stores`, data);
+  }
+
+  createManager(storeId: string, data: { name: string; email: string; password: string; designation?: string; joiningDate?: string }) {
+    return this.http.post<{ staff: StoreStaff }>(`${this.base}/hr/stores/${storeId}/managers`, data);
+  }
+
+  createStoreStaff(storeId: string, data: { name: string; staffCode: string; pin: string; designation?: string; phone?: string; joiningDate?: string }) {
+    return this.http.post<{ staff: StoreStaff }>(`${this.base}/hr/stores/${storeId}/staff`, data);
+  }
+
+  setStoreStaffStatus(id: string, data: { isActive?: boolean; employeeStatus?: string }) {
+    return this.http.patch<{ staff: StoreStaff }>(`${this.base}/hr/store/staff/${id}/status`, data);
   }
 }
