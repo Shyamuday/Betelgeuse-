@@ -185,7 +185,7 @@ export class StoreApiService {
       }>;
     } | null;
   }> {
-    return this.http.get(`${this.base}${STORE_API_PATHS.SCAN_PATIENT(patientCode)}`);
+    return this.http.get<any>(`${this.base}${STORE_API_PATHS.SCAN_PATIENT(patientCode)}`);
   }
 
   searchPatients(q: string, scope: 'auto' | 'clinic' | 'global' = 'auto') {
@@ -221,3 +221,6 @@ export class StoreApiService {
     );
   }
 }
+
+
+

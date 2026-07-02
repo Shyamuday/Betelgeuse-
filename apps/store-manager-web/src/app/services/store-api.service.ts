@@ -131,6 +131,47 @@ export class StoreApiService {
     return this.http.get<{ letter: JoiningLetterDoc }>(`${this.base}${STORE_API_PATHS.HR.STAFF_LETTER(id)}`);
   }
 
+  getMyPayslip(month: string): Observable<{ payslip: any; history: any[] }> {
+    const params = new HttpParams().set('month', month);
+    return this.http.get<{ payslip: any; history: any[] }>(`${this.base}${STORE_API_PATHS.STAFF.MY_PAYSLIP}`, { params });
+  }
+
+  scanPatient(patientCode: string): Observable<{
+    patient: { id: string; name: string; patientCode?: string | null; mobile?: string | null };
+    todayDoses: Array<{
+      id: string;
+      scheduledFor: string;
+      status: string;
+      medicineName: string;
+      strength?: string | null;
+      dose?: string | null;
+      frequency?: string | null;
+      instructions?: string | null;
+    }>;
+    pendingCount: number;
+    prescription?: {
+      id: string;
+      diagnosis: string;
+      items: Array<{
+        medicineName: string;
+        strength?: string | null;
+        dose?: string | null;
+        frequency?: string | null;
+        duration?: string | null;
+        instructions?: string | null;
+      }>;
+    } | null;
+  }> {
+    return this.http.get<any>(`${this.base}${STORE_API_PATHS.SCAN_PATIENT(patientCode)}`);
+  }
+
+  markDoseGiven(doseId: string): Observable<{ doseEvent: { id: string; status: string }; message: string }> {
+    return this.http.post<{ doseEvent: { id: string; status: string }; message: string }>(
+      `${this.base}${STORE_API_PATHS.SCAN_DOSE_GIVE(doseId)}`,
+      {}
+    );
+  }
+
   getStoreExpenses(category?: string): Observable<{ expenses: any[] }> {
     let params = new HttpParams();
     if (category) params = params.set('category', category);

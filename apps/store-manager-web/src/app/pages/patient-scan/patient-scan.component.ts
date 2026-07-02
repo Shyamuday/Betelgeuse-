@@ -64,11 +64,11 @@ export class PatientScanComponent implements OnInit {
     this.loading.set(true);
     this.error.set('');
     this.api.scanPatient(patientCode).subscribe({
-      next: (data) => {
+      next: (data: ScanResponse) => {
         this.scanResult.set(data);
         this.loading.set(false);
       },
-      error: (err) => {
+      error: (err: { error?: { message?: string } }) => {
         this.error.set(err.error?.message || 'Could not load patient medicines.');
         this.scanResult.set(null);
         this.loading.set(false);
@@ -83,7 +83,7 @@ export class PatientScanComponent implements OnInit {
         this.markingDoseId.set(null);
         this.load(this.patientCode());
       },
-      error: (err) => {
+      error: (err: { error?: { message?: string } }) => {
         this.markingDoseId.set(null);
         this.error.set(err.error?.message || 'Could not mark dose as given.');
       }

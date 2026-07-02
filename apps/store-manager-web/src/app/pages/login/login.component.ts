@@ -20,8 +20,8 @@ export class LoginComponent {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  email = DEV_DEMO_ACCOUNTS.storeManager.email;
-  password = DEV_DEMO_ACCOUNTS.password;
+  email: string = DEV_DEMO_ACCOUNTS.storeManager.email;
+  password: string = DEV_DEMO_ACCOUNTS.password;
   showPassword = signal(false);
   loading = signal(false);
   error = signal('');

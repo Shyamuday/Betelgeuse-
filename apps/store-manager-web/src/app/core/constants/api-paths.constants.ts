@@ -20,7 +20,8 @@ export const STORE_API_PATHS = {
   MOVEMENTS: '/movements',
   STAFF: {
     ACTIVITY: '/staff/activity',
-    DETAIL_ACTIVITY: (staffId: string) => `/staff/${staffId}/activity`
+    DETAIL_ACTIVITY: (staffId: string) => `/staff/${staffId}/activity`,
+    MY_PAYSLIP: '/staff/my-payslip'
   },
   EXPENSES: '/expenses',
   PATIENTS: {
@@ -28,6 +29,8 @@ export const STORE_API_PATHS = {
     CREATE: '/patients',
     BY_MOBILE: (mobile: string) => `/patients/by-mobile/${encodeURIComponent(mobile)}`
   },
+  SCAN_PATIENT: (patientCode: string) => `/scan/patient/${encodeURIComponent(patientCode)}`,
+  SCAN_DOSE_GIVE: (doseId: string) => `/scan/dose-events/${encodeURIComponent(doseId)}/give`,
   HR: {
     STAFF: '/hr/staff',
     STAFF_DETAIL: (id: string) => `/hr/staff/${id}`,

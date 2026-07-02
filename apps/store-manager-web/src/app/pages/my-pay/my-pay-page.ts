@@ -28,7 +28,7 @@ export class MyPayPage implements OnInit {
     this.loading.set(true);
     this.error.set('');
     this.api.getMyPayslip(this.selectedMonth).subscribe({
-      next: (res) => {
+      next: (res: { payslip: any; history: any[] }) => {
         this.payslip.set(res.payslip);
         this.history.set(res.history ?? []);
         this.loading.set(false);

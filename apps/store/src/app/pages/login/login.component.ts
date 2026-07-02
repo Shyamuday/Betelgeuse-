@@ -26,14 +26,14 @@ export class LoginComponent {
 
   mode = signal<'pin' | 'manager'>('pin');
   pin = signal('');
-  staffId = DEV_DEMO_ACCOUNTS.storeStaff.staffCode;
-  email = DEV_DEMO_ACCOUNTS.storeManager.email;
-  password = DEV_DEMO_ACCOUNTS.password;
+  staffId: string = DEV_DEMO_ACCOUNTS.storeStaff.staffCode;
+  email: string = DEV_DEMO_ACCOUNTS.storeManager.email;
+  password: string = DEV_DEMO_ACCOUNTS.password;
   showPassword = signal(false);
   loading = signal(false);
   error = signal('');
 
-  keypadKeys = ['1','2','3','4','5','6','7','8','9','⌫','0','✓'];
+  keypadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', '✓'];
 
   onKeypad(key: string): void {
     this.error.set('');

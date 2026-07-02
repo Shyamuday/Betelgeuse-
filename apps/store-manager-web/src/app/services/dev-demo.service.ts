@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { StoreAuthService } from '../../services/store-auth.service';
-import type { StoreStaff } from '../../models';
-import type { DevAppGuide } from '../types/dev-demo.types';
+import { environment } from '../../environments/environment';
+import { StoreAuthService } from './store-auth.service';
+import type { StoreStaff } from '../models';
+import type { DevAppGuide } from '../core/types/dev-demo.types';
 
-export type { DevFillCredentials, DevPersona, DevAppGuide } from '../types/dev-demo.types';
+export type { DevFillCredentials, DevPersona, DevAppGuide } from '../core/types/dev-demo.types';
 
 @Injectable({ providedIn: 'root' })
 export class DevDemoService {
