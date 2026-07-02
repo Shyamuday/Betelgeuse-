@@ -1,0 +1,77 @@
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Admin audit trail</h2>
+      <p class="muted">Doctor approvals, status changes, profile edits, and consultation assignments.</p>
+    </div>
+    <a class="link-btn" [routerLink]="doctorsPath">Manage doctors</a>
+  </div>
+
+  <div class="toolbar">
+    <input
+      placeholder="Search actor, action, target, summary..."
+      name="searchTerm"
+      [(ngModel)]="searchTerm"
+      (keyup.enter)="applyFilters()"
+    />
+    <select name="actionFilter" [(ngModel)]="actionFilter">
+      @for (option of actionOptions; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+    <select name="targetTypeFilter" [(ngModel)]="targetTypeFilter">
+      @for (option of targetTypeOptions; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+    <button type="button" (click)="applyFilters()" [disabled]="loading">Search</button>
+    <button type="button" class="ghost" (click)="clearFilters()" [disabled]="loading">Clear</button>
+  </div>
+
+  <small class="muted">{{ total }} entr{{ total === 1 ? 'y' : 'ies' }}</small>
+
+  @if (loading) {
+    <p class="loading-text">Loading audit trail...</p>
+  } @else if (error) {
+    <div class="error-row">
+      <p class="error">{{ error }}</p>
+      <button type="button" class="retry-btn" (click)="load()">Retry</button>
+    </div>
+  } @else {
+    @for (log of logs; track log.id) {
+      <article class="card audit-card">
+        <div class="card-head">
+          <div>
+            <strong>{{ formatAuditAction(log.action) }}</strong>
+            <p>{{ log.summary || 'No summary recorded' }}</p>
+          </div>
+          <time>{{ log.createdAt | date: 'medium' }}</time>
+        </div>
+        <div class="meta-grid">
+          <span><strong>Actor</strong> {{ actorLabel(log) }}</span>
+          <span><strong>Target</strong> {{ log.targetType }} · {{ log.targetId }}</span>
+        </div>
+        @if (log.metadata) {
+          <button type="button" class="ghost small" (click)="toggleDetails(log.id)">
+            {{ expandedLogId === log.id ? 'Hide details' : 'Show details' }}
+          </button>
+          @if (expandedLogId === log.id) {
+            <pre class="metadata">{{ metadataPreview(log.metadata) }}</pre>
+          }
+        }
+      </article>
+    } @empty {
+      <p class="empty-state">No audit entries match your filters.</p>
+    }
+
+    @if (totalPages > 1) {
+      <div class="pagination">
+        <button type="button" class="ghost" [disabled]="page === 1 || loading" (click)="load(page - 1)">Previous</button>
+        @for (p of pages(); track p) {
+          <button type="button" [class.active]="page === p" (click)="load(p)">{{ p }}</button>
+        }
+        <button type="button" class="ghost" [disabled]="page === totalPages || loading" (click)="load(page + 1)">Next</button>
+      </div>
+    }
+  }
+</section>

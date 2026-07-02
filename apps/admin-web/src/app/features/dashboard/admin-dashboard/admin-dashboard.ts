@@ -1,7 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AdminApi } from '../../../core/services/admin-api';
+import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
+import { formatAuditAction } from '../../audit/constants/audit.constants';
 import {
   AUDIT_LOGS_PAGE_SIZE,
   PAYMENTS_DEFAULTS,
@@ -11,11 +14,13 @@ import {
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.scss'
 })
 export class AdminDashboard {
+  readonly auditPath = `/${ROUTE_PATHS.AUDIT}`;
+  readonly formatAuditAction = formatAuditAction;
   revenueInPaise = 0;
   activeDoctors = 0;
   consultationsCount = 0;
@@ -27,6 +32,7 @@ export class AdminDashboard {
     targetId: string;
     summary?: string;
     createdAt: string;
+    actor?: { id: string; name: string; email?: string | null } | null;
   }> = [];
   payments: Array<any> = [];
   paymentsPage = 1;
@@ -56,7 +62,7 @@ export class AdminDashboard {
       this.revenueInPaise = report.revenueInPaise || 0;
       this.activeDoctors = report.activeDoctors || 0;
       this.consultationsCount = report.consultations?.length || 0;
-      const audit = await this.api.getAuditLogs(1, AUDIT_LOGS_PAGE_SIZE);
+      const audit = await this.api.getAuditLogs({ page: 1, pageSize: AUDIT_LOGS_PAGE_SIZE });
       this.auditLogs = audit.logs || [];
       await this.loadPayments();
     } catch {

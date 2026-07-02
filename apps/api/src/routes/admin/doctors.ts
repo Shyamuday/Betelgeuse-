@@ -166,7 +166,8 @@ export function registerAdminDoctorRoutes(router: Router) {
         action: 'doctor.status_change',
         targetType: 'doctor',
         targetId: doctor.id,
-        summary: body.isActive ? 'Doctor activated by admin.' : 'Doctor deactivated by admin.'
+        summary: body.isActive ? 'Doctor activated by admin.' : 'Doctor deactivated by admin.',
+        metadata: { isActive: body.isActive }
       });
       res.json({ doctor, message: body.isActive ? 'Doctor activated successfully.' : 'Doctor deactivated successfully.' });
     })
@@ -219,6 +220,19 @@ export function registerAdminDoctorRoutes(router: Router) {
     allowRoles(Role.ADMIN),
     asyncRoute(async (req, res) => {
       const doctorId = routeParam(req, 'id');
+      const existing = await prisma.user.findFirst({
+        where: { id: doctorId, role: Role.DOCTOR },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          mobile: true,
+          isActive: true,
+          doctorProfile: { select: { specialty: true, registrationNo: true, isAvailable: true } }
+        }
+      });
+      if (!existing) return res.status(404).json({ message: 'Doctor not found' });
+
       const body = z
         .object({
           name: z.string().min(2),
@@ -229,9 +243,6 @@ export function registerAdminDoctorRoutes(router: Router) {
           isAvailable: z.boolean().optional().default(true)
         })
         .parse(req.body);
-
-      const existing = await prisma.user.findFirst({ where: { id: doctorId, role: Role.DOCTOR }, select: { id: true } });
-      if (!existing) return res.status(404).json({ message: 'Doctor not found' });
 
       const doctor = await prisma.user.update({
         where: { id: doctorId },
@@ -255,7 +266,25 @@ export function registerAdminDoctorRoutes(router: Router) {
         targetType: 'doctor',
         targetId: doctor.id,
         summary: 'Doctor profile updated by admin.',
-        metadata: { isAvailable: body.isAvailable, specialty: body.specialty }
+        metadata: {
+          before: {
+            name: existing.name,
+            email: existing.email,
+            mobile: existing.mobile,
+            isActive: existing.isActive,
+            specialty: existing.doctorProfile?.specialty ?? null,
+            registrationNo: existing.doctorProfile?.registrationNo ?? null,
+            isAvailable: existing.doctorProfile?.isAvailable ?? null
+          },
+          after: {
+            name: body.name,
+            email: body.email,
+            mobile: body.mobile || null,
+            specialty: body.specialty,
+            registrationNo: body.registrationNo || null,
+            isAvailable: body.isAvailable
+          }
+        }
       });
       res.json({ doctor, message: 'Doctor profile updated successfully.' });
     })

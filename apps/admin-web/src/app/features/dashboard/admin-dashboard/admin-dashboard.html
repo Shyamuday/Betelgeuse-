@@ -139,15 +139,22 @@
 </section>
 
 <section class="panel">
-  <h3>Recent Admin Audit Trail</h3>
+  <div class="panel-header">
+    <h3>Recent admin audit trail</h3>
+    <a class="link-btn" [routerLink]="auditPath">View all</a>
+  </div>
   @for (log of auditLogs; track log.id) {
     <article class="card">
-      <strong>{{ log.action }}</strong>
+      <strong>{{ formatAuditAction(log.action) }}</strong>
       <p>{{ log.summary || 'No summary' }}</p>
-      <small>{{ log.targetType }}: {{ log.targetId }} | {{ log.actorRole || 'SYSTEM' }} | {{ log.createdAt | date: 'medium' }}</small>
+      <small>
+        {{ log.targetType }}: {{ log.targetId }} |
+        {{ log.actor?.name || log.actorRole || 'SYSTEM' }} |
+        {{ log.createdAt | date: 'medium' }}
+      </small>
     </article>
   } @empty {
-    <p class="empty-state">No audit activity yet.</p>
+    <p class="empty-state">No audit activity yet. Approve or edit a doctor to create entries.</p>
   }
 </section>
 

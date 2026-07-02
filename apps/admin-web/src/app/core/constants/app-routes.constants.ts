@@ -12,7 +12,8 @@ export const ROUTE_PATHS = {
   CONSULTATIONS: 'consultations',
   PAYROLL: 'payroll',
   PAYMENTS: 'payments',
-  FINANCE: 'finance'
+  FINANCE: 'finance',
+  AUDIT: 'audit'
 } as const;
 
 export const DEFAULT_AUTHED_ROUTE = ROUTE_PATHS.DASHBOARD;
@@ -29,6 +30,7 @@ export const NAV_ITEMS = [
   { path: `/${ROUTE_PATHS.STORES}`, label: '🏪 Stores' },
   { path: `/${ROUTE_PATHS.CONSULTATIONS}`, label: '🩺 Consultations' },
   { path: `/${ROUTE_PATHS.PAYMENTS}`, label: '💳 Payments' },
+  { path: `/${ROUTE_PATHS.AUDIT}`, label: '📋 Audit Trail' },
   { path: `/${ROUTE_PATHS.FINANCE}`, label: '📊 Finance' },
   { path: `/${ROUTE_PATHS.PAYROLL}`, label: '💰 Payroll' }
 ] as const;

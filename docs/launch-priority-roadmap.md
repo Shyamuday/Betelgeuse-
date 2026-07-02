@@ -48,6 +48,8 @@ Minimum acceptance:
 
 ### 3) Admin Audit Trail
 
+**Status: Done** — audit logs on doctor approve/reject/status/profile edits and consultation assignment; dedicated Audit Trail page with filters.
+
 Track and expose key administrative actions:
 
 - Doctor approval/rejection

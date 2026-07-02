@@ -332,6 +332,32 @@ async function main() {
     });
   }
 
+  await prisma.auditLog.createMany({
+    data: [
+      {
+        actorId: admin.id,
+        actorRole: Role.ADMIN,
+        action: 'doctor.approve',
+        targetType: 'doctor',
+        targetId: doctorUser.id,
+        summary: 'Doctor approved by admin (seed demo).'
+      },
+      {
+        actorId: admin.id,
+        actorRole: Role.ADMIN,
+        action: 'doctor.update',
+        targetType: 'doctor',
+        targetId: doctorUser.id,
+        summary: 'Doctor profile updated by admin (seed demo).',
+        metadata: {
+          before: { specialty: 'Dermatology' },
+          after: { specialty: 'Dermatology', clinicStoreId: ranchiStore.id }
+        }
+      }
+    ],
+    skipDuplicates: true
+  });
+
   console.log('Seeded demo admin, doctor, disease catalog, and demo patients.');
   console.log(`Admin login: ${admin.email} / Password@123`);
   console.log(`Demo patients: ${patientOne.patientCode} (Rahul), ${patientTwo.patientCode} (Priya) — shared mobile ${sharedMobile}`);

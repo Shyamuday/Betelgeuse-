@@ -101,6 +101,21 @@ export function registerAdminConsultationRoutes(router: Router, io: SocketIoServ
         io.to(`user:${patient.id}`).emit('consultation:updated', { consultationId: consultation.id, status: consultation.status });
       }
 
+      await writeAuditLog({
+        actorId: req.user!.id,
+        actorRole: req.user!.role,
+        action: 'consultation.assign_doctor',
+        targetType: 'consultation',
+        targetId: consultation.id,
+        summary: `Assigned Dr. ${doctor.name} to ${patient?.name || 'patient'} consultation.`,
+        metadata: {
+          doctorId: doctor.id,
+          doctorName: doctor.name,
+          patientId: consultation.patientId,
+          diseaseName: consultation.disease?.name ?? null
+        }
+      });
+
       res.json({ consultation, message: 'Doctor assigned successfully.' });
     })
   );

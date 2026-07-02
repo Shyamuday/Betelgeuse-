@@ -19,10 +19,24 @@ export class AdminReportsApi extends AdminApiBase {
     return firstValueFrom(this.http.get(`${this.apiBase}${API_PATHS.ADMIN.REPORTS}`));
   }
 
-  getAuditLogs(page = 1, pageSize: number = PAGE_SIZES.AUDIT_LOGS_API_DEFAULT) {
+  getAuditLogs(params: {
+    page?: number;
+    pageSize?: number;
+    q?: string;
+    action?: string;
+    targetType?: string;
+  } = {}) {
+    const query: Record<string, string> = {
+      page: String(params.page ?? 1),
+      pageSize: String(params.pageSize ?? PAGE_SIZES.AUDIT_LOGS_API_DEFAULT)
+    };
+    if (params.q?.trim()) query['q'] = params.q.trim();
+    if (params.action?.trim()) query['action'] = params.action.trim();
+    if (params.targetType?.trim()) query['targetType'] = params.targetType.trim();
+
     return firstValueFrom(
       this.http.get<{ logs: Array<any>; pagination: any }>(`${this.apiBase}${API_PATHS.ADMIN.AUDIT_LOGS}`, {
-        params: { page: String(page), pageSize: String(pageSize) }
+        params: query
       })
     );
   }
