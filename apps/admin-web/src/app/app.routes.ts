@@ -8,6 +8,9 @@ import { DiseasesPage } from './features/diseases/diseases-page/diseases-page';
 import { AdminShell } from './layout/admin-shell/admin-shell';
 import { DoctorHrComponent } from './features/hr/doctor-hr/doctor-hr';
 import { HrUsersComponent } from './features/hr/hr-users/hr-users';
+import { EmployeesPage } from './features/employees/employees-page/employees-page';
+import { LeavesPage } from './features/leaves/leaves-page/leaves-page';
+import { StoresPage } from './features/stores/stores-page/stores-page';
 
 export const routes: Routes = [
   { path: 'login', component: AdminLogin },
@@ -22,7 +25,10 @@ export const routes: Routes = [
       { path: 'consumers', component: ConsumersPage },
       { path: 'diseases', component: DiseasesPage },
       { path: 'hr', component: DoctorHrComponent },
-      { path: 'hr-users', component: HrUsersComponent }
+      { path: 'hr-users', component: HrUsersComponent },
+      { path: 'employees', component: EmployeesPage },
+      { path: 'leaves', component: LeavesPage },
+      { path: 'stores', component: StoresPage }
     ]
   },
   { path: '**', redirectTo: '' }

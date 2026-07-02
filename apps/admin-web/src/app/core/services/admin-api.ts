@@ -270,4 +270,72 @@ export class AdminApi {
   grantAllStores(hrUserId: string) {
     return firstValueFrom(this.http.post(`${this.apiBase}/hr/users/${hrUserId}/stores/all`, {}));
   }
+
+  // HR — Employees (unified)
+  getHrEmployees(params: { q?: string; type?: string; status?: string }) {
+    return firstValueFrom(
+      this.http.get<{ employees: Array<any>; total: number }>(`${this.apiBase}/hr/employees`, {
+        params: { q: params.q ?? '', type: params.type ?? 'ALL', status: params.status ?? 'ALL' }
+      })
+    );
+  }
+
+  updateHrStoreStaff(id: string, data: Record<string, unknown>) {
+    return firstValueFrom(this.http.put<{ staff: any }>(`${this.apiBase}/hr/store/staff/${id}`, data));
+  }
+
+  generateStoreStaffLetter(id: string) {
+    return firstValueFrom(this.http.post<{ letter: any }>(`${this.apiBase}/hr/store/staff/${id}/letter`, {}));
+  }
+
+  getStoreStaffLetter(id: string) {
+    return firstValueFrom(this.http.get<{ letter: any }>(`${this.apiBase}/hr/store/staff/${id}/letter`));
+  }
+
+  setDoctorAssignment(id: string, data: { isOnline: boolean; clinicStoreId?: string | null }) {
+    return firstValueFrom(this.http.put(`${this.apiBase}/hr/doctors/${id}/assignment`, data));
+  }
+
+  // HR — Leaves
+  getAdminLeaves(params: { status?: string; empType?: string; page?: number; pageSize?: number }) {
+    return firstValueFrom(
+      this.http.get<{ leaves: Array<any>; total: number }>(`${this.apiBase}/hr/leaves`, {
+        params: {
+          status: params.status ?? 'ALL',
+          empType: params.empType ?? 'ALL',
+          page: String(params.page ?? 1),
+          pageSize: String(params.pageSize ?? 20)
+        }
+      })
+    );
+  }
+
+  createAdminLeave(data: any) {
+    return firstValueFrom(this.http.post<{ leave: any }>(`${this.apiBase}/hr/leaves`, data));
+  }
+
+  updateAdminLeave(id: string, data: { status: string; hrNote?: string }) {
+    return firstValueFrom(this.http.patch<{ leave: any }>(`${this.apiBase}/hr/leaves/${id}`, data));
+  }
+
+  // HR — Stores
+  getAdminStores() {
+    return firstValueFrom(this.http.get<{ stores: Array<any> }>(`${this.apiBase}/hr/stores`));
+  }
+
+  createAdminStore(data: { name: string; code: string; address?: string; phone?: string }) {
+    return firstValueFrom(this.http.post<{ store: any }>(`${this.apiBase}/hr/stores`, data));
+  }
+
+  createAdminManager(storeId: string, data: any) {
+    return firstValueFrom(this.http.post<{ manager: any }>(`${this.apiBase}/hr/stores/${storeId}/managers`, data));
+  }
+
+  createAdminStoreStaff(storeId: string, data: any) {
+    return firstValueFrom(this.http.post<{ staff: any }>(`${this.apiBase}/hr/stores/${storeId}/staff`, data));
+  }
+
+  setAdminStoreStaffStatus(id: string, data: any) {
+    return firstValueFrom(this.http.patch(`${this.apiBase}/hr/store/staff/${id}/status`, data));
+  }
 }
