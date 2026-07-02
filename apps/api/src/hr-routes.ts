@@ -13,8 +13,12 @@ function asyncRoute(fn: (req: Request, res: Response, next: NextFunction) => Pro
 }
 
 interface AuthPayload { userId: string; role: string }
+interface HrRequest extends Request {
+  hrPayload: AuthPayload;
+  accessibleStoreIds: string[] | null; // null = ADMIN (all stores)
+}
 
-/** Accepts both ADMIN and HR roles */
+/** Accepts both ADMIN and HR roles. Attaches accessible store IDs to request. */
 function hrAuthMiddleware(req: Request, res: Response, next: NextFunction): void {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) { res.status(401).json({ error: 'Unauthorized' }); return; }
@@ -23,21 +27,42 @@ function hrAuthMiddleware(req: Request, res: Response, next: NextFunction): void
     if (payload.role !== 'ADMIN' && payload.role !== 'HR') {
       res.status(403).json({ error: 'HR or Admin access required' }); return;
     }
-    (req as Request & { hrPayload: AuthPayload }).hrPayload = payload;
-    next();
+    const hrReq = req as HrRequest;
+    hrReq.hrPayload = payload;
+
+    if (payload.role === 'ADMIN') {
+      // Admin sees everything
+      hrReq.accessibleStoreIds = null;
+      next();
+    } else {
+      // HR: load their assigned stores
+      prisma.hrStoreAccess.findMany({
+        where: { hrUserId: payload.userId },
+        select: { storeId: true }
+      }).then(rows => {
+        hrReq.accessibleStoreIds = rows.map(r => r.storeId);
+        next();
+      }).catch(() => { res.status(500).json({ error: 'Failed to load store access' }); });
+    }
   } catch { res.status(401).json({ error: 'Invalid token' }); }
 }
 
-/** Admin-only (for creating HR users) */
+/** Admin-only (for creating HR users and managing access) */
 function adminOnly(req: Request, res: Response, next: NextFunction): void {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) { res.status(401).json({ error: 'Unauthorized' }); return; }
   try {
     const payload = jwt.verify(header.slice(7), JWT_SECRET) as AuthPayload;
     if (payload.role !== 'ADMIN') { res.status(403).json({ error: 'Admin only' }); return; }
-    (req as Request & { hrPayload: AuthPayload }).hrPayload = payload;
+    (req as HrRequest).hrPayload = payload;
+    (req as HrRequest).accessibleStoreIds = null;
     next();
   } catch { res.status(401).json({ error: 'Invalid token' }); }
+}
+
+function getAccess(req: Request): { userId: string; storeIds: string[] | null } {
+  const hrReq = req as HrRequest;
+  return { userId: hrReq.hrPayload.userId, storeIds: hrReq.accessibleStoreIds };
 }
 
 // Store-manager middleware (re-declared here to keep hr-routes independent)
@@ -129,44 +154,48 @@ hrRouter.get(
 hrRouter.get(
   '/dashboard',
   hrAuthMiddleware,
-  asyncRoute(async (_req, res) => {
-    const [
-      totalDoctors,
-      activeDoctors,
-      totalStoreStaff,
-      activeStoreStaff,
-      pendingLeaves,
-      recentJoins,
-      leaveStats
-    ] = await Promise.all([
-      prisma.doctor.count(),
-      prisma.doctor.count({ where: { employeeStatus: 'ACTIVE' } }),
-      prisma.storeStaff.count(),
-      prisma.storeStaff.count({ where: { employeeStatus: 'ACTIVE' } }),
-      prisma.leaveRequest.count({ where: { status: 'PENDING' } }),
+  asyncRoute(async (req, res) => {
+    const { storeIds } = getAccess(req);
+    // storeIds = null means admin (all stores); [] means HR with no stores assigned yet
+    const staffWhere = storeIds ? { storeId: { in: storeIds } } : {};
+    const doctorWhere = storeIds
+      ? { OR: [ { isOnline: true }, { clinicStoreId: { in: storeIds } } ] }
+      : {};
+    const leaveWhere = storeIds
+      ? {
+          OR: [
+            { employeeType: 'DOCTOR' as const, doctor: { OR: [{ isOnline: true }, { clinicStoreId: { in: storeIds } }] } },
+            { employeeType: 'STORE_STAFF' as const, storeStaff: { storeId: { in: storeIds } } }
+          ]
+        }
+      : {};
+
+    const [totalDoctors, activeDoctors, totalStoreStaff, activeStoreStaff, pendingLeaves, recentJoins, leaveStats] = await Promise.all([
+      prisma.doctor.count({ where: doctorWhere }),
+      prisma.doctor.count({ where: { ...doctorWhere, employeeStatus: 'ACTIVE' } }),
+      prisma.storeStaff.count({ where: staffWhere }),
+      prisma.storeStaff.count({ where: { ...staffWhere, employeeStatus: 'ACTIVE' } }),
+      prisma.leaveRequest.count({ where: { ...leaveWhere, status: 'PENDING' } }),
       prisma.doctor.findMany({
-        where: { joiningDate: { not: null } },
+        where: { ...doctorWhere, joiningDate: { not: null } },
         orderBy: { joiningDate: 'desc' },
         take: 5,
         include: { user: { select: { name: true } } }
       }),
-      prisma.leaveRequest.groupBy({
-        by: ['status'],
-        _count: { id: true }
-      })
+      prisma.leaveRequest.groupBy({ by: ['status'], where: leaveWhere, _count: { id: true } })
     ]);
 
     const leaveByStatus = Object.fromEntries(leaveStats.map(s => [s.status, s._count.id]));
+    const accessibleStores = storeIds
+      ? await prisma.store.findMany({ where: { id: { in: storeIds } }, select: { id: true, name: true, code: true } })
+      : await prisma.store.findMany({ select: { id: true, name: true, code: true } });
 
     res.json({
-      totalDoctors, activeDoctors,
-      totalStoreStaff, activeStoreStaff,
+      totalDoctors, activeDoctors, totalStoreStaff, activeStoreStaff,
       totalEmployees: totalDoctors + totalStoreStaff,
-      pendingLeaves,
-      leaveStats: leaveByStatus,
-      recentJoins: recentJoins.map(d => ({
-        id: d.id, name: d.user.name, designation: d.designation, joiningDate: d.joiningDate
-      }))
+      pendingLeaves, leaveStats: leaveByStatus,
+      accessibleStores,
+      recentJoins: recentJoins.map(d => ({ id: d.id, name: d.user.name, designation: d.designation, joiningDate: d.joiningDate }))
     });
   })
 );
@@ -177,6 +206,7 @@ hrRouter.get(
   '/employees',
   hrAuthMiddleware,
   asyncRoute(async (req, res) => {
+    const { storeIds } = getAccess(req);
     const q = (req.query['q'] as string) ?? '';
     const type = (req.query['type'] as string) ?? 'ALL';
     const status = (req.query['status'] as string) ?? 'ALL';
@@ -184,13 +214,19 @@ hrRouter.get(
     const results: unknown[] = [];
 
     if (type === 'ALL' || type === 'DOCTOR') {
+      // Online doctors are visible to all HR; location-based only if clinic store is accessible
+      const docStoreFilter = storeIds
+        ? { OR: [{ isOnline: true }, { clinicStoreId: { in: storeIds } }] }
+        : {};
       const doctors = await prisma.doctor.findMany({
         where: {
+          ...docStoreFilter,
           employeeStatus: status !== 'ALL' ? (status as EmployeeStatus) : undefined,
           user: q ? { name: { contains: q, mode: 'insensitive' } } : undefined
         },
         include: {
           user: { select: { id: true, name: true, email: true, mobile: true } },
+          clinicStore: { select: { id: true, name: true, address: true } },
           joiningLetter: { select: { id: true, letterNumber: true, issuedDate: true } }
         },
         orderBy: { createdAt: 'desc' }
@@ -202,13 +238,16 @@ hrRouter.get(
         joiningDate: d.joiningDate, employeeStatus: d.employeeStatus,
         workShift: d.workShift, shiftStart: d.shiftStart, shiftEnd: d.shiftEnd,
         weeklyOffDays: d.weeklyOffDays, employeeId: d.employeeId,
-        hasLetter: !!d.joiningLetter
+        hasLetter: !!d.joiningLetter,
+        isOnline: d.isOnline,
+        clinicStore: d.clinicStore
       })));
     }
 
     if (type === 'ALL' || type === 'STORE_STAFF') {
       const staff = await prisma.storeStaff.findMany({
         where: {
+          storeId: storeIds ? { in: storeIds } : undefined,
           employeeStatus: status !== 'ALL' ? (status as EmployeeStatus) : undefined,
           name: q ? { contains: q, mode: 'insensitive' } : undefined
         },
@@ -235,10 +274,16 @@ hrRouter.get(
 
 // ─── Doctor HR (accessible to HR + Admin) ────────────────────────────────────
 
-hrRouter.get('/doctors', hrAuthMiddleware, asyncRoute(async (_req, res) => {
+hrRouter.get('/doctors', hrAuthMiddleware, asyncRoute(async (req, res) => {
+  const { storeIds } = getAccess(req);
+  const docWhere = storeIds
+    ? { OR: [{ isOnline: true }, { clinicStoreId: { in: storeIds } }] }
+    : {};
   const doctors = await prisma.doctor.findMany({
+    where: docWhere,
     include: {
       user: { select: { id: true, name: true, email: true, mobile: true } },
+      clinicStore: { select: { id: true, name: true, address: true } },
       joiningLetter: true
     },
     orderBy: { joiningDate: 'asc' }
@@ -335,8 +380,10 @@ hrRouter.get('/doctors/:id/letter', hrAuthMiddleware, asyncRoute(async (req, res
 
 // ─── Store Staff HR (accessible to HR + store manager) ────────────────────────
 
-hrRouter.get('/store/staff', hrAuthMiddleware, asyncRoute(async (_req, res) => {
+hrRouter.get('/store/staff', hrAuthMiddleware, asyncRoute(async (req, res) => {
+  const { storeIds } = getAccess(req);
   const staff = await prisma.storeStaff.findMany({
+    where: storeIds ? { storeId: { in: storeIds } } : {},
     include: { joiningLetter: true, store: { select: { id: true, name: true } } },
     orderBy: { joiningDate: 'asc' }
   });
@@ -516,15 +563,15 @@ hrRouter.patch('/leaves/:id', hrAuthMiddleware, asyncRoute(async (req, res) => {
 
 // ─── Store & Manager Management (HR can create/manage) ───────────────────────
 
-// GET /hr/stores — list all stores
-hrRouter.get('/stores', hrAuthMiddleware, asyncRoute(async (_req, res) => {
+// GET /hr/stores — list only accessible stores
+hrRouter.get('/stores', hrAuthMiddleware, asyncRoute(async (req, res) => {
+  const { storeIds } = getAccess(req);
   const stores = await prisma.store.findMany({
+    where: storeIds ? { id: { in: storeIds } } : {},
     include: {
       _count: { select: { staff: true } },
-      staff: {
-        where: { role: 'MANAGER' },
-        select: { id: true, name: true, email: true, isActive: true, employeeStatus: true }
-      }
+      staff: { where: { role: 'MANAGER' }, select: { id: true, name: true, email: true, isActive: true, employeeStatus: true } },
+      hrAccess: { include: { hrUser: { select: { id: true, name: true, email: true } } } }
     },
     orderBy: { createdAt: 'asc' }
   });
@@ -698,6 +745,78 @@ hrRouter.patch('/users/:id/status', adminOnly, asyncRoute(async (req, res) => {
     data: { isActive }
   });
   res.json({ user: { id: user.id, name: user.name, isActive: user.isActive } });
+}));
+
+// GET /hr/users/:id/stores — list stores this HR user can access
+hrRouter.get('/users/:id/stores', adminOnly, asyncRoute(async (req, res) => {
+  const hrUserId = req.params['id'] as string;
+  const accesses = await prisma.hrStoreAccess.findMany({
+    where: { hrUserId },
+    include: { store: { select: { id: true, name: true, code: true, address: true } } }
+  });
+  const allStores = await prisma.store.findMany({ select: { id: true, name: true, code: true, address: true } });
+  res.json({ assigned: accesses.map(a => a.store), all: allStores });
+}));
+
+// POST /hr/users/:id/stores — grant HR user access to a store
+hrRouter.post('/users/:id/stores', adminOnly, asyncRoute(async (req, res) => {
+  const hrUserId = req.params['id'] as string;
+  const { storeId } = req.body as { storeId: string };
+  const { userId } = (req as HrRequest).hrPayload;
+
+  await prisma.user.findUniqueOrThrow({ where: { id: hrUserId, role: 'HR' } });
+  await prisma.store.findUniqueOrThrow({ where: { id: storeId } });
+
+  const access = await prisma.hrStoreAccess.upsert({
+    where: { hrUserId_storeId: { hrUserId, storeId } },
+    create: { hrUserId, storeId, grantedById: userId },
+    update: {}
+  });
+  res.status(201).json({ access });
+}));
+
+// DELETE /hr/users/:id/stores/:storeId — revoke HR user access to a store
+hrRouter.delete('/users/:id/stores/:storeId', adminOnly, asyncRoute(async (req, res) => {
+  const hrUserId = req.params['id'] as string;
+  const storeId = req.params['storeId'] as string;
+  await prisma.hrStoreAccess.deleteMany({ where: { hrUserId, storeId } });
+  res.json({ ok: true });
+}));
+
+// POST /hr/users/:id/stores/all — grant access to ALL stores (bulk)
+hrRouter.post('/users/:id/stores/all', adminOnly, asyncRoute(async (req, res) => {
+  const hrUserId = req.params['id'] as string;
+  const { userId } = (req as HrRequest).hrPayload;
+  const stores = await prisma.store.findMany({ select: { id: true } });
+  await prisma.hrStoreAccess.createMany({
+    data: stores.map(s => ({ hrUserId, storeId: s.id, grantedById: userId })),
+    skipDuplicates: true
+  });
+  res.json({ granted: stores.length });
+}));
+
+// ─── Doctor isOnline / clinicStore assignment ─────────────────────────────────
+
+// PUT /hr/doctors/:id/assignment — HR or Admin sets doctor online/offline + clinic store
+hrRouter.put('/doctors/:id/assignment', hrAuthMiddleware, asyncRoute(async (req, res) => {
+  const { storeIds } = getAccess(req);
+  const id = req.params['id'] as string;
+  const { isOnline, clinicStoreId } = req.body as { isOnline?: boolean; clinicStoreId?: string | null };
+
+  // HR can only assign to stores they have access to
+  if (clinicStoreId && storeIds && !storeIds.includes(clinicStoreId)) {
+    res.status(403).json({ error: 'You do not have access to that store' }); return;
+  }
+
+  const doctor = await prisma.doctor.update({
+    where: { id },
+    data: {
+      isOnline: isOnline ?? undefined,
+      clinicStoreId: isOnline ? null : (clinicStoreId ?? undefined)
+    },
+    include: { clinicStore: { select: { id: true, name: true, address: true } } }
+  });
+  res.json({ doctor });
 }));
 
 export { hrRouter };

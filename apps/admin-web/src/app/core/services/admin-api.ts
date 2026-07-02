@@ -236,7 +236,38 @@ export class AdminApi {
     );
   }
 
+  createHrUser(payload: { name: string; email: string; password: string; designation?: string; department?: string }) {
+    return firstValueFrom(this.http.post(`${this.apiBase}/hr/users`, payload));
+  }
+
+  getHrUsers() {
+    return firstValueFrom(this.http.get<{ hrUsers: any[] }>(`${this.apiBase}/hr/users`));
+  }
+
+  setHrUserStatus(id: string, isActive: boolean) {
+    return firstValueFrom(this.http.patch(`${this.apiBase}/hr/users/${id}/status`, { isActive }));
+  }
+
   getDoctorLetter(id: string) {
     return firstValueFrom(this.http.get<{ letter: any }>(`${this.apiBase}/hr/doctors/${id}/letter`));
+  }
+
+  // HR Store Access Management
+  getHrUserStores(hrUserId: string) {
+    return firstValueFrom(
+      this.http.get<{ assigned: any[]; all: any[] }>(`${this.apiBase}/hr/users/${hrUserId}/stores`)
+    );
+  }
+
+  grantHrStoreAccess(hrUserId: string, storeId: string) {
+    return firstValueFrom(this.http.post(`${this.apiBase}/hr/users/${hrUserId}/stores`, { storeId }));
+  }
+
+  revokeHrStoreAccess(hrUserId: string, storeId: string) {
+    return firstValueFrom(this.http.delete(`${this.apiBase}/hr/users/${hrUserId}/stores/${storeId}`));
+  }
+
+  grantAllStores(hrUserId: string) {
+    return firstValueFrom(this.http.post(`${this.apiBase}/hr/users/${hrUserId}/stores/all`, {}));
   }
 }

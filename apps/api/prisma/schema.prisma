@@ -77,6 +77,8 @@ model User {
   auditLogs          AuditLog[]      @relation("AuditActor")
   passwordResetTokens PasswordResetToken[]
   hrProfile          HrProfile?
+  hrStoreAccess      HrStoreAccess[] @relation("HrUserAccess")
+  hrStoreGrants      HrStoreAccess[] @relation("HrAccessGrantor")
   leaveApprovals     LeaveRequest[]  @relation("LeaveApprovals")
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
@@ -128,6 +130,9 @@ model Doctor {
   specialty        String
   registrationNo   String?
   isAvailable      Boolean        @default(true)
+  isOnline         Boolean        @default(true)   // true = telemedicine, false = location-based
+  clinicStoreId    String?                          // linked store/clinic if location-based
+  clinicStore      Store?         @relation("DoctorClinic", fields: [clinicStoreId], references: [id])
   user             User           @relation(fields: [userId], references: [id])
 
   // HR / Onboarding
@@ -163,6 +168,22 @@ model HrProfile {
   user        User     @relation(fields: [userId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// Which HR users can manage which stores (admin-granted)
+model HrStoreAccess {
+  id          String   @id @default(cuid())
+  hrUserId    String
+  storeId     String
+  grantedById String
+  hrUser      User     @relation("HrUserAccess",  fields: [hrUserId],    references: [id], onDelete: Cascade)
+  store       Store    @relation(fields: [storeId],     references: [id], onDelete: Cascade)
+  grantedBy   User     @relation("HrAccessGrantor", fields: [grantedById], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@unique([hrUserId, storeId])
+  @@index([hrUserId])
+  @@index([storeId])
 }
 
 enum LeaveType {
@@ -456,6 +477,8 @@ model Store {
   stocks    MedicineStock[]
   staff     StoreStaff[]
   movements StockMovement[]
+  doctors   Doctor[]        @relation("DoctorClinic")
+  hrAccess  HrStoreAccess[]
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
 }
