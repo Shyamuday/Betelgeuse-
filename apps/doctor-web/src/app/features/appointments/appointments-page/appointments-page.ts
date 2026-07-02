@@ -1,71 +1,15 @@
-import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
-import { environment } from '../../../../environments/environment';
-import { API_PATHS } from '../../../core/constants/api-paths.constants';
-
-type OptionType = 'METHOD' | 'DIAGNOSED_DISEASE';
-
-type TemplateItem = {
-  medicineName: string;
-  strength?: string;
-  dose?: string;
-  frequency?: string;
-  duration?: string;
-  instructions?: string;
-  sortOrder?: number;
-};
-
-type PrescriptionTemplate = {
-  id: string;
-  name: string;
-  diagnosis: string;
-  advice?: string | null;
-  notes: string;
-  items: TemplateItem[];
-};
-
-type PrescriptionOption = {
-  id: string;
-  label: string;
-};
-
-type MedicineRow = {
-  medicineName: string;
-  strength: string;
-  dose: string;
-  frequency: string;
-  duration: string;
-  durationDays: number;
-  instructions: string;
-  intakeTimesText: string;
-};
-
-type LoadedPrescription = {
-  id: string;
-  version: number;
-  status: 'DRAFT' | 'PUBLISHED' | 'CANCELLED';
-  createdAt?: string;
-  followUpDate?: string | null;
-  diagnosis: string;
-  advice?: string | null;
-  notes: string;
-  methodOptionId?: string | null;
-  diagnosedDiseaseOptionId?: string | null;
-  items: Array<{
-    medicineName: string;
-    strength?: string | null;
-    dose?: string | null;
-    frequency?: string | null;
-    duration?: string | null;
-    durationDays?: number | null;
-    instructions?: string | null;
-    intakeTimes?: string[] | null;
-  }>;
-};
+import { AppointmentsPrescriptionsService } from './appointments-prescriptions.service';
+import type {
+  LoadedPrescription,
+  MedicineRow,
+  OptionType,
+  PrescriptionOption,
+  PrescriptionTemplate
+} from './appointments-page.types';
 
 @Component({
   selector: 'app-appointments-page',
@@ -74,8 +18,6 @@ type LoadedPrescription = {
   styleUrl: './appointments-page.scss'
 })
 export class AppointmentsPage {
-  private readonly apiBase = environment.apiUrl;
-
   consultationId = '';
   methodOptionId = '';
   diagnosedDiseaseOptionId = '';
@@ -109,7 +51,7 @@ export class AppointmentsPage {
   medicineRows: MedicineRow[] = [this.newMedicineRow()];
 
   constructor(
-    private readonly http: HttpClient,
+    private readonly prescriptions: AppointmentsPrescriptionsService,
     private readonly route: ActivatedRoute
   ) {
     this.consultationId = this.route.snapshot.queryParamMap.get('consultationId') || '';
@@ -120,21 +62,15 @@ export class AppointmentsPage {
     }
   }
 
-  private async loadByType(type: OptionType) {
-    const response = await firstValueFrom(
-      this.http.get<{ options: PrescriptionOption[] }>(`${this.apiBase}${API_PATHS.DOCTOR.PRESCRIPTION_OPTIONS}`, {
-        params: { type }
-      })
-    );
-
-    return response.options;
-  }
-
   async loadOptions() {
     this.error = '';
     try {
-      this.methods = await this.loadByType('METHOD');
-      this.diagnosedDiseases = await this.loadByType('DIAGNOSED_DISEASE');
+      const [methods, diagnosedDiseases] = await Promise.all([
+        this.prescriptions.loadOptions('METHOD'),
+        this.prescriptions.loadOptions('DIAGNOSED_DISEASE')
+      ]);
+      this.methods = methods;
+      this.diagnosedDiseases = diagnosedDiseases;
     } catch {
       this.error = 'Could not load dropdown options. Login with API-backed doctor account.';
     }
@@ -163,12 +99,7 @@ export class AppointmentsPage {
     }
 
     try {
-      const response = await firstValueFrom(
-        this.http.post<{ option: PrescriptionOption }>(
-          `${this.apiBase}${API_PATHS.DOCTOR.PRESCRIPTION_OPTIONS}`,
-          { type, label }
-        )
-      );
+      const response = await this.prescriptions.addOption(type, label);
 
       if (type === 'METHOD') {
         this.newMethod = '';
@@ -209,11 +140,7 @@ export class AppointmentsPage {
     }
 
     try {
-      const response = await firstValueFrom(
-        this.http.get<{ prescriptions: LoadedPrescription[]; consultation?: { status: string } }>(
-          `${this.apiBase}${API_PATHS.DOCTOR.APPOINTMENT_PRESCRIPTIONS(this.consultationId)}`
-        )
-      );
+      const response = await this.prescriptions.loadConsultationPrescriptions(this.consultationId);
       this.loadedPrescriptions = response.prescriptions || [];
       this.consultationStatus = response.consultation?.status || '';
       if (this.loadedPrescriptions.length) {
@@ -425,17 +352,18 @@ export class AppointmentsPage {
     this.error = '';
     try {
       const payload = this.buildPayload(targetStatus);
-      if (this.editingPrescriptionId) {
-        await firstValueFrom(
-          this.http.put(`${this.apiBase}${API_PATHS.DOCTOR.PRESCRIPTIONS}/${this.editingPrescriptionId}`, payload)
-        );
-        this.message = targetStatus === 'PUBLISHED' ? 'Draft updated and published.' : 'Draft updated.';
-      } else {
-        await firstValueFrom(
-          this.http.post(`${this.apiBase}${API_PATHS.DOCTOR.APPOINTMENT_PRESCRIPTIONS(this.consultationId)}`, payload)
-        );
-        this.message = targetStatus === 'PUBLISHED' ? 'Follow-up prescription created and published.' : 'Draft created.';
-      }
+      await this.prescriptions.savePrescription(
+        this.consultationId,
+        this.editingPrescriptionId || null,
+        payload
+      );
+      this.message = this.editingPrescriptionId
+        ? targetStatus === 'PUBLISHED'
+          ? 'Draft updated and published.'
+          : 'Draft updated.'
+        : targetStatus === 'PUBLISHED'
+          ? 'Follow-up prescription created and published.'
+          : 'Draft created.';
       await this.loadConsultationPrescriptions();
     } catch {
       this.error = 'Could not save prescription. Check consultation assignment and draft state.';
@@ -447,10 +375,7 @@ export class AppointmentsPage {
   async loadTemplates() {
     this.templatesLoading = true;
     try {
-      const res = await firstValueFrom(
-        this.http.get<{ templates: PrescriptionTemplate[] }>(`${this.apiBase}${API_PATHS.DOCTOR.PRESCRIPTION_TEMPLATES}`)
-      );
-      this.templates = res.templates || [];
+      this.templates = await this.prescriptions.loadTemplates();
     } catch {
       // non-blocking — silently skip
     } finally {
@@ -486,25 +411,23 @@ export class AppointmentsPage {
     this.savingTemplate = true;
     this.savingTemplateError = '';
     try {
-      await firstValueFrom(
-        this.http.post(`${this.apiBase}${API_PATHS.DOCTOR.PRESCRIPTION_TEMPLATES}`, {
-          name,
-          diagnosis: this.diagnosis,
-          advice: this.advice,
-          notes: this.notes,
-          items: this.medicineRows
-            .filter((r) => r.medicineName.trim())
-            .map((r, i) => ({
-              medicineName: r.medicineName,
-              strength: r.strength || undefined,
-              dose: r.dose || undefined,
-              frequency: r.frequency || undefined,
-              duration: r.duration || undefined,
-              instructions: r.instructions || undefined,
-              sortOrder: i
-            }))
-        })
-      );
+      await this.prescriptions.saveTemplate({
+        name,
+        diagnosis: this.diagnosis,
+        advice: this.advice,
+        notes: this.notes,
+        items: this.medicineRows
+          .filter((r) => r.medicineName.trim())
+          .map((r, i) => ({
+            medicineName: r.medicineName,
+            strength: r.strength || undefined,
+            dose: r.dose || undefined,
+            frequency: r.frequency || undefined,
+            duration: r.duration || undefined,
+            instructions: r.instructions || undefined,
+            sortOrder: i
+          }))
+      });
       this.templateName = '';
       this.showSaveTemplateForm = false;
       await this.loadTemplates();
@@ -519,7 +442,7 @@ export class AppointmentsPage {
   async deleteTemplate(id: string) {
     this.deletingTemplateId = id;
     try {
-      await firstValueFrom(this.http.delete(`${this.apiBase}${API_PATHS.DOCTOR.PRESCRIPTION_TEMPLATES}/${id}`));
+      await this.prescriptions.deleteTemplate(id);
       this.templates = this.templates.filter((t) => t.id !== id);
     } catch {
       this.error = 'Could not delete template.';
@@ -532,9 +455,7 @@ export class AppointmentsPage {
     this.saving = true;
     this.error = '';
     try {
-      await firstValueFrom(
-        this.http.post(`${this.apiBase}${API_PATHS.CONSULTATIONS}/${this.consultationId}/complete`, {})
-      );
+      await this.prescriptions.closeConsultation(this.consultationId);
       this.consultationStatus = 'COMPLETED';
       this.confirmingClose = false;
       this.message = 'Consultation marked as completed.';

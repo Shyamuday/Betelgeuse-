@@ -14,14 +14,13 @@ import { ReminderPreferencesComponent, ReminderPrefs } from './reminder-preferen
 import { TodayMedicinesComponent } from './today-medicines.component';
 import { PatientProfileComponent } from './patient-profile.component';
 import { ClinicApiService } from './clinic-api.service';
+import { DashboardDataService, DashboardPaymentService } from './dashboard-data.service';
 import { AuthService } from './auth/auth.service';
 import { ROUTE_PATHS } from './core/constants/app-routes.constants';
 import { WHATSAPP_CONTACT_URL } from './core/constants/branding.constants';
 import { DEFAULT_QUIET_HOURS, DEFAULT_SNOOZE_MINUTES, NOTICE_DISMISS_MS } from './core/constants/timing.constants';
 import { PURCHASE_TYPES } from './core/constants/billing.constants';
-import { BillingPlan, Consultation, Disease, Doctor, DoseEvent, Prescription } from './models';
-
-type PaymentFlowState = 'IDLE' | 'CREATING_ORDER' | 'OPENING_CHECKOUT' | 'VERIFYING' | 'SUCCESS' | 'ERROR';
+import { BillingPlan, Consultation, Disease, DoseEvent, Doctor, Prescription } from './models';
 
 @Component({
   selector: 'app-dashboard',
@@ -54,9 +53,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly notice = signal('');
   readonly isLoading = signal(false);
   readonly isProcessing = signal(false);
-  readonly paymentFlowState = signal<PaymentFlowState>('IDLE');
-  readonly paymentFlowConsultation = signal<Consultation | null>(null);
-  readonly paymentFlowError = signal('');
   readonly title = computed(() => `${this.auth.user()?.role?.toLowerCase()} dashboard`);
   readonly whatsappLink = WHATSAPP_CONTACT_URL;
   private realtimeChannel?: { unsubscribe(): void };
@@ -82,12 +78,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     readonly auth: AuthService,
     private readonly api: ClinicApiService,
+    private readonly dataService: DashboardDataService,
+    readonly paymentService: DashboardPaymentService,
     private readonly router: Router
-  ) { }
+  ) {}
+
+  paymentFlowState() {
+    return this.paymentService.paymentFlowState();
+  }
+
+  paymentFlowConsultation() {
+    return this.paymentService.paymentFlowConsultation();
+  }
 
   ngOnInit() {
     this.loadBaseData();
-    this.realtimeChannel = this.api.watchClinicChanges(() => this.loadConsultations());
+    this.realtimeChannel = this.dataService.watchChanges(() => this.loadConsultations());
   }
 
   ngOnDestroy() {
@@ -119,80 +125,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   pay(consultation: Consultation) {
-    this.paymentFlowConsultation.set(consultation);
-    this.paymentFlowError.set('');
-    this.paymentFlowState.set('CREATING_ORDER');
-    this.isProcessing.set(true);
-    this.api.createPaymentOrder(consultation.id).subscribe({
-      next: (order) => {
-        this.paymentFlowState.set('OPENING_CHECKOUT');
-        this.api
-          .openRazorpayCheckout(consultation, order)
-          .then((payment) => {
-            this.paymentFlowState.set('VERIFYING');
-            this.api.verifyPayment(consultation.id, payment).subscribe({
-              next: () => {
-                this.paymentFlowState.set('SUCCESS');
-                this.showNotice('Payment verified. Admin can assign doctor now.');
-                this.loadConsultations();
-              },
-              error: (error) => {
-                this.isProcessing.set(false);
-                this.paymentFlowState.set('ERROR');
-                this.paymentFlowError.set(error.error?.message || error.message || 'Payment verification failed.');
-                this.showNotice(this.paymentFlowError());
-              },
-              complete: () => this.isProcessing.set(false)
-            });
-          })
-          .catch((error) => {
-            this.isProcessing.set(false);
-            this.paymentFlowState.set('ERROR');
-            this.paymentFlowError.set(error.message || 'Payment was not completed.');
-            this.showNotice(this.paymentFlowError());
-          });
+    this.paymentService.pay(
+      consultation,
+      () => {
+        this.showNotice('Payment verified. Admin can assign doctor now.');
+        this.loadConsultations();
       },
-      error: (error) => {
-        this.isProcessing.set(false);
-        this.paymentFlowState.set('ERROR');
-        this.paymentFlowError.set(error.error?.message || error.message || 'Payment failed.');
-        this.showNotice(this.paymentFlowError());
-      }
-    });
+      (message) => this.showNotice(message),
+      (processing) => this.isProcessing.set(processing)
+    );
   }
 
   paymentFlowTitle() {
-    const state = this.paymentFlowState();
-    if (state === 'CREATING_ORDER') return 'Creating secure order';
-    if (state === 'OPENING_CHECKOUT') return 'Opening Razorpay checkout';
-    if (state === 'VERIFYING') return 'Verifying payment';
-    if (state === 'SUCCESS') return 'Payment successful';
-    if (state === 'ERROR') return 'Payment failed';
-    return '';
+    return this.paymentService.paymentFlowTitle();
   }
 
   paymentFlowMessage() {
-    const state = this.paymentFlowState();
-    if (state === 'CREATING_ORDER') return 'Preparing your order details.';
-    if (state === 'OPENING_CHECKOUT') return 'Complete payment in the Razorpay popup.';
-    if (state === 'VERIFYING') return 'Please wait while we verify with the gateway.';
-    if (state === 'SUCCESS') return 'Your consultation is now ready for doctor assignment.';
-    if (state === 'ERROR') return this.paymentFlowError() || 'Something went wrong. Please try again.';
-    return '';
+    return this.paymentService.paymentFlowMessage();
   }
 
   retryPayment() {
-    const consultation = this.paymentFlowConsultation();
-    if (!consultation) return;
-    this.pay(consultation);
+    this.paymentService.retryPayment(
+      () => {
+        this.showNotice('Payment verified. Admin can assign doctor now.');
+        this.loadConsultations();
+      },
+      (message) => this.showNotice(message),
+      (processing) => this.isProcessing.set(processing)
+    );
   }
 
   closePaymentOverlay() {
-    if (this.paymentFlowState() === 'SUCCESS' || this.paymentFlowState() === 'ERROR') {
-      this.paymentFlowState.set('IDLE');
-      this.paymentFlowError.set('');
-      this.paymentFlowConsultation.set(null);
-    }
+    this.paymentService.closePaymentOverlay();
   }
 
   setActive(consultation: Consultation) {
@@ -344,7 +308,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private loadBaseData() {
     this.isLoading.set(true);
-    this.api.diseases().subscribe({
+    this.dataService.loadDiseases().subscribe({
       next: ({ diseases }) => {
         this.diseases.set(diseases);
         this.isLoading.set(false);
@@ -354,21 +318,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.showNotice(error.error?.message || error.message || 'Could not load diseases.');
       }
     });
-    this.api.billingPlans().subscribe({
+    this.dataService.loadBillingPlans().subscribe({
       next: ({ plans }) => this.billingPlans.set(plans || []),
       error: () => { /* keep disease-based one-time fallback */ }
     });
     this.loadConsultations();
-    if (this.auth.user()?.role === 'PATIENT') {
+    if (this.dataService.isPatient()) {
       this.loadPatientMedicationData();
     }
-    if (this.auth.user()?.role === 'ADMIN') {
+    if (this.dataService.isAdmin()) {
       this.loadAdminData();
     }
   }
 
   private loadConsultations() {
-    this.api.consultations().subscribe({
+    this.dataService.loadConsultations().subscribe({
       next: ({ consultations }) => {
         this.consultations.set(consultations);
         this.activeConsultation.set(
@@ -383,29 +347,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private loadAdminData() {
-    this.api.doctors().subscribe({
+    this.dataService.loadDoctors().subscribe({
       next: ({ doctors }) => {
         this.doctors.set(doctors);
         this.assignment.doctorId = doctors[0]?.id || this.assignment.doctorId;
       },
       error: (error) => this.showNotice(error.error?.message || error.message || 'Could not load doctors.')
     });
-    this.api.reports().subscribe({
+    this.dataService.loadReports().subscribe({
       next: (report) => this.report.set(report),
       error: (error) => this.showNotice(error.error?.message || error.message || 'Could not load reports.')
     });
   }
 
   private loadPatientMedicationData() {
-    this.api.reminderPreferences().subscribe({
+    this.dataService.loadReminderPreferences().subscribe({
       next: ({ preferences }) => { this.reminderPreferences = preferences; },
       error: (error) => this.showNotice(error.error?.message || error.message || 'Could not load reminder preferences.')
     });
-    this.api.patientPrescriptions().subscribe({
+    this.dataService.loadPatientPrescriptions().subscribe({
       next: ({ prescriptions }) => this.patientPrescriptions.set(prescriptions),
       error: (error) => this.showNotice(error.error?.message || error.message || 'Could not load prescriptions.')
     });
-    this.api.todayDoseEvents().subscribe({
+    this.dataService.loadTodayDoseEvents().subscribe({
       next: ({ doseEvents }) => this.todayDoseEvents.set(doseEvents),
       error: (error) => this.showNotice(error.error?.message || error.message || 'Could not load today medicines.')
     });

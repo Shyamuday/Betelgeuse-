@@ -1,473 +1,203 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
-import { AdminAuth } from './admin-auth';
-import { environment } from '../../../environments/environment';
-import { API_EXPORT_FORMAT, API_PATHS } from '../constants/api-paths.constants';
-import { FILTER_ALL, SORT_DIRECTIONS } from '../../shared/constants/filter.constants';
-import { PAGE_SIZES } from '../constants/pagination.constants';
-import type { DoctorSortField } from '../../features/doctors/constants/doctors-list.constants';
-import type { ConsumerSortField } from '../../features/consumers/constants/consumers-list.constants';
-import type { PaymentStatus } from '../../features/dashboard/constants/payments.constants';
-import type { SortDirection } from '../../shared/constants/filter.constants';
+import { AdminReportsApi } from './admin/admin-reports.api';
+import { AdminDoctorsApi } from './admin/admin-doctors.api';
+import { AdminCatalogApi } from './admin/admin-catalog.api';
+import { AdminHrApi } from './admin/admin-hr.api';
+import { AdminFinanceApi } from './admin/admin-finance.api';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdminApi {
-  private readonly apiBase = environment.apiUrl;
-
   constructor(
-    private readonly http: HttpClient,
-    private readonly auth: AdminAuth
+    private readonly reports: AdminReportsApi,
+    private readonly doctors: AdminDoctorsApi,
+    private readonly catalog: AdminCatalogApi,
+    private readonly hr: AdminHrApi,
+    private readonly finance: AdminFinanceApi
   ) {}
 
-  getReports() {
-    return firstValueFrom(this.http.get(`${this.apiBase}${API_PATHS.ADMIN.REPORTS}`));
+  getReports(...args: Parameters<AdminReportsApi['getReports']>) {
+    return this.reports.getReports(...(args as Parameters<AdminReportsApi['getReports']>));
   }
-
-  getAuditLogs(page = 1, pageSize: number = PAGE_SIZES.AUDIT_LOGS_API_DEFAULT) {
-    return firstValueFrom(
-      this.http.get<{ logs: Array<any>; pagination: any }>(`${this.apiBase}${API_PATHS.ADMIN.AUDIT_LOGS}`, {
-        params: { page: String(page), pageSize: String(pageSize) }
-      })
-    );
+  getAuditLogs(...args: Parameters<AdminReportsApi['getAuditLogs']>) {
+    return this.reports.getAuditLogs(...(args as Parameters<AdminReportsApi['getAuditLogs']>));
   }
-
-  getPayments(params: {
-    page?: number;
-    pageSize?: number;
-    status?: PaymentStatus;
-    from?: string;
-    to?: string;
-  }) {
-    return firstValueFrom(
-      this.http.get<{
-        payments: Array<any>;
-        summary: { total: number; paid: number; failedCount: number; pendingCount: number };
-        pagination: any;
-      }>(`${this.apiBase}${API_PATHS.ADMIN.PAYMENTS}`, {
-        params: {
-          page: String(params.page ?? 1),
-          pageSize: String(params.pageSize ?? PAGE_SIZES.PAYMENTS),
-          status: params.status ?? FILTER_ALL,
-          from: params.from ?? '',
-          to: params.to ?? ''
-        }
-      })
-    );
+  getPayments(...args: Parameters<AdminReportsApi['getPayments']>) {
+    return this.reports.getPayments(...(args as Parameters<AdminReportsApi['getPayments']>));
   }
-
-  async exportPaymentsCsv(params: {
-    page?: number;
-    pageSize?: number;
-    status?: PaymentStatus;
-    from?: string;
-    to?: string;
-  }) {
-    const query = new URLSearchParams({
-      page: String(params.page ?? 1),
-      pageSize: String(params.pageSize ?? PAGE_SIZES.PAYMENTS_EXPORT),
-      status: params.status ?? FILTER_ALL,
-      export: API_EXPORT_FORMAT.CSV
-    });
-    if (params.from) query.set('from', params.from);
-    if (params.to) query.set('to', params.to);
-    const response = await fetch(`${this.apiBase}${API_PATHS.ADMIN.PAYMENTS}?${query.toString()}`, {
-      headers: { Authorization: `Bearer ${this.auth.token()}` }
-    });
-    if (!response.ok) {
-      throw new Error('Could not export payments CSV.');
-    }
-    return response.text();
+  exportPaymentsCsv(...args: Parameters<AdminReportsApi['exportPaymentsCsv']>) {
+    return this.reports.exportPaymentsCsv(...(args as Parameters<AdminReportsApi['exportPaymentsCsv']>));
   }
-
-  getDoctors() {
-    return this.getDoctorsPaged({});
+  getDoctors(...args: Parameters<AdminDoctorsApi['getDoctors']>) {
+    return this.doctors.getDoctors(...(args as Parameters<AdminDoctorsApi['getDoctors']>));
   }
-
-  getPendingDoctors() {
-    return this.getPendingDoctorsPaged({});
+  getPendingDoctors(...args: Parameters<AdminDoctorsApi['getPendingDoctors']>) {
+    return this.doctors.getPendingDoctors(...(args as Parameters<AdminDoctorsApi['getPendingDoctors']>));
   }
-
-  getDoctorsPaged(params: {
-    page?: number;
-    pageSize?: number;
-    q?: string;
-    status?: 'ALL' | 'ACTIVE' | 'INACTIVE';
-    sortBy?: DoctorSortField;
-    sortDirection?: SortDirection;
-  }) {
-    return firstValueFrom(
-      this.http.get<{ doctors: Array<any>; pagination: any }>(`${this.apiBase}${API_PATHS.ADMIN.DOCTORS}`, {
-        params: {
-          page: String(params.page ?? 1),
-          pageSize: String(params.pageSize ?? PAGE_SIZES.DOCTORS),
-          q: params.q ?? '',
-          status: params.status ?? FILTER_ALL,
-          sortBy: params.sortBy ?? 'createdAt',
-          sortDirection: params.sortDirection ?? SORT_DIRECTIONS.DESC
-        }
-      })
-    );
+  getDoctorsPaged(...args: Parameters<AdminDoctorsApi['getDoctorsPaged']>) {
+    return this.doctors.getDoctorsPaged(...(args as Parameters<AdminDoctorsApi['getDoctorsPaged']>));
   }
-
-  getPendingDoctorsPaged(params: { page?: number; pageSize?: number; q?: string }) {
-    return firstValueFrom(
-      this.http.get<{ pendingDoctors: Array<any>; pagination: any }>(`${this.apiBase}${API_PATHS.ADMIN.DOCTORS_PENDING}`, {
-        params: {
-          page: String(params.page ?? 1),
-          pageSize: String(params.pageSize ?? PAGE_SIZES.DOCTORS),
-          q: params.q ?? ''
-        }
-      })
-    );
+  getPendingDoctorsPaged(...args: Parameters<AdminDoctorsApi['getPendingDoctorsPaged']>) {
+    return this.doctors.getPendingDoctorsPaged(...(args as Parameters<AdminDoctorsApi['getPendingDoctorsPaged']>));
   }
-
-  approveDoctor(doctorId: string) {
-    return firstValueFrom(this.http.post(`${this.apiBase}${API_PATHS.ADMIN.DOCTORS}/${doctorId}/approve`, {}));
+  approveDoctor(...args: Parameters<AdminDoctorsApi['approveDoctor']>) {
+    return this.doctors.approveDoctor(...(args as Parameters<AdminDoctorsApi['approveDoctor']>));
   }
-
-  rejectDoctor(doctorId: string) {
-    return firstValueFrom(this.http.post(`${this.apiBase}${API_PATHS.ADMIN.DOCTORS}/${doctorId}/reject`, {}));
+  rejectDoctor(...args: Parameters<AdminDoctorsApi['rejectDoctor']>) {
+    return this.doctors.rejectDoctor(...(args as Parameters<AdminDoctorsApi['rejectDoctor']>));
   }
-
-  setDoctorStatus(doctorId: string, isActive: boolean) {
-    return firstValueFrom(this.http.post(`${this.apiBase}${API_PATHS.ADMIN.DOCTORS}/${doctorId}/status`, { isActive }));
+  setDoctorStatus(...args: Parameters<AdminDoctorsApi['setDoctorStatus']>) {
+    return this.doctors.setDoctorStatus(...(args as Parameters<AdminDoctorsApi['setDoctorStatus']>));
   }
-
-  updateDoctor(
-    doctorId: string,
-    payload: {
-      name: string;
-      email: string;
-      mobile?: string;
-      specialty: string;
-      registrationNo?: string;
-      isAvailable: boolean;
-    }
-  ) {
-    return firstValueFrom(this.http.put(`${this.apiBase}${API_PATHS.ADMIN.DOCTORS}/${doctorId}`, payload));
+  updateDoctor(...args: Parameters<AdminDoctorsApi['updateDoctor']>) {
+    return this.doctors.updateDoctor(...(args as Parameters<AdminDoctorsApi['updateDoctor']>));
   }
-
-  createDoctor(payload: {
-    name: string;
-    email: string;
-    mobile?: string;
-    password: string;
-    specialty: string;
-    registrationNo?: string;
-  }) {
-    return firstValueFrom(this.http.post(`${this.apiBase}${API_PATHS.ADMIN.DOCTORS}`, payload));
+  createDoctor(...args: Parameters<AdminDoctorsApi['createDoctor']>) {
+    return this.doctors.createDoctor(...(args as Parameters<AdminDoctorsApi['createDoctor']>));
   }
-
-  getConsultations() {
-    return firstValueFrom(this.http.get<{ consultations: Array<any> }>(`${this.apiBase}${API_PATHS.CONSULTATIONS}`));
+  getConsultations(...args: Parameters<AdminCatalogApi['getConsultations']>) {
+    return this.catalog.getConsultations(...(args as Parameters<AdminCatalogApi['getConsultations']>));
   }
-
-  getConsumersPaged(params: {
-    page?: number;
-    pageSize?: number;
-    q?: string;
-    sortBy?: ConsumerSortField;
-    sortDirection?: SortDirection;
-  }) {
-    return firstValueFrom(
-      this.http.get<{ consumers: Array<any>; pagination: any }>(`${this.apiBase}${API_PATHS.ADMIN.CONSUMERS}`, {
-        params: {
-          page: String(params.page ?? 1),
-          pageSize: String(params.pageSize ?? PAGE_SIZES.CONSUMERS),
-          q: params.q ?? '',
-          sortBy: params.sortBy ?? 'consultations',
-          sortDirection: params.sortDirection ?? SORT_DIRECTIONS.DESC
-        }
-      })
-    );
+  getConsumersPaged(...args: Parameters<AdminCatalogApi['getConsumersPaged']>) {
+    return this.catalog.getConsumersPaged(...(args as Parameters<AdminCatalogApi['getConsumersPaged']>));
   }
-
-  getConsumerDetail(consumerId: string) {
-    return firstValueFrom(
-      this.http.get<{ consumer: any; consultations: Array<any>; adherence: any }>(
-        `${this.apiBase}${API_PATHS.ADMIN.CONSUMERS}/${consumerId}`
-      )
-    );
+  getConsumerDetail(...args: Parameters<AdminCatalogApi['getConsumerDetail']>) {
+    return this.catalog.getConsumerDetail(...(args as Parameters<AdminCatalogApi['getConsumerDetail']>));
   }
-
-  assignDoctor(consultationId: string, doctorId: string) {
-    return firstValueFrom(
-      this.http.post(`${this.apiBase}${API_PATHS.CONSULTATIONS}/${consultationId}/assign`, { doctorId })
-    );
+  assignDoctor(...args: Parameters<AdminCatalogApi['assignDoctor']>) {
+    return this.catalog.assignDoctor(...(args as Parameters<AdminCatalogApi['assignDoctor']>));
   }
-
-  getActiveDoctors() {
-    return firstValueFrom(
-      this.http.get<{ doctors: Array<{ id: string; name: string; doctorProfile?: { specialty?: string } | null }> }>(
-        `${this.apiBase}${API_PATHS.ADMIN.DOCTORS}`,
-        {
-          params: {
-            status: 'ACTIVE',
-            pageSize: String(PAGE_SIZES.ACTIVE_DOCTORS),
-            page: '1',
-            q: '',
-            sortBy: 'name',
-            sortDirection: SORT_DIRECTIONS.ASC
-          }
-        }
-      )
-    );
+  getActiveDoctors(...args: Parameters<AdminCatalogApi['getActiveDoctors']>) {
+    return this.catalog.getActiveDoctors(...(args as Parameters<AdminCatalogApi['getActiveDoctors']>));
   }
-
-  getDiseases() {
-    return firstValueFrom(
-      this.http.get<{ diseases: Array<{ id: string; name: string; description: string; feeInPaise: number; isActive: boolean; intakeQuestions: string[] }> }>(
-        `${this.apiBase}${API_PATHS.ADMIN.DISEASES_LIST}`
-      )
-    );
+  getDiseases(...args: Parameters<AdminCatalogApi['getDiseases']>) {
+    return this.catalog.getDiseases(...(args as Parameters<AdminCatalogApi['getDiseases']>));
   }
-
-  createDisease(payload: { name: string; description: string; feeInPaise: number; intakeQuestions: string[] }) {
-    return firstValueFrom(this.http.post(`${this.apiBase}${API_PATHS.ADMIN.DISEASES}`, payload));
+  createDisease(...args: Parameters<AdminCatalogApi['createDisease']>) {
+    return this.catalog.createDisease(...(args as Parameters<AdminCatalogApi['createDisease']>));
   }
-
-  updateDisease(id: string, payload: { name: string; description: string; feeInPaise: number; isActive: boolean; intakeQuestions: string[] }) {
-    return firstValueFrom(this.http.put(`${this.apiBase}${API_PATHS.ADMIN.DISEASES}/${id}`, payload));
+  updateDisease(...args: Parameters<AdminCatalogApi['updateDisease']>) {
+    return this.catalog.updateDisease(...(args as Parameters<AdminCatalogApi['updateDisease']>));
   }
-
-  // HR — Doctors
-  getHrDoctors() {
-    return firstValueFrom(this.http.get<{ doctors: Array<any> }>(`${this.apiBase}${API_PATHS.HR.DOCTORS}`));
+  getHrDoctors(...args: Parameters<AdminHrApi['getHrDoctors']>) {
+    return this.hr.getHrDoctors(...(args as Parameters<AdminHrApi['getHrDoctors']>));
   }
-
-  getHrDoctor(id: string) {
-    return firstValueFrom(this.http.get<{ doctor: any }>(`${this.apiBase}${API_PATHS.HR.DOCTORS}/${id}`));
+  getHrDoctor(...args: Parameters<AdminHrApi['getHrDoctor']>) {
+    return this.hr.getHrDoctor(...(args as Parameters<AdminHrApi['getHrDoctor']>));
   }
-
-  updateHrDoctor(id: string, data: Record<string, unknown>) {
-    return firstValueFrom(this.http.put<{ doctor: any }>(`${this.apiBase}${API_PATHS.HR.DOCTORS}/${id}`, data));
+  updateHrDoctor(...args: Parameters<AdminHrApi['updateHrDoctor']>) {
+    return this.hr.updateHrDoctor(...(args as Parameters<AdminHrApi['updateHrDoctor']>));
   }
-
-  generateDoctorLetter(id: string, clinicName?: string, clinicAddress?: string) {
-    return firstValueFrom(
-      this.http.post<{ letter: any }>(`${this.apiBase}${API_PATHS.HR.DOCTORS}/${id}/letter`, { clinicName, clinicAddress })
-    );
+  generateDoctorLetter(...args: Parameters<AdminHrApi['generateDoctorLetter']>) {
+    return this.hr.generateDoctorLetter(...(args as Parameters<AdminHrApi['generateDoctorLetter']>));
   }
-
-  createHrUser(payload: { name: string; email: string; password: string; designation?: string; department?: string }) {
-    return firstValueFrom(this.http.post(`${this.apiBase}${API_PATHS.HR.USERS}`, payload));
+  createHrUser(...args: Parameters<AdminHrApi['createHrUser']>) {
+    return this.hr.createHrUser(...(args as Parameters<AdminHrApi['createHrUser']>));
   }
-
-  getHrUsers() {
-    return firstValueFrom(this.http.get<{ hrUsers: any[] }>(`${this.apiBase}${API_PATHS.HR.USERS}`));
+  getHrUsers(...args: Parameters<AdminHrApi['getHrUsers']>) {
+    return this.hr.getHrUsers(...(args as Parameters<AdminHrApi['getHrUsers']>));
   }
-
-  setHrUserStatus(id: string, isActive: boolean) {
-    return firstValueFrom(this.http.patch(`${this.apiBase}${API_PATHS.HR.USERS}/${id}/status`, { isActive }));
+  setHrUserStatus(...args: Parameters<AdminHrApi['setHrUserStatus']>) {
+    return this.hr.setHrUserStatus(...(args as Parameters<AdminHrApi['setHrUserStatus']>));
   }
-
-  getDoctorLetter(id: string) {
-    return firstValueFrom(this.http.get<{ letter: any }>(`${this.apiBase}${API_PATHS.HR.DOCTORS}/${id}/letter`));
+  getDoctorLetter(...args: Parameters<AdminHrApi['getDoctorLetter']>) {
+    return this.hr.getDoctorLetter(...(args as Parameters<AdminHrApi['getDoctorLetter']>));
   }
-
-  // HR Store Access Management
-  getHrUserStores(hrUserId: string) {
-    return firstValueFrom(
-      this.http.get<{ assigned: any[]; all: any[] }>(`${this.apiBase}${API_PATHS.HR.USERS}/${hrUserId}/stores`)
-    );
+  getHrUserStores(...args: Parameters<AdminHrApi['getHrUserStores']>) {
+    return this.hr.getHrUserStores(...(args as Parameters<AdminHrApi['getHrUserStores']>));
   }
-
-  grantHrStoreAccess(hrUserId: string, storeId: string) {
-    return firstValueFrom(this.http.post(`${this.apiBase}${API_PATHS.HR.USERS}/${hrUserId}/stores`, { storeId }));
+  grantHrStoreAccess(...args: Parameters<AdminHrApi['grantHrStoreAccess']>) {
+    return this.hr.grantHrStoreAccess(...(args as Parameters<AdminHrApi['grantHrStoreAccess']>));
   }
-
-  revokeHrStoreAccess(hrUserId: string, storeId: string) {
-    return firstValueFrom(this.http.delete(`${this.apiBase}${API_PATHS.HR.USERS}/${hrUserId}/stores/${storeId}`));
+  revokeHrStoreAccess(...args: Parameters<AdminHrApi['revokeHrStoreAccess']>) {
+    return this.hr.revokeHrStoreAccess(...(args as Parameters<AdminHrApi['revokeHrStoreAccess']>));
   }
-
-  grantAllStores(hrUserId: string) {
-    return firstValueFrom(this.http.post(`${this.apiBase}${API_PATHS.HR.USERS}/${hrUserId}/stores/all`, {}));
+  grantAllStores(...args: Parameters<AdminHrApi['grantAllStores']>) {
+    return this.hr.grantAllStores(...(args as Parameters<AdminHrApi['grantAllStores']>));
   }
-
-  // HR — Employees (unified)
-  getHrEmployees(params: { q?: string; type?: string; status?: string }) {
-    return firstValueFrom(
-      this.http.get<{ employees: Array<any>; total: number }>(`${this.apiBase}${API_PATHS.HR.EMPLOYEES}`, {
-        params: { q: params.q ?? '', type: params.type ?? FILTER_ALL, status: params.status ?? FILTER_ALL }
-      })
-    );
+  getHrEmployees(...args: Parameters<AdminHrApi['getHrEmployees']>) {
+    return this.hr.getHrEmployees(...(args as Parameters<AdminHrApi['getHrEmployees']>));
   }
-
-  updateHrStoreStaff(id: string, data: Record<string, unknown>) {
-    return firstValueFrom(this.http.put<{ staff: any }>(`${this.apiBase}${API_PATHS.HR.STORE_STAFF}/${id}`, data));
+  updateHrStoreStaff(...args: Parameters<AdminHrApi['updateHrStoreStaff']>) {
+    return this.hr.updateHrStoreStaff(...(args as Parameters<AdminHrApi['updateHrStoreStaff']>));
   }
-
-  generateStoreStaffLetter(id: string) {
-    return firstValueFrom(this.http.post<{ letter: any }>(`${this.apiBase}${API_PATHS.HR.STORE_STAFF}/${id}/letter`, {}));
+  generateStoreStaffLetter(...args: Parameters<AdminHrApi['generateStoreStaffLetter']>) {
+    return this.hr.generateStoreStaffLetter(...(args as Parameters<AdminHrApi['generateStoreStaffLetter']>));
   }
-
-  getStoreStaffLetter(id: string) {
-    return firstValueFrom(this.http.get<{ letter: any }>(`${this.apiBase}${API_PATHS.HR.STORE_STAFF}/${id}/letter`));
+  getStoreStaffLetter(...args: Parameters<AdminHrApi['getStoreStaffLetter']>) {
+    return this.hr.getStoreStaffLetter(...(args as Parameters<AdminHrApi['getStoreStaffLetter']>));
   }
-
-  setDoctorAssignment(id: string, data: { isOnline: boolean; clinicStoreId?: string | null }) {
-    return firstValueFrom(this.http.put(`${this.apiBase}${API_PATHS.HR.DOCTORS}/${id}/assignment`, data));
+  setDoctorAssignment(...args: Parameters<AdminHrApi['setDoctorAssignment']>) {
+    return this.hr.setDoctorAssignment(...(args as Parameters<AdminHrApi['setDoctorAssignment']>));
   }
-
-  // HR — Leaves
-  getAdminLeaves(params: { status?: string; empType?: string; page?: number; pageSize?: number }) {
-    return firstValueFrom(
-      this.http.get<{ leaves: Array<any>; total: number }>(`${this.apiBase}${API_PATHS.HR.LEAVES}`, {
-        params: {
-          status: params.status ?? FILTER_ALL,
-          empType: params.empType ?? FILTER_ALL,
-          page: String(params.page ?? 1),
-          pageSize: String(params.pageSize ?? PAGE_SIZES.LEAVES)
-        }
-      })
-    );
+  getAdminLeaves(...args: Parameters<AdminHrApi['getAdminLeaves']>) {
+    return this.hr.getAdminLeaves(...(args as Parameters<AdminHrApi['getAdminLeaves']>));
   }
-
-  createAdminLeave(data: any) {
-    return firstValueFrom(this.http.post<{ leave: any }>(`${this.apiBase}${API_PATHS.HR.LEAVES}`, data));
+  createAdminLeave(...args: Parameters<AdminHrApi['createAdminLeave']>) {
+    return this.hr.createAdminLeave(...(args as Parameters<AdminHrApi['createAdminLeave']>));
   }
-
-  updateAdminLeave(id: string, data: { status: string; hrNote?: string }) {
-    return firstValueFrom(this.http.patch<{ leave: any }>(`${this.apiBase}${API_PATHS.HR.LEAVES}/${id}`, data));
+  updateAdminLeave(...args: Parameters<AdminHrApi['updateAdminLeave']>) {
+    return this.hr.updateAdminLeave(...(args as Parameters<AdminHrApi['updateAdminLeave']>));
   }
-
-  // HR — Stores
-  getAdminStores() {
-    return firstValueFrom(this.http.get<{ stores: Array<any> }>(`${this.apiBase}${API_PATHS.HR.STORES}`));
+  getAdminStores(...args: Parameters<AdminHrApi['getAdminStores']>) {
+    return this.hr.getAdminStores(...(args as Parameters<AdminHrApi['getAdminStores']>));
   }
-
-  createAdminStore(data: { name: string; code: string; address?: string; phone?: string }) {
-    return firstValueFrom(this.http.post<{ store: any }>(`${this.apiBase}${API_PATHS.HR.STORES}`, data));
+  createAdminStore(...args: Parameters<AdminHrApi['createAdminStore']>) {
+    return this.hr.createAdminStore(...(args as Parameters<AdminHrApi['createAdminStore']>));
   }
-
-  createAdminManager(storeId: string, data: any) {
-    return firstValueFrom(this.http.post<{ manager: any }>(`${this.apiBase}${API_PATHS.HR.STORES}/${storeId}/managers`, data));
+  createAdminManager(...args: Parameters<AdminHrApi['createAdminManager']>) {
+    return this.hr.createAdminManager(...(args as Parameters<AdminHrApi['createAdminManager']>));
   }
-
-  createAdminStoreStaff(storeId: string, data: any) {
-    return firstValueFrom(this.http.post<{ staff: any }>(`${this.apiBase}${API_PATHS.HR.STORES}/${storeId}/staff`, data));
+  createAdminStoreStaff(...args: Parameters<AdminHrApi['createAdminStoreStaff']>) {
+    return this.hr.createAdminStoreStaff(...(args as Parameters<AdminHrApi['createAdminStoreStaff']>));
   }
-
-  setAdminStoreStaffStatus(id: string, data: any) {
-    return firstValueFrom(this.http.patch(`${this.apiBase}${API_PATHS.HR.STORE_STAFF}/${id}/status`, data));
+  setAdminStoreStaffStatus(...args: Parameters<AdminHrApi['setAdminStoreStaffStatus']>) {
+    return this.hr.setAdminStoreStaffStatus(...(args as Parameters<AdminHrApi['setAdminStoreStaffStatus']>));
   }
-
-  // Admin Consultations
-  getAdminConsultations(params: { status?: string; assigned?: string; q?: string; page?: number; pageSize?: number }) {
-    return firstValueFrom(
-      this.http.get<{ consultations: any[]; total: number }>(`${this.apiBase}/admin/consultations`, {
-        params: {
-          status:   params.status   ?? '',
-          assigned: params.assigned ?? '',
-          q:        params.q        ?? '',
-          page:     String(params.page     ?? 1),
-          pageSize: String(params.pageSize ?? 20)
-        }
-      })
-    );
+  getAdminConsultations(...args: Parameters<AdminHrApi['getAdminConsultations']>) {
+    return this.hr.getAdminConsultations(...(args as Parameters<AdminHrApi['getAdminConsultations']>));
   }
-
-  assignConsultationDoctor(consultationId: string, doctorId: string) {
-    return firstValueFrom(
-      this.http.put<{ consultation: any }>(`${this.apiBase}/admin/consultations/${consultationId}/assign`, { doctorId })
-    );
+  assignConsultationDoctor(...args: Parameters<AdminHrApi['assignConsultationDoctor']>) {
+    return this.hr.assignConsultationDoctor(...(args as Parameters<AdminHrApi['assignConsultationDoctor']>));
   }
-
-  getPayroll(month: string) {
-    return firstValueFrom(
-      this.http.get<{ month: string; rows: Array<any>; summary: any }>(`${this.apiBase}${API_PATHS.HR.PAYROLL}`, {
-        params: { month }
-      })
-    );
+  getPayroll(...args: Parameters<AdminHrApi['getPayroll']>) {
+    return this.hr.getPayroll(...(args as Parameters<AdminHrApi['getPayroll']>));
   }
-
-  getFinanceSummary(month?: string) {
-    return firstValueFrom(
-      this.http.get<any>(`${this.apiBase}${API_PATHS.ADMIN.FINANCE.SUMMARY}`, {
-        params: month ? { month } : {}
-      })
-    );
+  getFinanceSummary(...args: Parameters<AdminFinanceApi['getFinanceSummary']>) {
+    return this.finance.getFinanceSummary(...(args as Parameters<AdminFinanceApi['getFinanceSummary']>));
   }
-
-  getRevenueTrend(months = 6) {
-    return firstValueFrom(
-      this.http.get<{ rows: Array<any> }>(`${this.apiBase}${API_PATHS.ADMIN.FINANCE.REVENUE_TREND}`, {
-        params: { months: String(months) }
-      })
-    );
+  getRevenueTrend(...args: Parameters<AdminFinanceApi['getRevenueTrend']>) {
+    return this.finance.getRevenueTrend(...(args as Parameters<AdminFinanceApi['getRevenueTrend']>));
   }
-
-  getRevenueByDoctor(month?: string) {
-    return firstValueFrom(
-      this.http.get<{ rows: Array<any> }>(`${this.apiBase}${API_PATHS.ADMIN.FINANCE.REVENUE_BY_DOCTOR}`, {
-        params: month ? { month } : {}
-      })
-    );
+  getRevenueByDoctor(...args: Parameters<AdminFinanceApi['getRevenueByDoctor']>) {
+    return this.finance.getRevenueByDoctor(...(args as Parameters<AdminFinanceApi['getRevenueByDoctor']>));
   }
-
-  getRevenueByDisease(month?: string) {
-    return firstValueFrom(
-      this.http.get<{ rows: Array<any> }>(`${this.apiBase}${API_PATHS.ADMIN.FINANCE.REVENUE_BY_DISEASE}`, {
-        params: month ? { month } : {}
-      })
-    );
+  getRevenueByDisease(...args: Parameters<AdminFinanceApi['getRevenueByDisease']>) {
+    return this.finance.getRevenueByDisease(...(args as Parameters<AdminFinanceApi['getRevenueByDisease']>));
   }
-
-  getOutstandingPayments() {
-    return firstValueFrom(
-      this.http.get<{ payments: Array<any> }>(`${this.apiBase}${API_PATHS.ADMIN.FINANCE.OUTSTANDING}`)
-    );
+  getOutstandingPayments(...args: Parameters<AdminFinanceApi['getOutstandingPayments']>) {
+    return this.finance.getOutstandingPayments(...(args as Parameters<AdminFinanceApi['getOutstandingPayments']>));
   }
-
-  getMedicineRevenue(params: { from?: string; to?: string; storeId?: string }) {
-    return firstValueFrom(
-      this.http.get<{ movements: Array<any>; totalInPaise: number; count: number }>(
-        `${this.apiBase}${API_PATHS.ADMIN.FINANCE.MEDICINE_REVENUE}`,
-        { params: { from: params.from ?? '', to: params.to ?? '', storeId: params.storeId ?? '' } }
-      )
-    );
+  getMedicineRevenue(...args: Parameters<AdminFinanceApi['getMedicineRevenue']>) {
+    return this.finance.getMedicineRevenue(...(args as Parameters<AdminFinanceApi['getMedicineRevenue']>));
   }
-
-  getPayslip(type: string, id: string, month: string) {
-    return firstValueFrom(
-      this.http.get<{ payslip: any }>(`${this.apiBase}${API_PATHS.ADMIN.FINANCE.PAYSLIP(type, id)}`, {
-        params: { month }
-      })
-    );
+  getPayslip(...args: Parameters<AdminFinanceApi['getPayslip']>) {
+    return this.finance.getPayslip(...(args as Parameters<AdminFinanceApi['getPayslip']>));
   }
-
-  getExpenses(params: { level?: string; storeId?: string; category?: string; from?: string; to?: string }) {
-    return firstValueFrom(
-      this.http.get<{ expenses: Array<any> }>(`${this.apiBase}${API_PATHS.ADMIN.FINANCE.EXPENSES}`, {
-        params: {
-          level: params.level ?? '',
-          storeId: params.storeId ?? '',
-          category: params.category ?? '',
-          from: params.from ?? '',
-          to: params.to ?? ''
-        }
-      })
-    );
+  getExpenses(...args: Parameters<AdminFinanceApi['getExpenses']>) {
+    return this.finance.getExpenses(...(args as Parameters<AdminFinanceApi['getExpenses']>));
   }
-
-  getExpenseSummary(month: string) {
-    return firstValueFrom(
-      this.http.get<any>(`${this.apiBase}${API_PATHS.ADMIN.FINANCE.EXPENSES_SUMMARY}`, { params: { month } })
-    );
+  getExpenseSummary(...args: Parameters<AdminFinanceApi['getExpenseSummary']>) {
+    return this.finance.getExpenseSummary(...(args as Parameters<AdminFinanceApi['getExpenseSummary']>));
   }
-
-  createExpense(data: Record<string, unknown>) {
-    return firstValueFrom(this.http.post<{ expense: any }>(`${this.apiBase}${API_PATHS.ADMIN.FINANCE.EXPENSES}`, data));
+  createExpense(...args: Parameters<AdminFinanceApi['createExpense']>) {
+    return this.finance.createExpense(...(args as Parameters<AdminFinanceApi['createExpense']>));
   }
-
-  updateExpense(id: string, data: Record<string, unknown>) {
-    return firstValueFrom(this.http.put<{ expense: any }>(`${this.apiBase}${API_PATHS.ADMIN.FINANCE.EXPENSES}/${id}`, data));
+  updateExpense(...args: Parameters<AdminFinanceApi['updateExpense']>) {
+    return this.finance.updateExpense(...(args as Parameters<AdminFinanceApi['updateExpense']>));
   }
-
-  deleteExpense(id: string) {
-    return firstValueFrom(this.http.delete(`${this.apiBase}${API_PATHS.ADMIN.FINANCE.EXPENSES}/${id}`));
+  deleteExpense(...args: Parameters<AdminFinanceApi['deleteExpense']>) {
+    return this.finance.deleteExpense(...(args as Parameters<AdminFinanceApi['deleteExpense']>));
   }
 }

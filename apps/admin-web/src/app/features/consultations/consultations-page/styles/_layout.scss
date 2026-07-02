@@ -1,0 +1,45 @@
+.cp {
+    padding: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    color: white;
+}
+
+.cp-hdr {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.cp-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0 0 4px;
+}
+
+.cp-sub {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+}
+
+.hdr-stats {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.stat-pill {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+
+    &.unassigned {
+        background: rgba(251, 146, 60, 0.12);
+        color: #fb923c;
+    }
+}
+
