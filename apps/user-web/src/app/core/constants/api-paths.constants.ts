@@ -9,9 +9,11 @@ export const API_PATHS = {
     PRESCRIPTIONS: '/patient/prescriptions',
     PRESCRIPTION_PDF: (id: string) => `/patient/prescriptions/${id}/pdf`,
     TODAY_DOSES: '/patient/today-doses',
+    MEDICINE_REMINDERS: '/patient/medicine-reminders',
     DOSE_TAKE: (id: string) => `/patient/dose-events/${id}/take`,
     DOSE_SKIP: (id: string) => `/patient/dose-events/${id}/skip`,
     DOSE_SNOOZE: (id: string) => `/patient/dose-events/${id}/snooze`,
+    DOSE_EXPLAIN: (id: string) => `/patient/dose-events/${id}/explain`,
     REMINDER_PREFERENCES: '/patient/reminder-preferences',
     PROFILE: '/patient/profile',
     CARD: '/patient/card'

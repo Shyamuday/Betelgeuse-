@@ -4,29 +4,74 @@ import { DoseEventStatus, Role } from '@prisma/client';
 import { authRequired, allowRoles } from '../auth.js';
 import { prisma } from '../db.js';
 import { DEFAULT_REMINDER_PREFERENCE } from '../constants/reminder-preferences.constants.js';
+import { doseNeedsPatientReason } from '../services/dose-notes.js';
 import { asyncRoute, routeParam, queryPositiveInt } from '../utils/helpers.js';
 import { doctorCanAccessPatient } from '../services/patient-identity.js';
 
 export const router = Router();
 
+const doseEventInclude = {
+  prescriptionItem: true,
+  prescription: { include: { methodOption: true, diagnosedDiseaseOption: true } }
+} as const;
+
+function dayBounds(now = new Date()) {
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+  return { start, end };
+}
+
 // ─── Patient dose endpoints ────────────────────────────────────────────────────
+
+router.get(
+  '/patient/medicine-reminders',
+  authRequired,
+  allowRoles(Role.PATIENT),
+  asyncRoute(async (req, res) => {
+    const patientId = req.user!.id;
+    const { start, end } = dayBounds();
+    const since = new Date();
+    since.setDate(since.getDate() - 7);
+    since.setHours(0, 0, 0, 0);
+
+    const [todayDoses, recentDoses] = await Promise.all([
+      prisma.medicineDoseEvent.findMany({
+        where: { patientId, scheduledFor: { gte: start, lt: end } },
+        include: doseEventInclude,
+        orderBy: { scheduledFor: 'asc' }
+      }),
+      prisma.medicineDoseEvent.findMany({
+        where: {
+          patientId,
+          status: { in: [DoseEventStatus.MISSED, DoseEventStatus.SKIPPED] },
+          scheduledFor: { gte: since }
+        },
+        include: doseEventInclude,
+        orderBy: { scheduledFor: 'desc' },
+        take: 30
+      })
+    ]);
+
+    const needingReason = recentDoses.filter((dose) => doseNeedsPatientReason(dose.status, dose.note));
+
+    res.json({
+      today: todayDoses,
+      needingReason
+    });
+  })
+);
 
 router.get(
   '/patient/today-doses',
   authRequired,
   allowRoles(Role.PATIENT),
   asyncRoute(async (req, res) => {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const end = new Date(start);
-    end.setDate(end.getDate() + 1);
+    const { start, end } = dayBounds();
 
     const doses = await prisma.medicineDoseEvent.findMany({
       where: { patientId: req.user!.id, scheduledFor: { gte: start, lt: end } },
-      include: {
-        prescriptionItem: true,
-        prescription: { include: { methodOption: true, diagnosedDiseaseOption: true } }
-      },
+      include: doseEventInclude,
       orderBy: { scheduledFor: 'asc' }
     });
 
@@ -70,6 +115,30 @@ router.put(
     });
 
     res.json({ preferences: body, message: 'Reminder preferences saved.' });
+  })
+);
+
+router.post(
+  '/patient/dose-events/:id/explain',
+  authRequired,
+  allowRoles(Role.PATIENT),
+  asyncRoute(async (req, res) => {
+    const body = z.object({ note: z.string().trim().min(2).max(300) }).parse(req.body);
+    const event = await prisma.medicineDoseEvent.findUnique({ where: { id: routeParam(req, 'id') } });
+
+    if (!event || event.patientId !== req.user!.id) {
+      return res.status(404).json({ message: 'Dose event not found' });
+    }
+    if (!doseNeedsPatientReason(event.status, event.note)) {
+      return res.status(400).json({ message: 'This dose does not need an explanation.' });
+    }
+
+    const updated = await prisma.medicineDoseEvent.update({
+      where: { id: event.id },
+      data: { note: body.note }
+    });
+
+    res.json({ doseEvent: updated, message: 'Reason saved. Your doctor can see this in adherence notes.' });
   })
 );
 
@@ -123,16 +192,19 @@ router.post(
   authRequired,
   allowRoles(Role.PATIENT),
   asyncRoute(async (req, res) => {
-    const body = z.object({ note: z.string().max(300).optional() }).parse(req.body);
+    const body = z.object({ note: z.string().trim().min(2).max(300).optional() }).parse(req.body);
     const event = await prisma.medicineDoseEvent.findUnique({ where: { id: routeParam(req, 'id') } });
 
     if (!event || event.patientId !== req.user!.id) {
       return res.status(404).json({ message: 'Dose event not found' });
     }
+    if (event.status !== DoseEventStatus.PENDING) {
+      return res.status(400).json({ message: 'Only pending doses can be skipped.' });
+    }
 
     const updated = await prisma.medicineDoseEvent.update({
       where: { id: event.id },
-      data: { status: DoseEventStatus.SKIPPED, skippedAt: new Date(), note: body.note }
+      data: { status: DoseEventStatus.SKIPPED, skippedAt: new Date(), note: body.note || null }
     });
 
     res.json({ doseEvent: updated });
@@ -263,6 +335,7 @@ router.get(
         status: true,
         scheduledFor: true,
         skippedAt: true,
+        updatedAt: true,
         note: true,
         prescriptionItem: { select: { medicineName: true } }
       },
@@ -277,7 +350,7 @@ router.get(
         id: e.id,
         status: e.status,
         scheduledFor: e.scheduledFor,
-        interactedAt: e.skippedAt ?? null,
+        interactedAt: e.skippedAt ?? (e.status === DoseEventStatus.MISSED ? e.updatedAt : null),
         note: e.note ?? null,
         medicineName: e.prescriptionItem.medicineName
       }))

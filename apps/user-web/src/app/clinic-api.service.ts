@@ -121,6 +121,10 @@ export class ClinicApiService {
     return from(this.fetchTodayDoseEvents());
   }
 
+  medicineReminders() {
+    return from(this.fetchMedicineReminders());
+  }
+
   markDoseTaken(doseEventId: string) {
     return from(this.client.apiFetch(API_PATHS.PATIENT.DOSE_TAKE(doseEventId), { method: 'POST' }));
   }
@@ -136,6 +140,13 @@ export class ClinicApiService {
     return from(this.client.apiFetch(API_PATHS.PATIENT.DOSE_SNOOZE(doseEventId), {
       method: 'POST',
       body: JSON.stringify({ minutes })
+    }));
+  }
+
+  explainDose(doseEventId: string, note: string) {
+    return from(this.client.apiFetch(API_PATHS.PATIENT.DOSE_EXPLAIN(doseEventId), {
+      method: 'POST',
+      body: JSON.stringify({ note })
     }));
   }
 
@@ -244,5 +255,21 @@ export class ClinicApiService {
 
     const response = await this.client.apiFetch<{ doses: Array<Record<string, unknown>> }>(API_PATHS.PATIENT.TODAY_DOSES);
     return { doseEvents: (response.doses || []).map((row) => mapDoseEventFromApi(row)) };
+  }
+
+  private async fetchMedicineReminders() {
+    if (!this.client.backendToken) {
+      throw new Error('Backend session missing. Please login again.');
+    }
+
+    const response = await this.client.apiFetch<{
+      today: Array<Record<string, unknown>>;
+      needingReason: Array<Record<string, unknown>>;
+    }>(API_PATHS.PATIENT.MEDICINE_REMINDERS);
+
+    return {
+      today: (response.today || []).map((row) => mapDoseEventFromApi(row)),
+      needingReason: (response.needingReason || []).map((row) => mapDoseEventFromApi(row))
+    };
   }
 }

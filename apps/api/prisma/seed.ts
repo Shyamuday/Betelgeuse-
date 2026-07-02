@@ -196,6 +196,24 @@ async function main() {
         ],
         skipDuplicates: true
       });
+
+      const yesterdayMorning = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1, 9, 0, 0);
+      await prisma.medicineDoseEvent.upsert({
+        where: {
+          prescriptionItemId_scheduledFor: {
+            prescriptionItemId: item.id,
+            scheduledFor: yesterdayMorning
+          }
+        },
+        update: { status: DoseEventStatus.MISSED, note: null },
+        create: {
+          patientId: patientOne.id,
+          prescriptionId: prescription.id,
+          prescriptionItemId: item.id,
+          scheduledFor: yesterdayMorning,
+          status: DoseEventStatus.MISSED
+        }
+      });
     }
 
     const followUpDue = new Date();

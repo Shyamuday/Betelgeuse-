@@ -50,6 +50,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly activeConsultation = signal<Consultation | null>(null);
   readonly patientPrescriptions = signal<Prescription[]>([]);
   readonly todayDoseEvents = signal<DoseEvent[]>([]);
+  readonly dosesNeedingReason = signal<DoseEvent[]>([]);
   readonly notice = signal('');
   readonly isLoading = signal(false);
   readonly isProcessing = signal(false);
@@ -224,12 +225,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  skipDose(doseEventId: string) {
-    const note = prompt('Reason for skipping this dose?', '') || undefined;
+  skipDose(payload: { id: string; note: string }) {
     this.isProcessing.set(true);
-    this.api.skipDose(doseEventId, note).subscribe({
+    this.api.skipDose(payload.id, payload.note).subscribe({
       next: () => {
-        this.showNotice('Dose skipped.');
+        this.showNotice('Dose skipped with reason saved.');
         this.loadPatientMedicationData();
       },
       error: (error) => {
@@ -240,16 +240,31 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  snoozeDose(doseEventId: string) {
+  snoozeDose(payload: { id: string; minutes: number }) {
     this.isProcessing.set(true);
-    this.api.snoozeDose(doseEventId, Number(this.snoozeMinutes) || DEFAULT_SNOOZE_MINUTES).subscribe({
+    this.api.snoozeDose(payload.id, payload.minutes).subscribe({
       next: () => {
-        this.showNotice('Dose snoozed.');
+        this.showNotice(`Dose snoozed by ${payload.minutes} minutes.`);
         this.loadPatientMedicationData();
       },
       error: (error) => {
         this.isProcessing.set(false);
         this.showNotice(error.error?.message || error.message || 'Could not snooze dose.');
+      },
+      complete: () => this.isProcessing.set(false)
+    });
+  }
+
+  explainDose(payload: { id: string; note: string }) {
+    this.isProcessing.set(true);
+    this.api.explainDose(payload.id, payload.note).subscribe({
+      next: () => {
+        this.showNotice('Reason saved for your doctor.');
+        this.loadPatientMedicationData();
+      },
+      error: (error) => {
+        this.isProcessing.set(false);
+        this.showNotice(error.error?.message || error.message || 'Could not save reason.');
       },
       complete: () => this.isProcessing.set(false)
     });
@@ -369,9 +384,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: ({ prescriptions }) => this.patientPrescriptions.set(prescriptions),
       error: (error) => this.showNotice(error.error?.message || error.message || 'Could not load prescriptions.')
     });
-    this.dataService.loadTodayDoseEvents().subscribe({
-      next: ({ doseEvents }) => this.todayDoseEvents.set(doseEvents),
-      error: (error) => this.showNotice(error.error?.message || error.message || 'Could not load today medicines.')
+    this.dataService.loadMedicineReminders().subscribe({
+      next: ({ today, needingReason }) => {
+        this.todayDoseEvents.set(today);
+        this.dosesNeedingReason.set(needingReason);
+      },
+      error: (error) => this.showNotice(error.error?.message || error.message || 'Could not load medicine reminders.')
     });
   }
 

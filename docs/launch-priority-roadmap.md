@@ -27,6 +27,8 @@ Minimum acceptance:
 
 ### 2) Consumer Reminder Reliability Controls
 
+**Status: Done** — reminder channel preferences, snooze with quick presets, inline skip/missed reasons saved to API and visible to doctor/admin.
+
 Add patient controls for medicine reminders:
 
 - Notification preferences (SMS/WhatsApp/push/in-app where available)

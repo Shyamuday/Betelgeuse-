@@ -56,6 +56,17 @@
       <small>Skipped: {{ detail.adherence.skipped }} | Missed: {{ detail.adherence.missed }}</small>
     </article>
 
+    @if (detail.doseNotes?.length) {
+      <h3>Skipped &amp; missed dose notes (7 days)</h3>
+      @for (note of detail.doseNotes; track note.id) {
+        <article class="card dose-note-card">
+          <strong>{{ note.medicineName }}</strong>
+          <p>{{ note.scheduledFor | date: 'medium' }} · {{ note.status }}</p>
+          <small>{{ note.note || 'No patient reason recorded yet' }}</small>
+        </article>
+      }
+    }
+
     @if (patientIdCard(); as card) {
       <div class="card-panel">
         <h3>Printable patient card</h3>

@@ -15,7 +15,8 @@ export type ReminderPrefs = {
   selector: 'app-reminder-preferences',
   standalone: true,
   imports: [FormsModule],
-  templateUrl: './reminder-preferences.component.html'
+  templateUrl: './reminder-preferences.component.html',
+  styleUrl: './reminder-preferences.component.scss'
 })
 export class ReminderPreferencesComponent {
   readonly DEFAULT_QUIET_HOURS = DEFAULT_QUIET_HOURS;

@@ -38,13 +38,15 @@
 
         <section class="grid two">
           <app-today-medicines
-            [doseEvents]="todayDoseEvents()"
+            [todayDoses]="todayDoseEvents()"
+            [needingReason]="dosesNeedingReason()"
             [disabled]="isProcessing()"
             [snoozeMinutes]="snoozeMinutes"
             (snoozeMinutesChange)="snoozeMinutes = $event"
             (taken)="markDoseTaken($event)"
             (skipped)="skipDose($event)"
             (snoozed)="snoozeDose($event)"
+            (explained)="explainDose($event)"
           />
           <app-reminder-preferences
             [prefs]="reminderPreferences"

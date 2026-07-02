@@ -44,6 +44,10 @@ export class DashboardDataService {
     return this.api.todayDoseEvents();
   }
 
+  loadMedicineReminders(): Observable<{ today: DoseEvent[]; needingReason: DoseEvent[] }> {
+    return this.api.medicineReminders();
+  }
+
   watchChanges(onChange: () => void) {
     return this.api.watchClinicChanges(onChange);
   }

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { Role } from '@prisma/client';
+import { Role, DoseEventStatus } from '@prisma/client';
 import { authRequired, allowRoles } from '../../auth.js';
 import { prisma } from '../../db.js';
 import { asyncRoute, routeParam, queryText, queryPositiveInt, publicUserSelect, includeConsultationRelations } from '../../utils/helpers.js';
@@ -74,10 +74,42 @@ export function registerAdminConsumerRoutes(router: Router) {
       ]);
 
       const adherencePercent = totalDoses ? Math.round((takenDoses / totalDoses) * 100) : 0;
+
+      const since = new Date();
+      since.setDate(since.getDate() - 7);
+      since.setHours(0, 0, 0, 0);
+
+      const doseNotes = await prisma.medicineDoseEvent.findMany({
+        where: {
+          patientId,
+          status: { in: [DoseEventStatus.SKIPPED, DoseEventStatus.MISSED] },
+          scheduledFor: { gte: since }
+        },
+        select: {
+          id: true,
+          status: true,
+          scheduledFor: true,
+          skippedAt: true,
+          updatedAt: true,
+          note: true,
+          prescriptionItem: { select: { medicineName: true } }
+        },
+        orderBy: { scheduledFor: 'desc' },
+        take: 20
+      });
+
       res.json({
         consumer: patient,
         consultations,
-        adherence: { total: totalDoses, taken: takenDoses, skipped: skippedDoses, missed: missedDoses, percent: adherencePercent }
+        adherence: { total: totalDoses, taken: takenDoses, skipped: skippedDoses, missed: missedDoses, percent: adherencePercent },
+        doseNotes: doseNotes.map((event) => ({
+          id: event.id,
+          status: event.status,
+          scheduledFor: event.scheduledFor,
+          interactedAt: event.skippedAt ?? (event.status === DoseEventStatus.MISSED ? event.updatedAt : null),
+          note: event.note ?? null,
+          medicineName: event.prescriptionItem.medicineName
+        }))
       });
     })
   );

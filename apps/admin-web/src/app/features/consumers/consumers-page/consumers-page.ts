@@ -42,6 +42,14 @@ type ConsumerDetail = {
     missed: number;
     percent: number;
   };
+  doseNotes?: Array<{
+    id: string;
+    status: 'SKIPPED' | 'MISSED';
+    scheduledFor: string;
+    interactedAt: string | null;
+    note: string | null;
+    medicineName: string;
+  }>;
 };
 
 type ActiveDoctor = {
