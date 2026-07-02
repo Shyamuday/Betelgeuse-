@@ -1,0 +1,172 @@
+
+.topbar {
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem clamp(1rem, 4vw, 3rem);
+}
+
+.topbar h1 {
+  margin-bottom: 0;
+  text-transform: capitalize;
+}
+
+.user-chip {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.user-chip strong {
+  border-radius: 999px;
+  background: #172033;
+  color: #fff;
+  padding: 0.45rem 0.75rem;
+}
+
+.dashboard {
+  display: grid;
+  gap: 1.25rem;
+  padding: 0 clamp(1rem, 4vw, 3rem) 3rem;
+}
+
+.grid,
+.stats {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.hero {
+  align-items: center;
+  grid-template-columns: 1fr auto;
+}
+
+.hero strong,
+.stats strong {
+  font-size: 1.8rem;
+}
+
+.cards {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.consult-card {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid #e3e9f2;
+  border-radius: 18px;
+  padding: 0.85rem;
+  background: #fbfdff;
+}
+
+.consult-card.active {
+  border-color: #0f62fe;
+}
+
+.link-card {
+  display: grid;
+  gap: 0.25rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  text-align: left;
+}
+
+.chat-box {
+  display: grid;
+  max-height: 240px;
+  gap: 0.5rem;
+  overflow: auto;
+  border-radius: 16px;
+  background: #f4f7fb;
+  padding: 1rem;
+}
+
+.prescription {
+  border-radius: 16px;
+  background: #edf8f2;
+  padding: 1rem;
+}
+
+.toast {
+  position: fixed;
+  right: 1rem;
+  bottom: 4.75rem;
+  border-radius: 999px;
+  background: #172033;
+  color: #fff;
+  padding: 0.85rem 1rem;
+}
+
+.process-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(3px);
+}
+
+.app-overlay-backdrop {
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(3px);
+}
+
+.app-overlay-panel {
+  display: grid;
+  place-items: center;
+}
+
+.process-card {
+  display: grid;
+  min-width: 260px;
+  justify-items: center;
+  gap: 0.65rem;
+  border-radius: 24px;
+  background: #fff;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
+}
+
+.process-card small {
+  color: #64748b;
+}
+
+.spinner {
+  width: 42px;
+  height: 42px;
+  border: 4px solid #dbeafe;
+  border-top-color: #0f62fe;
+  border-radius: 999px;
+  animation: spin 0.8s linear infinite;
+}
+
+.status-icon {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 999px;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.success-icon {
+  background: #e8f8ef;
+  color: #087443;
+}
+
+.error-icon {
+  background: #fee2e2;
+  color: #b91c1c;
+}
