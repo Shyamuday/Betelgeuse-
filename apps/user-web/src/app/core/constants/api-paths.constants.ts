@@ -22,5 +22,8 @@ export const API_PATHS = {
   ADMIN: {
     DOCTORS: '/admin/doctors',
     REPORTS: '/admin/reports'
+  },
+  ANALYTICS: {
+    EVENTS: '/analytics/events'
   }
 } as const;

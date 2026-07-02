@@ -7,6 +7,7 @@ import { DEFAULT_REMINDER_PREFERENCE } from '../constants/reminder-preferences.c
 import { doseNeedsPatientReason } from '../services/dose-notes.js';
 import { asyncRoute, routeParam, queryPositiveInt } from '../utils/helpers.js';
 import { doctorCanAccessPatient } from '../services/patient-identity.js';
+import { PRODUCT_EVENTS, trackProductEvent } from '../services/product-analytics.js';
 
 export const router = Router();
 
@@ -155,6 +156,17 @@ router.post(
     const updated = await prisma.medicineDoseEvent.update({
       where: { id: event.id },
       data: { status: DoseEventStatus.TAKEN, takenAt: new Date() }
+    });
+
+    void trackProductEvent({
+      name: PRODUCT_EVENTS.DOSE_TAKEN,
+      actorId: req.user!.id,
+      actorRole: req.user!.role,
+      properties: {
+        doseEventId: event.id,
+        prescriptionId: event.prescriptionId,
+        prescriptionItemId: event.prescriptionItemId
+      }
     });
 
     res.json({ doseEvent: updated });

@@ -7,6 +7,7 @@ import { prisma } from '../db.js';
 import { asyncRoute, routeParam, publicUserSelect, includeConsultationRelations } from '../utils/helpers.js';
 import { enabledNotificationChannels, notificationService } from '../services/notification-service.js';
 import { ensureBillingPlans } from './catalog.js';
+import { PRODUCT_EVENTS, trackProductEvent } from '../services/product-analytics.js';
 
 export function createConsultationsRouter(io: SocketIoServer) {
   const router = Router();
@@ -73,6 +74,17 @@ export function createConsultationsRouter(io: SocketIoServer) {
           }
         },
         include: includeConsultationRelations()
+      });
+
+      void trackProductEvent({
+        name: PRODUCT_EVENTS.CONSULTATION_BOOKED,
+        actorId: req.user!.id,
+        actorRole: req.user!.role,
+        properties: {
+          consultationId: consultation.id,
+          diseaseId: disease.id,
+          purchaseType: body.purchaseType
+        }
       });
 
       res.status(201).json({ consultation });

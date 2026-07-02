@@ -14,6 +14,7 @@ import {
 import { enabledNotificationChannels, notificationService } from '../../services/notification-service.js';
 import { prescriptionInputSchema } from './shared.js';
 import { analyzePrescriptionSafety } from '../../services/prescription-safety.js';
+import { PRODUCT_EVENTS, trackProductEvent } from '../../services/product-analytics.js';
 
 function assertPrescriptionSafetyAcknowledged(
   items: Array<{ medicineName: string; strength?: string; dose?: string; frequency?: string }>,
@@ -157,6 +158,16 @@ export function registerDoctorPrescriptionRoutes(router: Router, io: SocketIoSer
           );
           io.to(`user:${rxPatient.id}`).emit('prescription:new', { prescriptionId: prescription.id, consultationId: consultation.id });
         }
+        void trackProductEvent({
+          name: PRODUCT_EVENTS.PRESCRIPTION_PUBLISHED,
+          actorId: req.user!.id,
+          actorRole: req.user!.role,
+          properties: {
+            prescriptionId: prescription.id,
+            consultationId: consultation.id,
+            patientId: consultation.patientId
+          }
+        });
       }
 
       res.status(201).json({ prescription });
@@ -248,6 +259,16 @@ export function registerDoctorPrescriptionRoutes(router: Router, io: SocketIoSer
           );
           io.to(`user:${updatedPatient.id}`).emit('prescription:new', { prescriptionId: updated.id, consultationId: updated.consultation.id });
         }
+        void trackProductEvent({
+          name: PRODUCT_EVENTS.PRESCRIPTION_PUBLISHED,
+          actorId: req.user!.id,
+          actorRole: req.user!.role,
+          properties: {
+            prescriptionId: updated.id,
+            consultationId: updated.consultation.id,
+            patientId: updated.patientId
+          }
+        });
       }
 
       res.json({ prescription: updated });

@@ -52,6 +52,14 @@ export class AdminReportsApi extends AdminApiBase {
     );
   }
 
+  getAnalyticsFunnels(params: { days?: number } = {}) {
+    return firstValueFrom(
+      this.http.get<any>(`${this.apiBase}${API_PATHS.ADMIN.ANALYTICS_FUNNELS}`, {
+        params: { days: String(params.days ?? 30) }
+      })
+    );
+  }
+
   getPayments(params: {
     page?: number;
     pageSize?: number;

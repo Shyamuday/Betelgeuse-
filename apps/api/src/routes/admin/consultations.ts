@@ -13,6 +13,7 @@ import {
   includeConsultationRelations
 } from '../../utils/helpers.js';
 import { enabledNotificationChannels, notificationService } from '../../services/notification-service.js';
+import { PRODUCT_EVENTS, trackProductEvent } from '../../services/product-analytics.js';
 
 export function registerAdminConsultationRoutes(router: Router, io: SocketIoServer) {
   // ─── Admin consultations ───────────────────────────────────────────────────────
@@ -113,6 +114,17 @@ export function registerAdminConsultationRoutes(router: Router, io: SocketIoServ
           doctorName: doctor.name,
           patientId: consultation.patientId,
           diseaseName: consultation.disease?.name ?? null
+        }
+      });
+
+      void trackProductEvent({
+        name: PRODUCT_EVENTS.CONSULTATION_ASSIGNED,
+        actorId: req.user!.id,
+        actorRole: req.user!.role,
+        properties: {
+          consultationId: consultation.id,
+          doctorId: doctor.id,
+          patientId: consultation.patientId
         }
       });
 

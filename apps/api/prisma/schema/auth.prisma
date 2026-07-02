@@ -32,6 +32,7 @@ model User {
   auditLogs          AuditLog[]      @relation("AuditActor")
   supportNotesAuthored SupportCaseNote[] @relation("SupportNoteAuthor")
   patientSupportNotes  SupportCaseNote[] @relation("PatientSupportNotes")
+  productEvents        ProductEvent[]    @relation("ProductEventActor")
   passwordResetTokens PasswordResetToken[]
   hrProfile          HrProfile?
   hrStoreAccess      HrStoreAccess[] @relation("HrUserAccess")

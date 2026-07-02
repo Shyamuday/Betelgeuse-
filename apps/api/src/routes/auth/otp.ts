@@ -5,6 +5,7 @@ import { prisma } from '../../db.js';
 import { generateOtp, storeOtp, verifyOtp, sendOtpSms, devOtp, isProduction } from '../../services/otp.js';
 import { createPatientRecord, normalizeMobile } from '../../services/patient-identity.js';
 import { asyncRoute, publicUserSelect, toAuthResponse, logAuthEvent } from '../../utils/helpers.js';
+import { PRODUCT_EVENTS, trackProductEvent } from '../../services/product-analytics.js';
 
 export function registerAuthOtpRoutes(router: Router) {
 // ─── OTP auth ──────────────────────────────────────────────────────────────────
@@ -64,6 +65,12 @@ router.post(
 
     if (patients.length === 1) {
       logAuthEvent('patient_login', { userId: patients[0].id, mobile });
+      void trackProductEvent({
+        name: PRODUCT_EVENTS.PATIENT_LOGIN,
+        actorId: patients[0].id,
+        actorRole: Role.PATIENT,
+        properties: { mobile, method: 'otp' }
+      });
       return res.json(toAuthResponse(patients[0]));
     }
 
@@ -73,6 +80,12 @@ router.post(
     });
 
     logAuthEvent('patient_login', { userId: user.id, mobile, event: 'otp_register' });
+    void trackProductEvent({
+      name: PRODUCT_EVENTS.PATIENT_LOGIN,
+      actorId: user.id,
+      actorRole: Role.PATIENT,
+      properties: { mobile, method: 'otp_register' }
+    });
     res.json(toAuthResponse({ ...user, role: Role.PATIENT }));
   })
 );
@@ -107,6 +120,12 @@ router.post(
     }
 
     logAuthEvent('patient_login', { userId: user.id, mobile, event: 'otp_select' });
+    void trackProductEvent({
+      name: PRODUCT_EVENTS.PATIENT_LOGIN,
+      actorId: user.id,
+      actorRole: Role.PATIENT,
+      properties: { mobile, method: 'otp_select' }
+    });
     res.json(toAuthResponse(user));
   })
 );

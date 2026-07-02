@@ -1,4 +1,4 @@
-import { PrismaClient, PrescriptionOptionType, Role, ConsultationStatus, PrescriptionStatus, DoseEventStatus, SupportNoteCategory } from '@prisma/client';
+import { PrismaClient, PrescriptionOptionType, Role, ConsultationStatus, PrescriptionStatus, DoseEventStatus, SupportNoteCategory, ProductEventCategory } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import bcrypt from 'bcryptjs';
 
@@ -413,6 +413,40 @@ async function main() {
       body: 'Demo: patient reported missed evening dose. Confirmed SMS reminders are on; suggested reviewing snooze presets in the patient app.'
     }
   });
+
+  const daysAgo = (n: number) => {
+    const date = new Date();
+    date.setDate(date.getDate() - n);
+    date.setHours(12, 0, 0, 0);
+    return date;
+  };
+
+  const demoFunnelEvents = [
+    { id: 'seed-event-login', name: 'patient.login', actorId: patientOne.id, actorRole: Role.PATIENT, createdAt: daysAgo(6) },
+    { id: 'seed-event-booked', name: 'consultation.booked', actorId: patientOne.id, actorRole: Role.PATIENT, createdAt: daysAgo(6), properties: { consultationId: 'seed-consultation-rahul' } },
+    { id: 'seed-event-pay-init', name: 'payment.initiated', actorId: patientOne.id, actorRole: Role.PATIENT, createdAt: daysAgo(6), properties: { consultationId: 'seed-consultation-rahul' } },
+    { id: 'seed-event-pay-done', name: 'payment.completed', actorId: patientOne.id, actorRole: Role.PATIENT, createdAt: daysAgo(5), properties: { consultationId: 'seed-consultation-rahul' } },
+    { id: 'seed-event-assigned', name: 'consultation.assigned', actorId: admin.id, actorRole: Role.ADMIN, createdAt: daysAgo(5), properties: { consultationId: 'seed-consultation-rahul', doctorId: doctorUser.id } },
+    { id: 'seed-event-rx', name: 'prescription.published', actorId: doctorUser.id, actorRole: Role.DOCTOR, createdAt: daysAgo(4), properties: { consultationId: 'seed-consultation-rahul' } },
+    { id: 'seed-event-dose', name: 'dose.taken', actorId: patientOne.id, actorRole: Role.PATIENT, createdAt: daysAgo(3), properties: { consultationId: 'seed-consultation-rahul' } },
+    { id: 'seed-event-worklist', name: 'doctor.worklist_viewed', actorId: doctorUser.id, actorRole: Role.DOCTOR, category: ProductEventCategory.ENGAGEMENT, createdAt: daysAgo(2), properties: { view: 'ALL' } }
+  ];
+
+  for (const event of demoFunnelEvents) {
+    await prisma.productEvent.upsert({
+      where: { id: event.id },
+      update: {},
+      create: {
+        id: event.id,
+        name: event.name,
+        category: event.category ?? ProductEventCategory.FUNNEL,
+        actorId: event.actorId,
+        actorRole: event.actorRole,
+        properties: event.properties ?? undefined,
+        createdAt: event.createdAt
+      }
+    });
+  }
 
   console.log('Seeded demo admin, doctor, disease catalog, and demo patients.');
   console.log(`Admin login: ${admin.email} / Password@123`);

@@ -9,6 +9,7 @@ import { asyncRoute, routeParam } from '../utils/helpers.js';
 import { getRazorpayClient, verifyRazorpaySignature, razorpayKeyId, razorpayWebhookSecret } from '../services/razorpay.js';
 import { enabledNotificationChannels, notificationService } from '../services/notification-service.js';
 import { buildDoctorPayslip, buildPayslipHistory } from '../services/payroll.js';
+import { PRODUCT_EVENTS, trackProductEvent } from '../services/product-analytics.js';
 
 export function createPaymentsRouter(io: SocketIoServer) {
   const router = Router();
@@ -46,6 +47,13 @@ export function createPaymentsRouter(io: SocketIoServer) {
       await prisma.payment.update({
         where: { id: payment.id },
         data: { providerOrderId: order.id, status: PaymentStatus.CREATED }
+      });
+
+      void trackProductEvent({
+        name: PRODUCT_EVENTS.PAYMENT_INITIATED,
+        actorId: req.user!.id,
+        actorRole: req.user!.role,
+        properties: { consultationId, orderId: order.id, amountInPaise: payment.amountInPaise }
       });
 
       res.json({ orderId: order.id, amountInPaise: payment.amountInPaise, currency: 'INR', razorpayKeyId });
@@ -86,6 +94,8 @@ export function createPaymentsRouter(io: SocketIoServer) {
         return res.status(400).json({ message: 'Invalid Razorpay signature.' });
       }
 
+      const wasPaid = payment.status === PaymentStatus.PAID;
+
       await prisma.payment.update({
         where: { id: payment.id },
         data: { status: 'PAID', providerPaymentId: body.razorpayPaymentId }
@@ -110,6 +120,15 @@ export function createPaymentsRouter(io: SocketIoServer) {
           }))
         );
         io.to(`user:${patient.id}`).emit('payment:updated', { consultationId, status: 'PAID' });
+      }
+
+      if (!wasPaid) {
+        void trackProductEvent({
+          name: PRODUCT_EVENTS.PAYMENT_COMPLETED,
+          actorId: req.user!.id,
+          actorRole: req.user!.role,
+          properties: { consultationId, razorpayPaymentId: body.razorpayPaymentId }
+        });
       }
 
       res.json({ ok: true });
@@ -149,9 +168,11 @@ export function createPaymentsRouter(io: SocketIoServer) {
 
       const payment = await prisma.payment.findFirst({
         where: { providerOrderId: paymentEntity.order_id },
-        select: { id: true, consultationId: true }
+        select: { id: true, consultationId: true, status: true, consultation: { select: { patientId: true } } }
       });
       if (!payment) return res.status(404).json({ message: 'Payment record not found for Razorpay order.' });
+
+      const wasPaid = payment.status === PaymentStatus.PAID;
 
       await prisma.payment.update({
         where: { id: payment.id },
@@ -184,6 +205,15 @@ export function createPaymentsRouter(io: SocketIoServer) {
           }))
         );
         io.to(`user:${webhookPatient.id}`).emit('payment:updated', { consultationId: payment.consultationId, status: 'PAID' });
+      }
+
+      if (!wasPaid) {
+        void trackProductEvent({
+          name: PRODUCT_EVENTS.PAYMENT_COMPLETED,
+          actorId: payment.consultation.patientId,
+          actorRole: Role.PATIENT,
+          properties: { consultationId: payment.consultationId, razorpayPaymentId: paymentEntity.id, source: 'webhook' }
+        });
       }
 
       res.json({ ok: true });

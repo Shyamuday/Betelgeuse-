@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../../db.js';
 import { getMailTransporter, smtpFrom } from '../../services/mail.js';
 import { asyncRoute, publicUserSelect, toAuthResponse, logAuthEvent, hashToken, randomToken } from '../../utils/helpers.js';
+import { PRODUCT_EVENTS, trackProductEvent } from '../../services/product-analytics.js';
 import { webOrigin } from './shared.js';
 
 export function registerAuthStaffRoutes(router: Router) {
@@ -42,6 +43,14 @@ router.post(
 
     const { passwordHash: _ph, isActive: _ia, ...safeUser } = user;
     logAuthEvent('staff_login_success', { userId: safeUser.id, role: safeUser.role });
+    if (safeUser.role === Role.DOCTOR) {
+      void trackProductEvent({
+        name: PRODUCT_EVENTS.DOCTOR_LOGIN,
+        actorId: safeUser.id,
+        actorRole: Role.DOCTOR,
+        properties: { method: 'password' }
+      });
+    }
     res.json(toAuthResponse(safeUser));
   })
 );

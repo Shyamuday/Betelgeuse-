@@ -26,6 +26,9 @@ export class AdminApi {
   getAdherenceRisk(...args: Parameters<AdminReportsApi['getAdherenceRisk']>) {
     return this.reports.getAdherenceRisk(...(args as Parameters<AdminReportsApi['getAdherenceRisk']>));
   }
+  getAnalyticsFunnels(...args: Parameters<AdminReportsApi['getAnalyticsFunnels']>) {
+    return this.reports.getAnalyticsFunnels(...(args as Parameters<AdminReportsApi['getAnalyticsFunnels']>));
+  }
   getPayments(...args: Parameters<AdminReportsApi['getPayments']>) {
     return this.reports.getPayments(...(args as Parameters<AdminReportsApi['getPayments']>));
   }

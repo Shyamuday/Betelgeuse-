@@ -1,0 +1,21 @@
+enum ProductEventCategory {
+  FUNNEL
+  ENGAGEMENT
+  SYSTEM
+}
+
+model ProductEvent {
+  id         String               @id @default(cuid())
+  name       String
+  category   ProductEventCategory @default(FUNNEL)
+  actorId    String?
+  actorRole  Role?
+  sessionId  String?
+  properties Json?
+  actor      User?                @relation("ProductEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt  DateTime             @default(now())
+
+  @@index([name, createdAt])
+  @@index([category, createdAt])
+  @@index([actorId, createdAt])
+}

@@ -155,6 +155,8 @@ Minimum acceptance:
 
 ### 6) Product Analytics
 
+**Status: Done** — `ProductEvent` model with server-side funnel instrumentation (login, booking, payment, assignment, prescription publish, dose taken, worklist views); `POST /analytics/events` for client events; `GET /admin/analytics/funnels` with conversion table and daily trend; admin Product Analytics page; demo seed funnel for Rahul.
+
 - Instrumentation for core funnels
 
 ## Recommended Implementation Order

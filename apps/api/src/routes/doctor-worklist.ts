@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { ConsultationStatus, Role } from '@prisma/client';
+import { ConsultationStatus, ProductEventCategory, Role } from '@prisma/client';
 import { authRequired, allowRoles } from '../auth.js';
 import { prisma } from '../db.js';
 import { asyncRoute, includeConsultationRelations } from '../utils/helpers.js';
@@ -13,6 +13,7 @@ import {
   type WorklistSection,
   type WorklistView
 } from '../services/doctor-worklist.js';
+import { PRODUCT_EVENTS, trackProductEvent } from '../services/product-analytics.js';
 
 function toWorklistItem(consultation: Awaited<ReturnType<typeof loadDoctorConsultations>>[number]) {
   const followUpDate = publishedFollowUpDate(consultation);
@@ -73,6 +74,14 @@ doctorWorklistRouter.get(
     const assigned = sectionItems(items, 'ASSIGNED', query.view);
     const inProgress = sectionItems(items, 'IN_PROGRESS', query.view);
     const followUpDue = sectionItems(items, 'FOLLOW_UP_DUE', query.view);
+
+    void trackProductEvent({
+      name: PRODUCT_EVENTS.DOCTOR_WORKLIST_VIEWED,
+      category: ProductEventCategory.ENGAGEMENT,
+      actorId: req.user!.id,
+      actorRole: req.user!.role,
+      properties: { view: query.view, itemCount: items.length }
+    });
 
     res.json({
       view: query.view,

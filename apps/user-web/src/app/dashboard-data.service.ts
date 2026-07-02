@@ -1,6 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ClinicApiService } from './clinic-api.service';
+import { ProductAnalyticsService } from './core/services/product-analytics.service';
+import { PRODUCT_ANALYTICS_EVENTS } from './core/constants/analytics.constants';
 import { AuthService } from './auth/auth.service';
 import { BillingPlan, Consultation, Disease, Doctor, DoseEvent, Prescription } from './models';
 import { ReminderPrefs } from './reminder-preferences.component';
@@ -69,7 +71,10 @@ export class DashboardPaymentService {
   readonly paymentFlowConsultation = signal<Consultation | null>(null);
   readonly paymentFlowError = signal('');
 
-  constructor(private readonly api: ClinicApiService) {}
+  constructor(
+    private readonly api: ClinicApiService,
+    private readonly analytics: ProductAnalyticsService
+  ) {}
 
   pay(
     consultation: Consultation,
@@ -85,6 +90,10 @@ export class DashboardPaymentService {
     this.api.createPaymentOrder(consultation.id).subscribe({
       next: (order) => {
         this.paymentFlowState.set('OPENING_CHECKOUT');
+        this.analytics.track(PRODUCT_ANALYTICS_EVENTS.PAYMENT_CHECKOUT_OPENED, {
+          consultationId: consultation.id,
+          orderId: order.orderId
+        });
         this.api
           .openRazorpayCheckout(consultation, order)
           .then((payment) => {
