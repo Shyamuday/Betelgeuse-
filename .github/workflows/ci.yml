@@ -16,6 +16,8 @@ jobs:
           - apps/user-web
           - apps/doctor-web
           - apps/admin-web
+          - apps/store
+          - apps/hr-web
 
     defaults:
       run:

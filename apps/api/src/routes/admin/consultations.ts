@@ -1,0 +1,101 @@
+import { Router } from 'express';
+import { Role } from '@prisma/client';
+import type { Server as SocketIoServer } from 'socket.io';
+import { authRequired, allowRoles } from '../../auth.js';
+import { prisma } from '../../db.js';
+import {
+  asyncRoute,
+  routeParam,
+  queryText,
+  queryPositiveInt,
+  writeAuditLog,
+  includeConsultationRelations
+} from '../../utils/helpers.js';
+import { enabledNotificationChannels, notificationService } from '../../services/notification-service.js';
+
+export function registerAdminConsultationRoutes(router: Router, io: SocketIoServer) {
+  // ─── Admin consultations ───────────────────────────────────────────────────────
+
+  router.get(
+    '/admin/consultations',
+    authRequired,
+    allowRoles(Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const page = queryPositiveInt(req, 'page', 1);
+      const pageSize = queryPositiveInt(req, 'pageSize', 20);
+      const status = queryText(req, 'status');
+      const assigned = queryText(req, 'assigned');
+      const q = queryText(req, 'q').trim().toLowerCase();
+
+      const where: Record<string, unknown> = {};
+      if (status) where['status'] = status;
+      if (assigned === 'no') where['assignedDoctorId'] = null;
+      if (assigned === 'yes') where['assignedDoctorId'] = { not: null };
+
+      const [consultations, total] = await Promise.all([
+        prisma.consultation.findMany({
+          where,
+          include: {
+            patient: { select: { id: true, name: true, mobile: true } },
+            assignedDoctor: { select: { id: true, name: true } },
+            disease: { select: { id: true, name: true } },
+            payment: { select: { status: true, amountInPaise: true } }
+          },
+          orderBy: { createdAt: 'desc' },
+          skip: (page - 1) * pageSize,
+          take: pageSize
+        }),
+        prisma.consultation.count({ where })
+      ]);
+
+      const filtered = q
+        ? consultations.filter((c) => {
+            const text = [c.patient?.name, c.patient?.mobile, c.disease?.name].join(' ').toLowerCase();
+            return text.includes(q);
+          })
+        : consultations;
+
+      res.json({ consultations: filtered, total, page, pageSize });
+    })
+  );
+
+  router.put(
+    '/admin/consultations/:id/assign',
+    authRequired,
+    allowRoles(Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const body = z.object({ doctorId: z.string().min(1) }).parse(req.body);
+      const doctor = await prisma.user.findFirstOrThrow({
+        where: { id: body.doctorId, role: Role.DOCTOR, isActive: true }
+      });
+
+      const consultation = await prisma.consultation.update({
+        where: { id: routeParam(req, 'id') },
+        data: { assignedDoctorId: doctor.id, status: 'ASSIGNED' as const },
+        include: {
+          patient: { select: { id: true, name: true, mobile: true, email: true } },
+          disease: { select: { name: true } }
+        }
+      });
+
+      const patient = consultation.patient;
+      if (patient) {
+        void notificationService.sendBatch(
+          enabledNotificationChannels.map((ch) => ({
+            eventType: 'DOCTOR_ASSIGNED' as const,
+            channel: ch,
+            recipientId: patient.id,
+            recipientName: patient.name,
+            recipientMobile: patient.mobile,
+            recipientEmail: patient.email,
+            title: 'Doctor assigned — Vitalis Care',
+            body: `Dr. ${doctor.name} has been assigned to your consultation. You can now chat with your doctor in the app.`
+          }))
+        );
+        io.to(`user:${patient.id}`).emit('consultation:updated', { consultationId: consultation.id, status: consultation.status });
+      }
+
+      res.json({ consultation, message: 'Doctor assigned successfully.' });
+    })
+  );
+}

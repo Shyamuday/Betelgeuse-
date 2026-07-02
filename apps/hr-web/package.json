@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "scripts": {
     "start": "ng serve --port 4400",
-    "build": "ng build"
+    "build": "ng build",
+    "lint": "tsc -p tsconfig.app.json --noEmit"
   },
   "dependencies": {
     "@angular/animations": "^21.0.0",
