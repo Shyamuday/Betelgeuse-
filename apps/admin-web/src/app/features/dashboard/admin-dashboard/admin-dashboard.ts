@@ -2,6 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../../../core/services/admin-api';
+import {
+  AUDIT_LOGS_PAGE_SIZE,
+  PAYMENTS_DEFAULTS,
+  PAYMENTS_PAGE_SIZE,
+  type PaymentStatus
+} from '../constants/payments.constants';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -25,7 +31,7 @@ export class AdminDashboard {
   payments: Array<any> = [];
   paymentsPage = 1;
   paymentsTotalPages = 1;
-  paymentStatus: 'ALL' | 'CREATED' | 'PAID' | 'FAILED' = 'ALL';
+  paymentStatus: PaymentStatus = PAYMENTS_DEFAULTS.STATUS;
   paymentFrom = '';
   paymentTo = '';
   paymentSummary = { total: 0, paid: 0, failedCount: 0, pendingCount: 0 };
@@ -50,7 +56,7 @@ export class AdminDashboard {
       this.revenueInPaise = report.revenueInPaise || 0;
       this.activeDoctors = report.activeDoctors || 0;
       this.consultationsCount = report.consultations?.length || 0;
-      const audit = await this.api.getAuditLogs(1, 15);
+      const audit = await this.api.getAuditLogs(1, AUDIT_LOGS_PAGE_SIZE);
       this.auditLogs = audit.logs || [];
       await this.loadPayments();
     } catch {
@@ -65,7 +71,7 @@ export class AdminDashboard {
     try {
       const result = await this.api.getPayments({
         page,
-        pageSize: 10,
+        pageSize: PAYMENTS_PAGE_SIZE,
         status: this.paymentStatus,
         from: this.paymentFrom || undefined,
         to: this.paymentTo || undefined
@@ -85,7 +91,7 @@ export class AdminDashboard {
   }
 
   clearPaymentFilters() {
-    this.paymentStatus = 'ALL';
+    this.paymentStatus = PAYMENTS_DEFAULTS.STATUS;
     this.paymentFrom = '';
     this.paymentTo = '';
     void this.loadPayments(1);

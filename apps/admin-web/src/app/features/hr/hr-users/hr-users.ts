@@ -1,6 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../../../core/services/admin-api';
+import { TOAST_DURATION_LONG_MS } from '../../../core/constants/timing.constants';
+import { HR_USER_DEFAULTS } from '../constants/hr-user-form.constants';
 
 @Component({
   selector: 'app-hr-users',
@@ -26,7 +28,7 @@ import { AdminApi } from '../../../core/services/admin-api';
                 <div class="hr-info">
                   <div class="hr-name">{{ u.name }}</div>
                   <div class="hr-email">{{ u.email }}</div>
-                  <div class="hr-desg">{{ u.hrProfile?.designation ?? 'HR Manager' }}</div>
+                  <div class="hr-desg">{{ u.hrProfile?.designation ?? hrUserDefaults.DESIGNATION }}</div>
                 </div>
                 <div class="hr-status" [class.inactive]="!u.isActive">
                   {{ u.isActive ? '● Active' : '● Inactive' }}
@@ -236,6 +238,8 @@ import { AdminApi } from '../../../core/services/admin-api';
 export class HrUsersComponent implements OnInit {
   private api = inject(AdminApi);
 
+  readonly hrUserDefaults = HR_USER_DEFAULTS;
+
   hrUsers = signal<any[]>([]);
   allStores = signal<any[]>([]);
   assignedStoreIds = signal<Set<string>>(new Set());
@@ -246,7 +250,13 @@ export class HrUsersComponent implements OnInit {
   error = signal('');
   toast = signal('');
 
-  createForm = { name: '', email: '', password: '', designation: 'HR Manager', department: 'Human Resources' };
+  createForm = {
+    name: '',
+    email: '',
+    password: '',
+    designation: HR_USER_DEFAULTS.DESIGNATION,
+    department: HR_USER_DEFAULTS.DEPARTMENT
+  };
 
   ngOnInit(): void { this.load(); }
 
@@ -268,7 +278,13 @@ export class HrUsersComponent implements OnInit {
   }
 
   openCreate(): void {
-    this.createForm = { name: '', email: '', password: '', designation: 'HR Manager', department: 'Human Resources' };
+    this.createForm = {
+      name: '',
+      email: '',
+      password: '',
+      designation: HR_USER_DEFAULTS.DESIGNATION,
+      department: HR_USER_DEFAULTS.DEPARTMENT
+    };
     this.error.set('');
     this.modal.set('create');
   }
@@ -340,6 +356,6 @@ export class HrUsersComponent implements OnInit {
 
   private showToast(msg: string) {
     this.toast.set(msg);
-    setTimeout(() => this.toast.set(''), 3000);
+    setTimeout(() => this.toast.set(''), TOAST_DURATION_LONG_MS);
   }
 }

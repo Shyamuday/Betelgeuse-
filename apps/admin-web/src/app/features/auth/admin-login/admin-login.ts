@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AdminAuth } from '../../../core/services/admin-auth';
+import { DEFAULT_AUTHED_ROUTE } from '../../../core/constants/app-routes.constants';
 
 @Component({
   selector: 'app-admin-login',
@@ -29,7 +30,7 @@ export class AdminLogin {
         this.error = result.message;
         return;
       }
-      void this.router.navigateByUrl('/dashboard');
+      void this.router.navigateByUrl(`/${DEFAULT_AUTHED_ROUTE}`);
     } finally {
       this.submitting = false;
     }

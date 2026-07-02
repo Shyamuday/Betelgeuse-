@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { adminAuthGuard } from './core/guards/admin-auth-guard';
+import { ROUTE_PATHS } from './core/constants/app-routes.constants';
 import { AdminLogin } from './features/auth/admin-login/admin-login';
 import { AdminDashboard } from './features/dashboard/admin-dashboard/admin-dashboard';
 import { ConsumersPage } from './features/consumers/consumers-page/consumers-page';
@@ -13,22 +14,22 @@ import { LeavesPage } from './features/leaves/leaves-page/leaves-page';
 import { StoresPage } from './features/stores/stores-page/stores-page';
 
 export const routes: Routes = [
-  { path: 'login', component: AdminLogin },
+  { path: ROUTE_PATHS.LOGIN, component: AdminLogin },
   {
     path: '',
     component: AdminShell,
     canActivate: [adminAuthGuard],
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-      { path: 'dashboard', component: AdminDashboard },
-      { path: 'doctors', component: DoctorsPage },
-      { path: 'consumers', component: ConsumersPage },
-      { path: 'diseases', component: DiseasesPage },
-      { path: 'hr', component: DoctorHrComponent },
-      { path: 'hr-users', component: HrUsersComponent },
-      { path: 'employees', component: EmployeesPage },
-      { path: 'leaves', component: LeavesPage },
-      { path: 'stores', component: StoresPage }
+      { path: '', pathMatch: 'full', redirectTo: ROUTE_PATHS.DASHBOARD },
+      { path: ROUTE_PATHS.DASHBOARD, component: AdminDashboard },
+      { path: ROUTE_PATHS.DOCTORS, component: DoctorsPage },
+      { path: ROUTE_PATHS.CONSUMERS, component: ConsumersPage },
+      { path: ROUTE_PATHS.DISEASES, component: DiseasesPage },
+      { path: ROUTE_PATHS.HR, component: DoctorHrComponent },
+      { path: ROUTE_PATHS.HR_USERS, component: HrUsersComponent },
+      { path: ROUTE_PATHS.EMPLOYEES, component: EmployeesPage },
+      { path: ROUTE_PATHS.LEAVES, component: LeavesPage },
+      { path: ROUTE_PATHS.STORES, component: StoresPage }
     ]
   },
   { path: '**', redirectTo: '' }

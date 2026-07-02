@@ -1,6 +1,15 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../../../core/services/admin-api';
+import { TOAST_DURATION_MS } from '../../../core/constants/timing.constants';
+import {
+  STORE_APP_PORT,
+  STORE_FORM_DEFAULTS,
+  STORE_MODAL_TYPES,
+  STORE_STATUS_COLORS,
+  STORE_VALIDATION,
+  type StoreModalType
+} from '../constants/store-form.constants';
 
 @Component({
   selector: 'app-stores-page',
@@ -47,7 +56,7 @@ import { AdminApi } from '../../../core/services/admin-api';
                         <div class="mgr-name">{{ m.name }}</div>
                         @if (m.email) { <div class="mgr-email">{{ m.email }}</div> }
                       </div>
-                      <span class="mgr-dot" [style.color]="m.isActive ? '#4ade80' : '#f87171'">{{ m.isActive ? '●' : '○' }}</span>
+                      <span class="mgr-dot" [style.color]="m.isActive ? storeStatusColors.ACTIVE : storeStatusColors.INACTIVE">{{ m.isActive ? '●' : '○' }}</span>
                     </div>
                   }
                 </div>
@@ -97,7 +106,7 @@ import { AdminApi } from '../../../core/services/admin-api';
         <div class="modal" (click)="$event.stopPropagation()">
           <div class="mhdr"><h3>👔 Add Manager — {{ selectedStore()?.name }}</h3><button class="close-btn" (click)="closeModal()">✕</button></div>
           <div class="mbody">
-            <div class="info-box">Managers log in with <strong>email + password</strong> on the Store App (port 4300)</div>
+            <div class="info-box">Managers log in with <strong>email + password</strong> on the Store App (port {{ storeAppPort }})</div>
             <div class="fg"><label>Full Name *</label><input [(ngModel)]="mgrForm.name" placeholder="Manager Name" /></div>
             <div class="fg"><label>Email *</label><input type="email" [(ngModel)]="mgrForm.email" placeholder="manager@store.com" /></div>
             <div class="fg"><label>Password * (min 6 chars)</label><input type="password" [(ngModel)]="mgrForm.password" /></div>
@@ -203,17 +212,20 @@ import { AdminApi } from '../../../core/services/admin-api';
 export class StoresPage implements OnInit {
   private api = inject(AdminApi);
 
+  readonly storeAppPort = STORE_APP_PORT;
+  readonly storeStatusColors = STORE_STATUS_COLORS;
+
   stores = signal<any[]>([]);
   loading = signal(true);
   saving = signal(false);
-  modal = signal<'store'|'manager'|'staff'|null>(null);
+  modal = signal<StoreModalType | null>(null);
   selectedStore = signal<any>(null);
   err = signal('');
   toast = signal('');
 
   storeForm = { name:'', code:'', address:'', phone:'' };
-  mgrForm = { name:'', email:'', password:'', designation:'Store Manager', joiningDate:'' };
-  staffForm = { name:'', staffCode:'', pin:'', designation:'Store Assistant', phone:'', joiningDate:'' };
+  mgrForm = { name:'', email:'', password:'', designation: STORE_FORM_DEFAULTS.MANAGER_DESIGNATION, joiningDate:'' };
+  staffForm = { name:'', staffCode:'', pin:'', designation: STORE_FORM_DEFAULTS.STAFF_DESIGNATION, phone:'', joiningDate:'' };
 
   ngOnInit(): void { this.load(); }
 
@@ -224,9 +236,19 @@ export class StoresPage implements OnInit {
       .catch(() => this.loading.set(false));
   }
 
-  openModal(m: 'store'|'manager'|'staff'): void { this.err.set(''); this.modal.set(m); }
-  openManagerModal(s: any): void { this.selectedStore.set(s); this.mgrForm = {name:'',email:'',password:'',designation:'Store Manager',joiningDate:''}; this.err.set(''); this.modal.set('manager'); }
-  openStaffModal(s: any): void { this.selectedStore.set(s); this.staffForm = {name:'',staffCode:'',pin:'',designation:'Store Assistant',phone:'',joiningDate:''}; this.err.set(''); this.modal.set('staff'); }
+  openModal(m: StoreModalType): void { this.err.set(''); this.modal.set(m); }
+  openManagerModal(s: any): void {
+    this.selectedStore.set(s);
+    this.mgrForm = { name:'', email:'', password:'', designation: STORE_FORM_DEFAULTS.MANAGER_DESIGNATION, joiningDate:'' };
+    this.err.set('');
+    this.modal.set(STORE_MODAL_TYPES.MANAGER);
+  }
+  openStaffModal(s: any): void {
+    this.selectedStore.set(s);
+    this.staffForm = { name:'', staffCode:'', pin:'', designation: STORE_FORM_DEFAULTS.STAFF_DESIGNATION, phone:'', joiningDate:'' };
+    this.err.set('');
+    this.modal.set(STORE_MODAL_TYPES.STAFF);
+  }
   closeModal(): void { this.modal.set(null); this.err.set(''); }
 
   async saveStore(): Promise<void> {
@@ -243,7 +265,7 @@ export class StoresPage implements OnInit {
 
   async saveManager(): Promise<void> {
     if (!this.mgrForm.name || !this.mgrForm.email || !this.mgrForm.password) { this.err.set('Name, email and password required'); return; }
-    if (this.mgrForm.password.length < 6) { this.err.set('Password must be 6+ characters'); return; }
+    if (this.mgrForm.password.length < STORE_VALIDATION.PASSWORD_MIN_LENGTH) { this.err.set('Password must be 6+ characters'); return; }
     this.saving.set(true);
     try {
       await this.api.createAdminManager(this.selectedStore()!.id, this.mgrForm);
@@ -256,7 +278,7 @@ export class StoresPage implements OnInit {
 
   async saveStaff(): Promise<void> {
     if (!this.staffForm.name || !this.staffForm.staffCode || !this.staffForm.pin) { this.err.set('Name, code and PIN required'); return; }
-    if (this.staffForm.pin.length < 4) { this.err.set('PIN must be 4+ digits'); return; }
+    if (this.staffForm.pin.length < STORE_VALIDATION.PIN_MIN_LENGTH) { this.err.set('PIN must be 4+ digits'); return; }
     this.saving.set(true);
     try {
       await this.api.createAdminStoreStaff(this.selectedStore()!.id, this.staffForm);
@@ -269,6 +291,6 @@ export class StoresPage implements OnInit {
 
   private showToast(msg: string): void {
     this.toast.set(msg);
-    setTimeout(() => this.toast.set(''), 2500);
+    setTimeout(() => this.toast.set(''), TOAST_DURATION_MS);
   }
 }

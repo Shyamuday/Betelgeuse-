@@ -5,15 +5,9 @@
   </header>
 
   <nav class="tabs">
-    <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-    <a routerLink="/doctors" routerLinkActive="active">Doctors</a>
-    <a routerLink="/consumers" routerLinkActive="active">Consumers</a>
-    <a routerLink="/diseases" routerLinkActive="active">Diseases</a>
-    <a routerLink="/hr" routerLinkActive="active">🪪 Doctor HR</a>
-    <a routerLink="/hr-users" routerLinkActive="active">👥 HR Managers</a>
-    <a routerLink="/employees" routerLinkActive="active">👥 Employees</a>
-    <a routerLink="/leaves" routerLinkActive="active">📋 Leaves</a>
-    <a routerLink="/stores" routerLinkActive="active">🏪 Stores</a>
+    @for (item of navItems; track item.path) {
+      <a [routerLink]="item.path" routerLinkActive="active">{{ item.label }}</a>
+    }
   </nav>
 
   <section class="content">

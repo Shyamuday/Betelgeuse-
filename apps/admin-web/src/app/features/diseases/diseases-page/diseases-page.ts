@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../../../core/services/admin-api';
+import { CURRENCY_CODE, CURRENCY_LOCALE, PAISE_PER_RUPEE } from '../../../shared/constants/currency.constants';
 
 type Disease = {
   id: string;
@@ -144,6 +145,10 @@ export class DiseasesPage {
   }
 
   feeToCurrency(paise: number) {
-    return (paise / 100).toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+    return (paise / PAISE_PER_RUPEE).toLocaleString(CURRENCY_LOCALE, {
+      style: 'currency',
+      currency: CURRENCY_CODE,
+      maximumFractionDigits: 0
+    });
   }
 }

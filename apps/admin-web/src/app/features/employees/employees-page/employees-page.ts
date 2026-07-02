@@ -2,18 +2,24 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { AdminApi } from '../../../core/services/admin-api';
-
-type WorkShift = 'MORNING'|'AFTERNOON'|'EVENING'|'NIGHT'|'FULL_DAY'|'CUSTOM';
-type EmpStatus = 'ACTIVE'|'ON_LEAVE'|'RESIGNED'|'TERMINATED';
-
-const SHIFT_LABELS: Record<WorkShift, string> = {
-  MORNING:'🌅 Morning', AFTERNOON:'🌤️ Afternoon', EVENING:'🌆 Evening',
-  NIGHT:'🌙 Night', FULL_DAY:'☀️ Full Day', CUSTOM:'⚙️ Custom'
-};
-const STATUS_COLOR: Record<EmpStatus,string> = {
-  ACTIVE:'#4ade80', ON_LEAVE:'#fb923c', RESIGNED:'#94a3b8', TERMINATED:'#f87171'
-};
-const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+import { SEARCH_DEBOUNCE_MS, TOAST_DURATION_MS } from '../../../core/constants/timing.constants';
+import { PAISE_PER_RUPEE } from '../../../shared/constants/currency.constants';
+import { FILTER_ALL } from '../../../shared/constants/filter.constants';
+import {
+  DEFAULT_EMPLOYEE_STATUS,
+  EMPLOYEE_STATUS_COLORS,
+  EMPLOYEE_STATUS_FALLBACK_COLOR,
+  EMPLOYEE_STATUS_FILTER_OPTIONS,
+  type EmployeeStatus
+} from '../../hr/constants/employee-status.constants';
+import { EMPLOYEE_TYPE_FILTER_OPTIONS } from '../../hr/constants/employee-type.constants';
+import { DEFAULT_CLINIC_NAME } from '../../hr/constants/organization.constants';
+import {
+  DEFAULT_WORK_SHIFT,
+  WEEK_DAYS,
+  WORK_SHIFT_LABELS,
+  type WorkShift
+} from '../../hr/constants/shift.constants';
 
 @Component({
   selector: 'app-employees-page',
@@ -226,7 +232,7 @@ const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sun
                 <div class="letter-preview">
                   <div class="letter-doc">
                     <div class="ld-top">
-                      <div class="ld-org">{{ letter()!['storeName'] ?? letter()!['organizationName'] ?? 'Betelgeuse Clinic' }}</div>
+                      <div class="ld-org">{{ letter()!['storeName'] ?? letter()!['organizationName'] ?? defaultClinicName }}</div>
                       <div class="ld-addr">{{ letter()!['storeAddress'] ?? letter()!['organizationAddress'] }}</div>
                     </div>
                     <div class="ld-meta">
@@ -368,11 +374,13 @@ const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sun
 export class EmployeesPage implements OnInit {
   private api = inject(AdminApi);
 
+  readonly defaultClinicName = DEFAULT_CLINIC_NAME;
+
   employees = signal<any[]>([]);
   loading = signal(true);
   q = '';
-  activeFilter = signal('ALL');
-  activeStatus = signal('ALL');
+  activeFilter = signal(FILTER_ALL);
+  activeStatus = signal(FILTER_ALL);
 
   drawerOpen = signal(false);
   selected = signal<any>(null);
@@ -388,15 +396,10 @@ export class EmployeesPage implements OnInit {
   form: any = {};
   salaryDisplay = 0;
 
-  filters = [
-    {label:'All', value:'ALL'}, {label:'🩺 Doctors', value:'DOCTOR'}, {label:'🏪 Staff', value:'STORE_STAFF'}
-  ];
-  statusFilters = [
-    {label:'All Status', value:'ALL'}, {label:'Active', value:'ACTIVE'},
-    {label:'On Leave', value:'ON_LEAVE'}, {label:'Resigned', value:'RESIGNED'}
-  ];
-  shifts = Object.entries(SHIFT_LABELS).map(([value, label]) => ({ value: value as WorkShift, label }));
-  days = DAYS;
+  filters = [...EMPLOYEE_TYPE_FILTER_OPTIONS];
+  statusFilters = [...EMPLOYEE_STATUS_FILTER_OPTIONS];
+  shifts = Object.entries(WORK_SHIFT_LABELS).map(([value, label]) => ({ value: value as WorkShift, label }));
+  days = WEEK_DAYS;
 
   private searchTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -411,7 +414,7 @@ export class EmployeesPage implements OnInit {
 
   onSearch(): void {
     if (this.searchTimer) clearTimeout(this.searchTimer);
-    this.searchTimer = setTimeout(() => this.load(), 300);
+    this.searchTimer = setTimeout(() => this.load(), SEARCH_DEBOUNCE_MS);
   }
 
   setFilter(v: string): void { this.activeFilter.set(v); this.load(); }
@@ -426,12 +429,12 @@ export class EmployeesPage implements OnInit {
       phone: e.phone, email: e.email, address: e.address,
       joiningDate: e.joiningDate ? e.joiningDate.slice(0,10) : '',
       probationEndDate: e.probationEndDate ? e.probationEndDate.slice(0,10) : '',
-      workShift: e.workShift ?? 'FULL_DAY', shiftStart: e.shiftStart ?? '',
+      workShift: e.workShift ?? DEFAULT_WORK_SHIFT, shiftStart: e.shiftStart ?? '',
       shiftEnd: e.shiftEnd ?? '', weeklyOffDays: [...(e.weeklyOffDays ?? [])],
       emergencyContact: e.emergencyContact, emergencyPhone: e.emergencyPhone,
-      employeeStatus: e.employeeStatus ?? 'ACTIVE'
+      employeeStatus: e.employeeStatus ?? DEFAULT_EMPLOYEE_STATUS
     };
-    this.salaryDisplay = e.salaryPerMonth ? e.salaryPerMonth / 100 : 0;
+    this.salaryDisplay = e.salaryPerMonth ? e.salaryPerMonth / PAISE_PER_RUPEE : 0;
     this.assignOnline.set(e.isOnline !== false);
     this.assignStoreId = e.clinicStore?.id ?? '';
     this.drawerOpen.set(true);
@@ -442,7 +445,7 @@ export class EmployeesPage implements OnInit {
   async saveProfile(): Promise<void> {
     if (!this.selected()) return;
     this.saving.set(true);
-    const payload = { ...this.form, salaryPerMonth: Math.round(this.salaryDisplay * 100) };
+    const payload = { ...this.form, salaryPerMonth: Math.round(this.salaryDisplay * PAISE_PER_RUPEE) };
     try {
       if (this.selected().empType === 'DOCTOR') {
         await this.api.updateHrDoctor(this.selected().id, payload);
@@ -496,7 +499,7 @@ export class EmployeesPage implements OnInit {
   async regen(): Promise<void> { this.letter.set(null); await this.generate(); }
   print(): void { window.print(); }
 
-  statusColor(s: EmpStatus): string { return STATUS_COLOR[s] ?? '#94a3b8'; }
+  statusColor(s: EmployeeStatus): string { return EMPLOYEE_STATUS_COLORS[s] ?? EMPLOYEE_STATUS_FALLBACK_COLOR; }
   isOff(d: string): boolean { return (this.form.weeklyOffDays ?? []).includes(d); }
   toggleOff(d: string): void {
     const c = this.form.weeklyOffDays ?? [];
@@ -505,6 +508,6 @@ export class EmployeesPage implements OnInit {
 
   private showToast(msg: string): void {
     this.toast.set(msg);
-    setTimeout(() => this.toast.set(''), 2500);
+    setTimeout(() => this.toast.set(''), TOAST_DURATION_MS);
   }
 }

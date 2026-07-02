@@ -2,20 +2,24 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { AdminApi } from '../../../core/services/admin-api';
-
-const LEAVE_COLORS: Record<string,string> = {
-  CASUAL:'#60a5fa', SICK:'#f87171', EARNED:'#4ade80',
-  UNPAID:'#94a3b8', MATERNITY:'#f472b6', PATERNITY:'#2dd4bf'
-};
-const LEAVE_ICONS: Record<string,string> = {
-  CASUAL:'📅', SICK:'🤒', EARNED:'⭐', UNPAID:'💸', MATERNITY:'👶', PATERNITY:'👨‍👶'
-};
-const STATUS_STYLES: Record<string,{bg:string,color:string}> = {
-  PENDING: {bg:'rgba(251,146,60,0.12)', color:'#fb923c'},
-  APPROVED:{bg:'rgba(74,222,128,0.12)', color:'#4ade80'},
-  REJECTED:{bg:'rgba(248,113,113,0.12)', color:'#f87171'},
-  CANCELLED:{bg:'rgba(148,163,184,0.12)', color:'#94a3b8'}
-};
+import { PAGE_SIZES } from '../../../core/constants/pagination.constants';
+import { SEARCH_DEBOUNCE_MS, TOAST_DURATION_MS } from '../../../core/constants/timing.constants';
+import { FILTER_ALL } from '../../../shared/constants/filter.constants';
+import { EMPLOYEE_TYPE_STAFF_FILTER_OPTIONS, EMPLOYEE_TYPES } from '../../hr/constants/employee-type.constants';
+import {
+  LEAVE_STATUS_FILTER_OPTIONS,
+  LEAVE_STATUS_FALLBACK_STYLE,
+  LEAVE_STATUS_STYLES,
+  LEAVE_STATUSES
+} from '../constants/leave-status.constants';
+import {
+  DEFAULT_LEAVE_TYPE,
+  LEAVE_TYPE_COLORS,
+  LEAVE_TYPE_FALLBACK_COLOR,
+  LEAVE_TYPE_FALLBACK_ICON,
+  LEAVE_TYPE_ICONS,
+  LEAVE_TYPES
+} from '../constants/leave-type.constants';
 
 @Component({
   selector: 'app-leaves-page',
@@ -239,10 +243,10 @@ export class LeavesPage implements OnInit {
   loading = signal(true);
   total = signal(0);
   page = signal(1);
-  pageSize = 20;
+  pageSize = PAGE_SIZES.LEAVES;
 
-  statusFilter = signal('ALL');
-  empTypeFilter = signal('ALL');
+  statusFilter = signal(FILTER_ALL);
+  empTypeFilter = signal(FILTER_ALL);
   modal = signal<'add'|'reject'|null>(null);
   saving = signal(false);
   toast = signal('');
@@ -253,11 +257,19 @@ export class LeavesPage implements OnInit {
   empResults = signal<any[]>([]);
   selectedEmp = signal<any>(null);
 
-  addForm: any = { employeeType: 'DOCTOR', doctorId: '', storeStaffId: '', type: 'CASUAL', startDate: '', endDate: '', reason: '' };
+  addForm: any = {
+    employeeType: EMPLOYEE_TYPES.DOCTOR,
+    doctorId: '',
+    storeStaffId: '',
+    type: DEFAULT_LEAVE_TYPE,
+    startDate: '',
+    endDate: '',
+    reason: ''
+  };
 
-  statusFilters = [{label:'All',value:'ALL'},{label:'Pending',value:'PENDING'},{label:'Approved',value:'APPROVED'},{label:'Rejected',value:'REJECTED'}];
-  typeFilters = [{label:'All Staff',value:'ALL'},{label:'🩺 Doctors',value:'DOCTOR'},{label:'🏪 Store Staff',value:'STORE_STAFF'}];
-  leaveTypes = ['CASUAL','SICK','EARNED','UNPAID','MATERNITY','PATERNITY'];
+  statusFilters = [...LEAVE_STATUS_FILTER_OPTIONS];
+  typeFilters = [...EMPLOYEE_TYPE_STAFF_FILTER_OPTIONS];
+  leaveTypes = LEAVE_TYPES;
 
   private empSearchTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -279,13 +291,13 @@ export class LeavesPage implements OnInit {
   empName(l: any): string {
     return l.doctor?.user?.name ?? l.storeStaff?.name ?? 'Unknown';
   }
-  leaveColor(t: string): string { return LEAVE_COLORS[t] ?? '#94a3b8'; }
-  leaveIcon(t: string): string { return LEAVE_ICONS[t] ?? '📋'; }
-  statusStyle(s: string): {bg:string,color:string} { return STATUS_STYLES[s] ?? {bg:'rgba(255,255,255,0.06)',color:'#94a3b8'}; }
+  leaveColor(t: string): string { return LEAVE_TYPE_COLORS[t as keyof typeof LEAVE_TYPE_COLORS] ?? LEAVE_TYPE_FALLBACK_COLOR; }
+  leaveIcon(t: string): string { return LEAVE_TYPE_ICONS[t as keyof typeof LEAVE_TYPE_ICONS] ?? LEAVE_TYPE_FALLBACK_ICON; }
+  statusStyle(s: string): {bg:string,color:string} { return LEAVE_STATUS_STYLES[s as keyof typeof LEAVE_STATUS_STYLES] ?? LEAVE_STATUS_FALLBACK_STYLE; }
 
   async approve(l: any): Promise<void> {
-    await this.api.updateAdminLeave(l.id, { status: 'APPROVED' });
-    this.leaves.update(list => list.map(x => x.id === l.id ? { ...x, status: 'APPROVED' } : x));
+    await this.api.updateAdminLeave(l.id, { status: LEAVE_STATUSES.APPROVED });
+    this.leaves.update(list => list.map(x => x.id === l.id ? { ...x, status: LEAVE_STATUSES.APPROVED } : x));
     this.showToast('Leave approved ✓');
   }
 
@@ -294,15 +306,23 @@ export class LeavesPage implements OnInit {
   async submitReject(): Promise<void> {
     this.saving.set(true);
     try {
-      await this.api.updateAdminLeave(this.rejectTarget()!.id, { status: 'REJECTED', hrNote: this.rejectNote });
-      this.leaves.update(list => list.map(x => x.id === this.rejectTarget()!.id ? { ...x, status: 'REJECTED', hrNote: this.rejectNote } : x));
+      await this.api.updateAdminLeave(this.rejectTarget()!.id, { status: LEAVE_STATUSES.REJECTED, hrNote: this.rejectNote });
+      this.leaves.update(list => list.map(x => x.id === this.rejectTarget()!.id ? { ...x, status: LEAVE_STATUSES.REJECTED, hrNote: this.rejectNote } : x));
       this.modal.set(null);
       this.showToast('Leave rejected');
     } finally { this.saving.set(false); }
   }
 
   openAdd(): void {
-    this.addForm = { employeeType: 'DOCTOR', doctorId: '', storeStaffId: '', type: 'CASUAL', startDate: '', endDate: '', reason: '' };
+    this.addForm = {
+      employeeType: EMPLOYEE_TYPES.DOCTOR,
+      doctorId: '',
+      storeStaffId: '',
+      type: DEFAULT_LEAVE_TYPE,
+      startDate: '',
+      endDate: '',
+      reason: ''
+    };
     this.selectedEmp.set(null);
     this.empSearch = '';
     this.empResults.set([]);
@@ -315,9 +335,9 @@ export class LeavesPage implements OnInit {
     if (this.empSearch.length < 2) { this.empResults.set([]); return; }
     this.empSearchTimer = setTimeout(() => {
       this.api.getHrEmployees({ q: this.empSearch, type: this.addForm.employeeType })
-        .then(r => this.empResults.set(r.employees.slice(0, 6)))
+        .then(r => this.empResults.set(r.employees.slice(0, PAGE_SIZES.EMP_SEARCH_RESULTS)))
         .catch(() => {});
-    }, 300);
+    }, SEARCH_DEBOUNCE_MS);
   }
 
   selectEmp(e: any): void {
@@ -346,6 +366,6 @@ export class LeavesPage implements OnInit {
 
   private showToast(msg: string): void {
     this.toast.set(msg);
-    setTimeout(() => this.toast.set(''), 2500);
+    setTimeout(() => this.toast.set(''), TOAST_DURATION_MS);
   }
 }

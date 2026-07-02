@@ -2,18 +2,19 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { AdminApi } from '../../../core/services/admin-api';
-
-type WorkShift = 'MORNING' | 'AFTERNOON' | 'EVENING' | 'NIGHT' | 'FULL_DAY' | 'CUSTOM';
-type EmployeeStatus = 'ACTIVE' | 'ON_LEAVE' | 'RESIGNED' | 'TERMINATED';
-
-const SHIFT_LABELS: Record<WorkShift, string> = {
-  MORNING: '🌅 Morning', AFTERNOON: '🌤️ Afternoon', EVENING: '🌆 Evening',
-  NIGHT: '🌙 Night', FULL_DAY: '☀️ Full Day', CUSTOM: '⚙️ Custom'
-};
-const STATUS_COLORS: Record<EmployeeStatus, string> = {
-  ACTIVE: '#4ade80', ON_LEAVE: '#fb923c', RESIGNED: '#94a3b8', TERMINATED: '#f87171'
-};
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+import { PAISE_PER_RUPEE } from '../../../shared/constants/currency.constants';
+import {
+  EMPLOYEE_STATUS_COLORS,
+  EMPLOYEE_STATUS_FALLBACK_COLOR,
+  type EmployeeStatus
+} from '../constants/employee-status.constants';
+import { DEFAULT_HOMEOPATHIC_CLINIC_NAME } from '../constants/organization.constants';
+import {
+  DEFAULT_WORK_SHIFT,
+  WEEK_DAYS,
+  WORK_SHIFT_LABELS,
+  type WorkShift
+} from '../constants/shift.constants';
 
 @Component({
   selector: 'app-doctor-hr',
@@ -363,8 +364,8 @@ export class DoctorHrComponent implements OnInit {
   salaryDisplay = 0;
   feeDisplay = 0;
 
-  shifts = Object.entries(SHIFT_LABELS).map(([value, label]) => ({ value: value as WorkShift, label }));
-  days = DAYS;
+  shifts = Object.entries(WORK_SHIFT_LABELS).map(([value, label]) => ({ value: value as WorkShift, label }));
+  days = WEEK_DAYS;
 
   ngOnInit(): void { this.load(); }
 
@@ -380,9 +381,9 @@ export class DoctorHrComponent implements OnInit {
     this.selected.set(d);
     this.letter.set(d.joiningLetter ?? null);
     this.tab.set('profile');
-    this.form = { ...d, workShift: d.workShift ?? 'FULL_DAY', weeklyOffDays: d.weeklyOffDays ?? [] };
-    this.salaryDisplay = d.salaryPerMonth ? d.salaryPerMonth / 100 : 0;
-    this.feeDisplay = d.consultationFee ? d.consultationFee / 100 : 0;
+    this.form = { ...d, workShift: d.workShift ?? DEFAULT_WORK_SHIFT, weeklyOffDays: d.weeklyOffDays ?? [] };
+    this.salaryDisplay = d.salaryPerMonth ? d.salaryPerMonth / PAISE_PER_RUPEE : 0;
+    this.feeDisplay = d.consultationFee ? d.consultationFee / PAISE_PER_RUPEE : 0;
     this.profileOpen.set(true);
   }
 
@@ -394,8 +395,8 @@ export class DoctorHrComponent implements OnInit {
     try {
       const r = await this.api.updateHrDoctor(this.selected().id, {
         ...this.form,
-        salaryPerMonth: Math.round(this.salaryDisplay * 100),
-        consultationFee: Math.round(this.feeDisplay * 100)
+        salaryPerMonth: Math.round(this.salaryDisplay * PAISE_PER_RUPEE),
+        consultationFee: Math.round(this.feeDisplay * PAISE_PER_RUPEE)
       });
       this.doctors.update(list => list.map(d => d.id === r.doctor.id ? { ...d, ...r.doctor } : d));
       this.selected.set({ ...this.selected(), ...r.doctor });
@@ -415,7 +416,7 @@ export class DoctorHrComponent implements OnInit {
   async generate() {
     this.letterLoading.set(true);
     try {
-      const r = await this.api.generateDoctorLetter(this.selected().id, 'Betelgeuse Homeopathic Clinic');
+      const r = await this.api.generateDoctorLetter(this.selected().id, DEFAULT_HOMEOPATHIC_CLINIC_NAME);
       this.letter.set(r.letter);
     } finally { this.letterLoading.set(false); }
   }
@@ -423,8 +424,8 @@ export class DoctorHrComponent implements OnInit {
   async regen() { this.letter.set(null); await this.generate(); }
   print(): void { window.print(); }
 
-  shiftLabel(s: WorkShift): string { return SHIFT_LABELS[s] ?? s; }
-  statusColor(s: EmployeeStatus): string { return STATUS_COLORS[s] ?? '#94a3b8'; }
+  shiftLabel(s: WorkShift): string { return WORK_SHIFT_LABELS[s] ?? s; }
+  statusColor(s: EmployeeStatus): string { return EMPLOYEE_STATUS_COLORS[s] ?? EMPLOYEE_STATUS_FALLBACK_COLOR; }
   isOff(d: string): boolean { return (this.form.weeklyOffDays ?? []).includes(d); }
   toggleOff(d: string): void {
     const c = this.form.weeklyOffDays ?? [];

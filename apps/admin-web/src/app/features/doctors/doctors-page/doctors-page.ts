@@ -2,6 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../../../core/services/admin-api';
+import {
+  DOCTORS_LIST_DEFAULTS,
+  DOCTORS_PAGE_SIZE,
+  type DoctorSortField,
+  type DoctorStatusFilter
+} from '../constants/doctors-list.constants';
+import type { SortDirection } from '../../../shared/constants/filter.constants';
 
 type Doctor = {
   id: string;
@@ -31,11 +38,11 @@ export class DoctorsPage {
 
   searchTerm = '';
   pendingSearchTerm = '';
-  sortBy: 'name' | 'createdAt' | 'status' = 'name';
-  sortDirection: 'asc' | 'desc' = 'asc';
-  statusFilter: 'ALL' | 'ACTIVE' | 'INACTIVE' = 'ALL';
+  sortBy: DoctorSortField = DOCTORS_LIST_DEFAULTS.SORT_BY;
+  sortDirection: SortDirection = DOCTORS_LIST_DEFAULTS.SORT_DIRECTION;
+  statusFilter: DoctorStatusFilter = DOCTORS_LIST_DEFAULTS.STATUS_FILTER;
 
-  pageSize = 6;
+  pageSize = DOCTORS_PAGE_SIZE;
   doctorsPage = 1;
   pendingPage = 1;
   doctorsTotalPagesCount = 1;

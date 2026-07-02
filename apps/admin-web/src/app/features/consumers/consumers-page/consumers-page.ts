@@ -2,6 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../../../core/services/admin-api';
+import {
+  CONSUMERS_LIST_DEFAULTS,
+  CONSUMERS_PAGE_SIZE,
+  type ConsumerSortField
+} from '../constants/consumers-list.constants';
+import type { SortDirection } from '../../../shared/constants/filter.constants';
 
 type Consumer = {
   id: string;
@@ -54,9 +60,9 @@ export class ConsumersPage {
   listLoading = false;
   detailLoading = false;
   searchTerm = '';
-  sortBy: 'name' | 'consultations' = 'consultations';
-  sortDirection: 'asc' | 'desc' = 'desc';
-  pageSize = 8;
+  sortBy: ConsumerSortField = CONSUMERS_LIST_DEFAULTS.SORT_BY;
+  sortDirection: SortDirection = CONSUMERS_LIST_DEFAULTS.SORT_DIRECTION;
+  pageSize = CONSUMERS_PAGE_SIZE;
   page = 1;
   totalPagesCount = 1;
   listError = '';
