@@ -8,7 +8,7 @@ import {
   CUSTOM_POTENCY_VALUE,
   MEDICINE_CATEGORIES,
   MEDICINE_POTENCIES
-} from '../../../shared/store/constants/medicine-form.constants';
+} from '@vitalis/store-ui';
 
 function emptyMedicineForm() {
   return {

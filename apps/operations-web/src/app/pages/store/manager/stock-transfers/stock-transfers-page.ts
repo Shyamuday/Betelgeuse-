@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { StoreApiService } from '../../../services/store-api.service';
+import { StoreApiService } from '../../../../services/store-api.service';
 
 @Component({
   selector: 'app-stock-transfers-page',

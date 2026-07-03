@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
-import { StoreApiService } from '../../../services/store-api.service';
+import { StoreApiService } from '../../../../services/store-api.service';
 
 type ReceiveLine = {
   purchaseOrderLineId: string;

@@ -3,9 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { HrApiService } from '../../services/hr-api.service';
 import { Employee } from '../../models';
-import { EmployeeDrawerComponent } from '../../shared/employee-drawer/employee-drawer.component';
-import { EMPLOYEE_STATUS_FILTER_OPTIONS, employeeStatusBadgeClass } from '../../shared/constants/employee-status.constants';
-import { EMPLOYEE_TYPE_FILTER_OPTIONS } from '../../shared/constants/employee-type.constants';
+import { EmployeeDrawerComponent, EMPLOYEE_STATUS_FILTER_OPTIONS, employeeStatusBadgeClass, EMPLOYEE_TYPE_FILTER_OPTIONS } from '@vitalis/hr-ui';
 import { SEARCH_DEBOUNCE_MS } from '../../core/constants/timing.constants';
 
 type FilterType = 'ALL' | 'DOCTOR' | 'STORE_STAFF';

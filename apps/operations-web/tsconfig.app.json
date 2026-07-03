@@ -19,7 +19,11 @@
       "@vitalis/role-task-guides": ["../../shared/role-task-guides/index.ts"],
       "@vitalis/role-task-guides/*": ["../../shared/role-task-guides/*"],
       "@vitalis/clinic-api": ["../../libs/clinic-api/src/index.ts"],
-      "@vitalis/clinic-api/*": ["../../libs/clinic-api/src/*"]
+      "@vitalis/clinic-api/*": ["../../libs/clinic-api/src/*"],
+      "@vitalis/hr-ui": ["../../libs/hr-ui/src/index.ts"],
+      "@vitalis/hr-ui/*": ["../../libs/hr-ui/src/*"],
+      "@vitalis/store-ui": ["../../libs/store-ui/src/index.ts"],
+      "@vitalis/store-ui/*": ["../../libs/store-ui/src/*"]
     },
     "outDir": "./out-tsc/app",
     "types": []

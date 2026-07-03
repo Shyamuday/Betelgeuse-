@@ -182,83 +182,83 @@ export const routes: Routes = [
           {
             path: STORE_COUNTER_PATHS.DASHBOARD,
             loadComponent: () =>
-              import('./pages/store-counter/dashboard/dashboard.component').then((m) => m.DashboardComponent)
+              import('./pages/store/dashboard/dashboard.component').then((m) => m.DashboardComponent)
           },
           {
             path: STORE_COUNTER_PATHS.SEARCH,
             loadComponent: () =>
-              import('./pages/store-counter/search/search.component').then((m) => m.SearchComponent)
+              import('./pages/store/search/search.component').then((m) => m.SearchComponent)
           },
           {
             path: STORE_COUNTER_PATHS.PATIENTS,
             loadComponent: () =>
-              import('./pages/store-counter/patients/patients-page').then((m) => m.PatientsPage)
+              import('./pages/store/patients/patients-page').then((m) => m.PatientsPage)
           },
           {
             path: STORE_COUNTER_PATHS.MEDICINE_DETAIL,
             loadComponent: () =>
-              import('./pages/store-counter/medicine-detail/medicine-detail.component').then(
+              import('./pages/store/medicine-detail/medicine-detail.component').then(
                 (m) => m.MedicineDetailComponent
               )
           },
           {
             path: STORE_COUNTER_PATHS.STOCK_IN,
             loadComponent: () =>
-              import('./pages/store-counter/stock-in/stock-in.component').then((m) => m.StockInComponent)
+              import('./pages/store/stock-in/stock-in.component').then((m) => m.StockInComponent)
           },
           {
             path: STORE_COUNTER_PATHS.STOCK_OUT,
             loadComponent: () =>
-              import('./pages/store-counter/stock-out/stock-out.component').then((m) => m.StockOutComponent)
+              import('./pages/store/stock-out/stock-out.component').then((m) => m.StockOutComponent)
           },
           {
             path: STORE_COUNTER_PATHS.ALERTS,
             loadComponent: () =>
-              import('./pages/store-counter/alerts/alerts.component').then((m) => m.AlertsComponent)
+              import('./pages/store/alerts/alerts.component').then((m) => m.AlertsComponent)
           },
           {
             path: STORE_COUNTER_PATHS.RACK_MAP,
             loadComponent: () =>
-              import('./pages/store-counter/rack-map/rack-map.component').then((m) => m.RackMapComponent)
+              import('./pages/store/rack-map/rack-map.component').then((m) => m.RackMapComponent)
           },
           {
             path: STORE_COUNTER_PATHS.MEDICINES,
             loadComponent: () =>
-              import('./pages/store-counter/medicines-admin/medicines-admin.component').then(
+              import('./pages/store/medicines-admin/medicines-admin.component').then(
                 (m) => m.MedicinesAdminComponent
               )
           },
           {
             path: STORE_COUNTER_PATHS.MOVEMENTS,
             loadComponent: () =>
-              import('./pages/store-counter/movements/movements.component').then((m) => m.MovementsComponent)
+              import('./pages/store/movements/movements.component').then((m) => m.MovementsComponent)
           },
           {
             path: STORE_COUNTER_PATHS.STAFF_ACTIVITY,
             loadComponent: () =>
-              import('./pages/store-counter/staff-activity/staff-activity.component').then(
+              import('./pages/store/staff-activity/staff-activity.component').then(
                 (m) => m.StaffActivityComponent
               )
           },
           {
             path: STORE_COUNTER_PATHS.STAFF_HR,
             loadComponent: () =>
-              import('./pages/store-counter/staff-hr/staff-hr.component').then((m) => m.StaffHrComponent)
+              import('./pages/store/staff-hr/staff-hr.component').then((m) => m.StaffHrComponent)
           },
           {
             path: STORE_COUNTER_PATHS.MY_PAY,
             loadComponent: () =>
-              import('./pages/store-counter/my-pay/my-pay-page').then((m) => m.MyPayPage)
+              import('./pages/store/my-pay/my-pay-page').then((m) => m.MyPayPage)
           },
           {
             path: STORE_COUNTER_PATHS.STORE_EXPENSES,
             loadComponent: () =>
-              import('./pages/store-counter/store-expenses/store-expenses-page').then((m) => m.StoreExpensesPage)
+              import('./pages/store/store-expenses/store-expenses-page').then((m) => m.StoreExpensesPage)
           },
           {
             path: STORE_COUNTER_PATHS.PATIENT_SCAN,
             loadComponent: () =>
-              import('./pages/store-counter/patient-scan/patient-scan.component').then(
+              import('./pages/store/patient-scan/patient-scan.component').then(
                 (m) => m.PatientScanComponent
               )
           }
@@ -276,89 +276,89 @@ export const routes: Routes = [
           {
             path: STORE_MANAGER_PATHS.DASHBOARD,
             loadComponent: () =>
-              import('./pages/store-counter/dashboard/dashboard.component').then((m) => m.DashboardComponent)
+              import('./pages/store/dashboard/dashboard.component').then((m) => m.DashboardComponent)
           },
           {
             path: STORE_MANAGER_PATHS.PATIENTS,
             loadComponent: () =>
-              import('./pages/store-counter/patients/patients-page').then((m) => m.PatientsPage)
+              import('./pages/store/patients/patients-page').then((m) => m.PatientsPage)
           },
           {
             path: STORE_MANAGER_PATHS.SEARCH,
             loadComponent: () =>
-              import('./pages/store-counter/search/search.component').then((m) => m.SearchComponent)
+              import('./pages/store/search/search.component').then((m) => m.SearchComponent)
           },
           {
             path: STORE_MANAGER_PATHS.MEDICINE_DETAIL,
             loadComponent: () =>
-              import('./pages/store-counter/medicine-detail/medicine-detail.component').then(
+              import('./pages/store/medicine-detail/medicine-detail.component').then(
                 (m) => m.MedicineDetailComponent
               )
           },
           {
             path: STORE_MANAGER_PATHS.ALERTS,
             loadComponent: () =>
-              import('./pages/store-counter/alerts/alerts.component').then((m) => m.AlertsComponent)
+              import('./pages/store/alerts/alerts.component').then((m) => m.AlertsComponent)
           },
           {
             path: STORE_MANAGER_PATHS.RACK_MAP,
             loadComponent: () =>
-              import('./pages/store-counter/rack-map/rack-map.component').then((m) => m.RackMapComponent)
+              import('./pages/store/rack-map/rack-map.component').then((m) => m.RackMapComponent)
           },
           {
             path: STORE_MANAGER_PATHS.MEDICINES,
             loadComponent: () =>
-              import('./pages/store-counter/medicines-admin/medicines-admin.component').then(
+              import('./pages/store/medicines-admin/medicines-admin.component').then(
                 (m) => m.MedicinesAdminComponent
               )
           },
           {
             path: STORE_MANAGER_PATHS.MOVEMENTS,
             loadComponent: () =>
-              import('./pages/store-counter/movements/movements.component').then((m) => m.MovementsComponent)
+              import('./pages/store/movements/movements.component').then((m) => m.MovementsComponent)
           },
           {
             path: STORE_MANAGER_PATHS.STAFF_ACTIVITY,
             loadComponent: () =>
-              import('./pages/store-counter/staff-activity/staff-activity.component').then(
+              import('./pages/store/staff-activity/staff-activity.component').then(
                 (m) => m.StaffActivityComponent
               )
           },
           {
             path: STORE_MANAGER_PATHS.STAFF_HR,
             loadComponent: () =>
-              import('./pages/store-counter/staff-hr/staff-hr.component').then((m) => m.StaffHrComponent)
+              import('./pages/store/staff-hr/staff-hr.component').then((m) => m.StaffHrComponent)
           },
           {
             path: STORE_MANAGER_PATHS.STORE_EXPENSES,
             loadComponent: () =>
-              import('./pages/store-counter/store-expenses/store-expenses-page').then((m) => m.StoreExpensesPage)
+              import('./pages/store/store-expenses/store-expenses-page').then((m) => m.StoreExpensesPage)
           },
           {
             path: STORE_MANAGER_PATHS.PATIENT_SCAN,
             loadComponent: () =>
-              import('./pages/store-counter/patient-scan/patient-scan.component').then(
+              import('./pages/store/patient-scan/patient-scan.component').then(
                 (m) => m.PatientScanComponent
               )
           },
           {
             path: STORE_MANAGER_PATHS.PURCHASE_ORDERS,
             loadComponent: () =>
-              import('./pages/store-manager/purchase-orders/purchase-orders-page').then(
+              import('./pages/store/manager/purchase-orders/purchase-orders-page').then(
                 (m) => m.PurchaseOrdersPage
               )
           },
           {
             path: STORE_MANAGER_PATHS.STOCK_TRANSFERS,
             loadComponent: () =>
-              import('./pages/store-manager/stock-transfers/stock-transfers-page').then(
+              import('./pages/store/manager/stock-transfers/stock-transfers-page').then(
                 (m) => m.StockTransfersPage
               )
           },
           {
             path: STORE_MANAGER_PATHS.DELIVERIES,
             loadComponent: () =>
-              import('./pages/store-manager/deliveries/deliveries-page').then((m) => m.DeliveriesPage)
+              import('./pages/store/manager/deliveries/deliveries-page').then((m) => m.DeliveriesPage)
           }
         ]
       }

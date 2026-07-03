@@ -5,7 +5,7 @@ import { StoreApiService } from '../../../services/store-api.service';
 import { StaffHrProfile, JoiningLetterDoc } from '../../../models/store';
 import { WorkShift, EmployeeStatus } from '../../../models';
 import { STORE_STAFF_ROLES } from '../../../core/constants/store/auth.constants';
-import { EMPLOYEE_STATUS_STYLES, SHIFT_LABELS, WEEK_DAYS } from '../../../shared/store/constants/hr.constants';
+import { EMPLOYEE_STATUS_STYLES, SHIFT_LABELS, WEEK_DAYS } from '@vitalis/hr-ui';
 
 type ProfileFormFields = {
   employeeId: string;

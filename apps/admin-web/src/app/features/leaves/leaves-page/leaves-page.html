@@ -89,8 +89,8 @@
             <div class="fg">
               <label>Employee Type</label>
               <div class="toggle-row">
-                <button class="tog" [class.active]="addModel().employeeType === 'DOCTOR'" (click)="setAddEmployeeType('DOCTOR')">🩺 Doctor</button>
-                <button class="tog" [class.active]="addModel().employeeType === 'STORE_STAFF'" (click)="setAddEmployeeType('STORE_STAFF')">🏪 Store Staff</button>
+                <button class="tog" [class.active]="addModel().employeeType === employeeTypes.DOCTOR" (click)="setAddEmployeeType(employeeTypes.DOCTOR)">🩺 Doctor</button>
+                <button class="tog" [class.active]="addModel().employeeType === employeeTypes.STORE_STAFF" (click)="setAddEmployeeType(employeeTypes.STORE_STAFF)">🏪 Store Staff</button>
               </div>
             </div>
             <div class="fg">

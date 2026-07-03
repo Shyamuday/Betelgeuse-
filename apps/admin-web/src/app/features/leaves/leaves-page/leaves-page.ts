@@ -69,12 +69,14 @@ export class LeavesPage implements OnInit {
   empResults = signal<any[]>([]);
   selectedEmp = signal<any>(null);
 
-  readonly addModel = signal(emptyAddForm());
+  readonly addModel = signal<AddLeaveForm>(emptyAddForm());
   readonly addForm = form(this.addModel);
   readonly rejectNoteModel = signal({ note: '' });
   readonly rejectNoteForm = form(this.rejectNoteModel);
   readonly empSearchModel = signal({ q: '' });
   readonly empSearchForm = form(this.empSearchModel);
+
+  readonly employeeTypes = EMPLOYEE_TYPES;
 
   statusFilters = [...LEAVE_STATUS_FILTER_OPTIONS];
   typeFilters = [...EMPLOYEE_TYPE_STAFF_FILTER_OPTIONS];

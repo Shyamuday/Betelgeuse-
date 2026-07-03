@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { HrApiService } from '../../services/hr-api.service';
 import { Leave, LeaveStatus, LeaveType, EmpType } from '../../models';
-import { LEAVE_STATUS_TABS, LEAVE_TYPES, leaveStatusBadgeClass, leaveTypeIcon } from '../../shared/constants/leave.constants';
+import { LEAVE_STATUS_TABS, LEAVE_TYPES, leaveStatusBadgeClass, leaveTypeIcon } from '@vitalis/hr-ui';
 import { PAGE_SIZES } from '../../core/constants/pagination.constants';
 
 type TabStatus = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED';

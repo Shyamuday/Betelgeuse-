@@ -1,0 +1,1 @@
+export const SAVE_SUCCESS_DURATION_MS = 3000;

@@ -2,8 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { HrApiService } from '../../services/hr-api.service';
 import { StoreStaff } from '../../models';
-import { EmployeeDrawerComponent } from '../../shared/employee-drawer/employee-drawer.component';
-import { employeeStatusBadgeClass } from '../../shared/constants/employee-status.constants';
+import { EmployeeDrawerComponent, employeeStatusBadgeClass } from '@vitalis/hr-ui';
 
 @Component({
   selector: 'app-store-staff',
