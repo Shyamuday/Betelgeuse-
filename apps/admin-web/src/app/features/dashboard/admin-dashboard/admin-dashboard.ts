@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, signal } from '@angular/core';
+import { form, FormField } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { AdminApi } from '../../../core/services/admin-api';
 import { adminNavPath, ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
@@ -14,7 +14,7 @@ import {
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormField, RouterLink],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.scss'
 })
@@ -38,9 +38,6 @@ export class AdminDashboard {
   payments: Array<any> = [];
   paymentsPage = 1;
   paymentsTotalPages = 1;
-  paymentStatus: PaymentStatus = PAYMENTS_DEFAULTS.STATUS;
-  paymentFrom = '';
-  paymentTo = '';
   paymentSummary = { total: 0, paid: 0, failedCount: 0, pendingCount: 0 };
   paymentsLoading = false;
   paymentsError = '';
@@ -49,6 +46,13 @@ export class AdminDashboard {
   error = '';
   adherenceSummary = { highRiskCount: 0, mediumRiskCount: 0, alertCount: 0, platformAdherencePercent: 0 };
   adherenceAlerts: Array<{ patientName: string; message: string; severity: string }> = [];
+
+  readonly paymentFilterModel = signal({
+    paymentStatus: PAYMENTS_DEFAULTS.STATUS as PaymentStatus,
+    paymentFrom: '',
+    paymentTo: ''
+  });
+  readonly paymentFilterForm = form(this.paymentFilterModel);
 
   constructor(private readonly api: AdminApi) {
     void this.load();
@@ -77,13 +81,14 @@ export class AdminDashboard {
     this.paymentsPage = page;
     this.paymentsLoading = true;
     this.paymentsError = '';
+    const filters = this.paymentFilterModel();
     try {
       const result = await this.api.getPayments({
         page,
         pageSize: PAYMENTS_PAGE_SIZE,
-        status: this.paymentStatus,
-        from: this.paymentFrom || undefined,
-        to: this.paymentTo || undefined
+        status: filters.paymentStatus,
+        from: filters.paymentFrom || undefined,
+        to: filters.paymentTo || undefined
       });
       this.payments = result.payments || [];
       this.paymentSummary = result.summary || this.paymentSummary;
@@ -100,9 +105,11 @@ export class AdminDashboard {
   }
 
   clearPaymentFilters() {
-    this.paymentStatus = PAYMENTS_DEFAULTS.STATUS;
-    this.paymentFrom = '';
-    this.paymentTo = '';
+    this.paymentFilterModel.set({
+      paymentStatus: PAYMENTS_DEFAULTS.STATUS,
+      paymentFrom: '',
+      paymentTo: ''
+    });
     void this.loadPayments(1);
   }
 
@@ -113,11 +120,12 @@ export class AdminDashboard {
   async exportPaymentsCsv() {
     this.csvExporting = true;
     this.csvError = '';
+    const filters = this.paymentFilterModel();
     try {
       const csv = await this.api.exportPaymentsCsv({
-        status: this.paymentStatus,
-        from: this.paymentFrom || undefined,
-        to: this.paymentTo || undefined
+        status: filters.paymentStatus,
+        from: filters.paymentFrom || undefined,
+        to: filters.paymentTo || undefined
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
       const url = URL.createObjectURL(blob);

@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
 import { AdminApi } from '../../../core/services/admin-api';
 import {
@@ -14,7 +14,7 @@ import {
 
 @Component({
   selector: 'app-finance-page',
-  imports: [FormsModule, DatePipe],
+  imports: [FormField, DatePipe],
   templateUrl: './finance-page.html',
   styleUrl: './finance-page.scss'
 })
@@ -25,9 +25,20 @@ export class FinancePage implements OnInit {
   loading = signal(true);
   error = signal('');
   exporting = signal(false);
-  branchExportFilter = '';
-  selectedMonth = new Date().toISOString().slice(0, 7);
   toast = signal('');
+
+  readonly exportFilterModel = signal({ branchExportFilter: '' });
+  readonly exportFilterForm = form(this.exportFilterModel);
+  readonly monthModel = signal({ selectedMonth: new Date().toISOString().slice(0, 7) });
+  readonly monthForm = form(this.monthModel);
+  readonly medicineFilterModel = signal({
+    medicineFrom: '',
+    medicineTo: '',
+    storeFilter: ''
+  });
+  readonly medicineFilterForm = form(this.medicineFilterModel);
+  readonly storeExpenseFilterModel = signal({ storeFilter: '' });
+  readonly storeExpenseFilterForm = form(this.storeExpenseFilterModel);
 
   summary = signal<any>(null);
   branchPnl = signal<any[]>([]);
@@ -43,10 +54,8 @@ export class FinancePage implements OnInit {
 
   expenseModal = signal(false);
   editingExpense = signal<any | null>(null);
-  expenseForm = { ...EMPTY_EXPENSE_FORM };
-  storeFilter = '';
-  medicineFrom = '';
-  medicineTo = '';
+  readonly expenseModel = signal({ ...EMPTY_EXPENSE_FORM });
+  readonly expenseForm = form(this.expenseModel);
 
   readonly tabs = FINANCE_TABS;
   readonly categories = EXPENSE_CATEGORIES;
@@ -71,15 +80,22 @@ export class FinancePage implements OnInit {
   loadAll(): void {
     this.loading.set(true);
     this.error.set('');
+    const month = this.monthModel().selectedMonth;
+    const medicineFilters = this.medicineFilterModel();
+    const storeFilter = this.storeExpenseFilterModel().storeFilter;
     Promise.all([
-      this.api.getFinanceSummary(this.selectedMonth),
-      this.api.getBranchPnl(this.selectedMonth),
+      this.api.getFinanceSummary(month),
+      this.api.getBranchPnl(month),
       this.api.getRevenueTrend(6),
-      this.api.getRevenueByDoctor(this.selectedMonth),
-      this.api.getRevenueByDisease(this.selectedMonth),
-      this.api.getMedicineRevenue({ from: this.medicineFrom || undefined, to: this.medicineTo || undefined, storeId: this.storeFilter || undefined }),
+      this.api.getRevenueByDoctor(month),
+      this.api.getRevenueByDisease(month),
+      this.api.getMedicineRevenue({
+        from: medicineFilters.medicineFrom || undefined,
+        to: medicineFilters.medicineTo || undefined,
+        storeId: medicineFilters.storeFilter || undefined
+      }),
       this.api.getExpenses({ level: 'CLINIC' }),
-      this.api.getExpenses({ level: 'STORE', storeId: this.storeFilter || undefined })
+      this.api.getExpenses({ level: 'STORE', storeId: storeFilter || undefined })
     ]).then(([summary, branchData, trend, byDoctor, byDisease, medicine, clinicExpenses, storeExpenses]) => {
       this.summary.set(summary);
       this.branchPnl.set(branchData.branches ?? []);
@@ -98,34 +114,40 @@ export class FinancePage implements OnInit {
   }
 
   loadTab(): void {
+    const month = this.monthModel().selectedMonth;
+    const medicineFilters = this.medicineFilterModel();
+    const storeFilter = this.storeExpenseFilterModel().storeFilter;
     if (this.tab() === 'overview') {
-      this.api.getFinanceSummary(this.selectedMonth).then(s => this.summary.set(s)).catch(() => {});
+      this.api.getFinanceSummary(month).then(s => this.summary.set(s)).catch(() => {});
     }
     if (this.tab() === 'outstanding') {
       this.api.getOutstandingPayments().then(r => this.outstanding.set(r.payments || [])).catch(() => {});
     }
     if (this.tab() === 'branches') {
-      this.api.getBranchPnl(this.selectedMonth).then(r => {
+      this.api.getBranchPnl(month).then(r => {
         this.branchPnl.set(r.branches ?? []);
         this.branchTotals.set(r.totals ?? null);
       }).catch(() => {});
     }
     if (this.tab() === 'medicine') {
-      this.api.getMedicineRevenue({ from: this.medicineFrom || undefined, to: this.medicineTo || undefined, storeId: this.storeFilter || undefined })
-        .then(r => this.medicine.set(r)).catch(() => {});
+      this.api.getMedicineRevenue({
+        from: medicineFilters.medicineFrom || undefined,
+        to: medicineFilters.medicineTo || undefined,
+        storeId: medicineFilters.storeFilter || undefined
+      }).then(r => this.medicine.set(r)).catch(() => {});
     }
     if (this.tab() === 'clinic-expenses') {
       this.api.getExpenses({ level: 'CLINIC' }).then(r => this.clinicExpenses.set(r.expenses)).catch(() => {});
     }
     if (this.tab() === 'store-expenses') {
-      this.api.getExpenses({ level: 'STORE', storeId: this.storeFilter || undefined }).then(r => this.storeExpenses.set(r.expenses)).catch(() => {});
+      this.api.getExpenses({ level: 'STORE', storeId: storeFilter || undefined }).then(r => this.storeExpenses.set(r.expenses)).catch(() => {});
     }
   }
 
   openExpenseModal(expense?: any, level: 'CLINIC' | 'STORE' = 'CLINIC'): void {
     if (expense) {
       this.editingExpense.set(expense);
-      this.expenseForm = {
+      this.expenseModel.set({
         level: expense.level,
         storeId: expense.storeId ?? '',
         category: expense.category,
@@ -134,10 +156,14 @@ export class FinancePage implements OnInit {
         billNo: expense.billNo ?? '',
         amountInPaise: expense.amountInPaise,
         expenseDate: expense.expenseDate.slice(0, 10)
-      };
+      });
     } else {
       this.editingExpense.set(null);
-      this.expenseForm = { ...EMPTY_EXPENSE_FORM, level, storeId: level === 'STORE' ? (this.storeFilter || '') : '' };
+      this.expenseModel.set({
+        ...EMPTY_EXPENSE_FORM,
+        level,
+        storeId: level === 'STORE' ? (this.storeExpenseFilterModel().storeFilter || '') : ''
+      });
     }
     this.expenseModal.set(true);
   }
@@ -148,13 +174,14 @@ export class FinancePage implements OnInit {
   }
 
   saveExpense(): void {
-    const amountInPaise = Math.round(Number(this.expenseForm.amountInPaise));
-    if (!this.expenseForm.description || !amountInPaise) return;
+    const form = this.expenseModel();
+    const amountInPaise = Math.round(Number(form.amountInPaise));
+    if (!form.description || !amountInPaise) return;
 
     const payload = {
-      ...this.expenseForm,
+      ...form,
       amountInPaise,
-      storeId: this.expenseForm.level === 'STORE' ? this.expenseForm.storeId : null
+      storeId: form.level === 'STORE' ? form.storeId : null
     };
 
     const req = this.editingExpense()
@@ -182,15 +209,15 @@ export class FinancePage implements OnInit {
     this.exporting.set(true);
     try {
       const csv = await this.api.exportAccountantBundle({
-        month: this.selectedMonth,
-        storeId: this.branchExportFilter || undefined
+        month: this.monthModel().selectedMonth,
+        storeId: this.exportFilterModel().branchExportFilter || undefined
       });
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
-      const suffix = this.branchExportFilter ? `-${this.branchExportFilter}` : '';
-      anchor.download = `accountant-bundle-${this.selectedMonth}${suffix}.csv`;
+      const suffix = this.exportFilterModel().branchExportFilter ? `-${this.exportFilterModel().branchExportFilter}` : '';
+      anchor.download = `accountant-bundle-${this.monthModel().selectedMonth}${suffix}.csv`;
       anchor.click();
       URL.revokeObjectURL(url);
       this.toast.set('Accountant bundle exported');

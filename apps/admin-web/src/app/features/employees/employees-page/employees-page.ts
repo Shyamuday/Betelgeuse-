@@ -1,5 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { form, FormField } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
 import { AdminApi } from '../../../core/services/admin-api';
 import { SEARCH_DEBOUNCE_MS, TOAST_DURATION_MS } from '../../../core/constants/timing.constants';
@@ -21,9 +21,29 @@ import {
   type WorkShift
 } from '../../hr/constants/shift.constants';
 
+function emptyProfileForm() {
+  return {
+    employeeId: '',
+    designation: '',
+    department: '',
+    phone: '',
+    email: '',
+    address: '',
+    joiningDate: '',
+    probationEndDate: '',
+    workShift: DEFAULT_WORK_SHIFT,
+    shiftStart: '',
+    shiftEnd: '',
+    weeklyOffDays: [] as string[],
+    emergencyContact: '',
+    emergencyPhone: '',
+    employeeStatus: DEFAULT_EMPLOYEE_STATUS
+  };
+}
+
 @Component({
   selector: 'app-employees-page',
-  imports: [FormsModule, DatePipe],
+  imports: [FormField, DatePipe],
   templateUrl: './employees-page.html',
   styleUrl: './employees-page.scss'
 })
@@ -35,9 +55,11 @@ export class EmployeesPage implements OnInit {
   employees = signal<any[]>([]);
   loading = signal(true);
   error = signal('');
-  q = '';
   activeFilter = signal<string>(FILTER_ALL);
   activeStatus = signal<string>(FILTER_ALL);
+
+  readonly searchModel = signal({ q: '' });
+  readonly searchForm = form(this.searchModel);
 
   drawerOpen = signal(false);
   selected = signal<any>(null);
@@ -48,10 +70,15 @@ export class EmployeesPage implements OnInit {
   storesLoading = signal(false);
   stores = signal<any[]>([]);
   assignOnline = signal(true);
-  assignStoreId = '';
+
+  readonly profileModel = signal(emptyProfileForm());
+  readonly profileForm = form(this.profileModel);
+  readonly salaryModel = signal({ value: 0 });
+  readonly salaryForm = form(this.salaryModel);
+  readonly assignModel = signal({ storeId: '' });
+  readonly assignForm = form(this.assignModel);
+
   toast = signal('');
-  form: any = {};
-  salaryDisplay = 0;
 
   filters = [...EMPLOYEE_TYPE_FILTER_OPTIONS];
   statusFilters = [...EMPLOYEE_STATUS_FILTER_OPTIONS];
@@ -65,7 +92,11 @@ export class EmployeesPage implements OnInit {
   load(): void {
     this.loading.set(true);
     this.error.set('');
-    this.api.getHrEmployees({ q: this.q, type: this.activeFilter(), status: this.activeStatus() })
+    this.api.getHrEmployees({
+      q: this.searchModel().q,
+      type: this.activeFilter(),
+      status: this.activeStatus()
+    })
       .then(r => { this.employees.set(r.employees); this.loading.set(false); })
       .catch(() => { this.loading.set(false); this.error.set('Could not load employees. Check your connection and try again.'); });
   }
@@ -82,19 +113,26 @@ export class EmployeesPage implements OnInit {
     this.selected.set(e);
     this.letter.set(null);
     this.tab.set('profile');
-    this.form = {
-      employeeId: e.employeeId, designation: e.designation, department: e.department,
-      phone: e.phone, email: e.email, address: e.address,
+    this.profileModel.set({
+      employeeId: e.employeeId,
+      designation: e.designation,
+      department: e.department,
+      phone: e.phone,
+      email: e.email,
+      address: e.address,
       joiningDate: e.joiningDate ? e.joiningDate.slice(0,10) : '',
       probationEndDate: e.probationEndDate ? e.probationEndDate.slice(0,10) : '',
-      workShift: e.workShift ?? DEFAULT_WORK_SHIFT, shiftStart: e.shiftStart ?? '',
-      shiftEnd: e.shiftEnd ?? '', weeklyOffDays: [...(e.weeklyOffDays ?? [])],
-      emergencyContact: e.emergencyContact, emergencyPhone: e.emergencyPhone,
+      workShift: e.workShift ?? DEFAULT_WORK_SHIFT,
+      shiftStart: e.shiftStart ?? '',
+      shiftEnd: e.shiftEnd ?? '',
+      weeklyOffDays: [...(e.weeklyOffDays ?? [])],
+      emergencyContact: e.emergencyContact,
+      emergencyPhone: e.emergencyPhone,
       employeeStatus: e.employeeStatus ?? DEFAULT_EMPLOYEE_STATUS
-    };
-    this.salaryDisplay = e.salaryPerMonth ? e.salaryPerMonth / PAISE_PER_RUPEE : 0;
+    });
+    this.salaryModel.set({ value: e.salaryPerMonth ? e.salaryPerMonth / PAISE_PER_RUPEE : 0 });
     this.assignOnline.set(e.isOnline !== false);
-    this.assignStoreId = e.clinicStore?.id ?? '';
+    this.assignModel.set({ storeId: e.clinicStore?.id ?? '' });
     this.drawerOpen.set(true);
   }
 
@@ -103,7 +141,10 @@ export class EmployeesPage implements OnInit {
   async saveProfile(): Promise<void> {
     if (!this.selected()) return;
     this.saving.set(true);
-    const payload = { ...this.form, salaryPerMonth: Math.round(this.salaryDisplay * PAISE_PER_RUPEE) };
+    const payload = {
+      ...this.profileModel(),
+      salaryPerMonth: Math.round(this.salaryModel().value * PAISE_PER_RUPEE)
+    };
     try {
       if (this.selected().empType === 'DOCTOR') {
         await this.api.updateHrDoctor(this.selected().id, payload);
@@ -121,7 +162,7 @@ export class EmployeesPage implements OnInit {
     try {
       await this.api.setDoctorAssignment(this.selected().id, {
         isOnline: this.assignOnline(),
-        clinicStoreId: this.assignOnline() ? null : this.assignStoreId
+        clinicStoreId: this.assignOnline() ? null : this.assignModel().storeId
       });
       this.showToast('Assignment saved ✓');
     } finally { this.saving.set(false); }
@@ -137,7 +178,6 @@ export class EmployeesPage implements OnInit {
       fn.then(r => { this.letter.set(r.letter?.content ?? {}); this.letterLoading.set(false); })
         .catch(() => this.letterLoading.set(false));
     }
-    // Load stores for assignment tab
     if (this.stores().length === 0) {
       this.storesLoading.set(true);
       this.api.getAdminStores().then(r => { this.stores.set(r.stores); this.storesLoading.set(false); }).catch(() => this.storesLoading.set(false));
@@ -158,10 +198,18 @@ export class EmployeesPage implements OnInit {
   print(): void { window.print(); }
 
   statusColor(s: EmployeeStatus): string { return EMPLOYEE_STATUS_COLORS[s] ?? EMPLOYEE_STATUS_FALLBACK_COLOR; }
-  isOff(d: string): boolean { return (this.form.weeklyOffDays ?? []).includes(d); }
+  isOff(d: string): boolean { return (this.profileModel().weeklyOffDays ?? []).includes(d); }
   toggleOff(d: string): void {
-    const c = this.form.weeklyOffDays ?? [];
-    this.form.weeklyOffDays = c.includes(d) ? c.filter((x: string) => x !== d) : [...c, d];
+    const profile = this.profileModel();
+    const c = profile.weeklyOffDays ?? [];
+    this.profileModel.set({
+      ...profile,
+      weeklyOffDays: c.includes(d) ? c.filter((x: string) => x !== d) : [...c, d]
+    });
+  }
+
+  setWorkShift(value: WorkShift): void {
+    this.profileModel.update((profile) => ({ ...profile, workShift: value }));
   }
 
   private showToast(msg: string): void {

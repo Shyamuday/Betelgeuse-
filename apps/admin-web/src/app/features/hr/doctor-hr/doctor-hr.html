@@ -68,7 +68,7 @@
                 <div class="frow">
                   <div class="fg full">
                     <label>Doctor type</label>
-                    <select [(ngModel)]="form.doctorType">
+                    <select [formField]="profileForm.doctorType">
                       @for (option of doctorTypeOptions; track option.value) {
                         <option [value]="option.value">{{ option.label }}</option>
                       }
@@ -79,7 +79,7 @@
                   <div class="frow">
                     <div class="fg full">
                       <label>Specialty focus</label>
-                      <select [(ngModel)]="form.specialtyFocus">
+                      <select [formField]="profileForm.specialtyFocus">
                         <option value="">Select focus</option>
                         @for (option of specialtyFocusOptions; track option.value) {
                           <option [value]="option.value">{{ option.label }}</option>
@@ -91,23 +91,23 @@
                 <div class="frow">
                   <div class="fg">
                     <label>Designation</label>
-                    <input [(ngModel)]="form.designation" placeholder="Chief Consultant" />
+                    <input [formField]="profileForm.designation" attr.placeholder="Chief Consultant" />
                   </div>
                   <div class="fg">
                     <label>Department</label>
-                    <input [(ngModel)]="form.department" placeholder="Homeopathy" />
+                    <input [formField]="profileForm.department" attr.placeholder="Homeopathy" />
                   </div>
                 </div>
                 <div class="frow">
                   <div class="fg full">
                     <label>Clinical specialty (display)</label>
-                    <input [(ngModel)]="form.specialty" placeholder="Homeopathy" />
+                    <input [formField]="profileForm.specialty" attr.placeholder="Homeopathy" />
                   </div>
                 </div>
                 <div class="frow">
                   <div class="fg">
                     <label>Status</label>
-                    <select [(ngModel)]="form.employeeStatus">
+                    <select [formField]="profileForm.employeeStatus">
                       <option value="ACTIVE">Active</option>
                       <option value="ON_LEAVE">On Leave</option>
                       <option value="RESIGNED">Resigned</option>
@@ -116,27 +116,27 @@
                   </div>
                   <div class="fg">
                     <label>Employee ID</label>
-                    <input [(ngModel)]="form.employeeId" placeholder="DOC-001" />
+                    <input [formField]="profileForm.employeeId" attr.placeholder="DOC-001" />
                   </div>
                 </div>
                 <div class="frow">
                   <div class="fg">
                     <label>Joining Date</label>
-                    <input type="date" [(ngModel)]="form.joiningDate" />
+                    <input type="date" [formField]="profileForm.joiningDate" />
                   </div>
                   <div class="fg">
                     <label>Probation End</label>
-                    <input type="date" [(ngModel)]="form.probationEndDate" />
+                    <input type="date" [formField]="profileForm.probationEndDate" />
                   </div>
                 </div>
                 <div class="frow">
                   <div class="fg">
                     <label>Monthly Salary (₹)</label>
-                    <input type="number" [(ngModel)]="salaryDisplay" placeholder="50000" />
+                    <input type="number" [formField]="salaryForm.value" attr.placeholder="50000" />
                   </div>
                   <div class="fg">
                     <label>Consultation Fee (₹)</label>
-                    <input type="number" [(ngModel)]="feeDisplay" placeholder="500" />
+                    <input type="number" [formField]="feeForm.value" attr.placeholder="500" />
                   </div>
                 </div>
               </div>
@@ -145,7 +145,7 @@
                 <div class="ftitle">Shift & Schedule</div>
                 <div class="shift-grid">
                   @for (s of shifts; track s.value) {
-                    <button class="shift-btn" [class.active]="form.workShift === s.value" (click)="form.workShift = s.value">
+                    <button class="shift-btn" [class.active]="profileModel().workShift === s.value" (click)="setWorkShift(s.value)">
                       {{ s.label }}
                     </button>
                   }
@@ -153,11 +153,11 @@
                 <div class="frow" style="margin-top:12px">
                   <div class="fg">
                     <label>Start Time</label>
-                    <input type="time" [(ngModel)]="form.shiftStart" />
+                    <input type="time" [formField]="profileForm.shiftStart" />
                   </div>
                   <div class="fg">
                     <label>End Time</label>
-                    <input type="time" [(ngModel)]="form.shiftEnd" />
+                    <input type="time" [formField]="profileForm.shiftEnd" />
                   </div>
                 </div>
                 <div class="fg full" style="margin-top:12px">
@@ -175,21 +175,21 @@
                 <div class="frow">
                   <div class="fg">
                     <label>Phone</label>
-                    <input type="tel" [(ngModel)]="form.phone" placeholder="+91 99999 00000" />
+                    <input type="tel" [formField]="profileForm.phone" attr.placeholder="+91 99999 00000" />
                   </div>
                   <div class="fg full">
                     <label>Address</label>
-                    <textarea [(ngModel)]="form.address" rows="2" placeholder="Full address"></textarea>
+                    <textarea [formField]="profileForm.address" rows="2" attr.placeholder="Full address"></textarea>
                   </div>
                 </div>
                 <div class="frow">
                   <div class="fg">
                     <label>Emergency Contact</label>
-                    <input [(ngModel)]="form.emergencyContact" placeholder="Name" />
+                    <input [formField]="profileForm.emergencyContact" attr.placeholder="Name" />
                   </div>
                   <div class="fg">
                     <label>Emergency Phone</label>
-                    <input type="tel" [(ngModel)]="form.emergencyPhone" />
+                    <input type="tel" [formField]="profileForm.emergencyPhone" />
                   </div>
                 </div>
               </div>

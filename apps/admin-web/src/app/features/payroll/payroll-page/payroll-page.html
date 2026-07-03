@@ -6,7 +6,7 @@
           <p class="pp-sub">Monthly salary overview with leave deductions</p>
         </div>
         <div class="hdr-actions">
-          <input type="month" [(ngModel)]="selectedMonth" (change)="load()" class="month-inp" />
+          <input type="month" [formField]="monthForm.selectedMonth" (change)="load()" class="month-inp" />
           <button class="btn-export" (click)="exportCSV()">⬇ Export CSV</button>
         </div>
       </div>
@@ -39,7 +39,7 @@
           @for (f of typeFilters; track f.value) {
             <button class="ftab" [class.active]="typeFilter() === f.value" (click)="typeFilter.set(f.value)">{{ f.label }}</button>
           }
-          <input class="search-sm" [(ngModel)]="q" placeholder="🔍 Search…" />
+          <input class="search-sm" [formField]="searchForm.q" attr.placeholder="🔍 Search…" />
         </div>
 
         <!-- Table -->

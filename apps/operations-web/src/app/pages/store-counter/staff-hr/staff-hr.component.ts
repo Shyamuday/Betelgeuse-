@@ -129,11 +129,8 @@ export class StaffHrComponent implements OnInit {
     if (!this.selected()) return;
     this.saving.set(true);
     const form = this.profileFormModel();
-    const payload = {
-      ...form,
-      salaryPerMonth: form.salaryDisplay * 100
-    };
-    delete (payload as { salaryDisplay?: number }).salaryDisplay;
+    const { salaryDisplay, ...rest } = form;
+    const payload = { ...rest, salaryPerMonth: salaryDisplay * 100 };
     this.api.updateHrStaff(this.selected()!.id, payload).subscribe({
       next: (r) => {
         this.staff.update(list => list.map(s => s.id === r.staff.id ? { ...s, ...r.staff } : s));

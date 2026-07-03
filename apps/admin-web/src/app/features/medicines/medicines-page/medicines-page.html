@@ -9,7 +9,7 @@
       </div>
 
       <div class="toolbar">
-        <input [(ngModel)]="q" placeholder="Search medicines…" (keyup.enter)="load()" />
+        <input [formField]="searchForm.q" attr.placeholder="Search medicines…" (keyup.enter)="load()" />
         <button type="button" (click)="load()">Search</button>
       </div>
 
@@ -38,14 +38,14 @@
       <div class="overlay" (click)="closeModal()">
         <div class="modal" (click)="$event.stopPropagation()">
           <h3>{{ modal() === 'create' ? 'New medicine' : 'Edit medicine' }}</h3>
-          <label>Name <input [(ngModel)]="form.name" /></label>
-          <label>Potency <input [(ngModel)]="form.potency" /></label>
-          <label>Short name <input [(ngModel)]="form.shortName" /></label>
-          <label>Manufacturer <input [(ngModel)]="form.manufacturer" /></label>
-          <label>Category <input [(ngModel)]="form.category" /></label>
-          <label>Min stock <input type="number" [(ngModel)]="form.minStockLevel" /></label>
+          <label>Name <input [formField]="draftForm.name" /></label>
+          <label>Potency <input [formField]="draftForm.potency" /></label>
+          <label>Short name <input [formField]="draftForm.shortName" /></label>
+          <label>Manufacturer <input [formField]="draftForm.manufacturer" /></label>
+          <label>Category <input [formField]="draftForm.category" /></label>
+          <label>Min stock <input type="number" [formField]="draftForm.minStockLevel" /></label>
           @if (modal() === 'edit') {
-            <label class="check"><input type="checkbox" [(ngModel)]="form.isActive" /> Active</label>
+            <label class="check"><input type="checkbox" [formField]="draftForm.isActive" /> Active</label>
           }
           @if (error()) { <p class="error">{{ error() }}</p> }
           <div class="actions">

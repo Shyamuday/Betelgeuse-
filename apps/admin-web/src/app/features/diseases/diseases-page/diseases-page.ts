@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { AdminApi } from '../../../core/services/admin-api';
 import { CURRENCY_CODE, CURRENCY_LOCALE, PAISE_PER_RUPEE } from '../../../shared/constants/currency.constants';
 
@@ -13,9 +13,17 @@ type Disease = {
   intakeQuestions: string[];
 };
 
+function emptyDraft() {
+  return { name: '', description: '', feeInPaise: 0, isActive: true, intakeQuestions: [] as string[] };
+}
+
+function emptyNew() {
+  return { name: '', description: '', feeInPaise: 0, intakeQuestions: [] as string[] };
+}
+
 @Component({
   selector: 'app-diseases-page',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormField],
   templateUrl: './diseases-page.html',
   styleUrl: './diseases-page.scss'
 })
@@ -25,27 +33,23 @@ export class DiseasesPage {
   readonly error = signal('');
 
   editingId = '';
-  draft: { name: string; description: string; feeInPaise: number; isActive: boolean; intakeQuestions: string[] } = this.emptyDraft();
-  draftNewQuestion = '';
+  readonly draftModel = signal(emptyDraft());
+  readonly draftForm = form(this.draftModel);
+  readonly draftQuestionModel = signal({ value: '' });
+  readonly draftQuestionForm = form(this.draftQuestionModel);
   readonly saving = signal(false);
   saveError = '';
 
   showCreateForm = false;
-  newDisease: { name: string; description: string; feeInPaise: number; intakeQuestions: string[] } = this.emptyNew();
-  newDiseaseQuestion = '';
+  readonly newDiseaseModel = signal(emptyNew());
+  readonly newDiseaseForm = form(this.newDiseaseModel);
+  readonly newQuestionModel = signal({ value: '' });
+  readonly newQuestionForm = form(this.newQuestionModel);
   readonly creating = signal(false);
   createError = '';
 
   constructor(private readonly api: AdminApi) {
     void this.load();
-  }
-
-  private emptyDraft() {
-    return { name: '', description: '', feeInPaise: 0, isActive: true, intakeQuestions: [] as string[] };
-  }
-
-  private emptyNew() {
-    return { name: '', description: '', feeInPaise: 0, intakeQuestions: [] as string[] };
   }
 
   async load() {
@@ -63,43 +67,49 @@ export class DiseasesPage {
 
   startEdit(disease: Disease) {
     this.editingId = disease.id;
-    this.draft = {
+    this.draftModel.set({
       name: disease.name,
       description: disease.description,
       feeInPaise: disease.feeInPaise,
       isActive: disease.isActive,
       intakeQuestions: [...disease.intakeQuestions]
-    };
-    this.draftNewQuestion = '';
+    });
+    this.draftQuestionModel.set({ value: '' });
     this.saveError = '';
   }
 
   cancelEdit() {
     this.editingId = '';
-    this.draft = this.emptyDraft();
-    this.draftNewQuestion = '';
+    this.draftModel.set(emptyDraft());
+    this.draftQuestionModel.set({ value: '' });
     this.saveError = '';
   }
 
   addDraftQuestion() {
-    const q = this.draftNewQuestion.trim();
+    const q = this.draftQuestionModel().value.trim();
     if (!q) return;
-    this.draft.intakeQuestions = [...this.draft.intakeQuestions, q];
-    this.draftNewQuestion = '';
+    const draft = this.draftModel();
+    this.draftModel.set({ ...draft, intakeQuestions: [...draft.intakeQuestions, q] });
+    this.draftQuestionModel.set({ value: '' });
   }
 
   removeDraftQuestion(index: number) {
-    this.draft.intakeQuestions = this.draft.intakeQuestions.filter((_, i) => i !== index);
+    const draft = this.draftModel();
+    this.draftModel.set({
+      ...draft,
+      intakeQuestions: draft.intakeQuestions.filter((_, i) => i !== index)
+    });
   }
 
   async saveEdit() {
-    if (!this.editingId || !this.draft.name || !this.draft.description || !this.draft.feeInPaise) return;
+    const draft = this.draftModel();
+    if (!this.editingId || !draft.name || !draft.description || !draft.feeInPaise) return;
     this.saving.set(true);
     this.saveError = '';
     try {
       await this.api.updateDisease(this.editingId, {
-        ...this.draft,
-        feeInPaise: Number(this.draft.feeInPaise)
+        ...draft,
+        feeInPaise: Number(draft.feeInPaise)
       });
       await this.load();
       this.cancelEdit();
@@ -111,18 +121,24 @@ export class DiseasesPage {
   }
 
   addNewQuestion() {
-    const q = this.newDiseaseQuestion.trim();
+    const q = this.newQuestionModel().value.trim();
     if (!q) return;
-    this.newDisease.intakeQuestions = [...this.newDisease.intakeQuestions, q];
-    this.newDiseaseQuestion = '';
+    const newDisease = this.newDiseaseModel();
+    this.newDiseaseModel.set({ ...newDisease, intakeQuestions: [...newDisease.intakeQuestions, q] });
+    this.newQuestionModel.set({ value: '' });
   }
 
   removeNewQuestion(index: number) {
-    this.newDisease.intakeQuestions = this.newDisease.intakeQuestions.filter((_, i) => i !== index);
+    const newDisease = this.newDiseaseModel();
+    this.newDiseaseModel.set({
+      ...newDisease,
+      intakeQuestions: newDisease.intakeQuestions.filter((_, i) => i !== index)
+    });
   }
 
   async createDisease() {
-    if (!this.newDisease.name || !this.newDisease.description || !this.newDisease.feeInPaise || !this.newDisease.intakeQuestions.length) {
+    const newDisease = this.newDiseaseModel();
+    if (!newDisease.name || !newDisease.description || !newDisease.feeInPaise || !newDisease.intakeQuestions.length) {
       this.createError = 'Fill all fields and add at least one intake question.';
       return;
     }
@@ -130,11 +146,11 @@ export class DiseasesPage {
     this.createError = '';
     try {
       await this.api.createDisease({
-        ...this.newDisease,
-        feeInPaise: Number(this.newDisease.feeInPaise)
+        ...newDisease,
+        feeInPaise: Number(newDisease.feeInPaise)
       });
-      this.newDisease = this.emptyNew();
-      this.newDiseaseQuestion = '';
+      this.newDiseaseModel.set(emptyNew());
+      this.newQuestionModel.set({ value: '' });
       this.showCreateForm = false;
       await this.load();
     } catch {

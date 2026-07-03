@@ -7,9 +7,9 @@
   </div>
 
   <div class="toolbar">
-    <select name="windowDays" [(ngModel)]="windowDays" (change)="applyFilters()">
+    <select [formField]="filterForm.windowDays" (change)="applyFilters()">
       @for (opt of windowOptions; track opt.value) {
-        <option [ngValue]="opt.value">{{ opt.label }}</option>
+        <option [value]="opt.value">{{ opt.label }}</option>
       }
     </select>
     <button type="button" (click)="applyFilters()" [disabled]="loading()">Refresh</button>

@@ -9,7 +9,7 @@
       </div>
 
       <div class="toolbar">
-        <select [(ngModel)]="statusFilter" (ngModelChange)="load()">
+        <select [formField]="listFilterForm.statusFilter" (change)="load()">
           <option value="">All statuses</option>
           <option value="DRAFT">Draft</option>
           <option value="SENT">Sent</option>
@@ -18,7 +18,7 @@
           <option value="RECEIVED">Received</option>
           <option value="CANCELLED">Cancelled</option>
         </select>
-        <select [(ngModel)]="storeFilter" (ngModelChange)="load()">
+        <select [formField]="listFilterForm.storeFilter" (change)="load()">
           <option value="">All stores</option>
           @for (store of stores(); track store.id) {
             <option [value]="store.id">{{ store.name }}</option>
@@ -63,7 +63,7 @@
           <div class="mbody">
             <div class="grid2">
               <label>Supplier
-                <select [(ngModel)]="poForm.supplierId">
+                <select [formField]="poForm.supplierId">
                   <option value="">Select supplier</option>
                   @for (s of suppliers(); track s.id) {
                     <option [value]="s.id">{{ s.name }} ({{ s.code }})</option>
@@ -71,18 +71,18 @@
                 </select>
               </label>
               <label>Store
-                <select [(ngModel)]="poForm.storeId">
+                <select [formField]="poForm.storeId">
                   @for (s of stores(); track s.id) {
                     <option [value]="s.id">{{ s.name }}</option>
                   }
                 </select>
               </label>
             </div>
-            <label>Notes <input [(ngModel)]="poForm.notes" placeholder="Optional" /></label>
-            <label class="check"><input type="checkbox" [(ngModel)]="poForm.send" /> Send to supplier immediately</label>
+            <label>Notes <input [formField]="poForm.notes" attr.placeholder="Optional" /></label>
+            <label class="check"><input type="checkbox" [formField]="poForm.send" /> Send to supplier immediately</label>
 
             <div class="med-search">
-              <input [(ngModel)]="medicineQuery" placeholder="Search medicines (min 2 chars)" (keyup.enter)="searchMedicines()" />
+              <input [formField]="medicineSearchForm.q" attr.placeholder="Search medicines (min 2 chars)" (keyup.enter)="searchMedicines()" />
               <button type="button" class="btn-sec" (click)="searchMedicines()" [disabled]="medicineSearching()">
                 {{ medicineSearching() ? '…' : 'Search' }}
               </button>
@@ -102,8 +102,8 @@
                   @for (line of lines(); track line.medicineId) {
                     <tr>
                       <td>{{ line.label }}</td>
-                      <td><input type="number" min="1" [(ngModel)]="line.qtyOrdered" /></td>
-                      <td><input type="number" min="0" [(ngModel)]="line.unitPriceInPaise" /></td>
+                      <td><input type="number" min="1" [value]="line.qtyOrdered" (input)="updateLineField(line.medicineId, 'qtyOrdered', +$any($event.target).value)" /></td>
+                      <td><input type="number" min="0" [value]="line.unitPriceInPaise" (input)="updateLineField(line.medicineId, 'unitPriceInPaise', +$any($event.target).value)" /></td>
                       <td><button type="button" class="link-btn" (click)="removeLine(line.medicineId)">Remove</button></td>
                     </tr>
                   }

@@ -69,10 +69,10 @@
             <strong>Items</strong>
             <button type="button" (click)="addLine()">+ Add line</button>
           </div>
-          @for (line of createFormModel().lines; track $index) {
+          @for (line of createFormModel().lines; track $index; let i = $index) {
             <div class="recv-line">
-              <input [formField]="createForm.lines[$index].label" placeholder="Medicine label" />
-              <label>Qty <input type="number" [formField]="createForm.lines[$index].qty" min="1" /></label>
+              <input [formField]="createForm.lines[i].label" placeholder="Medicine label" />
+              <label>Qty <input type="number" [formField]="createForm.lines[i].qty" /></label>
             </div>
           }
           <div class="actions">

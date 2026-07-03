@@ -4,7 +4,13 @@ import { AdminApi } from '../../../core/services/admin-api';
 import { TOAST_DURATION_LONG_MS } from '../../../core/constants/timing.constants';
 import { HR_USER_DEFAULTS } from '../constants/hr-user-form.constants';
 
-function emptyCreateForm() {
+function emptyCreateForm(): {
+  name: string;
+  email: string;
+  password: string;
+  designation: string;
+  department: string;
+} {
   return {
     name: '',
     email: '',

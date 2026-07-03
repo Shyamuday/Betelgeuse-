@@ -34,15 +34,15 @@
         <div class="modal" (click)="$event.stopPropagation()">
           <h3>{{ modal() === 'create' ? 'New supplier' : 'Edit supplier' }}</h3>
           @if (modal() === 'create') {
-            <label>Code <input [(ngModel)]="form.code" style="text-transform:uppercase" /></label>
+            <label>Code <input [formField]="draftForm.code" style="text-transform:uppercase" /></label>
           }
-          <label>Name <input [(ngModel)]="form.name" /></label>
-          <label>Email <input [(ngModel)]="form.email" /></label>
-          <label>Phone <input [(ngModel)]="form.phone" /></label>
-          <label>Address <input [(ngModel)]="form.address" /></label>
-          <label>GSTIN <input [(ngModel)]="form.gstin" /></label>
+          <label>Name <input [formField]="draftForm.name" /></label>
+          <label>Email <input [formField]="draftForm.email" /></label>
+          <label>Phone <input [formField]="draftForm.phone" /></label>
+          <label>Address <input [formField]="draftForm.address" /></label>
+          <label>GSTIN <input [formField]="draftForm.gstin" /></label>
           @if (modal() === 'edit') {
-            <label class="check"><input type="checkbox" [(ngModel)]="form.isActive" /> Active</label>
+            <label class="check"><input type="checkbox" [formField]="draftForm.isActive" /> Active</label>
           }
           @if (error()) { <p class="error">{{ error() }}</p> }
           <div class="actions">

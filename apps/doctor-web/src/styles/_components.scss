@@ -94,6 +94,25 @@
   }
 }
 
+.btn-sm {
+  min-height: 2.25rem;
+  padding: 0.4rem 0.7rem;
+  font-size: var(--text-sm);
+}
+
+.btn-block {
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+.btn-add {
+  @extend .btn-primary;
+}
+
+.btn-select {
+  @extend .btn-secondary;
+}
+
 .alert {
   padding: 0.75rem 0.9rem;
   border-radius: var(--radius-sm);

@@ -19,7 +19,13 @@ function emptyEditForm() {
   return { name: '', address: '', phone: '', isActive: true };
 }
 
-function emptyMgrForm() {
+function emptyMgrForm(): {
+  name: string;
+  email: string;
+  password: string;
+  designation: string;
+  joiningDate: string;
+} {
   return {
     name: '',
     email: '',
@@ -29,7 +35,15 @@ function emptyMgrForm() {
   };
 }
 
-function emptyStaffForm() {
+function emptyStaffForm(): {
+  name: string;
+  staffCode: string;
+  email: string;
+  password: string;
+  designation: string;
+  phone: string;
+  joiningDate: string;
+} {
   return {
     name: '',
     staffCode: '',

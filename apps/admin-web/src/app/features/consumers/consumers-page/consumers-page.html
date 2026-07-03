@@ -10,10 +10,10 @@
     <div class="register-box">
       <h3>Register new patient</h3>
       <div class="register-grid">
-        <input placeholder="Full name *" [(ngModel)]="registerForm.name" name="registerName" />
-        <input placeholder="Mobile (optional)" [(ngModel)]="registerForm.mobile" name="registerMobile" />
-        <input placeholder="Email (optional)" [(ngModel)]="registerForm.email" name="registerEmail" />
-        <select [(ngModel)]="registerForm.homeClinicStoreId" name="registerClinic">
+        <input attr.placeholder="Full name *" [formField]="registerForm.name" />
+        <input attr.placeholder="Mobile (optional)" [formField]="registerForm.mobile" />
+        <input attr.placeholder="Email (optional)" [formField]="registerForm.email" />
+        <select [formField]="registerForm.homeClinicStoreId">
           <option value="">No home clinic</option>
           @for (store of stores; track store.id) {
             <option [value]="store.id">{{ store.name }} ({{ store.code }})</option>
@@ -29,7 +29,7 @@
   }
 
   <div class="toolbar">
-    <input placeholder="Global patient search (mobile, code, name)…" [(ngModel)]="patientSearchQuery" name="patientSearch" (keyup.enter)="searchPatientsGlobal()" />
+    <input attr.placeholder="Global patient search (mobile, code, name)…" [formField]="patientSearchForm.q" (keyup.enter)="searchPatientsGlobal()" />
     <button type="button" (click)="searchPatientsGlobal()" [disabled]="patientSearchLoading">Search all</button>
   </div>
   @if (patientSearchResults.length) {
@@ -44,12 +44,12 @@
   }
 
   <div class="toolbar">
-    <input placeholder="Search consumers..." name="searchTerm" [(ngModel)]="searchTerm" (ngModelChange)="setPage(1)" />
-    <select name="sortBy" [(ngModel)]="sortBy" (ngModelChange)="setPage(1)">
+    <input attr.placeholder="Search consumers..." [formField]="listFilterForm.searchTerm" (change)="setPage(1)" />
+    <select [formField]="listFilterForm.sortBy" (change)="setPage(1)">
       <option value="consultations">Sort by consultations</option>
       <option value="name">Sort by name</option>
     </select>
-    <select name="sortDirection" [(ngModel)]="sortDirection" (ngModelChange)="setPage(1)">
+    <select [formField]="listFilterForm.sortDirection" (change)="setPage(1)">
       <option value="desc">Desc</option>
       <option value="asc">Asc</option>
     </select>
@@ -170,7 +170,7 @@
           <div class="assign-panel">
             <label class="assign-label">
               Select doctor
-              <select [(ngModel)]="assignDoctorId" name="assignDoctorId">
+              <select [formField]="assignForm.doctorId">
                 @for (doctor of activeDoctors; track doctor.id) {
                   <option [value]="doctor.id">
                     {{ doctor.name }}@if (doctor.doctorProfile?.specialty) { — {{ doctor.doctorProfile!.specialty }}}
@@ -182,7 +182,7 @@
               <p class="error">{{ assignError }}</p>
             }
             <div class="assign-actions">
-              <button type="button" class="btn-confirm" (click)="confirmAssign()" [disabled]="assigning || !assignDoctorId">
+              <button type="button" class="btn-confirm" (click)="confirmAssign()" [disabled]="assigning || !assignModel().doctorId">
                 {{ assigning ? 'Assigning…' : 'Confirm' }}
               </button>
               <button type="button" class="btn-cancel" (click)="cancelAssign()" [disabled]="assigning">Cancel</button>
@@ -304,19 +304,19 @@
           <div class="note-form">
             <h4>Add case note</h4>
             <div class="note-form-row">
-              <select name="noteCategory" [(ngModel)]="noteCategory">
+              <select [formField]="noteForm.category">
                 @for (cat of supportCategories; track cat.value) {
                   <option [value]="cat.value">{{ cat.label }}</option>
                 }
               </select>
-              <select name="noteConsultationId" [(ngModel)]="noteConsultationId">
+              <select [formField]="noteForm.consultationId">
                 <option value="">No consultation link</option>
                 @for (c of detail.consultations; track c.id) {
                   <option [value]="c.id">{{ c.disease?.name || 'Consultation' }} — {{ c.status }}</option>
                 }
               </select>
             </div>
-            <textarea name="noteBody" rows="3" [(ngModel)]="noteBody" placeholder="What did you check? What should the next agent do?"></textarea>
+            <textarea rows="3" [formField]="noteForm.body" attr.placeholder="What did you check? What should the next agent do?"></textarea>
             @if (noteError) {
               <p class="error">{{ noteError }}</p>
             }

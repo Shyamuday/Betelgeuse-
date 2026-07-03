@@ -42,7 +42,7 @@
           <div class="recv-line">
             <div class="recv-title">{{ line.label }} (max {{ line.qtyRemaining }})</div>
             <div class="recv-grid">
-              <label>Qty <input type="number" [formField]="receiveForm.lines[i].qtyReceived" min="1" [max]="line.qtyRemaining" /></label>
+              <label>Qty <input type="number" [formField]="receiveForm.lines[i].qtyReceived" /></label>
               <label>Batch <input [formField]="receiveForm.lines[i].batchNumber" /></label>
               <label>Expiry <input type="date" [formField]="receiveForm.lines[i].expiryDate" /></label>
               <label>Buy ₹ <input type="number" [formField]="receiveForm.lines[i].purchasePricePerUnit" /></label>

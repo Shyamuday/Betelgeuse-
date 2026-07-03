@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, signal } from '@angular/core';
+import { form, FormField } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import { AdminApi } from '../../../core/services/admin-api';
 import {
@@ -112,7 +112,7 @@ type SupportContext = {
 
 @Component({
   selector: 'app-consumers-page',
-  imports: [CommonModule, FormsModule, PatientIdCardComponent],
+  imports: [CommonModule, FormField, PatientIdCardComponent],
   templateUrl: './consumers-page.html',
   styleUrl: './consumers-page.scss'
 })
@@ -122,9 +122,12 @@ export class ConsumersPage {
   consumerDetail: ConsumerDetail | null = null;
   listLoading = false;
   detailLoading = false;
-  searchTerm = '';
-  sortBy: ConsumerSortField = CONSUMERS_LIST_DEFAULTS.SORT_BY;
-  sortDirection: SortDirection = CONSUMERS_LIST_DEFAULTS.SORT_DIRECTION;
+  readonly listFilterModel = signal({
+    searchTerm: '',
+    sortBy: CONSUMERS_LIST_DEFAULTS.SORT_BY as ConsumerSortField,
+    sortDirection: CONSUMERS_LIST_DEFAULTS.SORT_DIRECTION as SortDirection
+  });
+  readonly listFilterForm = form(this.listFilterModel);
   pageSize = CONSUMERS_PAGE_SIZE;
   page = 1;
   totalPagesCount = 1;
@@ -133,7 +136,8 @@ export class ConsumersPage {
 
   activeDoctors: ActiveDoctor[] = [];
   assigningConsultationId = '';
-  assignDoctorId = '';
+  readonly assignModel = signal({ doctorId: '' });
+  readonly assignForm = form(this.assignModel);
   assignError = '';
   assigning = false;
 
@@ -142,18 +146,23 @@ export class ConsumersPage {
   supportError = '';
   supportNotes: SupportNote[] = [];
   supportContext: SupportContext | null = null;
-  noteCategory: SupportNoteCategory = 'GENERAL';
-  noteBody = '';
-  noteConsultationId = '';
+  readonly noteModel = signal({
+    category: 'GENERAL' as SupportNoteCategory,
+    body: '',
+    consultationId: ''
+  });
+  readonly noteForm = form(this.noteModel);
   savingNote = false;
   noteError = '';
 
   showRegister = false;
-  registerForm = { name: '', email: '', mobile: '', homeClinicStoreId: '' };
+  readonly registerModel = signal({ name: '', email: '', mobile: '', homeClinicStoreId: '' });
+  readonly registerForm = form(this.registerModel);
   registerSaving = false;
   registerError = '';
   registerMessage = '';
-  patientSearchQuery = '';
+  readonly patientSearchModel = signal({ q: '' });
+  readonly patientSearchForm = form(this.patientSearchModel);
   patientSearchLoading = false;
   patientSearchResults: Array<any> = [];
   stores: Array<{ id: string; name: string; code: string }> = [];
@@ -198,24 +207,25 @@ export class ConsumersPage {
 
   startAssign(consultationId: string) {
     this.assigningConsultationId = consultationId;
-    this.assignDoctorId = this.activeDoctors[0]?.id || '';
+    this.assignModel.set({ doctorId: this.activeDoctors[0]?.id || '' });
     this.assignError = '';
   }
 
   cancelAssign() {
     this.assigningConsultationId = '';
-    this.assignDoctorId = '';
+    this.assignModel.set({ doctorId: '' });
     this.assignError = '';
   }
 
   async confirmAssign() {
-    if (!this.assigningConsultationId || !this.assignDoctorId) return;
+    const doctorId = this.assignModel().doctorId;
+    if (!this.assigningConsultationId || !doctorId) return;
     this.assigning = true;
     this.assignError = '';
     try {
-      await this.api.assignDoctor(this.assigningConsultationId, this.assignDoctorId);
+      await this.api.assignDoctor(this.assigningConsultationId, doctorId);
       this.assigningConsultationId = '';
-      this.assignDoctorId = '';
+      this.assignModel.set({ doctorId: '' });
       if (this.selectedConsumerId) {
         await Promise.all([
           this.loadConsumerDetail(this.selectedConsumerId),
@@ -233,12 +243,13 @@ export class ConsumersPage {
     this.listLoading = true;
     this.listError = '';
     try {
+      const filters = this.listFilterModel();
       const response = await this.api.getConsumersPaged({
         page: this.page,
         pageSize: this.pageSize,
-        q: this.searchTerm,
-        sortBy: this.sortBy,
-        sortDirection: this.sortDirection
+        q: filters.searchTerm,
+        sortBy: filters.sortBy,
+        sortDirection: filters.sortDirection
       });
       this.consumers = response.consumers || [];
       this.totalPagesCount = Math.max(1, Number(response.pagination?.totalPages || 1));
@@ -307,7 +318,8 @@ export class ConsumersPage {
 
   async submitSupportNote() {
     if (!this.selectedConsumerId) return;
-    const body = this.noteBody.trim();
+    const note = this.noteModel();
+    const body = note.body.trim();
     if (body.length < 2) {
       this.noteError = 'Enter at least 2 characters.';
       return;
@@ -316,12 +328,11 @@ export class ConsumersPage {
     this.noteError = '';
     try {
       await this.api.addConsumerSupportNote(this.selectedConsumerId, {
-        category: this.noteCategory,
+        category: note.category,
         body,
-        consultationId: this.noteConsultationId || undefined
+        consultationId: note.consultationId || undefined
       });
-      this.noteBody = '';
-      this.noteConsultationId = '';
+      this.noteModel.set({ category: 'GENERAL', body: '', consultationId: '' });
       await this.loadSupport(this.selectedConsumerId);
     } catch {
       this.noteError = 'Could not save support note.';
@@ -363,7 +374,7 @@ export class ConsumersPage {
   }
 
   async searchPatientsGlobal() {
-    const q = this.patientSearchQuery.trim();
+    const q = this.patientSearchModel().q.trim();
     if (q.length < 2) return;
     this.patientSearchLoading = true;
     try {
@@ -379,13 +390,14 @@ export class ConsumersPage {
   selectSearchedPatient(patientId: string) {
     void this.selectConsumer(patientId);
     this.patientSearchResults = [];
-    this.patientSearchQuery = '';
+    this.patientSearchModel.set({ q: '' });
   }
 
   async registerPatient() {
     this.registerError = '';
     this.registerMessage = '';
-    const name = this.registerForm.name.trim();
+    const form = this.registerModel();
+    const name = form.name.trim();
     if (!name) {
       this.registerError = 'Name is required.';
       return;
@@ -394,12 +406,12 @@ export class ConsumersPage {
     try {
       const response = await this.api.registerPatient({
         name,
-        email: this.registerForm.email.trim() || undefined,
-        mobile: this.registerForm.mobile.trim() || undefined,
-        homeClinicStoreId: this.registerForm.homeClinicStoreId || null
+        email: form.email.trim() || undefined,
+        mobile: form.mobile.trim() || undefined,
+        homeClinicStoreId: form.homeClinicStoreId || null
       });
       this.registerMessage = `Patient registered: ${response.patient.patientCode || response.patient.id}`;
-      this.registerForm = { name: '', email: '', mobile: '', homeClinicStoreId: '' };
+      this.registerModel.set({ name: '', email: '', mobile: '', homeClinicStoreId: '' });
       this.showRegister = false;
       await this.load();
       if (response.patient.id) {

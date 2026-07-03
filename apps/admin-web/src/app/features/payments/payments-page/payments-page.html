@@ -20,8 +20,8 @@
     @for (opt of statusOptions; track opt.value) {
       <button class="ftab" [class.active]="statusFilter() === opt.value" (click)="setStatus(opt.value)">{{ opt.label }}</button>
     }
-    <input type="date" [(ngModel)]="from" />
-    <input type="date" [(ngModel)]="to" />
+    <input type="date" [formField]="dateFilterForm.from" />
+    <input type="date" [formField]="dateFilterForm.to" />
     <button type="button" class="btn-apply" (click)="applyFilters()" [disabled]="loading()">Apply</button>
     <button type="button" class="btn-clear" (click)="clearFilters()" [disabled]="loading()">Clear</button>
   </div>

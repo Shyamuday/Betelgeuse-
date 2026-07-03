@@ -12,22 +12,22 @@
       <div class="field-row">
         <label class="field">
           Name
-          <input name="newName" [(ngModel)]="newDisease.name" placeholder="e.g. Psoriasis" />
+          <input [formField]="newDiseaseForm.name" attr.placeholder="e.g. Psoriasis" />
         </label>
         <label class="field">
           Fee (₹)
-          <input name="newFee" type="number" [(ngModel)]="newDisease.feeInPaise" placeholder="e.g. 50000 = ₹500" />
+          <input type="number" [formField]="newDiseaseForm.feeInPaise" attr.placeholder="e.g. 50000 = ₹500" />
           <span class="field-hint">Enter in paise (₹1 = 100 paise)</span>
         </label>
       </div>
       <label class="field">
         Description
-        <textarea name="newDesc" [(ngModel)]="newDisease.description" rows="2" placeholder="Brief description shown to patients"></textarea>
+        <textarea [formField]="newDiseaseForm.description" rows="2" attr.placeholder="Brief description shown to patients"></textarea>
       </label>
 
       <div class="questions-editor">
         <p class="qs-label">Intake Questions</p>
-        @for (q of newDisease.intakeQuestions; track $index) {
+        @for (q of newDiseaseModel().intakeQuestions; track $index) {
           <div class="question-row">
             <span>{{ $index + 1 }}. {{ q }}</span>
             <button type="button" class="btn-remove" (click)="removeNewQuestion($index)">✕</button>
@@ -36,7 +36,7 @@
           <p class="qs-empty">No questions yet.</p>
         }
         <div class="add-question-row">
-          <input name="newDiseaseQ" [(ngModel)]="newDiseaseQuestion" placeholder="Type question and press Add" (keyup.enter)="addNewQuestion()" />
+          <input [formField]="newQuestionForm.value" attr.placeholder="Type question and press Add" (keyup.enter)="addNewQuestion()" />
           <button type="button" class="btn-add-q" (click)="addNewQuestion()">Add</button>
         </div>
       </div>
@@ -84,26 +84,26 @@
           <div class="field-row">
             <label class="field">
               Name
-              <input name="draftName" [(ngModel)]="draft.name" />
+              <input [formField]="draftForm.name" />
             </label>
             <label class="field">
               Fee (paise)
-              <input name="draftFee" type="number" [(ngModel)]="draft.feeInPaise" />
-              <span class="field-hint">{{ feeToCurrency(draft.feeInPaise) }}</span>
+              <input type="number" [formField]="draftForm.feeInPaise" />
+              <span class="field-hint">{{ feeToCurrency(draftModel().feeInPaise) }}</span>
             </label>
           </div>
           <label class="field">
             Description
-            <textarea name="draftDesc" [(ngModel)]="draft.description" rows="2"></textarea>
+            <textarea [formField]="draftForm.description" rows="2"></textarea>
           </label>
           <label class="field checkbox-field">
-            <input type="checkbox" name="draftActive" [(ngModel)]="draft.isActive" />
+            <input type="checkbox" [formField]="draftForm.isActive" />
             Active (visible to patients)
           </label>
 
           <div class="questions-editor">
             <p class="qs-label">Intake Questions</p>
-            @for (q of draft.intakeQuestions; track $index) {
+            @for (q of draftModel().intakeQuestions; track $index) {
               <div class="question-row">
                 <span>{{ $index + 1 }}. {{ q }}</span>
                 <button type="button" class="btn-remove" (click)="removeDraftQuestion($index)">✕</button>
@@ -112,7 +112,7 @@
               <p class="qs-empty">No questions. Add at least one.</p>
             }
             <div class="add-question-row">
-              <input name="draftNewQ" [(ngModel)]="draftNewQuestion" placeholder="New question…" (keyup.enter)="addDraftQuestion()" />
+              <input [formField]="draftQuestionForm.value" attr.placeholder="New question…" (keyup.enter)="addDraftQuestion()" />
               <button type="button" class="btn-add-q" (click)="addDraftQuestion()">Add</button>
             </div>
           </div>
@@ -121,7 +121,7 @@
             <p class="error">{{ saveError }}</p>
           }
           <div class="edit-actions">
-            <button type="button" class="btn-save" (click)="saveEdit()" [disabled]="saving() || !draft.name || !draft.intakeQuestions.length">
+            <button type="button" class="btn-save" (click)="saveEdit()" [disabled]="saving() || !draftModel().name || !draftModel().intakeQuestions.length">
               {{ saving() ? 'Saving…' : 'Save Changes' }}
             </button>
             <button type="button" class="btn-cancel" (click)="cancelEdit()" [disabled]="saving()">Cancel</button>

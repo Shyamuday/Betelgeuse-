@@ -10,16 +10,15 @@
   <div class="toolbar">
     <input
       placeholder="Search actor, action, target, summary..."
-      name="searchTerm"
-      [(ngModel)]="searchTerm"
+      [formField]="filterForm.searchTerm"
       (keyup.enter)="applyFilters()"
     />
-    <select name="actionFilter" [(ngModel)]="actionFilter">
+    <select [formField]="filterForm.actionFilter">
       @for (option of actionOptions; track option.value) {
         <option [value]="option.value">{{ option.label }}</option>
       }
     </select>
-    <select name="targetTypeFilter" [(ngModel)]="targetTypeFilter">
+    <select [formField]="filterForm.targetTypeFilter">
       @for (option of targetTypeOptions; track option.value) {
         <option [value]="option.value">{{ option.label }}</option>
       }

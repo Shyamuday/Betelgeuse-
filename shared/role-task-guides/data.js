@@ -438,19 +438,84 @@ exports.ROLE_TASK_GUIDES = [
         roleTitle: 'Operations Staff',
         tagline: 'One portal for clinic operations — your menu adapts to your role after login.',
         responsibilities: [
-            'Use only the screens your role is authorized for (HR, reception, branch, call center, etc.).',
+            'Use only the screens your role is authorized for (HR, reception, branch, call center, partners, store, etc.).',
             'Complete daily tasks shown in the role guide at the top of each page.',
             'Escalate issues outside your permissions to clinic manager or platform admin.'
         ],
         dailyTasks: [
             { title: 'Sign in', detail: 'Use staff email and password — the app routes you to your default workspace.', when: 'Start of shift' },
-            { title: 'Check your nav', detail: 'Sidebar shows only what your role can access (follow-ups, queue, HR, branch P&L, etc.).', when: 'After login' },
+            { title: 'Check your nav', detail: 'Sidebar shows only what your role can access.', when: 'After login' },
             { title: 'Platform admin', detail: 'Admins open Admin console from the nav for full platform configuration.', when: 'Admin only' }
         ],
         boundaries: [
             'Do not share staff credentials.',
             'Do not use screens that are not in your navigation — access is blocked by capability checks.',
             'Clinical changes belong to doctors; financial approvals may require admin or accountant roles.'
+        ]
+    },
+    {
+        appKey: 'operations-web',
+        variantKey: 'store-counter',
+        roleTitle: 'Store Counter Staff',
+        tagline: 'Dispense medicines safely at the branch counter.',
+        responsibilities: [
+            'Scan patient QR or ID before every dispense.',
+            'Match prescription items, quantity, and batch.',
+            'Record stock-out accurately in the system.',
+            'Escalate unclear prescriptions to the store manager.'
+        ],
+        dailyTasks: [
+            { title: 'Sign in', detail: 'Use your store email and password at the operations portal.', when: 'Start of shift' },
+            { title: 'Scan patient', detail: 'Verify patient identity before preparing medicines.', when: 'Every dispense' },
+            { title: 'Complete stock-out', detail: 'Confirm items handed over match the prescription.', when: 'Per sale' }
+        ],
+        boundaries: [
+            'Do not dispense without manager approval if prescription is unclear.',
+            'Do not share your login credentials.',
+            'Do not give medical advice — refer to the doctor.'
+        ]
+    },
+    {
+        appKey: 'operations-web',
+        variantKey: 'store-manager',
+        roleTitle: 'Store Manager',
+        tagline: 'Run the medicine store — stock, staff, dispensing, and expenses.',
+        responsibilities: [
+            'Maintain store inventory and rack organization.',
+            'Supervise store staff and dispensing accuracy.',
+            'Process stock in/out, POs, transfers, and home deliveries.',
+            'Log store expenses and daily sales.'
+        ],
+        dailyTasks: [
+            { title: 'Stock check', detail: 'Review low-stock alerts and expiry dates.', when: 'Start of day' },
+            { title: 'Dispensing oversight', detail: 'Ensure staff scan patient QR before handover.', when: 'Continuous' },
+            { title: 'Incoming POs & transfers', detail: 'Post GRN and receive warehouse transfers.', when: 'As they arrive' }
+        ],
+        boundaries: [
+            'Do not dispense without a valid prescription in the system.',
+            'Do not override pharmacist verification steps.',
+            'Do not adjust stock without a documented movement.'
+        ]
+    },
+    {
+        appKey: 'operations-web',
+        variantKey: 'partner',
+        roleTitle: 'External Partner',
+        tagline: 'Suppliers, logistics, diagnostics, corporate wellness, and insurance partners.',
+        responsibilities: [
+            'Fulfill your organization\'s obligations on the platform.',
+            'Keep status updates accurate and timely.',
+            'Use only partner screens assigned to your account type.'
+        ],
+        dailyTasks: [
+            { title: 'Open your default view', detail: 'Login routes you to orders, warehouse, deliveries, lab referrals, accounts, or claims.', when: 'Start of day' },
+            { title: 'Process queue', detail: 'Work through pending items in your primary screen.', when: 'Daily' },
+            { title: 'Update statuses', detail: 'Mark progress at each workflow step so clinics see live status.', when: 'Per item' }
+        ],
+        boundaries: [
+            'Do not access other partners\' data.',
+            'Do not share patient-identifiable information outside approved channels.',
+            'Account or contract changes require Vitalis platform admin.'
         ]
     },
     {

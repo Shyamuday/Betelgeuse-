@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { AdminApi } from '../../../core/services/admin-api';
 import { TOAST_DURATION_LONG_MS } from '../../../core/constants/timing.constants';
 import {
@@ -18,7 +18,7 @@ type UserPool = 'ecosystem' | 'staff' | 'partner';
 
 @Component({
   selector: 'app-ecosystem-users-page',
-  imports: [CommonModule, FormsModule, DatePipe, DecimalPipe],
+  imports: [CommonModule, FormField, DatePipe, DecimalPipe],
   templateUrl: './ecosystem-users-page.html',
   styleUrl: './ecosystem-users-page.scss'
 })
@@ -52,7 +52,7 @@ export class EcosystemUsersPage implements OnInit {
   selected = signal<any>(null);
   selectedCorporateId = signal('');
 
-  createForm = {
+  readonly createModel = signal({
     role: 'BRANCH_OWNER',
     name: '',
     email: '',
@@ -66,9 +66,10 @@ export class EcosystemUsersPage implements OnInit {
     corporateId: '',
     companyName: '',
     companyCode: ''
-  };
+  });
+  readonly createForm = form(this.createModel);
 
-  editForm = {
+  readonly editModel = signal({
     employeeId: '',
     designation: '',
     storeId: '',
@@ -78,10 +79,15 @@ export class EcosystemUsersPage implements OnInit {
     corporateId: '',
     companyName: '',
     companyCode: ''
-  };
+  });
+  readonly editForm = form(this.editModel);
 
-  corporateForm = { code: '', name: '', contactEmail: '' };
-  enrollQuery = '';
+  readonly corporateModel = signal({ code: '', name: '', contactEmail: '' });
+  readonly corporateForm = form(this.corporateModel);
+  readonly enrollQueryModel = signal({ q: '' });
+  readonly enrollQueryForm = form(this.enrollQueryModel);
+  readonly corporateSelectModel = signal({ corporateId: '' });
+  readonly corporateSelectForm = form(this.corporateSelectModel);
   enrollPatientId = '';
 
   currentRoleOptions = computed(() => {
@@ -153,6 +159,7 @@ export class EcosystemUsersPage implements OnInit {
     this.corporates.set(corporatesRes.accounts);
     const first = corporatesRes.accounts[0]?.id ?? '';
     this.selectedCorporateId.set(first);
+    this.corporateSelectModel.set({ corporateId: first });
     if (first) await this.loadEnrollments(first);
     else this.enrollments.set([]);
   }
@@ -164,6 +171,7 @@ export class EcosystemUsersPage implements OnInit {
 
   async loadEnrollments(corporateId: string) {
     this.selectedCorporateId.set(corporateId);
+    this.corporateSelectModel.set({ corporateId });
     const res = await this.api.getCorporateEnrollments(corporateId);
     this.enrollments.set(res.enrollments);
   }
@@ -266,7 +274,7 @@ export class EcosystemUsersPage implements OnInit {
     const pool = this.userPool();
     const defaultRole =
       pool === 'staff' ? 'RECEPTIONIST' : pool === 'partner' ? 'SUPPLIER' : this.activeRole() === 'ALL' ? 'BRANCH_OWNER' : this.activeRole();
-    this.createForm = {
+    this.createModel.set({
       role: defaultRole,
       name: '',
       email: '',
@@ -280,14 +288,14 @@ export class EcosystemUsersPage implements OnInit {
       corporateId: this.corporates()[0]?.id ?? '',
       companyName: '',
       companyCode: ''
-    };
+    });
     this.error.set('');
     this.modal.set('create');
   }
 
   openEdit(user: any) {
     this.selected.set(user);
-    this.editForm = {
+    this.editModel.set({
       employeeId:
         user.branchOwnerProfile?.employeeId ??
         user.patientCoordinatorProfile?.employeeId ??
@@ -323,19 +331,19 @@ export class EcosystemUsersPage implements OnInit {
       corporateId: user.corporateWellnessProfile?.corporateId ?? '',
       companyName: user.insurancePartnerProfile?.companyName ?? '',
       companyCode: user.insurancePartnerProfile?.companyCode ?? ''
-    };
+    });
     this.error.set('');
     this.modal.set('edit');
   }
 
   openCorporate() {
-    this.corporateForm = { code: '', name: '', contactEmail: '' };
+    this.corporateModel.set({ code: '', name: '', contactEmail: '' });
     this.error.set('');
     this.modal.set('corporate');
   }
 
   openEnroll() {
-    this.enrollQuery = '';
+    this.enrollQueryModel.set({ q: '' });
     this.enrollPatientId = '';
     this.patientHits.set([]);
     this.error.set('');
@@ -348,7 +356,7 @@ export class EcosystemUsersPage implements OnInit {
   }
 
   async createUser() {
-    const f = this.createForm;
+    const f = this.createModel();
     if (!f.name || !f.email || !f.password) {
       this.error.set('Name, email, and password are required.');
       return;
@@ -398,16 +406,17 @@ export class EcosystemUsersPage implements OnInit {
     if (!user) return;
     this.saving.set(true);
     try {
+      const edit = this.editModel();
       const payload = {
-        employeeId: this.editForm.employeeId || undefined,
-        designation: this.editForm.designation || undefined,
-        storeId: this.needsStore(user.role) ? this.editForm.storeId : undefined,
-        warehouseId: this.needsWarehouse(user.role) ? this.editForm.warehouseId : undefined,
-        supplierId: this.needsSupplier(user.role) ? this.editForm.supplierId : undefined,
-        diagnosticCenterId: this.needsDiagnostic(user.role) ? this.editForm.diagnosticCenterId : undefined,
-        corporateId: user.role === 'CORPORATE_WELLNESS' ? this.editForm.corporateId : undefined,
-        companyName: user.role === 'INSURANCE_PARTNER' ? this.editForm.companyName : undefined,
-        companyCode: user.role === 'INSURANCE_PARTNER' ? this.editForm.companyCode : undefined
+        employeeId: edit.employeeId || undefined,
+        designation: edit.designation || undefined,
+        storeId: this.needsStore(user.role) ? edit.storeId : undefined,
+        warehouseId: this.needsWarehouse(user.role) ? edit.warehouseId : undefined,
+        supplierId: this.needsSupplier(user.role) ? edit.supplierId : undefined,
+        diagnosticCenterId: this.needsDiagnostic(user.role) ? edit.diagnosticCenterId : undefined,
+        corporateId: user.role === 'CORPORATE_WELLNESS' ? edit.corporateId : undefined,
+        companyName: user.role === 'INSURANCE_PARTNER' ? edit.companyName : undefined,
+        companyCode: user.role === 'INSURANCE_PARTNER' ? edit.companyCode : undefined
       };
       if (this.isPortalUser(user)) {
         await this.api.updatePortalUser(user.id, payload);
@@ -425,13 +434,14 @@ export class EcosystemUsersPage implements OnInit {
   }
 
   async createCorporate() {
-    if (!this.corporateForm.code || !this.corporateForm.name) {
+    const corporate = this.corporateModel();
+    if (!corporate.code || !corporate.name) {
       this.error.set('Code and name are required.');
       return;
     }
     this.saving.set(true);
     try {
-      await this.api.createEcosystemCorporate(this.corporateForm);
+      await this.api.createEcosystemCorporate(corporate);
       this.showToast('Corporate account created.');
       this.closeModal();
       await this.load();
@@ -443,10 +453,11 @@ export class EcosystemUsersPage implements OnInit {
   }
 
   async searchPatients() {
-    if (!this.enrollQuery.trim()) return;
+    const q = this.enrollQueryModel().q.trim();
+    if (!q) return;
     this.searchingPatients.set(true);
     try {
-      const res = await this.api.searchPatients(this.enrollQuery.trim());
+      const res = await this.api.searchPatients(q);
       this.patientHits.set(res.patients ?? []);
     } catch {
       this.patientHits.set([]);

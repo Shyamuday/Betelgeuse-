@@ -9,7 +9,7 @@
 
       <!-- Search + Filters -->
       <div class="filters">
-        <input class="search" [(ngModel)]="q" (ngModelChange)="onSearch()" placeholder="🔍 Search by name…" />
+        <input class="search" [formField]="searchForm.q" (input)="onSearch()" attr.placeholder="🔍 Search by name…" />
         <div class="filter-tabs">
           @for (f of filters; track f.value) {
             <button class="ftab" [class.active]="activeFilter() === f.value" (click)="setFilter(f.value)">{{ f.label }}</button>
@@ -96,10 +96,10 @@
               <div class="fsect">
                 <div class="ftitle">Employment</div>
                 <div class="frow">
-                  <div class="fg"><label>Employee ID</label><input [(ngModel)]="form.employeeId" placeholder="EMP-001" /></div>
+                  <div class="fg"><label>Employee ID</label><input [formField]="profileForm.employeeId" attr.placeholder="EMP-001" /></div>
                   <div class="fg">
                     <label>Status</label>
-                    <select [(ngModel)]="form.employeeStatus">
+                    <select [formField]="profileForm.employeeStatus">
                       <option value="ACTIVE">Active</option>
                       <option value="ON_LEAVE">On Leave</option>
                       <option value="RESIGNED">Resigned</option>
@@ -108,25 +108,25 @@
                   </div>
                 </div>
                 <div class="frow">
-                  <div class="fg"><label>Designation</label><input [(ngModel)]="form.designation" /></div>
-                  <div class="fg"><label>Department</label><input [(ngModel)]="form.department" /></div>
+                  <div class="fg"><label>Designation</label><input [formField]="profileForm.designation" /></div>
+                  <div class="fg"><label>Department</label><input [formField]="profileForm.department" /></div>
                 </div>
                 <div class="frow">
-                  <div class="fg"><label>Joining Date</label><input type="date" [(ngModel)]="form.joiningDate" /></div>
-                  <div class="fg"><label>Probation End</label><input type="date" [(ngModel)]="form.probationEndDate" /></div>
+                  <div class="fg"><label>Joining Date</label><input type="date" [formField]="profileForm.joiningDate" /></div>
+                  <div class="fg"><label>Probation End</label><input type="date" [formField]="profileForm.probationEndDate" /></div>
                 </div>
-                <div class="fg full"><label>Salary (₹/month)</label><input type="number" [(ngModel)]="salaryDisplay" /></div>
+                <div class="fg full"><label>Salary (₹/month)</label><input type="number" [formField]="salaryForm.value" /></div>
               </div>
               <div class="fsect">
                 <div class="ftitle">Contact</div>
                 <div class="frow">
-                  <div class="fg"><label>Phone</label><input [(ngModel)]="form.phone" /></div>
-                  <div class="fg"><label>Email</label><input [(ngModel)]="form.email" /></div>
+                  <div class="fg"><label>Phone</label><input [formField]="profileForm.phone" /></div>
+                  <div class="fg"><label>Email</label><input [formField]="profileForm.email" /></div>
                 </div>
-                <div class="fg full"><label>Address</label><textarea [(ngModel)]="form.address" rows="2"></textarea></div>
+                <div class="fg full"><label>Address</label><textarea [formField]="profileForm.address" rows="2"></textarea></div>
                 <div class="frow">
-                  <div class="fg"><label>Emergency Contact</label><input [(ngModel)]="form.emergencyContact" /></div>
-                  <div class="fg"><label>Emergency Phone</label><input [(ngModel)]="form.emergencyPhone" /></div>
+                  <div class="fg"><label>Emergency Contact</label><input [formField]="profileForm.emergencyContact" /></div>
+                  <div class="fg"><label>Emergency Phone</label><input [formField]="profileForm.emergencyPhone" /></div>
                 </div>
               </div>
               <button class="btn-save" [disabled]="saving()" (click)="saveProfile()">
@@ -142,12 +142,12 @@
                 <div class="ftitle">Work Shift</div>
                 <div class="shift-grid">
                   @for (s of shifts; track s.value) {
-                    <button class="shift-btn" [class.active]="form.workShift === s.value" (click)="form.workShift = s.value">{{ s.label }}</button>
+                    <button class="shift-btn" [class.active]="profileModel().workShift === s.value" (click)="setWorkShift(s.value)">{{ s.label }}</button>
                   }
                 </div>
                 <div class="frow" style="margin-top:12px">
-                  <div class="fg"><label>Start Time</label><input type="time" [(ngModel)]="form.shiftStart" /></div>
-                  <div class="fg"><label>End Time</label><input type="time" [(ngModel)]="form.shiftEnd" /></div>
+                  <div class="fg"><label>Start Time</label><input type="time" [formField]="profileForm.shiftStart" /></div>
+                  <div class="fg"><label>End Time</label><input type="time" [formField]="profileForm.shiftEnd" /></div>
                 </div>
                 <div class="fg full" style="margin-top:10px">
                   <label>Weekly Off Days</label>
@@ -178,7 +178,7 @@
                     <label>Assign to Store/Clinic</label>
                     @if (storesLoading()) { <div class="loading-sm">Loading stores…</div> }
                     @else {
-                      <select [(ngModel)]="assignStoreId">
+                      <select [formField]="assignForm.storeId">
                         <option value="">— Select Store —</option>
                         @for (s of stores(); track s.id) {
                           <option [value]="s.id">{{ s.name }} ({{ s.code }})</option>

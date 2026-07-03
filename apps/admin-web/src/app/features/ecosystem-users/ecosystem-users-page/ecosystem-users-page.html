@@ -89,7 +89,7 @@
     } @else {
       <div class="fg corp-select">
         <label>Corporate account</label>
-        <select [ngModel]="selectedCorporateId()" (ngModelChange)="loadEnrollments($event)">
+        <select [formField]="corporateSelectForm.corporateId" (change)="loadEnrollments(corporateSelectModel().corporateId)">
           @for (c of corporates(); track c.id) {
             <option [value]="c.id">{{ c.name }} ({{ c.code }}) — {{ c.enrollmentCount }} enrolled</option>
           }
@@ -167,72 +167,72 @@
       <div class="modal-body">
         <div class="fg">
           <label>Role *</label>
-          <select [(ngModel)]="createForm.role">
+          <select [formField]="createForm.role">
             @for (opt of currentRoleOptions(); track opt.value) {
               <option [value]="opt.value">{{ opt.label }}</option>
             }
           </select>
         </div>
-        <div class="fg"><label>Full name *</label><input [(ngModel)]="createForm.name" /></div>
-        <div class="fg"><label>Email *</label><input type="email" [(ngModel)]="createForm.email" /></div>
-        <div class="fg"><label>Password *</label><input type="password" [(ngModel)]="createForm.password" /></div>
-        @if (needsStore(createForm.role)) {
+        <div class="fg"><label>Full name *</label><input [formField]="createForm.name" /></div>
+        <div class="fg"><label>Email *</label><input type="email" [formField]="createForm.email" /></div>
+        <div class="fg"><label>Password *</label><input type="password" [formField]="createForm.password" /></div>
+        @if (needsStore(createModel().role)) {
           <div class="fg">
             <label>Branch store *</label>
-            <select [(ngModel)]="createForm.storeId">
+            <select [formField]="createForm.storeId">
               @for (s of stores(); track s.id) {
                 <option [value]="s.id">{{ s.name }} ({{ s.code }})</option>
               }
             </select>
           </div>
         }
-        @if (needsWarehouse(createForm.role)) {
+        @if (needsWarehouse(createModel().role)) {
           <div class="fg">
             <label>Warehouse *</label>
-            <select [(ngModel)]="createForm.warehouseId">
+            <select [formField]="createForm.warehouseId">
               @for (w of warehouses(); track w.id) {
                 <option [value]="w.id">{{ w.name }} ({{ w.code }})</option>
               }
             </select>
           </div>
         }
-        @if (needsSupplier(createForm.role)) {
+        @if (needsSupplier(createModel().role)) {
           <div class="fg">
             <label>Supplier *</label>
-            <select [(ngModel)]="createForm.supplierId">
+            <select [formField]="createForm.supplierId">
               @for (s of suppliers(); track s.id) {
                 <option [value]="s.id">{{ s.name }} ({{ s.code }})</option>
               }
             </select>
           </div>
         }
-        @if (needsDiagnostic(createForm.role)) {
+        @if (needsDiagnostic(createModel().role)) {
           <div class="fg">
             <label>Diagnostic center *</label>
-            <select [(ngModel)]="createForm.diagnosticCenterId">
+            <select [formField]="createForm.diagnosticCenterId">
               @for (d of diagnosticCenters(); track d.id) {
                 <option [value]="d.id">{{ d.name }} ({{ d.code }})</option>
               }
             </select>
           </div>
         }
-        @if (createForm.role === 'CORPORATE_WELLNESS') {
+        @if (createModel().role === 'CORPORATE_WELLNESS') {
           <div class="fg">
             <label>Corporate account *</label>
-            <select [(ngModel)]="createForm.corporateId">
+            <select [formField]="createForm.corporateId">
               @for (c of corporates(); track c.id) {
                 <option [value]="c.id">{{ c.name }} ({{ c.code }})</option>
               }
             </select>
           </div>
         }
-        @if (createForm.role === 'INSURANCE_PARTNER') {
-          <div class="fg"><label>Company name *</label><input [(ngModel)]="createForm.companyName" /></div>
-          <div class="fg"><label>Company code *</label><input [(ngModel)]="createForm.companyCode" style="text-transform:uppercase" /></div>
+        @if (createModel().role === 'INSURANCE_PARTNER') {
+          <div class="fg"><label>Company name *</label><input [formField]="createForm.companyName" /></div>
+          <div class="fg"><label>Company code *</label><input [formField]="createForm.companyCode" style="text-transform:uppercase" /></div>
         }
-        @if (createForm.role !== 'CORPORATE_WELLNESS' && createForm.role !== 'INSURANCE_PARTNER' && createForm.role !== 'SUPPLIER' && createForm.role !== 'DIAGNOSTIC_PARTNER') {
-          <div class="fg"><label>Employee ID</label><input [(ngModel)]="createForm.employeeId" /></div>
-          <div class="fg"><label>Designation</label><input [(ngModel)]="createForm.designation" /></div>
+        @if (createModel().role !== 'CORPORATE_WELLNESS' && createModel().role !== 'INSURANCE_PARTNER' && createModel().role !== 'SUPPLIER' && createModel().role !== 'DIAGNOSTIC_PARTNER') {
+          <div class="fg"><label>Employee ID</label><input [formField]="createForm.employeeId" /></div>
+          <div class="fg"><label>Designation</label><input [formField]="createForm.designation" /></div>
         }
       </div>
       <div class="modal-footer">
@@ -257,7 +257,7 @@
         @if (needsStore(selected()!.role)) {
           <div class="fg">
             <label>Branch store</label>
-            <select [(ngModel)]="editForm.storeId">
+            <select [formField]="editForm.storeId">
               @for (s of stores(); track s.id) {
                 <option [value]="s.id">{{ s.name }} ({{ s.code }})</option>
               }
@@ -267,7 +267,7 @@
         @if (needsWarehouse(selected()!.role)) {
           <div class="fg">
             <label>Warehouse</label>
-            <select [(ngModel)]="editForm.warehouseId">
+            <select [formField]="editForm.warehouseId">
               @for (w of warehouses(); track w.id) {
                 <option [value]="w.id">{{ w.name }} ({{ w.code }})</option>
               }
@@ -277,7 +277,7 @@
         @if (needsSupplier(selected()!.role)) {
           <div class="fg">
             <label>Supplier</label>
-            <select [(ngModel)]="editForm.supplierId">
+            <select [formField]="editForm.supplierId">
               @for (s of suppliers(); track s.id) {
                 <option [value]="s.id">{{ s.name }} ({{ s.code }})</option>
               }
@@ -287,7 +287,7 @@
         @if (needsDiagnostic(selected()!.role)) {
           <div class="fg">
             <label>Diagnostic center</label>
-            <select [(ngModel)]="editForm.diagnosticCenterId">
+            <select [formField]="editForm.diagnosticCenterId">
               @for (d of diagnosticCenters(); track d.id) {
                 <option [value]="d.id">{{ d.name }} ({{ d.code }})</option>
               }
@@ -297,7 +297,7 @@
         @if (selected()!.role === 'CORPORATE_WELLNESS') {
           <div class="fg">
             <label>Corporate account</label>
-            <select [(ngModel)]="editForm.corporateId">
+            <select [formField]="editForm.corporateId">
               @for (c of corporates(); track c.id) {
                 <option [value]="c.id">{{ c.name }} ({{ c.code }})</option>
               }
@@ -305,12 +305,12 @@
           </div>
         }
         @if (selected()!.role === 'INSURANCE_PARTNER') {
-          <div class="fg"><label>Company name</label><input [(ngModel)]="editForm.companyName" /></div>
-          <div class="fg"><label>Company code</label><input [(ngModel)]="editForm.companyCode" style="text-transform:uppercase" /></div>
+          <div class="fg"><label>Company name</label><input [formField]="editForm.companyName" /></div>
+          <div class="fg"><label>Company code</label><input [formField]="editForm.companyCode" style="text-transform:uppercase" /></div>
         }
         @if (selected()!.role !== 'CORPORATE_WELLNESS' && selected()!.role !== 'INSURANCE_PARTNER' && selected()!.role !== 'SUPPLIER' && selected()!.role !== 'DIAGNOSTIC_PARTNER') {
-          <div class="fg"><label>Employee ID</label><input [(ngModel)]="editForm.employeeId" /></div>
-          <div class="fg"><label>Designation</label><input [(ngModel)]="editForm.designation" /></div>
+          <div class="fg"><label>Employee ID</label><input [formField]="editForm.employeeId" /></div>
+          <div class="fg"><label>Designation</label><input [formField]="editForm.designation" /></div>
         }
       </div>
       <div class="modal-footer">
@@ -332,9 +332,9 @@
         <button type="button" class="close-btn" (click)="closeModal()">✕</button>
       </div>
       <div class="modal-body">
-        <div class="fg"><label>Code *</label><input [(ngModel)]="corporateForm.code" style="text-transform:uppercase" placeholder="ACME" /></div>
-        <div class="fg"><label>Company name *</label><input [(ngModel)]="corporateForm.name" /></div>
-        <div class="fg"><label>Contact email</label><input type="email" [(ngModel)]="corporateForm.contactEmail" /></div>
+        <div class="fg"><label>Code *</label><input [formField]="corporateForm.code" style="text-transform:uppercase" attr.placeholder="ACME" /></div>
+        <div class="fg"><label>Company name *</label><input [formField]="corporateForm.name" /></div>
+        <div class="fg"><label>Contact email</label><input type="email" [formField]="corporateForm.contactEmail" /></div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn-ghost" (click)="closeModal()">Cancel</button>
@@ -358,7 +358,7 @@
         <div class="fg">
           <label>Search patients</label>
           <div class="search-row">
-            <input [(ngModel)]="enrollQuery" placeholder="Name, mobile, or patient code" (keyup.enter)="searchPatients()" />
+            <input [formField]="enrollQueryForm.q" attr.placeholder="Name, mobile, or patient code" (keyup.enter)="searchPatients()" />
             <button type="button" class="btn-ghost" [disabled]="searchingPatients()" (click)="searchPatients()">Search</button>
           </div>
         </div>

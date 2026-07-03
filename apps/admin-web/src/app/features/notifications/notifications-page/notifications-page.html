@@ -62,21 +62,21 @@
     <div class="modal" (click)="$event.stopPropagation()">
       @if (modal() === 'send') {
         <h3>Send broadcast</h3>
-        <label>Title <input [(ngModel)]="broadcastForm.title" /></label>
-        <label>Body <textarea [(ngModel)]="broadcastForm.body" rows="4"></textarea></label>
+        <label>Title <input [formField]="broadcastForm.title" /></label>
+        <label>Body <textarea [formField]="broadcastForm.body" rows="4"></textarea></label>
         <label>Channel
-          <select [(ngModel)]="broadcastForm.channel">
+          <select [formField]="broadcastForm.channel">
             @for (ch of channels; track ch) { <option [value]="ch">{{ ch }}</option> }
           </select>
         </label>
         <label>Audience
-          <select [(ngModel)]="broadcastForm.audience">
+          <select [formField]="broadcastForm.audience">
             @for (a of audiences; track a.value) { <option [value]="a.value">{{ a.label }}</option> }
           </select>
         </label>
-        @if (broadcastForm.audience === 'ROLE') {
+        @if (broadcastModel().audience === 'ROLE') {
           <label>Role
-            <select [(ngModel)]="broadcastForm.audienceRole">
+            <select [formField]="broadcastForm.audienceRole">
               @for (r of roles; track r) { <option [value]="r">{{ r }}</option> }
             </select>
           </label>
@@ -88,18 +88,18 @@
       } @else {
         <h3>{{ modal() === 'create' ? 'New template' : 'Edit template' }}</h3>
         @if (modal() === 'create') {
-          <label>Code <input [(ngModel)]="templateForm.code" style="text-transform:uppercase" /></label>
+          <label>Code <input [formField]="templateForm.code" style="text-transform:uppercase" /></label>
         }
-        <label>Name <input [(ngModel)]="templateForm.name" /></label>
-        <label>Title <input [(ngModel)]="templateForm.title" /></label>
-        <label>Body <textarea [(ngModel)]="templateForm.body" rows="4"></textarea></label>
+        <label>Name <input [formField]="templateForm.name" /></label>
+        <label>Title <input [formField]="templateForm.title" /></label>
+        <label>Body <textarea [formField]="templateForm.body" rows="4"></textarea></label>
         <label>Channel
-          <select [(ngModel)]="templateForm.channel">
+          <select [formField]="templateForm.channel">
             @for (ch of channels; track ch) { <option [value]="ch">{{ ch }}</option> }
           </select>
         </label>
         @if (modal() === 'edit') {
-          <label class="check"><input type="checkbox" [(ngModel)]="templateForm.isActive" /> Active</label>
+          <label class="check"><input type="checkbox" [formField]="templateForm.isActive" /> Active</label>
         }
         <div class="actions">
           <button type="button" (click)="closeModal()">Cancel</button>

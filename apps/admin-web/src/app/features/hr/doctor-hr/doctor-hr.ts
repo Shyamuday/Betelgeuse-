@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
 import { AdminApi } from '../../../core/services/admin-api';
 import { PAISE_PER_RUPEE } from '../../../shared/constants/currency.constants';
@@ -22,9 +22,31 @@ import {
   type HomeopathicSpecialtyFocus
 } from '../../doctors/constants/doctor-types.constants';
 
+function emptyDoctorProfileForm() {
+  return {
+    doctorType: 'JUNIOR_DOCTOR' as HomeopathicDoctorType,
+    specialtyFocus: '' as HomeopathicSpecialtyFocus | '',
+    specialty: '',
+    designation: '',
+    department: '',
+    employeeStatus: 'ACTIVE',
+    employeeId: '',
+    joiningDate: '',
+    probationEndDate: '',
+    workShift: DEFAULT_WORK_SHIFT,
+    shiftStart: '',
+    shiftEnd: '',
+    weeklyOffDays: [] as string[],
+    phone: '',
+    address: '',
+    emergencyContact: '',
+    emergencyPhone: ''
+  };
+}
+
 @Component({
   selector: 'app-doctor-hr',
-  imports: [FormsModule, DatePipe],
+  imports: [FormField, DatePipe],
   templateUrl: './doctor-hr.html',
   styleUrl: './doctor-hr.scss'
 })
@@ -43,9 +65,12 @@ export class DoctorHrComponent implements OnInit {
   letter = signal<any>(null);
   letterLoading = signal(false);
 
-  form: any = {};
-  salaryDisplay = 0;
-  feeDisplay = 0;
+  readonly profileModel = signal(emptyDoctorProfileForm());
+  readonly profileForm = form(this.profileModel);
+  readonly salaryModel = signal({ value: 0 });
+  readonly salaryForm = form(this.salaryModel);
+  readonly feeModel = signal({ value: 0 });
+  readonly feeForm = form(this.feeModel);
 
   shifts = Object.entries(WORK_SHIFT_LABELS).map(([value, label]) => ({ value: value as WorkShift, label }));
   days = WEEK_DAYS;
@@ -68,37 +93,51 @@ export class DoctorHrComponent implements OnInit {
     this.selected.set(d);
     this.letter.set(d.joiningLetter ?? null);
     this.tab.set('profile');
-    this.form = {
-      ...d,
+    this.profileModel.set({
       doctorType: d.doctorType ?? 'JUNIOR_DOCTOR',
       specialtyFocus: d.specialtyFocus ?? '',
       specialty: d.specialty ?? '',
-      workShift: d.workShift ?? DEFAULT_WORK_SHIFT,
-      weeklyOffDays: d.weeklyOffDays ?? [],
+      designation: d.designation ?? '',
+      department: d.department ?? '',
+      employeeStatus: d.employeeStatus ?? 'ACTIVE',
+      employeeId: d.employeeId ?? '',
       joiningDate: d.joiningDate ? String(d.joiningDate).slice(0, 10) : '',
-      probationEndDate: d.probationEndDate ? String(d.probationEndDate).slice(0, 10) : ''
-    };
-    this.salaryDisplay = d.salary != null ? d.salary / PAISE_PER_RUPEE : (d.salaryPerMonth ? d.salaryPerMonth / PAISE_PER_RUPEE : 0);
-    this.feeDisplay = d.consultationFee != null ? d.consultationFee / PAISE_PER_RUPEE : 0;
+      probationEndDate: d.probationEndDate ? String(d.probationEndDate).slice(0, 10) : '',
+      workShift: d.workShift ?? DEFAULT_WORK_SHIFT,
+      shiftStart: d.shiftStart ?? '',
+      shiftEnd: d.shiftEnd ?? '',
+      weeklyOffDays: d.weeklyOffDays ?? [],
+      phone: d.phone ?? '',
+      address: d.address ?? '',
+      emergencyContact: d.emergencyContact ?? '',
+      emergencyPhone: d.emergencyPhone ?? ''
+    });
+    this.salaryModel.set({
+      value: d.salary != null ? d.salary / PAISE_PER_RUPEE : (d.salaryPerMonth ? d.salaryPerMonth / PAISE_PER_RUPEE : 0)
+    });
+    this.feeModel.set({
+      value: d.consultationFee != null ? d.consultationFee / PAISE_PER_RUPEE : 0
+    });
     this.profileOpen.set(true);
   }
 
   close(): void { this.profileOpen.set(false); }
 
   isSpecialistType(): boolean {
-    return this.form.doctorType === 'SPECIALIST_CONSULTANT';
+    return this.profileModel().doctorType === 'SPECIALIST_CONSULTANT';
   }
 
   async save() {
     if (!this.selected()) return;
     this.saving.set(true);
+    const form = this.profileModel();
     try {
       const r = await this.api.updateHrDoctor(this.selected().id, {
-        ...this.form,
-        doctorType: this.form.doctorType as HomeopathicDoctorType,
-        specialtyFocus: this.isSpecialistType() ? (this.form.specialtyFocus as HomeopathicSpecialtyFocus) || null : null,
-        salaryPerMonth: Math.round(this.salaryDisplay * PAISE_PER_RUPEE),
-        consultationFee: Math.round(this.feeDisplay * PAISE_PER_RUPEE)
+        ...form,
+        doctorType: form.doctorType as HomeopathicDoctorType,
+        specialtyFocus: this.isSpecialistType() ? (form.specialtyFocus as HomeopathicSpecialtyFocus) || null : null,
+        salaryPerMonth: Math.round(this.salaryModel().value * PAISE_PER_RUPEE),
+        consultationFee: Math.round(this.feeModel().value * PAISE_PER_RUPEE)
       });
       this.doctors.update(list => list.map(d => d.id === r.doctor.id ? { ...d, ...r.doctor } : d));
       this.selected.set({ ...this.selected(), ...r.doctor });
@@ -126,11 +165,19 @@ export class DoctorHrComponent implements OnInit {
   async regen() { this.letter.set(null); await this.generate(); }
   print(): void { window.print(); }
 
+  setWorkShift(value: WorkShift): void {
+    this.profileModel.update((profile) => ({ ...profile, workShift: value }));
+  }
+
   shiftLabel(s: WorkShift): string { return WORK_SHIFT_LABELS[s] ?? s; }
   statusColor(s: EmployeeStatus): string { return EMPLOYEE_STATUS_COLORS[s] ?? EMPLOYEE_STATUS_FALLBACK_COLOR; }
-  isOff(d: string): boolean { return (this.form.weeklyOffDays ?? []).includes(d); }
+  isOff(d: string): boolean { return (this.profileModel().weeklyOffDays ?? []).includes(d); }
   toggleOff(d: string): void {
-    const c = this.form.weeklyOffDays ?? [];
-    this.form.weeklyOffDays = c.includes(d) ? c.filter((x: string) => x !== d) : [...c, d];
+    const profile = this.profileModel();
+    const c = profile.weeklyOffDays ?? [];
+    this.profileModel.set({
+      ...profile,
+      weeklyOffDays: c.includes(d) ? c.filter((x: string) => x !== d) : [...c, d]
+    });
   }
 }

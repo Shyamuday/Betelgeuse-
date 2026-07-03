@@ -21,7 +21,7 @@
   <div class="filters">
     <div class="filter-group">
       <label class="filter-label" for="paymentStatus">Status</label>
-      <select id="paymentStatus" [(ngModel)]="paymentStatus">
+      <select id="paymentStatus" [formField]="paymentFilterForm.paymentStatus">
         <option value="ALL">All</option>
         <option value="PAID">Paid</option>
         <option value="CREATED">Pending</option>
@@ -30,11 +30,11 @@
     </div>
     <div class="filter-group">
       <label class="filter-label" for="paymentFrom">From</label>
-      <input id="paymentFrom" type="date" [(ngModel)]="paymentFrom" />
+      <input id="paymentFrom" type="date" [formField]="paymentFilterForm.paymentFrom" />
     </div>
     <div class="filter-group">
       <label class="filter-label" for="paymentTo">To</label>
-      <input id="paymentTo" type="date" [(ngModel)]="paymentTo" />
+      <input id="paymentTo" type="date" [formField]="paymentFilterForm.paymentTo" />
     </div>
     <div class="filter-actions">
       <button type="button" class="btn-primary" (click)="applyPaymentFilters()" [disabled]="paymentsLoading">

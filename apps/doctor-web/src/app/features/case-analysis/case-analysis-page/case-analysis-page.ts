@@ -17,9 +17,9 @@ import { formatRubricPath, rubricPathSegments } from '../rubric-path.util';
 
 @Component({
   selector: 'app-case-analysis-page',
+  host: { class: 'case-analysis-page' },
   imports: [FormsModule, RouterLink, DecimalPipe],
-  templateUrl: './case-analysis-page.html',
-  styleUrl: './case-analysis-page.scss'
+  templateUrl: './case-analysis-page.html'
 })
 export class CaseAnalysisPage {
   readonly appointmentsPath = ROUTE_PATHS.APPOINTMENTS;

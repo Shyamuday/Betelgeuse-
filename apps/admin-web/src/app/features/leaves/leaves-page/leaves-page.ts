@@ -1,11 +1,11 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
 import { AdminApi } from '../../../core/services/admin-api';
 import { PAGE_SIZES } from '../../../core/constants/pagination.constants';
 import { SEARCH_DEBOUNCE_MS, TOAST_DURATION_MS } from '../../../core/constants/timing.constants';
 import { FILTER_ALL } from '../../../shared/constants/filter.constants';
-import { EMPLOYEE_TYPE_STAFF_FILTER_OPTIONS, EMPLOYEE_TYPES } from '../../hr/constants/employee-type.constants';
+import { EMPLOYEE_TYPE_STAFF_FILTER_OPTIONS, EMPLOYEE_TYPES, type EmployeeType } from '../../hr/constants/employee-type.constants';
 import {
   LEAVE_STATUS_FILTER_OPTIONS,
   LEAVE_STATUS_FALLBACK_STYLE,
@@ -21,9 +21,31 @@ import {
   LEAVE_TYPES
 } from '../constants/leave-type.constants';
 
+type AddLeaveForm = {
+  employeeType: EmployeeType;
+  doctorId: string;
+  storeStaffId: string;
+  type: typeof DEFAULT_LEAVE_TYPE;
+  startDate: string;
+  endDate: string;
+  reason: string;
+};
+
+function emptyAddForm(): AddLeaveForm {
+  return {
+    employeeType: EMPLOYEE_TYPES.DOCTOR,
+    doctorId: '',
+    storeStaffId: '',
+    type: DEFAULT_LEAVE_TYPE,
+    startDate: '',
+    endDate: '',
+    reason: ''
+  };
+}
+
 @Component({
   selector: 'app-leaves-page',
-  imports: [FormsModule, DatePipe],
+  imports: [FormField, DatePipe],
   templateUrl: './leaves-page.html',
   styleUrl: './leaves-page.scss'
 })
@@ -43,21 +65,16 @@ export class LeavesPage implements OnInit {
   saving = signal(false);
   toast = signal('');
   formError = signal('');
-  rejectNote = '';
   rejectTarget = signal<any>(null);
-  empSearch = '';
   empResults = signal<any[]>([]);
   selectedEmp = signal<any>(null);
 
-  addForm: any = {
-    employeeType: EMPLOYEE_TYPES.DOCTOR,
-    doctorId: '',
-    storeStaffId: '',
-    type: DEFAULT_LEAVE_TYPE,
-    startDate: '',
-    endDate: '',
-    reason: ''
-  };
+  readonly addModel = signal(emptyAddForm());
+  readonly addForm = form(this.addModel);
+  readonly rejectNoteModel = signal({ note: '' });
+  readonly rejectNoteForm = form(this.rejectNoteModel);
+  readonly empSearchModel = signal({ q: '' });
+  readonly empSearchForm = form(this.empSearchModel);
 
   statusFilters = [...LEAVE_STATUS_FILTER_OPTIONS];
   typeFilters = [...EMPLOYEE_TYPE_STAFF_FILTER_OPTIONS];
@@ -94,30 +111,27 @@ export class LeavesPage implements OnInit {
     this.showToast('Leave approved ✓');
   }
 
-  openReject(l: any): void { this.rejectTarget.set(l); this.rejectNote = ''; this.modal.set('reject'); }
+  openReject(l: any): void {
+    this.rejectTarget.set(l);
+    this.rejectNoteModel.set({ note: '' });
+    this.modal.set('reject');
+  }
 
   async submitReject(): Promise<void> {
+    const note = this.rejectNoteModel().note;
     this.saving.set(true);
     try {
-      await this.api.updateAdminLeave(this.rejectTarget()!.id, { status: LEAVE_STATUSES.REJECTED, hrNote: this.rejectNote });
-      this.leaves.update(list => list.map(x => x.id === this.rejectTarget()!.id ? { ...x, status: LEAVE_STATUSES.REJECTED, hrNote: this.rejectNote } : x));
+      await this.api.updateAdminLeave(this.rejectTarget()!.id, { status: LEAVE_STATUSES.REJECTED, hrNote: note });
+      this.leaves.update(list => list.map(x => x.id === this.rejectTarget()!.id ? { ...x, status: LEAVE_STATUSES.REJECTED, hrNote: note } : x));
       this.modal.set(null);
       this.showToast('Leave rejected');
     } finally { this.saving.set(false); }
   }
 
   openAdd(): void {
-    this.addForm = {
-      employeeType: EMPLOYEE_TYPES.DOCTOR,
-      doctorId: '',
-      storeStaffId: '',
-      type: DEFAULT_LEAVE_TYPE,
-      startDate: '',
-      endDate: '',
-      reason: ''
-    };
+    this.addModel.set(emptyAddForm());
     this.selectedEmp.set(null);
-    this.empSearch = '';
+    this.empSearchModel.set({ q: '' });
     this.empResults.set([]);
     this.formError.set('');
     this.modal.set('add');
@@ -125,9 +139,10 @@ export class LeavesPage implements OnInit {
 
   searchEmps(): void {
     if (this.empSearchTimer) clearTimeout(this.empSearchTimer);
-    if (this.empSearch.length < 2) { this.empResults.set([]); return; }
+    const q = this.empSearchModel().q;
+    if (q.length < 2) { this.empResults.set([]); return; }
     this.empSearchTimer = setTimeout(() => {
-      this.api.getHrEmployees({ q: this.empSearch, type: this.addForm.employeeType })
+      this.api.getHrEmployees({ q, type: this.addModel().employeeType })
         .then(r => this.empResults.set(r.employees.slice(0, PAGE_SIZES.EMP_SEARCH_RESULTS)))
         .catch(() => {});
     }, SEARCH_DEBOUNCE_MS);
@@ -135,24 +150,40 @@ export class LeavesPage implements OnInit {
 
   selectEmp(e: any): void {
     this.selectedEmp.set(e);
-    this.empSearch = e.name;
+    this.empSearchModel.set({ q: e.name });
     this.empResults.set([]);
-    if (e.empType === 'DOCTOR') { this.addForm.doctorId = e.id; this.addForm.storeStaffId = ''; }
-    else { this.addForm.storeStaffId = e.id; this.addForm.doctorId = ''; }
+    if (e.empType === 'DOCTOR') {
+      this.addModel.update(form => ({ ...form, doctorId: e.id, storeStaffId: '' }));
+    } else {
+      this.addModel.update(form => ({ ...form, storeStaffId: e.id, doctorId: '' }));
+    }
   }
 
   async submitAdd(): Promise<void> {
     if (!this.selectedEmp()) { this.formError.set('Please select an employee'); return; }
-    if (!this.addForm.startDate || !this.addForm.endDate) { this.formError.set('Start and end dates required'); return; }
+    const form = this.addModel();
+    if (!form.startDate || !form.endDate) { this.formError.set('Start and end dates required'); return; }
     this.saving.set(true);
     try {
-      await this.api.createAdminLeave(this.addForm);
+      await this.api.createAdminLeave(form);
       this.modal.set(null);
       this.showToast('Leave added ✓');
       this.load();
     } catch (e: any) {
       this.formError.set(e?.error?.error ?? 'Failed to add leave');
     } finally { this.saving.set(false); }
+  }
+
+  setAddEmployeeType(type: EmployeeType): void {
+    this.addModel.update((form) => ({
+      ...form,
+      employeeType: type,
+      doctorId: '',
+      storeStaffId: ''
+    }));
+    this.selectedEmp.set(null);
+    this.empSearchModel.set({ q: '' });
+    this.empResults.set([]);
   }
 
   closeModal(): void { this.modal.set(null); }

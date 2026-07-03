@@ -5,7 +5,7 @@
       <p>Revenue, payroll cost, expenses, and net estimate</p>
     </div>
     <div class="fin-actions">
-      <select [(ngModel)]="branchExportFilter" class="branch-filter" title="Optional branch filter for export">
+      <select [formField]="exportFilterForm.branchExportFilter" class="branch-filter" title="Optional branch filter for export">
         <option value="">All branches</option>
         <option value="CLINIC">Clinic (online / unallocated)</option>
         @for (s of stores(); track s.id) {
@@ -15,7 +15,7 @@
       <button type="button" class="btn-export" [disabled]="exporting() || loading()" (click)="exportBundle()">
         {{ exporting() ? 'Exporting…' : 'Export accountant bundle' }}
       </button>
-      <input type="month" [(ngModel)]="selectedMonth" (change)="loadAll()" class="month-inp" />
+      <input type="month" [formField]="monthForm.selectedMonth" (change)="loadAll()" class="month-inp" />
     </div>
   </div>
 
@@ -91,7 +91,7 @@
     }
     @case ('branches') {
       <div class="panel">
-        <h3>Branch P&L — {{ selectedMonth }}</h3>
+        <h3>Branch P&L — {{ monthModel().selectedMonth }}</h3>
         <p class="branch-note">Per-branch revenue, payroll, and expenses. Clinic-level costs appear under “Clinic (online / unallocated)”.</p>
         @if (!branchPnl().length) {
           <p class="empty-state">No branch data for this month.</p>
@@ -169,9 +169,9 @@
     }
     @case ('medicine') {
       <div class="filters">
-        <input type="date" [(ngModel)]="medicineFrom" (change)="loadTab()" />
-        <input type="date" [(ngModel)]="medicineTo" (change)="loadTab()" />
-        <select [(ngModel)]="storeFilter" (change)="loadTab()">
+        <input type="date" [formField]="medicineFilterForm.medicineFrom" (change)="loadTab()" />
+        <input type="date" [formField]="medicineFilterForm.medicineTo" (change)="loadTab()" />
+        <select [formField]="medicineFilterForm.storeFilter" (change)="loadTab()">
           <option value="">All Stores</option>
           @for (s of stores(); track s.id) {
             <option [value]="s.id">{{ s.name }}</option>
@@ -222,7 +222,7 @@
     }
     @case ('store-expenses') {
       <div class="filters actions">
-        <select [(ngModel)]="storeFilter" (change)="loadTab()">
+        <select [formField]="storeExpenseFilterForm.storeFilter" (change)="loadTab()">
           <option value="">All Stores</option>
           @for (s of stores(); track s.id) {
             <option [value]="s.id">{{ s.name }}</option>
@@ -261,14 +261,14 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <h3>{{ editingExpense() ? 'Edit Expense' : 'Add Expense' }}</h3>
       <label>Level
-        <select [(ngModel)]="expenseForm.level">
+        <select [formField]="expenseForm.level">
           <option value="CLINIC">Clinic</option>
           <option value="STORE">Store</option>
         </select>
       </label>
-      @if (expenseForm.level === 'STORE') {
+      @if (expenseModel().level === 'STORE') {
         <label>Store
-          <select [(ngModel)]="expenseForm.storeId">
+          <select [formField]="expenseForm.storeId">
             <option value="">Select store</option>
             @for (s of stores(); track s.id) {
               <option [value]="s.id">{{ s.name }}</option>
@@ -277,17 +277,17 @@
         </label>
       }
       <label>Category
-        <select [(ngModel)]="expenseForm.category">
+        <select [formField]="expenseForm.category">
           @for (c of categories; track c) {
             <option [value]="c">{{ categoryLabels[c] }}</option>
           }
         </select>
       </label>
-      <label>Description <input [(ngModel)]="expenseForm.description" /></label>
-      <label>Vendor <input [(ngModel)]="expenseForm.vendor" /></label>
-      <label>Bill No <input [(ngModel)]="expenseForm.billNo" /></label>
-      <label>Amount (paise) <input type="number" [(ngModel)]="expenseForm.amountInPaise" /></label>
-      <label>Date <input type="date" [(ngModel)]="expenseForm.expenseDate" /></label>
+      <label>Description <input [formField]="expenseForm.description" /></label>
+      <label>Vendor <input [formField]="expenseForm.vendor" /></label>
+      <label>Bill No <input [formField]="expenseForm.billNo" /></label>
+      <label>Amount (paise) <input type="number" [formField]="expenseForm.amountInPaise" /></label>
+      <label>Date <input type="date" [formField]="expenseForm.expenseDate" /></label>
       <div class="modal-actions">
         <button (click)="closeExpenseModal()">Cancel</button>
         <button class="btn-primary" (click)="saveExpense()">Save</button>
