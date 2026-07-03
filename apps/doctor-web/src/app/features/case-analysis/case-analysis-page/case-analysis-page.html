@@ -1,0 +1,326 @@
+<section class="page">
+  <header class="hero">
+    <div>
+      <a class="back-link" [routerLink]="['/', worklistPath]">← Worklist</a>
+      <h2>Case Analysis</h2>
+      <p class="muted">Search symptoms, repertorize, and select a remedy for this consultation.</p>
+    </div>
+    @if (consultationId) {
+      <div class="hero-actions">
+        <a class="btn-secondary" [routerLink]="['/', appointmentsPath]" [queryParams]="{ consultationId }">
+          Prescription
+        </a>
+      </div>
+    }
+  </header>
+
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+  @if (message()) {
+    <div class="alert alert-success">{{ message() }}</div>
+  }
+
+  @if (!consultationId) {
+    <section class="panel empty-panel">
+      <h3>Open a consultation first</h3>
+      <p class="muted">Go to your worklist and choose <strong>Case analysis</strong> on a case.</p>
+      <a class="btn-primary" [routerLink]="['/', worklistPath]">Go to worklist</a>
+    </section>
+  } @else if (loading()) {
+    <section class="panel loading-panel">
+      <p>Loading case analysis…</p>
+    </section>
+  } @else if (analysis(); as analysis) {
+    @if (consultation(); as consultation) {
+      <section class="patient-banner">
+        <div>
+          <strong>{{ consultation.patient?.name || 'Patient' }}</strong>
+          <span class="muted">{{ consultation.disease?.name || 'Consultation' }}</span>
+        </div>
+        <div class="banner-meta">
+          <span class="badge">{{ consultation.status }}</span>
+          @if (analysis.source?.name) {
+            <span class="badge badge-soft">{{ analysis.source?.name }}</span>
+          }
+        </div>
+      </section>
+    }
+
+    <div class="steps">
+      <span class="step" [class.done]="selectedRubrics().length > 0">1. Symptoms</span>
+      <span class="step" [class.done]="analysis.results.length > 0">2. Repertorize</span>
+      <span class="step" [class.done]="!!analysis.selectedRemedy">3. Remedy</span>
+    </div>
+
+    <div class="workspace">
+      <div class="column">
+        <section class="panel">
+          <div class="panel-title-row">
+            <h3>Symptom search</h3>
+            @if (sources().length) {
+              <select class="source-select" [formField]="searchForm.selectedSourceId">
+                @for (source of sources(); track source.id) {
+                  <option [value]="source.id">
+                    {{ source.name }}@if (source.rubricCount) { · {{ source.rubricCount | number }} rubrics }
+                  </option>
+                }
+              </select>
+            }
+          </div>
+
+          <div class="search-box">
+            <input
+              [formField]="searchForm.rubricQuery"
+              placeholder="e.g. anxiety morning, nausea, grief suppressed"
+              (keyup.enter)="searchRubrics()"
+            />
+            <button type="button" class="btn-primary" (click)="searchRubrics()" [disabled]="searching() || searchModel().rubricQuery.trim().length < 2">
+              {{ searching() ? 'Searching…' : 'Search' }}
+            </button>
+          </div>
+
+          @if (searching()) {
+            <p class="hint">Searching repertory…</p>
+          } @else if (searchModel().rubricQuery.trim().length >= 2 && !searchResults().length && searchedOnce()) {
+            <p class="hint">No rubrics found. Try fewer or different keywords.</p>
+          }
+
+          @if (searchResults().length) {
+            <div class="result-list">
+              @for (rubric of searchResults(); track rubric.id) {
+                <article class="rubric-result" [class.added]="hasRubric(rubric.id)">
+                  <div class="rubric-body">
+                    <nav class="rubric-path" aria-label="Rubric location">
+                      @for (segment of rubricPathSegments(rubric); track segment; let last = $last) {
+                        <span class="path-segment" [class.is-leaf]="last">{{ segment }}</span>
+                        @if (!last) {
+                          <span class="path-sep" aria-hidden="true">›</span>
+                        }
+                      }
+                    </nav>
+                    <p class="rubric-text">{{ formatRubricPath(rubric) }}</p>
+                    @if (rubric.remedies.length) {
+                      <div class="remedy-chips">
+                        @for (link of rubric.remedies; track link.remedy.id) {
+                          <span class="chip" [attr.data-grade]="link.grade">
+                            {{ link.remedy.abbreviation }}
+                            <small>{{ link.grade }}</small>
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+                  <button
+                    type="button"
+                    class="btn-add"
+                    (click)="addRubric(rubric)"
+                    [disabled]="hasRubric(rubric.id)"
+                  >
+                    {{ hasRubric(rubric.id) ? 'Added' : '+ Add' }}
+                  </button>
+                </article>
+              }
+            </div>
+          }
+        </section>
+
+        <section class="panel">
+          <div class="panel-title-row">
+            <h3>Case rubrics <span class="count-pill">{{ selectedRubrics().length }}</span></h3>
+            <button type="button" class="btn-secondary btn-sm" (click)="saveRubrics()" [disabled]="saving() || !selectedRubrics().length">
+              Save
+            </button>
+          </div>
+
+          @if (selectedRubrics().length) {
+            <div class="selected-list">
+              @for (item of selectedRubrics(); track item.rubricId) {
+                <article class="selected-item">
+                  <div>
+                    @if (item.rubric) {
+                      <nav class="rubric-path" aria-label="Rubric location">
+                        @for (segment of rubricPathSegments(item.rubric); track segment; let last = $last) {
+                          <span class="path-segment" [class.is-leaf]="last">{{ segment }}</span>
+                          @if (!last) {
+                            <span class="path-sep" aria-hidden="true">›</span>
+                          }
+                        }
+                      </nav>
+                    }
+                    <p>{{ item.rubric ? formatRubricPath(item.rubric) : 'Rubric' }}</p>
+                  </div>
+                  <div class="selected-actions">
+                    <div class="weight-picker" role="group" aria-label="Symptom weight">
+                      @for (w of weightOptions; track w) {
+                        <button
+                          type="button"
+                          class="weight-btn"
+                          [class.active]="item.weight === w"
+                          (click)="item.weight = w"
+                        >
+                          {{ w }}
+                        </button>
+                      }
+                    </div>
+                    <button type="button" class="btn-icon" (click)="removeRubric(item.rubricId)" title="Remove">×</button>
+                  </div>
+                </article>
+              }
+            </div>
+            <button
+              type="button"
+              class="btn-primary btn-block"
+              (click)="runRepertorization()"
+              [disabled]="repertorizing()"
+            >
+              {{ repertorizing() ? 'Repertorizing…' : 'Repertorize case' }}
+            </button>
+          } @else {
+            <p class="hint">Search and add symptoms that match the patient. Assign weight 1–4 by importance.</p>
+          }
+        </section>
+
+        <section class="panel notes-panel">
+          <h3>Analysis notes</h3>
+          <textarea
+            [formField]="notesForm.notes"
+            rows="4"
+            placeholder="Key observations, modalities, mentals, or follow-up thoughts…"
+          ></textarea>
+          <button type="button" class="btn-secondary btn-sm" (click)="saveNotes()" [disabled]="saving()">Save notes</button>
+        </section>
+      </div>
+
+      <div class="column results-column">
+        <section class="panel results-panel">
+          <h3>Remedy analysis</h3>
+
+          @if (analysis.results.length) {
+            <div class="results-list">
+              @for (result of analysis.results; track result.remedy.id) {
+                <article
+                  class="result-card"
+                  [class.is-top]="result.rank <= 3"
+                  [class.is-selected]="analysis.selectedRemedy?.id === result.remedy.id"
+                  [class.is-focused]="isFocusedRemedy(result.remedy.id)"
+                >
+                  <div class="rank-badge">{{ result.rank }}</div>
+                  <button type="button" class="result-body result-focus" (click)="focusRemedy(result.remedy)">
+                    <div class="result-head">
+                      <strong>{{ result.remedy.name }}</strong>
+                      <span class="abbrev">{{ result.remedy.abbreviation }}</span>
+                    </div>
+                    <div class="score-row">
+                      <div class="score-bar">
+                        <span class="score-fill" [style.width.%]="scorePercent(result.totalScore)"></span>
+                      </div>
+                      <span class="score-label">Score {{ result.totalScore }}</span>
+                    </div>
+                    <small class="muted">Covers {{ result.coverage }} selected rubric{{ result.coverage === 1 ? '' : 's' }}</small>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-select"
+                    (click)="chooseRemedy(result.remedy)"
+                    [disabled]="selectingRemedyId() === result.remedy.id"
+                  >
+                    {{ analysis.selectedRemedy?.id === result.remedy.id ? 'Selected' : 'Select' }}
+                  </button>
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="empty-results">
+              <p class="hint">Add rubrics and run repertorization to see ranked remedies here.</p>
+            </div>
+          }
+
+          @if (analysis.selectedRemedy) {
+            <div class="chosen-remedy">
+              <div>
+                <small class="muted">Chosen simillimum</small>
+                <strong>{{ analysis.selectedRemedy.name }}</strong>
+                <span class="abbrev">{{ analysis.selectedRemedy.abbreviation }}</span>
+              </div>
+              <button type="button" class="btn-primary" (click)="openPrescriptionWithRemedy()">
+                Use in prescription →
+              </button>
+            </div>
+          }
+        </section>
+
+        @if (focusedRemedy(); as focusedRemedy) {
+          <section class="panel mm-panel">
+            <div class="panel-title-row">
+              <div>
+                <h3>Materia medica</h3>
+                <p class="mm-remedy-title">
+                  <strong>{{ focusedRemedy.name }}</strong>
+                  <span class="abbrev">{{ focusedRemedy.abbreviation }}</span>
+                </p>
+              </div>
+              <button type="button" class="btn-icon mm-close" (click)="clearFocusedRemedy()" title="Close panel">×</button>
+            </div>
+
+            @if (loadingMateriaMedica()) {
+              <p class="hint">Loading remedy profile…</p>
+            } @else if (materiaMedicaError()) {
+              <p class="hint mm-error">{{ materiaMedicaError() }}</p>
+            } @else if (materiaMedica(); as materiaMedica) {
+              @if (materiaMedica.source) {
+                <p class="mm-source muted">
+                  {{ materiaMedica.source.name }}
+                  @if (materiaMedica.source.author) {
+                    · {{ materiaMedica.source.author }}
+                  }
+                  @if (materiaMedica.source.year) {
+                    · {{ materiaMedica.source.year }}
+                  }
+                </p>
+              }
+
+              @if (materiaMedica.sections.length) {
+                <div class="mm-sections">
+                  @for (section of materiaMedica.sections; track section.id) {
+                    <article class="mm-section">
+                      @if (section.heading) {
+                        <h4>{{ section.heading }}</h4>
+                      }
+                      <p>{{ section.content }}</p>
+                    </article>
+                  }
+                </div>
+              } @else {
+                <p class="hint">No materia medica text loaded yet for this remedy.</p>
+              }
+
+              @if (materiaMedica.keyRubrics.length) {
+                <div class="mm-rubrics">
+                  <h4>
+                    @if (materiaMedica.caseRubrics?.length) {
+                      Matching case rubrics
+                    } @else {
+                      Key repertory rubrics
+                    }
+                  </h4>
+                  <ul>
+                    @for (item of materiaMedica.keyRubrics; track item.rubricId) {
+                      <li>
+                        <span class="mm-grade">{{ item.grade }}</span>
+                        <span>{{ formatRubricPath(item.rubric) }}</span>
+                        @if (item.weight) {
+                          <small class="muted">· weight {{ item.weight }}</small>
+                        }
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+            }
+          </section>
+        }
+      </div>
+    </div>
+  }
+</section>

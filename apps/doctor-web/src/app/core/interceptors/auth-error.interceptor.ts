@@ -2,6 +2,7 @@ import { type HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
+import { ROUTE_PATHS } from '../constants/app-routes.constants';
 import { Auth } from '../services/auth';
 
 export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
@@ -12,7 +13,7 @@ export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error) => {
       if (error.status === 401) {
         auth.logout();
-        void router.navigateByUrl('/login');
+        void router.navigateByUrl(`/${ROUTE_PATHS.LOGIN}`);
       }
       return throwError(() => error);
     })

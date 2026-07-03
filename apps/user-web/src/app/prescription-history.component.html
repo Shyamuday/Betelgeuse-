@@ -1,0 +1,48 @@
+
+    <div class="panel">
+      <h2>Prescription History</h2>
+      @if (error()) {
+        <p class="rx-error">{{ error() }}</p>
+      }
+      <div class="cards">
+        @for (prescription of prescriptions; track prescription.id) {
+          <article class="consult-card">
+            <div class="rx-card">
+              <div class="rx-info">
+                <strong>{{ prescription.diagnosis || 'Prescription' }} (v{{ prescription.version || 1 }})</strong>
+                <span>{{ prescription.createdAt | date: 'mediumDate' }}</span>
+                <small>{{ prescription.method || 'Method not specified' }}</small>
+                @if (prescription.items?.length) {
+                  <p class="muted">{{ prescription.items?.length }} medicine(s)</p>
+                }
+                @if (prescription.followUpDate) {
+                  <p class="muted">Follow-up: {{ prescription.followUpDate | date: 'mediumDate' }}</p>
+                }
+              </div>
+              <div class="rx-actions">
+                <button class="btn-pdf ghost" type="button" [disabled]="isBusy(prescription.id)" (click)="viewPdf(prescription)">
+                  {{ isBusy(prescription.id) ? '…' : 'View' }}
+                </button>
+                <button class="btn-pdf" type="button" [disabled]="isBusy(prescription.id)" (click)="downloadPdf(prescription)">
+                  Download
+                </button>
+                <button class="btn-pdf ghost" type="button" [disabled]="isBusy(prescription.id)" (click)="printPdf(prescription)">
+                  Print
+                </button>
+                @if (canShareFiles()) {
+                  <button class="btn-pdf share" type="button" [disabled]="isBusy(prescription.id)" (click)="sharePdf(prescription)">
+                    Share
+                  </button>
+                }
+                <button class="btn-pdf wa" type="button" [disabled]="isBusy(prescription.id)" (click)="shareWhatsApp(prescription)">
+                  WhatsApp
+                </button>
+              </div>
+            </div>
+          </article>
+        } @empty {
+          <p class="muted">No prescriptions published yet.</p>
+        }
+      </div>
+    </div>
+  

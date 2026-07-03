@@ -1,0 +1,5 @@
+export {
+  MEDICINE_POTENCIES,
+  MEDICINE_CATEGORIES,
+  CUSTOM_POTENCY_VALUE
+} from '@vitalis/store-ui';

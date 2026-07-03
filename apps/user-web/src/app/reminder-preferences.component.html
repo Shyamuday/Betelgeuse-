@@ -1,0 +1,49 @@
+
+    <div class="panel reminder-panel">
+      <h2>Reminder preferences</h2>
+      <p class="muted">Choose how we remind you about medicines. Quiet hours pause non-urgent reminders.</p>
+
+      <div class="channel-grid">
+        <label class="channel">
+          <input type="checkbox" [formField]="prefsForm.inApp" />
+          <span>
+            <strong>In-app</strong>
+            <small>Dashboard reminders while you are logged in</small>
+          </span>
+        </label>
+        <label class="channel">
+          <input type="checkbox" [formField]="prefsForm.sms" />
+          <span>
+            <strong>SMS</strong>
+            <small>Text message to your registered mobile</small>
+          </span>
+        </label>
+        <label class="channel">
+          <input type="checkbox" [formField]="prefsForm.whatsapp" />
+          <span>
+            <strong>WhatsApp</strong>
+            <small>Requires an opted-in WhatsApp number</small>
+          </span>
+        </label>
+        <label class="channel">
+          <input type="checkbox" [formField]="prefsForm.push" />
+          <span>
+            <strong>Push</strong>
+            <small>Browser / app notifications when enabled</small>
+          </span>
+        </label>
+      </div>
+
+      <div class="quiet-hours">
+        <label>
+          Quiet hours start
+          <input type="time" [formField]="prefsForm.quietHoursStart" [attr.placeholder]="DEFAULT_QUIET_HOURS.START" />
+        </label>
+        <label>
+          Quiet hours end
+          <input type="time" [formField]="prefsForm.quietHoursEnd" [attr.placeholder]="DEFAULT_QUIET_HOURS.END" />
+        </label>
+      </div>
+
+      <button class="primary" [disabled]="disabled" (click)="save()">Save preferences</button>
+    </div>

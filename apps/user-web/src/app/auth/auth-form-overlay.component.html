@@ -1,0 +1,88 @@
+
+    <div class="auth-card">
+      <p class="eyebrow">Vitalis Care and Research Centre</p>
+
+      @if (patientSelection(); as selection) {
+        <h2>Who is logging in?</h2>
+        <p class="muted">Multiple patient profiles use this mobile number. Choose yours to continue.</p>
+        <div class="patient-pick-list">
+          @for (patient of selection.patients; track patient.id) {
+            <button type="button" class="patient-pick" (click)="selectPatient(patient.id)">
+              <strong>{{ patient.name }}</strong>
+              @if (patient.patientCode) {
+                <span>{{ patient.patientCode }}</span>
+              }
+            </button>
+          }
+        </div>
+        <button type="button" class="link-btn" (click)="cancelPatientSelection()">← Back to login</button>
+      } @else if (forgotStep() === 'reset' && resetToken()) {
+        <h2>Set new password</h2>
+        <p class="muted">Enter your new password below.</p>
+
+        <form (ngSubmit)="resetPassword()">
+          <label>
+            New password
+            <input [formField]="forgotForm.password" type="password" attr.placeholder="Min 8 characters" />
+          </label>
+          <label>
+            Confirm password
+            <input [formField]="forgotForm.confirmPassword" type="password" attr.placeholder="Confirm new password" />
+          </label>
+          @if (forgotModel().password && forgotModel().confirmPassword && forgotModel().password !== forgotModel().confirmPassword) {
+            <p class="error-text">Passwords do not match</p>
+          }
+          <button class="primary" type="submit" [disabled]="isProcessing() || !canResetPassword()">Reset password & login</button>
+        </form>
+      } @else {
+        <h2>Login to continue</h2>
+        <p class="muted">Use email/mobile with password, or choose mobile OTP as a separate option.</p>
+
+        <form (ngSubmit)="loginPatientWithPassword()">
+          <label>
+            Email or mobile number
+            <input
+              [formField]="patientCredentialsForm.identifier"
+              attr.placeholder="Enter Gmail or mobile number"
+            />
+          </label>
+          <label>
+            Password
+            <input
+              [formField]="patientCredentialsForm.password"
+              type="password"
+              attr.placeholder="Enter your password"
+            />
+          </label>
+          <button class="primary" type="submit" [disabled]="isProcessing()">Login</button>
+        </form>
+
+        <div class="divider-text">or continue with Gmail</div>
+        <form (ngSubmit)="loginWithGoogle()">
+          <button class="secondary" type="submit" [disabled]="isProcessing()">Continue with Gmail</button>
+          <p class="muted">Sign in with your Google account.</p>
+        </form>
+
+        <div class="divider-text">or login with mobile OTP</div>
+        <form (ngSubmit)="loginPatientWithOtp()">
+          <label>
+            Full name
+            <input [formField]="patientOtpForm.name" attr.placeholder="Enter your full name" />
+          </label>
+          <label>
+            Mobile number
+            <input [formField]="patientOtpForm.mobile" attr.placeholder="Enter 10-digit mobile number" />
+          </label>
+          <div class="otp-row">
+            <label>
+              OTP
+              <input [formField]="patientOtpForm.otp" attr.placeholder="Enter 6-digit OTP" />
+            </label>
+            <button type="button" class="secondary" [disabled]="isProcessing()" (click)="requestOtp()">Send OTP</button>
+          </div>
+          <button class="secondary" type="submit" [disabled]="isProcessing()">Continue with OTP</button>
+        </form>
+
+        <app-dev-login-panel (loggedIn)="onDevLoggedIn()" (fillAccount)="applyDevFill($event)" />
+      }
+    </div>

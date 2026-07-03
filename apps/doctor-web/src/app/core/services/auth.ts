@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { AUTH_MESSAGES, AUTH_PATHS, AUTH_TOKEN_KEY } from '../constants/auth.constants';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Auth {
-  private readonly tokenKey = 'doctor_app_token';
+  private readonly tokenKey = AUTH_TOKEN_KEY;
   private readonly apiBase = environment.apiUrl;
 
   constructor(private readonly http: HttpClient) {}
@@ -18,18 +19,18 @@ export class Auth {
 
   async login(email: string, password: string) {
     if (!email || !password) {
-      return { ok: false as const, message: 'Email and password are required.' };
+      return { ok: false as const, message: AUTH_MESSAGES.CREDENTIALS_REQUIRED };
     }
 
     try {
       const response = await firstValueFrom(
-        this.http.post<{ token: string }>(`${this.apiBase}/auth/staff-login`, { email, password })
+        this.http.post<{ token: string }>(`${this.apiBase}${AUTH_PATHS.STAFF_LOGIN}`, { email, password })
       );
 
       localStorage.setItem(this.tokenKey, response.token);
       return { ok: true as const };
     } catch (error: any) {
-      return { ok: false as const, message: error?.error?.message || 'Invalid login or API unavailable.' };
+      return { ok: false as const, message: error?.error?.message || AUTH_MESSAGES.INVALID_LOGIN };
     }
   }
 
@@ -42,20 +43,24 @@ export class Auth {
     registrationNo?: string;
   }) {
     if (!payload.name || !payload.email || !payload.password || !payload.specialty) {
-      return { ok: false as const, message: 'Name, email, password, and specialty are required.' };
+      return { ok: false as const, message: AUTH_MESSAGES.ENROLL_REQUIRED_FIELDS };
     }
 
     try {
       const response = await firstValueFrom(
-        this.http.post<{ message?: string }>(`${this.apiBase}/doctor/enroll`, payload)
+        this.http.post<{ message?: string }>(`${this.apiBase}${AUTH_PATHS.DOCTOR_ENROLL}`, payload)
       );
       return {
         ok: true as const,
-        message: response.message || 'Enrollment submitted. Wait for admin approval.'
+        message: response.message || AUTH_MESSAGES.ENROLL_DEFAULT_SUCCESS
       };
     } catch (error: any) {
-      return { ok: false as const, message: error?.error?.message || 'Could not enroll doctor account.' };
+      return { ok: false as const, message: error?.error?.message || AUTH_MESSAGES.ENROLL_FAILED };
     }
+  }
+
+  applyDevLogin(token: string) {
+    localStorage.setItem(this.tokenKey, token);
   }
 
   logout() {

@@ -1,6 +1,10 @@
 <h2>Create Prescription</h2>
 <p>Draft, edit, and publish multi-medicine prescriptions with follow-up versions.</p>
 
+@if (patientClinical) {
+  <app-patient-health-profile [profile]="patientClinical" />
+}
+
 <div class="templates-bar">
   <span class="templates-label">Templates</span>
   @if (templatesLoading) {
@@ -22,7 +26,7 @@
   </button>
   @if (showSaveTemplateForm) {
     <div class="save-tpl-form">
-      <input name="templateName" [(ngModel)]="templateName" placeholder="Template name (e.g. Hair Fall — Acute)" />
+      <input [formField]="templateForm.templateName" placeholder="Template name (e.g. Hair Fall — Acute)" />
       <button type="button" (click)="saveAsTemplate()" [disabled]="savingTemplate">
         {{ savingTemplate ? 'Saving…' : 'Save' }}
       </button>
@@ -35,78 +39,19 @@
 
 <div class="grid">
   <label for="consultationId">Consultation ID</label>
-  <input id="consultationId" name="consultationId" [(ngModel)]="consultationId" />
+  <input id="consultationId" [formField]="prescriptionForm.consultationId" />
   <div class="actions">
     <button type="button" (click)="loadConsultationPrescriptions()">Load history</button>
     <button type="button" (click)="resetEditorForFollowUp()">New follow-up version</button>
-  </div>
-
-  <div class="attachments-panel">
-    <h3>Consultation files (online & clinic)</h3>
-    <p class="hint">Labs from patient and clinical photos you attach here are visible to both sides.</p>
-    @if (attachments.length) {
-      <ul class="attachment-list">
-        @for (att of attachments; track att.id) {
-          <li>
-            <strong>{{ attachmentKindLabel(att.kind) }}</strong>
-            @if (att.fileName) {
-              <span> · {{ att.fileName }}</span>
-            }
-            · {{ att.createdAt ? (att.createdAt | date: 'short') : '' }}
-            @if (att.uploadedBy?.name) {
-              <span> · {{ att.uploadedBy?.name }}</span>
-            }
-            @if (att.caption) {
-              — {{ att.caption }}
-            }
-            @if (att.fileUrl) {
-              · <a [href]="att.fileUrl" target="_blank" rel="noopener">Open</a>
-            }
-          </li>
-        }
-      </ul>
-    } @else {
-      <p class="hint">Load consultation history to see uploads.</p>
+    @if (prescriptionModel().consultationId) {
+      <a class="link-btn" [routerLink]="['/', caseAnalysisPath, prescriptionModel().consultationId, 'case-analysis']">Case analysis</a>
     }
-    <label class="block-label">
-      Caption (optional)
-      <input name="clinicalAttachmentCaption" [(ngModel)]="clinicalAttachmentCaption" />
-    </label>
-    <div class="attachment-buttons">
-      <label class="btn-secondary">
-        Camera / clinic photo
-        <input
-          type="file"
-          hidden
-          accept="image/*"
-          capture="environment"
-          [disabled]="uploadingClinicalAttachment || !consultationId.trim()"
-          (change)="uploadClinicalAttachment($event)"
-        />
-      </label>
-      <label class="btn-secondary">
-        Upload image / PDF
-        <input
-          type="file"
-          hidden
-          accept="image/*,application/pdf"
-          [disabled]="uploadingClinicalAttachment || !consultationId.trim()"
-          (change)="uploadClinicalAttachment($event)"
-        />
-      </label>
-      @if (uploadingClinicalAttachment) {
-        <span class="hint">Uploading…</span>
-      }
-      @if (clinicalAttachmentMessage) {
-        <span class="hint">{{ clinicalAttachmentMessage }}</span>
-      }
-    </div>
   </div>
 
   @if (loadedPrescriptions.length) {
     <div class="timeline">
       @for (item of loadedPrescriptions; track item.id) {
-        <article class="timeline-card" [class.active]="editingPrescriptionId === item.id">
+        <article class="timeline-card" [class.active]="prescriptionModel().editingPrescriptionId === item.id">
           <div class="timeline-head">
             <strong>v{{ item.version }}</strong>
             <span [class]="versionBadgeClass(item.status)">{{ item.status }}</span>
@@ -120,6 +65,11 @@
             <button type="button" (click)="openVersion(item)">Open</button>
             <button type="button" [disabled]="!canEditVersion(item)" (click)="openVersion(item)">Edit</button>
             <button type="button" (click)="startFollowUpFrom(item)">Follow-up</button>
+            @if (item.status === 'PUBLISHED') {
+              <button type="button" class="ghost" [disabled]="isPdfBusy(item.id)" (click)="viewPublishedPdf(item.id)">View PDF</button>
+              <button type="button" class="ghost" [disabled]="isPdfBusy(item.id)" (click)="downloadPublishedPdf(item.id)">Download</button>
+              <button type="button" class="ghost" [disabled]="isPdfBusy(item.id)" (click)="sharePublishedPdf(item.id)">Share</button>
+            }
           </div>
         </article>
       }
@@ -128,9 +78,8 @@
     <label for="existingVersion">Existing Versions</label>
     <select
       id="existingVersion"
-      name="existingVersion"
-      [ngModel]="editingPrescriptionId"
-      (ngModelChange)="selectPrescriptionById($event)"
+      [formField]="prescriptionForm.editingPrescriptionId"
+      (change)="selectPrescriptionById(prescriptionModel().editingPrescriptionId)"
     >
       <option value="">Select version</option>
       @for (item of loadedPrescriptions; track item.id) {
@@ -142,215 +91,95 @@
   }
 
   <label for="method">Homeopathy Method</label>
-  <select
-    id="method"
-    name="method"
-    [(ngModel)]="methodOptionId"
-    (ngModelChange)="onMethodOptionChanged()"
-  >
+  <select id="method" [formField]="prescriptionForm.methodOptionId">
     <option value="">Select method</option>
     @for (item of methods; track item.id) {
       <option [value]="item.id">{{ item.label }}</option>
     }
   </select>
   <div class="inline">
-    <input name="newMethod" [(ngModel)]="newMethod" placeholder="Add new method" />
+    <input [formField]="optionDraftForm.newMethod" placeholder="Add new method" />
     <button type="button" (click)="addOption('METHOD')">Add</button>
   </div>
 
-  @if (methodIntakeLoadError) {
-    <p class="formulary-error" role="status">{{ methodIntakeLoadError }}</p>
-  }
-  @for (panel of methodIntakeUiPanels(); track panel.id) {
-    <div class="method-intake-panel">
-      <h3>{{ panel.heading }}</h3>
-      @if (panel.description) {
-        <p class="hint">{{ panel.description }}</p>
-      }
-      @if (panel.profileTitle) {
-        <p class="method-intake-title">{{ panel.profileTitle }}</p>
-      }
-      @if (panel.profileHelper) {
-        <p class="hint">{{ panel.profileHelper }}</p>
-      }
-      @for (row of panel.rows; track row.storageKey) {
-        @if (row.showSectionHeader && row.section) {
-          <h4 class="method-intake-section">{{ row.section }}</h4>
-        }
-        <label [attr.for]="'mi-' + panel.id + '-' + row.storageKey">
-          {{ row.label }}
-          @if (row.helper) {
-            <span class="hint block-hint">{{ row.helper }}</span>
-          }
-          @if (row.type === 'textarea') {
-            <textarea
-              [id]="'mi-' + panel.id + '-' + row.storageKey"
-              [name]="'mi-' + panel.id + '-' + row.storageKey"
-              rows="3"
-              [(ngModel)]="methodIntakeValues[row.storageKey]"
-              [placeholder]="row.placeholder || ''"
-            ></textarea>
-          } @else if (row.type === 'select') {
-            <select
-              [id]="'mi-' + panel.id + '-' + row.storageKey"
-              [name]="'mi-' + panel.id + '-' + row.storageKey"
-              [(ngModel)]="methodIntakeValues[row.storageKey]"
-            >
-              <option value="">— Select —</option>
-              @for (opt of row.options || []; track opt) {
-                <option [value]="opt">{{ opt }}</option>
-              }
-            </select>
-          } @else if (row.type === 'checkbox') {
-            <span class="method-intake-check">
-              <input
-                type="checkbox"
-                [id]="'mi-' + panel.id + '-' + row.storageKey"
-                [name]="'mi-' + panel.id + '-' + row.storageKey"
-                [checked]="methodIntakeValues[row.storageKey] === 'yes'"
-                (change)="methodIntakeValues[row.storageKey] = $any($event.target).checked ? 'yes' : ''"
-              />
-            </span>
-          } @else {
-            <input
-              [id]="'mi-' + panel.id + '-' + row.storageKey"
-              [name]="'mi-' + panel.id + '-' + row.storageKey"
-              type="text"
-              [(ngModel)]="methodIntakeValues[row.storageKey]"
-              [placeholder]="row.placeholder || ''"
-            />
-          }
-        </label>
-      }
-      @if (panel.id === 'method') {
-        <p class="hint">Saved with the prescription as structured fields (in addition to your free-text notes).</p>
-      }
-    </div>
-  }
-  @if (kingdomIntakeGroup) {
-    <app-kingdom-diagnosis-panel
-      [group]="kingdomIntakeGroup"
-      [heading]="kingdomDiagnosisTitle"
-      [description]="kingdomDiagnosisDescription"
-      [values]="methodIntakeValues"
-    />
-  }
-  @if (miasmIntakeGroup) {
-    <app-miasm-diagnosis-panel
-      [group]="miasmIntakeGroup"
-      [heading]="miasmDiagnosisTitle"
-      [description]="miasmDiagnosisDescription"
-      [values]="methodIntakeValues"
-    />
-  }
-
   <label for="diagnosedDisease">Diagnosed Disease</label>
-  <select id="diagnosedDisease" name="diagnosedDisease" [(ngModel)]="diagnosedDiseaseOptionId">
+  <select id="diagnosedDisease" [formField]="prescriptionForm.diagnosedDiseaseOptionId">
     <option value="">Select diagnosed disease</option>
     @for (item of diagnosedDiseases; track item.id) {
       <option [value]="item.id">{{ item.label }}</option>
     }
   </select>
   <div class="inline">
-    <input name="newDiagnosedDisease" [(ngModel)]="newDiagnosedDisease" placeholder="Add diagnosed disease" />
+    <input [formField]="optionDraftForm.newDiagnosedDisease" placeholder="Add diagnosed disease" />
     <button type="button" (click)="addOption('DIAGNOSED_DISEASE')">Add</button>
   </div>
 
   <label for="diagnosis">Diagnosis Summary</label>
-  <input id="diagnosis" name="diagnosis" [(ngModel)]="diagnosis" />
+  <input id="diagnosis" [formField]="prescriptionForm.diagnosis" />
 
   <label for="advice">Advice (optional)</label>
-  <textarea id="advice" name="advice" [(ngModel)]="advice"></textarea>
+  <textarea id="advice" [formField]="prescriptionForm.advice"></textarea>
 
   <label for="notes">Prescription Notes</label>
-  <textarea id="notes" name="notes" [(ngModel)]="notes"></textarea>
+  <textarea id="notes" [formField]="prescriptionForm.notes"></textarea>
 
   <label for="followUpDate">Follow-up Date (optional)</label>
-  <input id="followUpDate" name="followUpDate" type="date" [(ngModel)]="followUpDate" />
+  <input id="followUpDate" type="date" [formField]="prescriptionForm.followUpDate" />
 
-  <h3>Medicines</h3>
-  @if (formularyLoadError) {
-    <p class="formulary-error" role="status">{{ formularyLoadError }}</p>
-  }
-  @if (formulary.length) {
-    <div class="formulary-toolbar">
-      <label class="block-label">
-        Filter CGHS formulary
-        <input
-          type="search"
-          name="formularyQuery"
-          [(ngModel)]="formularyQuery"
-          placeholder="e.g. arnica, A-86, 30 100ml"
-          autocomplete="off"
-        />
-      </label>
-      @if (formulary.length) {
-        <p class="hint">{{ formulary.length }} medicines in reference list.</p>
-      }
-      <p class="hint">Pick a row below or choose “Other” and type manually. Potency and pack size stay editable.</p>
-    </div>
-  } @else if (formularyLoaded && !formularyLoadError) {
-    <p class="hint">Formulary list is empty — run <code>npm run build:cghs-formulary</code> at repo root.</p>
-  }
+  <h3>Remedies</h3>
+  <p class="safety-intro muted">In homeopathy, the same remedy at different potencies is normal. Warnings apply only when the same potency is repeated or dose/frequency conflicts.</p>
   @let safety = prescriptionSafetyReport();
-  @if (safety.duplicateMedicines.length || safety.conflictingMedicines.length) {
-    <div class="safety-warnings" role="status">
-      @if (safety.duplicateMedicines.length) {
-        <p>
-          <strong>Duplicate medicines</strong> (same name more than once):
-          {{ safety.duplicateMedicines.join(', ') }}
-        </p>
-      }
-      @if (safety.conflictingMedicines.length) {
-        <p>
-          <strong>Dose or frequency differs</strong> between lines for:
-          {{ safety.conflictingMedicines.join(', ') }}
-        </p>
-      }
-      <p class="safety-hint">Fix the warnings above, or use the action buttons to proceed with explicit confirmation.</p>
+  @if (safety.multiplePotencies.length) {
+    <div class="safety-info" role="status">
+      <p><strong>Multiple potencies</strong> (allowed — review only):</p>
+      <ul>
+        @for (item of safety.multiplePotencies; track item.medicineName) {
+          <li>{{ item.medicineName }}: {{ item.strengths.join(', ') }}</li>
+        }
+      </ul>
     </div>
   }
-  @for (row of medicineRows; track $index) {
+  @if (safety.duplicatePotencyLines.length || safety.conflictingDose.length) {
+    <div class="safety-warnings" role="status">
+      @for (item of safety.duplicatePotencyLines; track item.medicineName + item.strength) {
+        <p>
+          <strong>Repeated line</strong> — {{ item.medicineName }} at {{ item.strength }} appears {{ item.count }} times.
+        </p>
+      }
+      @for (item of safety.conflictingDose; track item.medicineName + item.strength) {
+        <p>
+          <strong>Dose/frequency mismatch</strong> — {{ item.medicineName }} at {{ item.strength }}:
+          {{ item.details.join(' vs ') }}
+        </p>
+      }
+      <p class="safety-hint">Save or publish will ask you to confirm before proceeding.</p>
+    </div>
+  }
+  @for (row of prescriptionModel().medicineRows; track $index) {
     <div class="medicine-card">
-      <div class="formulary-pick">
-        <label>CGHS medicine</label>
-        <select
-          [name]="'formulary' + $index"
-          [ngModel]="row.formularyKey"
-          (ngModelChange)="onFormularyPick(row, $event)"
-          [disabled]="!formulary.length"
-        >
-          <option value="">— Not from list —</option>
-          <option value="__other__">Other (manual entry)</option>
-          @for (e of formularyOptionsFiltered(); track formularyEntryKey(e)) {
-            <option [value]="formularyEntryKey(e)">{{ e.label }}</option>
-          }
-        </select>
-      </div>
+      <label>Remedy name</label>
+      <input [formField]="prescriptionForm.medicineRows[$index].medicineName" />
 
-      <label>Medicine name</label>
-      <input [name]="'medicineName' + $index" [(ngModel)]="row.medicineName" />
+      <label>Potency (e.g. 30C, 200C, 1M)</label>
+      <input [formField]="prescriptionForm.medicineRows[$index].strength" placeholder="30C" />
 
-      <label>Potency (strength)</label>
-      <input [name]="'strength' + $index" [(ngModel)]="row.strength" placeholder="e.g. 30, 200, Q" />
-
-      <label>Amount / dispensed unit</label>
-      <input [name]="'dose' + $index" [(ngModel)]="row.dose" placeholder="e.g. 100ml pack — adjust to dose instructions" />
+      <label>Dose</label>
+      <input [formField]="prescriptionForm.medicineRows[$index].dose" />
 
       <label>Frequency</label>
-      <input [name]="'frequency' + $index" [(ngModel)]="row.frequency" placeholder="e.g. twice daily" />
+      <input [formField]="prescriptionForm.medicineRows[$index].frequency" placeholder="e.g. twice daily" />
 
       <label>Duration text</label>
-      <input [name]="'duration' + $index" [(ngModel)]="row.duration" placeholder="e.g. 2 weeks" />
+      <input [formField]="prescriptionForm.medicineRows[$index].duration" placeholder="e.g. 2 weeks" />
 
       <label>Duration days</label>
-      <input [name]="'durationDays' + $index" [(ngModel)]="row.durationDays" type="number" min="1" max="120" />
+      <input [formField]="prescriptionForm.medicineRows[$index].durationDays" type="number" />
 
       <label>Intake times (comma separated HH:mm)</label>
-      <input [name]="'intakeTimes' + $index" [(ngModel)]="row.intakeTimesText" placeholder="09:00,21:00" />
+      <input [formField]="prescriptionForm.medicineRows[$index].intakeTimesText" placeholder="09:00,21:00" />
 
       <label>Instructions</label>
-      <textarea [name]="'instructions' + $index" [(ngModel)]="row.instructions"></textarea>
+      <textarea [formField]="prescriptionForm.medicineRows[$index].instructions"></textarea>
 
       <button type="button" (click)="removeMedicineRow($index)">Remove medicine</button>
     </div>
@@ -363,14 +192,23 @@
   @let safety = prescriptionSafetyReport();
   <div class="safety-confirm" role="alert">
     <div class="safety-confirm-header">
-      <strong>Safety warnings — confirm to proceed</strong>
+      <strong>Confirm homeopathy prescription warnings</strong>
     </div>
+    <p class="safety-confirm-note">
+      Same remedy at different potencies is fine. Please confirm only if the repeated lines below are intentional.
+    </p>
     <ul class="safety-confirm-list">
-      @for (name of safety.duplicateMedicines; track name) {
-        <li><span class="warn-type">Duplicate:</span> {{ name }} appears more than once</li>
+      @for (item of safety.duplicatePotencyLines; track item.medicineName + item.strength) {
+        <li>
+          <span class="warn-type">Repeated:</span>
+          {{ item.medicineName }} at {{ item.strength }} ({{ item.count }} lines)
+        </li>
       }
-      @for (name of safety.conflictingMedicines; track name) {
-        <li><span class="warn-type">Conflict:</span> {{ name }} has different dose or frequency across lines</li>
+      @for (item of safety.conflictingDose; track item.medicineName + item.strength) {
+        <li>
+          <span class="warn-type">Conflict:</span>
+          {{ item.medicineName }} at {{ item.strength }} — {{ item.details.join(' vs ') }}
+        </li>
       }
     </ul>
     <p class="safety-confirm-question">
@@ -399,7 +237,7 @@
   </button>
 </div>
 
-@if (consultationId && consultationStatus && consultationStatus !== 'COMPLETED') {
+@if (prescriptionModel().consultationId && consultationStatus && consultationStatus !== 'COMPLETED') {
   <div class="close-consultation-row">
     <span class="status-badge">Status: {{ consultationStatus }}</span>
     @if (!confirmingClose) {
@@ -421,6 +259,9 @@
   </div>
 }
 
+@if (pdfError) {
+  <p class="error">{{ pdfError }}</p>
+}
 @if (message) {
   <p class="message">{{ message }}</p>
 }

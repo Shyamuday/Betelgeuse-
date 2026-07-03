@@ -1,0 +1,298 @@
+<div class="fin-page">
+  <div class="fin-hdr">
+    <div>
+      <h2>Finance</h2>
+      <p>Revenue, payroll cost, expenses, and net estimate</p>
+    </div>
+    <div class="fin-actions">
+      <select [formField]="exportFilterForm.branchExportFilter" class="branch-filter" title="Optional branch filter for export">
+        <option value="">All branches</option>
+        <option value="CLINIC">Clinic (online / unallocated)</option>
+        @for (s of stores(); track s.id) {
+          <option [value]="s.id">{{ s.name }}</option>
+        }
+      </select>
+      <button type="button" class="btn-export" [disabled]="exporting() || loading()" (click)="exportBundle()">
+        {{ exporting() ? 'Exporting…' : 'Export accountant bundle' }}
+      </button>
+      <input type="month" [formField]="monthForm.selectedMonth" (change)="loadAll()" class="month-inp" />
+    </div>
+  </div>
+
+  <div class="tabs">
+    @for (t of tabs; track t.id) {
+      <button class="tab" [class.active]="tab() === t.id" (click)="setTab(t.id)">{{ t.label }}</button>
+    }
+  </div>
+
+  @if (loading()) {
+    <p class="loading-text">Loading finance data…</p>
+  } @else if (error()) {
+    <div class="error-row">
+      <p class="error">{{ error() }}</p>
+      <button type="button" class="retry-btn" (click)="loadAll()">Retry</button>
+    </div>
+  } @else {
+  @switch (tab()) {
+    @case ('overview') {
+      <div class="cards">
+        <div class="card"><div class="val">₹{{ paiseToK(summary()?.consultationRevenueInPaise ?? 0) }}</div><div class="lbl">Consultation Revenue</div></div>
+        <div class="card"><div class="val">₹{{ paiseToK(summary()?.medicineRevenueInPaise ?? 0) }}</div><div class="lbl">Medicine Revenue</div></div>
+        <div class="card"><div class="val">₹{{ paiseToK(summary()?.payrollCostInPaise ?? 0) }}</div><div class="lbl">Payroll Cost</div></div>
+        <div class="card"><div class="val">₹{{ paiseToK(summary()?.clinicExpensesInPaise ?? 0) }}</div><div class="lbl">Clinic Expenses</div></div>
+        <div class="card"><div class="val">₹{{ paiseToK(summary()?.storeExpensesInPaise ?? 0) }}</div><div class="lbl">Store Expenses</div></div>
+        <div class="card net"><div class="val">₹{{ paiseToK(summary()?.netEstimateInPaise ?? 0) }}</div><div class="lbl">Net Estimate</div></div>
+      </div>
+      <div class="panel">
+        <h3>Revenue Trend (6 months)</h3>
+        <table>
+          <thead><tr><th>Month</th><th class="num">Revenue (₹)</th><th class="num">Consultations</th></tr></thead>
+          <tbody>
+            @for (row of trend(); track row.month) {
+              <tr><td>{{ row.month }}</td><td class="num">{{ formatPaise(row.revenueInPaise) }}</td><td class="num">{{ row.paidConsultations }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    @case ('outstanding') {
+      <div class="panel">
+        <h3>Outstanding payments</h3>
+        <p class="branch-note">Consultations with pending or failed payment (latest 200).</p>
+        @if (!outstanding().length) {
+          <p class="empty-state">No outstanding payments.</p>
+        } @else {
+          <table>
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Disease</th>
+                <th>Doctor</th>
+                <th>Status</th>
+                <th class="num">Amount</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (payment of outstanding(); track payment.id) {
+                <tr>
+                  <td>{{ payment.consultation?.patient?.name || '—' }}</td>
+                  <td>{{ payment.consultation?.disease?.name || '—' }}</td>
+                  <td>{{ payment.consultation?.assignedDoctor?.name || 'Unassigned' }}</td>
+                  <td>{{ payment.status }}</td>
+                  <td class="num">{{ formatPaise(payment.amountInPaise) }}</td>
+                  <td>{{ payment.createdAt | date: 'mediumDate' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    }
+    @case ('branches') {
+      <div class="panel">
+        <h3>Branch P&L — {{ monthModel().selectedMonth }}</h3>
+        <p class="branch-note">Per-branch revenue, payroll, and expenses. Clinic-level costs appear under “Clinic (online / unallocated)”.</p>
+        @if (!branchPnl().length) {
+          <p class="empty-state">No branch data for this month.</p>
+        } @else {
+          <table class="branch-table">
+            <thead>
+              <tr>
+                <th>Branch</th>
+                <th class="num">Consultation (₹)</th>
+                <th class="num">Medicine (₹)</th>
+                <th class="num">Payroll (₹)</th>
+                <th class="num">Store Exp. (₹)</th>
+                <th class="num">Clinic Exp. (₹)</th>
+                <th class="num">Net (₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of branchPnl(); track row.storeId ?? row.storeCode) {
+                <tr>
+                  <td>
+                    <div class="branch-name">{{ row.storeName }}</div>
+                    <div class="branch-code">{{ row.storeCode }}</div>
+                  </td>
+                  <td class="num">{{ formatPaise(row.consultationRevenueInPaise) }}</td>
+                  <td class="num">{{ formatPaise(row.medicineRevenueInPaise) }}</td>
+                  <td class="num">{{ formatPaise(row.payrollCostInPaise) }}</td>
+                  <td class="num">{{ formatPaise(row.storeExpensesInPaise) }}</td>
+                  <td class="num">{{ formatPaise(row.clinicExpensesInPaise) }}</td>
+                  <td class="num" [class.positive]="row.netEstimateInPaise >= 0" [class.negative]="row.netEstimateInPaise < 0">
+                    {{ formatPaise(row.netEstimateInPaise) }}
+                  </td>
+                </tr>
+              }
+              @if (branchTotals()) {
+                <tr class="totals-row">
+                  <td><strong>Total</strong></td>
+                  <td class="num"><strong>{{ formatPaise(branchTotals().consultationRevenueInPaise) }}</strong></td>
+                  <td class="num"><strong>{{ formatPaise(branchTotals().medicineRevenueInPaise) }}</strong></td>
+                  <td class="num"><strong>{{ formatPaise(branchTotals().payrollCostInPaise) }}</strong></td>
+                  <td class="num"><strong>{{ formatPaise(branchTotals().storeExpensesInPaise) }}</strong></td>
+                  <td class="num"><strong>{{ formatPaise(branchTotals().clinicExpensesInPaise) }}</strong></td>
+                  <td class="num"><strong>{{ formatPaise(branchTotals().netEstimateInPaise) }}</strong></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    }
+    @case ('consultation') {
+      <div class="grid-2">
+        <div class="panel">
+          <h3>By Doctor</h3>
+          <table>
+            <thead><tr><th>Doctor</th><th>Specialty</th><th class="num">Revenue (₹)</th></tr></thead>
+            <tbody>
+              @for (row of byDoctor(); track row.doctorId) {
+                <tr><td>{{ row.doctorName }}</td><td>{{ row.specialty }}</td><td class="num">{{ formatPaise(row.revenueInPaise) }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <h3>By Disease</h3>
+          <table>
+            <thead><tr><th>Disease</th><th class="num">Revenue (₹)</th><th class="num">Count</th></tr></thead>
+            <tbody>
+              @for (row of byDisease(); track row.diseaseId) {
+                <tr><td>{{ row.diseaseName }}</td><td class="num">{{ formatPaise(row.revenueInPaise) }}</td><td class="num">{{ row.count }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+    @case ('medicine') {
+      <div class="filters">
+        <input type="date" [formField]="medicineFilterForm.medicineFrom" (change)="loadTab()" />
+        <input type="date" [formField]="medicineFilterForm.medicineTo" (change)="loadTab()" />
+        <select [formField]="medicineFilterForm.storeFilter" (change)="loadTab()">
+          <option value="">All Stores</option>
+          @for (s of stores(); track s.id) {
+            <option [value]="s.id">{{ s.name }}</option>
+          }
+        </select>
+        <div class="total-pill">Total: ₹{{ formatPaise(medicine().totalInPaise) }}</div>
+      </div>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Date</th><th>Store</th><th>Medicine</th><th class="num">Qty</th><th class="num">Amount (₹)</th></tr></thead>
+          <tbody>
+            @for (m of medicine().movements; track m.id) {
+              <tr>
+                <td>{{ m.createdAt | date:'medium' }}</td>
+                <td>{{ m.store?.name }}</td>
+                <td>{{ m.stock?.medicine?.name }} {{ m.stock?.medicine?.potency }}</td>
+                <td class="num">{{ m.qty }}</td>
+                <td class="num">{{ formatPaise(m.amountInPaise ?? 0) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    @case ('clinic-expenses') {
+      <div class="actions"><button class="btn-primary" (click)="openExpenseModal(undefined, 'CLINIC')">+ Add Clinic Expense</button></div>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Vendor</th><th>Bill No</th><th class="num">Amount (₹)</th><th></th></tr></thead>
+          <tbody>
+            @for (e of clinicExpenses(); track e.id) {
+              <tr>
+                <td>{{ e.expenseDate | date:'mediumDate' }}</td>
+                <td>{{ categoryLabels[e.category] ?? e.category }}</td>
+                <td>{{ e.description }}</td>
+                <td>{{ e.vendor ?? '—' }}</td>
+                <td>{{ e.billNo ?? '—' }}</td>
+                <td class="num">{{ formatPaise(e.amountInPaise) }}</td>
+                <td class="actions-cell">
+                  <button (click)="openExpenseModal(e)">Edit</button>
+                  <button class="danger" (click)="deleteExpense(e.id)">Delete</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    @case ('store-expenses') {
+      <div class="filters actions">
+        <select [formField]="storeExpenseFilterForm.storeFilter" (change)="loadTab()">
+          <option value="">All Stores</option>
+          @for (s of stores(); track s.id) {
+            <option [value]="s.id">{{ s.name }}</option>
+          }
+        </select>
+        <button class="btn-primary" (click)="openExpenseModal(undefined, 'STORE')">+ Add Store Expense</button>
+      </div>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Date</th><th>Store</th><th>Category</th><th>Description</th><th>Vendor</th><th class="num">Amount (₹)</th><th></th></tr></thead>
+          <tbody>
+            @for (e of storeExpenses(); track e.id) {
+              <tr>
+                <td>{{ e.expenseDate | date:'mediumDate' }}</td>
+                <td>{{ e.store?.name ?? '—' }}</td>
+                <td>{{ categoryLabels[e.category] ?? e.category }}</td>
+                <td>{{ e.description }}</td>
+                <td>{{ e.vendor ?? '—' }}</td>
+                <td class="num">{{ formatPaise(e.amountInPaise) }}</td>
+                <td class="actions-cell">
+                  <button (click)="openExpenseModal(e)">Edit</button>
+                  <button class="danger" (click)="deleteExpense(e.id)">Delete</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+  }
+</div>
+
+@if (expenseModal()) {
+  <div class="modal-backdrop" (click)="closeExpenseModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>{{ editingExpense() ? 'Edit Expense' : 'Add Expense' }}</h3>
+      <label>Level
+        <select [formField]="expenseForm.level">
+          <option value="CLINIC">Clinic</option>
+          <option value="STORE">Store</option>
+        </select>
+      </label>
+      @if (expenseModel().level === 'STORE') {
+        <label>Store
+          <select [formField]="expenseForm.storeId">
+            <option value="">Select store</option>
+            @for (s of stores(); track s.id) {
+              <option [value]="s.id">{{ s.name }}</option>
+            }
+          </select>
+        </label>
+      }
+      <label>Category
+        <select [formField]="expenseForm.category">
+          @for (c of categories; track c) {
+            <option [value]="c">{{ categoryLabels[c] }}</option>
+          }
+        </select>
+      </label>
+      <label>Description <input [formField]="expenseForm.description" /></label>
+      <label>Vendor <input [formField]="expenseForm.vendor" /></label>
+      <label>Bill No <input [formField]="expenseForm.billNo" /></label>
+      <label>Amount (paise) <input type="number" [formField]="expenseForm.amountInPaise" /></label>
+      <label>Date <input type="date" [formField]="expenseForm.expenseDate" /></label>
+      <div class="modal-actions">
+        <button (click)="closeExpenseModal()">Cancel</button>
+        <button class="btn-primary" (click)="saveExpense()">Save</button>
+      </div>
+    </div>
+  </div>
+}
+@if (toast()) { <div class="toast">{{ toast() }}</div> }

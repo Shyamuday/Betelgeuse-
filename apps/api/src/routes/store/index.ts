@@ -1,0 +1,36 @@
+import { Router } from 'express';
+import { registerStoreAlertRoutes } from './alerts.js';
+import { registerStoreAuthRoutes } from './auth.js';
+import { registerStoreDashboardRoutes } from './dashboard.js';
+import { registerStoreExpenseRoutes } from './expenses.js';
+import { registerStoreMedicineRoutes } from './medicines.js';
+import { registerStoreRackRoutes } from './racks.js';
+import { registerStoreSetupRoutes } from './setup.js';
+import { registerStoreStaffRoutes } from './staff.js';
+import { registerStorePatientRoutes } from './patients.js';
+import { registerStoreScanRoutes } from './scan.js';
+import { registerStoreHrRoutes } from './hr.js';
+import { registerStorePurchaseOrderRoutes } from './purchase-orders.js';
+import { registerStoreStockTransferRoutes } from './stock-transfers.js';
+import { registerStoreDeliveryRoutes } from './deliveries.js';
+import { registerStoreStockRoutes } from './stock.js';
+import { registerStoreNotificationRoutes } from './notifications.js';
+
+export const storeRouter = Router();
+
+registerStoreAuthRoutes(storeRouter);
+registerStoreMedicineRoutes(storeRouter);
+registerStoreRackRoutes(storeRouter);
+registerStoreStockRoutes(storeRouter);
+registerStorePurchaseOrderRoutes(storeRouter);
+registerStoreStockTransferRoutes(storeRouter);
+registerStoreDeliveryRoutes(storeRouter);
+registerStoreAlertRoutes(storeRouter);
+registerStoreDashboardRoutes(storeRouter);
+registerStoreSetupRoutes(storeRouter);
+registerStoreStaffRoutes(storeRouter);
+registerStoreExpenseRoutes(storeRouter);
+registerStorePatientRoutes(storeRouter);
+registerStoreScanRoutes(storeRouter);
+registerStoreHrRoutes(storeRouter);
+registerStoreNotificationRoutes(storeRouter);

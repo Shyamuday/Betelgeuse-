@@ -1,19 +1,50 @@
+<section class="panel worklist-summary">
+  <div class="panel-header">
+    <div>
+      <h2>Today&apos;s workload</h2>
+      <p class="muted">Open your worklist for assigned cases, active consults, and follow-ups.</p>
+    </div>
+    <a class="primary-link" [routerLink]="worklistPath">Open worklist</a>
+  </div>
+
+  @if (worklistLoading() && !worklistCounts().followUpDue) {
+    <p class="loading-text">Loading worklist...</p>
+  } @else if (worklistError()) {
+    <p class="error">{{ worklistError() }}</p>
+  } @else {
+    <div class="stats">
+      <a class="card stat-link" [routerLink]="worklistPath" [queryParams]="{ view: 'ASSIGNED' }">
+        <h3>Assigned</h3>
+        <p>{{ worklistCounts().assigned }}</p>
+      </a>
+      <a class="card stat-link" [routerLink]="worklistPath" [queryParams]="{ view: 'IN_PROGRESS' }">
+        <h3>In progress</h3>
+        <p>{{ worklistCounts().inProgress }}</p>
+      </a>
+      <a class="card stat-link urgent" [routerLink]="worklistPath" [queryParams]="{ view: 'FOLLOW_UP_DUE' }">
+        <h3>Follow-up due</h3>
+        <p>{{ worklistCounts().followUpDue }}</p>
+      </a>
+    </div>
+  }
+</section>
+
 <section class="panel">
   <div class="panel-header">
     <h2>Doctor Payment Dashboard</h2>
-    <button type="button" (click)="loadSummary()" [disabled]="loading">
-      {{ loading ? 'Refreshing...' : 'Refresh' }}
+    <button type="button" (click)="loadSummary()" [disabled]="loading()">
+      {{ loading() ? 'Refreshing...' : 'Refresh' }}
     </button>
   </div>
 
-  @if (loading && !summary) {
+  @if (loading() && !summary()) {
     <p class="loading-text">Loading payment summary...</p>
-  } @else if (error) {
+  } @else if (error()) {
     <div class="error-row">
-      <p class="error">{{ error }}</p>
+      <p class="error">{{ error() }}</p>
       <button type="button" class="retry-btn" (click)="loadSummary()">Retry</button>
     </div>
-  } @else if (summary; as data) {
+  } @else if (summary(); as data) {
     <div class="stats">
       <article class="card">
         <h3>Paid Consultations</h3>
@@ -35,10 +66,10 @@
 
 <section class="panel">
   <h3>Recent Paid Consultations</h3>
-  @if (loading && !summary) {
+  @if (loading() && !summary()) {
     <p class="loading-text">Loading...</p>
   } @else {
-    @for (item of summary?.payments || []; track item.id) {
+    @for (item of summary()?.payments || []; track item.id) {
       <article class="card">
         <strong>{{ item.consultation?.patient?.name || 'Patient' }} — {{ item.consultation?.disease?.name || 'Consultation' }}</strong>
         <p>

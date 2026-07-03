@@ -1,0 +1,33 @@
+<div class="bell-wrap">
+  <button type="button" class="bell-btn" ngMenuTrigger [menu]="notificationMenu" aria-label="Notifications">
+    🔔
+    @if (unreadCount() > 0) {
+      <span class="badge">{{ unreadCount() > 99 ? '99+' : unreadCount() }}</span>
+    }
+  </button>
+
+  <div class="panel" ngMenu #notificationMenu="ngMenu">
+    <div class="panel-head">
+      <strong>Notifications</strong>
+      <button type="button" class="link" ngMenuItem [value]="'mark-all'" (click)="markAllRead()">Mark all read</button>
+    </div>
+
+    @if (loading()) {
+      <p class="muted">Loading…</p>
+    } @else if (error()) {
+      <p class="error">{{ error() }}</p>
+    } @else if (!items().length) {
+      <p class="muted">No notifications yet.</p>
+    } @else {
+      <ul class="list" role="presentation">
+        @for (item of items(); track item.id) {
+          <li ngMenuItem [value]="item.id" [class.unread]="!item.readAt" (click)="markRead(item)">
+            <div class="title">{{ item.title }}</div>
+            <div class="body">{{ item.body }}</div>
+            <div class="time muted">{{ item.createdAt | date: 'short' }}</div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</div>

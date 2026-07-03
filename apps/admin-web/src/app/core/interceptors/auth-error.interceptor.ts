@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { AdminAuth } from '../services/admin-auth';
+import { ROUTE_PATHS } from '../constants/app-routes.constants';
 
 export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AdminAuth);
@@ -12,7 +13,7 @@ export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error) => {
       if (error.status === 401) {
         auth.logout();
-        void router.navigateByUrl('/login');
+        void router.navigateByUrl(`/${ROUTE_PATHS.LOGIN}`);
       }
       return throwError(() => error);
     })

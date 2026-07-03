@@ -1,8 +1,5 @@
 export const environment = {
   production: false,
   apiUrl: 'http://localhost:4000',
-  /** Patient / public site (link from admin login). Leave empty to hide. */
-  patientPortalUrl: 'http://localhost:4200',
-  /** Same as API `GOOGLE_CLIENT_ID` — required for Google Sign-In. */
-  googleClientId: ''
+  devAppId: 'admin-web'
 };

@@ -1,0 +1,118 @@
+<div class="panel medicine-panel">
+  <div class="panel-head">
+    <div>
+      <h2>Medicine reminders</h2>
+      <p class="muted">Mark doses taken, snooze reminders, or explain missed medicines.</p>
+    </div>
+  </div>
+
+  @if (needingReason.length) {
+    <section class="attention-block">
+      <h3>Needs your explanation</h3>
+      <p class="muted">These missed or skipped doses are visible to your doctor once you add a reason.</p>
+      @for (dose of needingReason; track dose.id) {
+        <article class="consult-card attention">
+          <strong>{{ dose.prescriptionItem.medicineName }}</strong>
+          <span>{{ dose.scheduledFor | date: 'medium' }}</span>
+          <span class="status-pill missed">{{ dose.status }}</span>
+          @if (explainingDoseId === dose.id) {
+            <div class="reason-form">
+              <div class="chip-row">
+                @for (reason of missedReasons; track reason) {
+                  <button type="button" class="chip" [disabled]="disabled" (click)="setExplainReason(reason)">{{ reason }}</button>
+                }
+              </div>
+              <textarea rows="2" attr.placeholder="Why was this dose missed or skipped?" [formField]="explainNoteForm.note"></textarea>
+              <div class="actions">
+                <button type="button" class="primary" [disabled]="disabled || explainNoteModel().note.trim().length < 2" (click)="confirmExplain(dose.id)">
+                  Save reason
+                </button>
+                <button type="button" class="secondary" [disabled]="disabled" (click)="cancelExplain()">Cancel</button>
+              </div>
+            </div>
+          } @else {
+            <div class="actions">
+              <button type="button" class="primary" [disabled]="disabled" (click)="startExplain(dose.id)">Add reason</button>
+            </div>
+          }
+        </article>
+      }
+    </section>
+  }
+
+  <section>
+    <h3>Today&apos;s schedule</h3>
+    <label class="snooze-default">
+      Default snooze
+      <select
+        [value]="snoozeModel().minutes"
+        (change)="onSnoozeMinutesSelect($event)"
+        [disabled]="disabled"
+      >
+        @for (minutes of snoozeOptions; track minutes) {
+          <option [value]="minutes">{{ minutes }} minutes</option>
+        }
+      </select>
+    </label>
+
+    <div class="cards">
+      @for (dose of todayDoses; track dose.id) {
+        @if (showInTodaySchedule(dose)) {
+        <article class="consult-card" [class.done]="dose.status === 'TAKEN'">
+          <strong>{{ dose.prescriptionItem.medicineName }}</strong>
+          <span>
+            {{ dose.scheduledFor | date: 'shortTime' }} ·
+            {{ dose.prescriptionItem.dose || 'Dose as advised' }}
+          </span>
+          <span class="status-pill" [class]="'status-' + dose.status.toLowerCase()">{{ dose.status }}</span>
+          @if (isSnoozedNote(dose.note)) {
+            <small class="muted">{{ dose.note }}</small>
+          } @else if (dose.note) {
+            <small class="muted">Note: {{ dose.note }}</small>
+          }
+
+          @if (dose.status === 'PENDING') {
+            @if (skippingDoseId === dose.id) {
+              <div class="reason-form">
+                <div class="chip-row">
+                  @for (reason of skipReasons; track reason) {
+                    <button type="button" class="chip" [disabled]="disabled" (click)="setSkipReason(reason)">{{ reason }}</button>
+                  }
+                </div>
+                <textarea rows="2" attr.placeholder="Why are you skipping this dose?" [formField]="skipNoteForm.note"></textarea>
+                <div class="actions">
+                  <button type="button" class="primary" [disabled]="disabled || skipNoteModel().note.trim().length < 2" (click)="confirmSkip(dose.id)">
+                    Confirm skip
+                  </button>
+                  <button type="button" class="secondary" [disabled]="disabled" (click)="cancelSkip()">Cancel</button>
+                </div>
+              </div>
+            } @else {
+              <div class="actions">
+                <button type="button" class="primary" [disabled]="disabled" (click)="taken.emit(dose.id)">Taken</button>
+                <button type="button" class="secondary" [disabled]="disabled" (click)="startSkip(dose.id)">Skip</button>
+                <button type="button" class="secondary" [disabled]="disabled" (click)="applySnoozePreset(dose.id, snoozeModel().minutes)">
+                  Snooze {{ snoozeModel().minutes }}m
+                </button>
+              </div>
+              <div class="chip-row compact">
+                @for (minutes of snoozeOptions; track minutes) {
+                  <button type="button" class="chip" [disabled]="disabled" (click)="applySnoozePreset(dose.id, minutes)">
+                    +{{ minutes }}m
+                  </button>
+                }
+              </div>
+            }
+          } @else if (dose.status === 'MISSED' && explainingDoseId !== dose.id) {
+            <div class="actions">
+              <button type="button" class="primary" [disabled]="disabled" (click)="startExplain(dose.id)">Explain missed dose</button>
+            </div>
+          }
+        </article>
+        }
+      } @empty {
+        <p class="muted">No medicine reminders scheduled for today.</p>
+      }
+    </div>
+  </section>
+</div>

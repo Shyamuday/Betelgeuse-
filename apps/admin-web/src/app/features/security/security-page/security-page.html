@@ -1,0 +1,69 @@
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2>Security & compliance</h2>
+      <p class="muted">Role capability matrix and audit log retention</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button type="button" [class.active]="tab() === 'rbac'" (click)="tab.set('rbac')">RBAC matrix</button>
+    <button type="button" [class.active]="tab() === 'retention'" (click)="tab.set('retention')">Audit retention</button>
+  </div>
+
+  @if (loading()) {
+    <p>Loading…</p>
+  } @else if (error()) {
+    <p class="error">{{ error() }}</p>
+  } @else if (tab() === 'rbac') {
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Capability</th>
+            @for (role of roles(); track role) {
+              <th>{{ role }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (cap of capabilities(); track cap.id) {
+            <tr>
+              <td>
+                <strong>{{ cap.label }}</strong>
+                <div class="muted">{{ cap.description }}</div>
+              </td>
+              @for (role of roles(); track role) {
+                <td class="center">{{ hasCapability(role, cap.id) ? '✓' : '—' }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else if (retention()) {
+    <div class="retention-cards">
+      <div class="card"><span>Total logs</span><strong>{{ retention()!.total }}</strong></div>
+      <div class="card"><span>Older than 30 days</span><strong>{{ retention()!.olderThan30Days }}</strong></div>
+      <div class="card"><span>Older than 90 days</span><strong>{{ retention()!.olderThan90Days }}</strong></div>
+      <div class="card"><span>Older than 365 days</span><strong>{{ retention()!.olderThan365Days }}</strong></div>
+    </div>
+    @if (retention()!.oldestAt) {
+      <p class="muted">Oldest entry: {{ retention()!.oldestAt | date:'medium' }}</p>
+    }
+
+    <div class="purge-box">
+      <label>Delete logs older than (days)
+        <input type="number" [formField]="purgeForm.days" attr.min="30" />
+      </label>
+      <div class="actions">
+        <button type="button" [disabled]="saving()" (click)="dryRunPurge()">Dry run</button>
+        <button type="button" class="danger" [disabled]="saving()" (click)="purge(false)">Purge now</button>
+      </div>
+      <p class="muted">Minimum retention window is 30 days. Purge actions are themselves audited.</p>
+    </div>
+  }
+</div>
+
+@if (toast()) { <div class="toast">{{ toast() }}</div> }

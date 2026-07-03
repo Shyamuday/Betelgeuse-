@@ -13,12 +13,9 @@ jobs:
       matrix:
         app:
           - apps/api
-          - apps/web
+          - apps/user-web
           - apps/doctor-web
-          - apps/admin-web
-          - apps/mobile-patient
-          - apps/mobile-doctor
-          - apps/mobile-admin
+          - apps/operations-web
 
     defaults:
       run:
@@ -37,6 +34,10 @@ jobs:
 
       - name: Install
         run: npm ci
+
+      - name: Prisma generate
+        if: matrix.app == 'apps/api'
+        run: npm run prisma:generate
 
       - name: Lint
         run: npm run lint

@@ -1,0 +1,144 @@
+import { Router } from 'express';
+import { Role, Prisma } from '@prisma/client';
+import { authRequired, allowRoles } from '../../auth.js';
+import { prisma } from '../../db.js';
+import { asyncRoute, queryPositiveInt, queryText, writeAuditLog } from '../../utils/helpers.js';
+
+export function registerAdminAuditRoutes(router: Router) {
+  router.get(
+    '/admin/audit-retention/stats',
+    authRequired,
+    allowRoles(Role.ADMIN),
+    asyncRoute(async (_req, res) => {
+      const now = Date.now();
+      const day = 24 * 60 * 60 * 1000;
+      const [total, olderThan30, olderThan90, olderThan365, oldest] = await Promise.all([
+        prisma.auditLog.count(),
+        prisma.auditLog.count({ where: { createdAt: { lt: new Date(now - 30 * day) } } }),
+        prisma.auditLog.count({ where: { createdAt: { lt: new Date(now - 90 * day) } } }),
+        prisma.auditLog.count({ where: { createdAt: { lt: new Date(now - 365 * day) } } }),
+        prisma.auditLog.findFirst({ orderBy: { createdAt: 'asc' }, select: { createdAt: true } })
+      ]);
+
+      res.json({
+        total,
+        olderThan30Days: olderThan30,
+        olderThan90Days: olderThan90,
+        olderThan365Days: olderThan365,
+        oldestAt: oldest?.createdAt ?? null
+      });
+    })
+  );
+
+  router.post(
+    '/admin/audit-retention/purge',
+    authRequired,
+    allowRoles(Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const olderThanDays = Math.max(30, Number((req.body as { olderThanDays?: number }).olderThanDays) || 90);
+      const dryRun = Boolean((req.body as { dryRun?: boolean }).dryRun);
+      const cutoff = new Date(Date.now() - olderThanDays * 24 * 60 * 60 * 1000);
+
+      const where: Prisma.AuditLogWhereInput = { createdAt: { lt: cutoff } };
+      const matchCount = await prisma.auditLog.count({ where });
+
+      if (dryRun) {
+        return res.json({ dryRun: true, olderThanDays, cutoff, deletedCount: matchCount });
+      }
+
+      const result = await prisma.auditLog.deleteMany({ where });
+
+      await writeAuditLog({
+        actorId: req.user?.id,
+        actorRole: req.user?.role,
+        action: 'AUDIT_LOG_PURGE',
+        targetType: 'AuditLog',
+        targetId: 'bulk',
+        summary: `Purged ${result.count} audit logs older than ${olderThanDays} days`,
+        metadata: { olderThanDays, cutoff: cutoff.toISOString() }
+      });
+
+      res.json({ dryRun: false, olderThanDays, cutoff, deletedCount: result.count });
+    })
+  );
+
+  router.get(
+    '/admin/audit-logs',
+    authRequired,
+    allowRoles(Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const page = queryPositiveInt(req, 'page', 1);
+      const pageSize = queryPositiveInt(req, 'pageSize', 20, 1, 100);
+      const exportType = queryText(req, 'export').toLowerCase();
+      const action = queryText(req, 'action').trim();
+      const targetType = queryText(req, 'targetType').trim();
+      const q = queryText(req, 'q').trim();
+
+      const where: Prisma.AuditLogWhereInput = {
+        ...(action ? { action } : {}),
+        ...(targetType ? { targetType } : {}),
+        ...(q
+          ? {
+              OR: [
+                { action: { contains: q, mode: 'insensitive' } },
+                { targetType: { contains: q, mode: 'insensitive' } },
+                { targetId: { contains: q, mode: 'insensitive' } },
+                { summary: { contains: q, mode: 'insensitive' } },
+                { actor: { name: { contains: q, mode: 'insensitive' } } },
+                { actor: { email: { contains: q, mode: 'insensitive' } } }
+              ]
+            }
+          : {})
+      };
+
+      const total = await prisma.auditLog.count({ where });
+      const logs = await prisma.auditLog.findMany({
+        where,
+        include: {
+          actor: { select: { id: true, name: true, email: true, role: true } }
+        },
+        orderBy: { createdAt: 'desc' },
+        ...(exportType === 'csv' ? { take: 10000 } : { skip: (page - 1) * pageSize, take: pageSize })
+      });
+
+      const formatted = logs.map((log) => ({
+        id: log.id,
+        action: log.action,
+        actorRole: log.actorRole,
+        targetType: log.targetType,
+        targetId: log.targetId,
+        summary: log.summary,
+        metadata: log.metadata,
+        createdAt: log.createdAt,
+        actor: log.actor
+          ? { id: log.actor.id, name: log.actor.name, email: log.actor.email, role: log.actor.role }
+          : null
+      }));
+
+      if (exportType === 'csv') {
+        const header = 'createdAt,action,actorName,actorEmail,actorRole,targetType,targetId,summary';
+        const rows = formatted.map((log) => {
+          const cells = [
+            log.createdAt.toISOString(),
+            log.action,
+            log.actor?.name ?? '',
+            log.actor?.email ?? '',
+            log.actorRole ?? log.actor?.role ?? '',
+            log.targetType,
+            log.targetId,
+            (log.summary ?? '').replace(/"/g, '""')
+          ];
+          return cells.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',');
+        });
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="audit-logs-${Date.now()}.csv"`);
+        return res.send([header, ...rows].join('\n'));
+      }
+
+      res.json({
+        logs: formatted,
+        pagination: { page, pageSize, total, totalPages: Math.max(1, Math.ceil(total / pageSize)) }
+      });
+    })
+  );
+}

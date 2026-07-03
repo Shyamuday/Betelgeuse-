@@ -1,42 +1,20 @@
 <main class="admin-shell">
-  <header class="app-header-bar">
-    <div class="header-brand">
-      <h1>Admin Console</h1>
-      @if (auth.user(); as u) {
-        <p class="user-line">{{ u.name }}<span class="dim"> · task access only where permitted</span></p>
-      }
-    </div>
-
-    <nav class="header-nav" aria-label="Admin sections">
-      @if (canAny(P.REPORTS_VIEW, P.PAYMENTS_READ, P.AUDIT_READ)) {
-        <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-      }
-      @if (canAll(P.CONSULTATIONS_READ)) {
-        <a routerLink="/consultations" routerLinkActive="active">Consultations</a>
-      }
-      @if (canAll(P.DOCTORS_READ)) {
-        <a routerLink="/doctors" routerLinkActive="active">Doctors</a>
-      }
-      @if (canAll(P.CONSUMERS_READ)) {
-        <a routerLink="/consumers" routerLinkActive="active">Consumers</a>
-      }
-      @if (canAll(P.DISEASES_READ)) {
-        <a routerLink="/diseases" routerLinkActive="active">Diseases</a>
-      }
-      @if (canAll(P.LOCATIONS_READ)) {
-        <a routerLink="/locations" routerLinkActive="active">Locations</a>
-      }
-      @if (canAll(P.STAFF_READ)) {
-        <a routerLink="/staff" routerLinkActive="active">Staff</a>
-      }
-    </nav>
-
-    <div class="header-actions">
-      <button type="button" class="btn-logout" (click)="logout()">Logout</button>
+  <header class="topbar">
+    <h1>Admin Console</h1>
+    <div class="topbar-actions">
+      <app-notification-bell-host [config]="bellConfig" />
+      <button type="button" (click)="logout()">Logout</button>
     </div>
   </header>
 
+  <nav class="tabs">
+    @for (item of navItems; track item.path) {
+      <a [routerLink]="item.path" routerLinkActive="active">{{ item.label }}</a>
+    }
+  </nav>
+
   <section class="content">
+    <app-role-task-guide appKey="admin-web" />
     <router-outlet />
   </section>
 </main>

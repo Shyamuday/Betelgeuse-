@@ -1,19 +1,27 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ADMIN_PERMISSIONS, adminHasAllPermissions } from '../../../core/admin-permissions';
-import { AdminAuth } from '../../../core/services/admin-auth';
+import { Component, signal } from '@angular/core';
+import { form, FormField } from '@angular/forms/signals';
+import { RouterLink } from '@angular/router';
 import { AdminApi } from '../../../core/services/admin-api';
+import { adminNavPath, ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
+import { formatAuditAction } from '../../audit/constants/audit.constants';
+import {
+  AUDIT_LOGS_PAGE_SIZE,
+  PAYMENTS_DEFAULTS,
+  PAYMENTS_PAGE_SIZE,
+  type PaymentStatus
+} from '../constants/payments.constants';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormField, RouterLink],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.scss'
 })
 export class AdminDashboard {
-  readonly P = ADMIN_PERMISSIONS;
-
+  readonly auditPath = adminNavPath(ROUTE_PATHS.AUDIT);
+  readonly adherencePath = adminNavPath(ROUTE_PATHS.ADHERENCE);
+  readonly formatAuditAction = formatAuditAction;
   revenueInPaise = 0;
   activeDoctors = 0;
   consultationsCount = 0;
@@ -25,75 +33,47 @@ export class AdminDashboard {
     targetId: string;
     summary?: string;
     createdAt: string;
+    actor?: { id: string; name: string; email?: string | null } | null;
   }> = [];
   payments: Array<any> = [];
   paymentsPage = 1;
   paymentsTotalPages = 1;
-  paymentStatus: 'ALL' | 'CREATED' | 'PAID' | 'FAILED' = 'ALL';
-  paymentFrom = '';
-  paymentTo = '';
   paymentSummary = { total: 0, paid: 0, failedCount: 0, pendingCount: 0 };
   paymentsLoading = false;
   paymentsError = '';
   csvExporting = false;
   csvError = '';
   error = '';
+  adherenceSummary = { highRiskCount: 0, mediumRiskCount: 0, alertCount: 0, platformAdherencePercent: 0 };
+  adherenceAlerts: Array<{ patientName: string; message: string; severity: string }> = [];
 
-  constructor(
-    private readonly api: AdminApi,
-    readonly auth: AdminAuth
-  ) {
+  readonly paymentFilterModel = signal({
+    paymentStatus: PAYMENTS_DEFAULTS.STATUS as PaymentStatus,
+    paymentFrom: '',
+    paymentTo: ''
+  });
+  readonly paymentFilterForm = form(this.paymentFilterModel);
+
+  constructor(private readonly api: AdminApi) {
     void this.load();
-  }
-
-  canReport() {
-    return adminHasAllPermissions(this.auth.user(), this.P.REPORTS_VIEW);
-  }
-
-  canPayments() {
-    return adminHasAllPermissions(this.auth.user(), this.P.PAYMENTS_READ);
-  }
-
-  canPaymentsExport() {
-    return adminHasAllPermissions(this.auth.user(), this.P.PAYMENTS_EXPORT);
-  }
-
-  canAudit() {
-    return adminHasAllPermissions(this.auth.user(), this.P.AUDIT_READ);
   }
 
   async load() {
     this.error = '';
     try {
-      if (this.canReport()) {
-        const report = (await this.api.getReports()) as {
-          revenueInPaise: number;
-          activeDoctors: number;
-          consultations: Array<unknown>;
-        };
-        this.revenueInPaise = report.revenueInPaise || 0;
-        this.activeDoctors = report.activeDoctors || 0;
-        this.consultationsCount = report.consultations?.length || 0;
-      } else {
-        this.revenueInPaise = 0;
-        this.activeDoctors = 0;
-        this.consultationsCount = 0;
-      }
-
-      if (this.canAudit()) {
-        const audit = await this.api.getAuditLogs(1, 15);
-        this.auditLogs = audit.logs || [];
-      } else {
-        this.auditLogs = [];
-      }
-
-      if (this.canPayments()) {
-        await this.loadPayments();
-      } else {
-        this.payments = [];
-      }
+      const report = (await this.api.getReports()) as {
+        revenueInPaise: number;
+        activeDoctors: number;
+        consultations: Array<unknown>;
+      };
+      this.revenueInPaise = report.revenueInPaise || 0;
+      this.activeDoctors = report.activeDoctors || 0;
+      this.consultationsCount = report.consultations?.length || 0;
+      const audit = await this.api.getAuditLogs({ page: 1, pageSize: AUDIT_LOGS_PAGE_SIZE });
+      this.auditLogs = audit.logs || [];
+      await Promise.all([this.loadPayments(), this.loadAdherenceSummary()]);
     } catch {
-      this.error = 'Could not load one or more dashboard sections.';
+      this.error = 'Could not load admin dashboard summary.';
     }
   }
 
@@ -101,13 +81,14 @@ export class AdminDashboard {
     this.paymentsPage = page;
     this.paymentsLoading = true;
     this.paymentsError = '';
+    const filters = this.paymentFilterModel();
     try {
       const result = await this.api.getPayments({
         page,
-        pageSize: 10,
-        status: this.paymentStatus,
-        from: this.paymentFrom || undefined,
-        to: this.paymentTo || undefined
+        pageSize: PAYMENTS_PAGE_SIZE,
+        status: filters.paymentStatus,
+        from: filters.paymentFrom || undefined,
+        to: filters.paymentTo || undefined
       });
       this.payments = result.payments || [];
       this.paymentSummary = result.summary || this.paymentSummary;
@@ -124,9 +105,11 @@ export class AdminDashboard {
   }
 
   clearPaymentFilters() {
-    this.paymentStatus = 'ALL';
-    this.paymentFrom = '';
-    this.paymentTo = '';
+    this.paymentFilterModel.set({
+      paymentStatus: PAYMENTS_DEFAULTS.STATUS,
+      paymentFrom: '',
+      paymentTo: ''
+    });
     void this.loadPayments(1);
   }
 
@@ -137,11 +120,12 @@ export class AdminDashboard {
   async exportPaymentsCsv() {
     this.csvExporting = true;
     this.csvError = '';
+    const filters = this.paymentFilterModel();
     try {
       const csv = await this.api.exportPaymentsCsv({
-        status: this.paymentStatus,
-        from: this.paymentFrom || undefined,
-        to: this.paymentTo || undefined
+        status: filters.paymentStatus,
+        from: filters.paymentFrom || undefined,
+        to: filters.paymentTo || undefined
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
       const url = URL.createObjectURL(blob);
@@ -151,9 +135,24 @@ export class AdminDashboard {
       link.click();
       URL.revokeObjectURL(url);
     } catch {
-      this.csvError = 'CSV export failed. You may need admin.payments.export.';
+      this.csvError = 'CSV export failed. Please try again.';
     } finally {
       this.csvExporting = false;
+    }
+  }
+
+  private async loadAdherenceSummary() {
+    try {
+      const report = await this.api.getAdherenceRisk({ days: 7, minDoses: 5 });
+      this.adherenceSummary = {
+        highRiskCount: report.summary?.highRiskCount ?? 0,
+        mediumRiskCount: report.summary?.mediumRiskCount ?? 0,
+        alertCount: report.summary?.alertCount ?? 0,
+        platformAdherencePercent: report.summary?.platformAdherencePercent ?? 0
+      };
+      this.adherenceAlerts = (report.alerts ?? []).slice(0, 3);
+    } catch {
+      this.adherenceAlerts = [];
     }
   }
 }

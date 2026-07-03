@@ -1,0 +1,12 @@
+**/node_modules
+**/.angular
+**/dist
+**/.env
+**/.env.*
+!**/.env.example
+**/coverage
+**/.git
+**/.cursor
+**/terminals
+**/*.log
+apps/api/data/oorep/*.sql

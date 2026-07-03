@@ -1,0 +1,31 @@
+.pay-page { padding: 1.5rem; }
+.pay-hdr { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1.25rem; }
+.pay-hdr h2 { margin: 0; }
+.pay-hdr p { margin: 0.25rem 0 0; color: #64748b; }
+.summary-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; }
+.card .val { font-size: 1.5rem; font-weight: 700; }
+.card .lbl { color: #64748b; font-size: 0.85rem; }
+.card.paid .val { color: #166534; }
+.card.pending .val { color: #92400e; }
+.card.failed .val { color: #991b1b; }
+.filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; align-items: center; }
+.ftab { border: 1px solid #cbd5e1; background: #fff; border-radius: 999px; padding: 0.4rem 0.9rem; cursor: pointer; }
+.ftab.active { background: #0f766e; color: #fff; border-color: #0f766e; }
+.table-wrap { overflow: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 0.75rem; border-bottom: 1px solid #f1f5f9; text-align: left; }
+.num { text-align: right; }
+.badge { padding: 0.2rem 0.55rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+.pager { display: flex; justify-content: center; gap: 1rem; align-items: center; margin-top: 1rem; }
+.btn-primary { background: #0f766e; color: #fff; border: none; border-radius: 8px; padding: 0.6rem 1rem; cursor: pointer; }
+.filters input[type='date'] { border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.4rem 0.55rem; }
+.btn-apply, .btn-clear { border-radius: 8px; padding: 0.45rem 0.8rem; cursor: pointer; }
+.btn-apply { background: #0f766e; color: #fff; border: none; }
+.btn-clear { background: #fff; border: 1px solid #cbd5e1; color: #334155; }
+.loading-text, .empty-state { color: #64748b; padding: 1rem 0; }
+.error-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; }
+.error-row .error { color: #b91c1c; margin: 0; }
+.retry-btn { border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; padding: 0.45rem 0.7rem; cursor: pointer; }
+.toast { position: fixed; bottom: 1rem; right: 1rem; background: #0f172a; color: #fff; padding: 0.75rem 1rem; border-radius: 8px; }
+@media (max-width: 900px) { .summary-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

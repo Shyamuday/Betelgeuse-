@@ -1,12 +1,55 @@
 <section class="panel">
-  <h2>Consumers (Patients)</h2>
+  <div class="toolbar spaced">
+    <h2>Consumers (Patients)</h2>
+    <button type="button" class="btn-primary" (click)="showRegister = !showRegister">
+      {{ showRegister ? 'Close register' : '+ Register patient' }}
+    </button>
+  </div>
+
+  @if (showRegister) {
+    <div class="register-box">
+      <h3>Register new patient</h3>
+      <div class="register-grid">
+        <input attr.placeholder="Full name *" [formField]="registerForm.name" />
+        <input attr.placeholder="Mobile (optional)" [formField]="registerForm.mobile" />
+        <input attr.placeholder="Email (optional)" [formField]="registerForm.email" />
+        <select [formField]="registerForm.homeClinicStoreId">
+          <option value="">No home clinic</option>
+          @for (store of stores; track store.id) {
+            <option [value]="store.id">{{ store.name }} ({{ store.code }})</option>
+          }
+        </select>
+      </div>
+      <button type="button" (click)="registerPatient()" [disabled]="registerSaving">
+        {{ registerSaving ? 'Saving…' : 'Create patient' }}
+      </button>
+      @if (registerError) { <p class="error">{{ registerError }}</p> }
+      @if (registerMessage) { <p class="success">{{ registerMessage }}</p> }
+    </div>
+  }
+
   <div class="toolbar">
-    <input placeholder="Search consumers..." name="searchTerm" [(ngModel)]="searchTerm" (ngModelChange)="setPage(1)" />
-    <select name="sortBy" [(ngModel)]="sortBy" (ngModelChange)="setPage(1)">
+    <input attr.placeholder="Global patient search (mobile, code, name)…" [formField]="patientSearchForm.q" (keyup.enter)="searchPatientsGlobal()" />
+    <button type="button" (click)="searchPatientsGlobal()" [disabled]="patientSearchLoading">Search all</button>
+  </div>
+  @if (patientSearchResults.length) {
+    <div class="search-results">
+      @for (patient of patientSearchResults; track patient.id) {
+        <button type="button" class="search-hit" (click)="selectSearchedPatient(patient.id)">
+          <strong>{{ patient.name }}</strong>
+          <small>{{ patient.patientCode || patient.id }} · {{ patient.mobile || 'no mobile' }}</small>
+        </button>
+      }
+    </div>
+  }
+
+  <div class="toolbar">
+    <input attr.placeholder="Search consumers..." [formField]="listFilterForm.searchTerm" (change)="setPage(1)" />
+    <select [formField]="listFilterForm.sortBy" (change)="setPage(1)">
       <option value="consultations">Sort by consultations</option>
       <option value="name">Sort by name</option>
     </select>
-    <select name="sortDirection" [(ngModel)]="sortDirection" (ngModelChange)="setPage(1)">
+    <select [formField]="listFilterForm.sortDirection" (change)="setPage(1)">
       <option value="desc">Desc</option>
       <option value="asc">Asc</option>
     </select>
@@ -22,6 +65,7 @@
     @for (consumer of visibleConsumers(); track consumer.id) {
       <article class="card">
         <strong>{{ consumer.name }}</strong>
+        <p class="patient-code-badge">{{ consumer.patientCode || 'No ID yet' }}</p>
         <button type="button" class="link" (click)="selectConsumer(consumer.id)" [disabled]="detailLoading">View details</button>
         <p>{{ consumer.email || 'No email' }} | {{ consumer.mobile || 'No mobile' }}</p>
         <small>Total consultations: {{ consumer.consultations }}</small>
@@ -39,6 +83,12 @@
 
 <section class="panel">
   <h2>Consumer Details</h2>
+  @if (consumerDetail; as detail) {
+    <div class="detail-tabs">
+      <button type="button" class="dtab" [class.active]="detailTab === 'overview'" (click)="setDetailTab('overview')">Overview</button>
+      <button type="button" class="dtab" [class.active]="detailTab === 'support'" (click)="setDetailTab('support')">Support &amp; troubleshooting</button>
+    </div>
+  }
   @if (detailLoading) {
     <p class="loading-text">Loading details...</p>
   } @else if (detailError) {
@@ -47,8 +97,10 @@
       <button type="button" class="retry-btn" (click)="selectConsumer(selectedConsumerId)">Retry</button>
     </div>
   } @else if (consumerDetail; as detail) {
+    @if (detailTab === 'overview') {
     <article class="card">
       <strong>{{ detail.consumer.name }}</strong>
+      <p class="patient-code-badge">{{ detail.consumer.patientCode || detail.consumer.id }}</p>
       <p>{{ detail.consumer.email || 'No email' }} | {{ detail.consumer.mobile || 'No mobile' }}</p>
       <div class="delivery-block">
         <h4>Delivery address</h4>
@@ -82,6 +134,47 @@
       <small>Skipped: {{ detail.adherence.skipped }} | Missed: {{ detail.adherence.missed }}</small>
     </article>
 
+    <section class="health-profile-panel">
+      <h3>Clinical profile</h3>
+      @if (detail.consumer.allergies?.trim() || detail.consumer.currentMedications?.trim() || detail.consumer.chronicConditions?.trim()) {
+        <div class="health-grid">
+          <article class="health-item" [class.alert]="detail.consumer.allergies?.trim()">
+            <span class="label">Allergies</span>
+            <p>{{ detail.consumer.allergies?.trim() || 'None reported' }}</p>
+          </article>
+          <article class="health-item">
+            <span class="label">Current medications</span>
+            <p>{{ detail.consumer.currentMedications?.trim() || 'None reported' }}</p>
+          </article>
+          <article class="health-item">
+            <span class="label">Chronic conditions</span>
+            <p>{{ detail.consumer.chronicConditions?.trim() || 'None reported' }}</p>
+          </article>
+        </div>
+      } @else {
+        <p class="empty-state">No allergies, medications, or chronic conditions recorded yet.</p>
+      }
+    </section>
+
+    @if (detail.doseNotes?.length) {
+      <h3>Skipped &amp; missed dose notes (7 days)</h3>
+      @for (note of detail.doseNotes; track note.id) {
+        <article class="card dose-note-card">
+          <strong>{{ note.medicineName }}</strong>
+          <p>{{ note.scheduledFor | date: 'medium' }} · {{ note.status }}</p>
+          <small>{{ note.note || 'No patient reason recorded yet' }}</small>
+        </article>
+      }
+    }
+
+    @if (patientIdCard(); as card) {
+      <div class="card-panel">
+        <h3>Printable patient card</h3>
+        <p class="muted">Give this card to the patient for future visits.</p>
+        <app-patient-id-card [card]="card" />
+      </div>
+    }
+
     <h3>Recent Consultations</h3>
     @for (consultation of detail.consultations; track consultation.id) {
       <article class="card consult-card">
@@ -105,7 +198,7 @@
           <div class="assign-panel">
             <label class="assign-label">
               Select doctor
-              <select [(ngModel)]="assignDoctorId" name="assignDoctorId">
+              <select [formField]="assignForm.doctorId">
                 @for (doctor of activeDoctors; track doctor.id) {
                   <option [value]="doctor.id">
                     {{ doctor.name }}@if (doctor.doctorProfile?.specialty) { — {{ doctor.doctorProfile!.specialty }}}
@@ -117,7 +210,7 @@
               <p class="error">{{ assignError }}</p>
             }
             <div class="assign-actions">
-              <button type="button" class="btn-confirm" (click)="confirmAssign()" [disabled]="assigning || !assignDoctorId">
+              <button type="button" class="btn-confirm" (click)="confirmAssign()" [disabled]="assigning || !assignModel().doctorId">
                 {{ assigning ? 'Assigning…' : 'Confirm' }}
               </button>
               <button type="button" class="btn-cancel" (click)="cancelAssign()" [disabled]="assigning">Cancel</button>
@@ -127,6 +220,140 @@
       </article>
     } @empty {
       <p>No consultations found for this consumer.</p>
+    }
+    } @else {
+      @if (supportLoading) {
+        <p class="loading-text">Loading support context…</p>
+      } @else if (supportError) {
+        <div class="error-row">
+          <p class="error">{{ supportError }}</p>
+          <button type="button" class="retry-btn" (click)="loadSupport(selectedConsumerId)">Retry</button>
+        </div>
+      } @else if (supportContext; as ctx) {
+        @if (ctx.flags.length) {
+          <section class="support-flags">
+            <h3>Attention flags</h3>
+            <ul>
+              @for (flag of ctx.flags; track flag) {
+                <li>{{ flag }}</li>
+              }
+            </ul>
+          </section>
+        }
+
+        <section class="support-safe">
+          <h3>Safe troubleshooting checklist</h3>
+          <ul>
+            @for (tip of ctx.safeActions; track tip) {
+              <li>{{ tip }}</li>
+            }
+          </ul>
+        </section>
+
+        <section class="support-grid">
+          <article class="support-card">
+            <h4>Account</h4>
+            <p>Status: <strong [class.warn]="!ctx.account.isActive">{{ ctx.account.isActive ? 'Active' : 'Inactive' }}</strong></p>
+            <p>Adherence: {{ ctx.adherenceSummary.percent ?? '—' }}% ({{ ctx.adherenceSummary.taken }}/{{ ctx.adherenceSummary.total }} taken)</p>
+          </article>
+          <article class="support-card">
+            <h4>Reminder channels</h4>
+            @if (ctx.reminderPreferences; as prefs) {
+              <p>In-app {{ prefs.inApp ? 'on' : 'off' }} · SMS {{ prefs.sms ? 'on' : 'off' }} · WhatsApp {{ prefs.whatsapp ? 'on' : 'off' }}</p>
+              <p class="muted">Quiet hours {{ prefs.quietHoursStart }} – {{ prefs.quietHoursEnd }}</p>
+            } @else {
+              <p class="muted">No preferences saved.</p>
+            }
+          </article>
+        </section>
+
+        <section class="support-section">
+          <h3>Consultation timeline (read-only)</h3>
+          <div class="support-table-wrap">
+            <table class="support-table">
+              <thead>
+                <tr>
+                  <th>Disease</th>
+                  <th>Status</th>
+                  <th>Payment</th>
+                  <th>Doctor</th>
+                  <th>Rx / msgs</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (c of ctx.consultations; track c.id) {
+                  <tr>
+                    <td>{{ c.diseaseName }}</td>
+                    <td>{{ c.status }}</td>
+                    <td>{{ c.paymentStatus || '—' }}</td>
+                    <td>{{ c.doctorName || 'Unassigned' }}</td>
+                    <td>{{ c.prescriptionCount }} / {{ c.messageCount }}</td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="5">No consultations.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        @if (ctx.recentAudit.length) {
+          <section class="support-section">
+            <h3>Recent admin activity</h3>
+            @for (log of ctx.recentAudit; track log.id) {
+              <article class="card compact">
+                <strong>{{ log.action }}</strong>
+                <p>{{ log.summary || '—' }}</p>
+                <small>{{ log.actorName || 'System' }} · {{ log.createdAt | date: 'medium' }}</small>
+              </article>
+            }
+          </section>
+        }
+
+        <section class="support-section">
+          <h3>Case notes</h3>
+          @for (note of supportNotes; track note.id) {
+            <article class="card note-card">
+              <div class="note-head">
+                <span class="note-badge" [style.background]="categoryStyle(note.category).bg" [style.color]="categoryStyle(note.category).color">
+                  {{ note.category }}
+                </span>
+                <small>{{ note.author?.name || 'Admin' }} · {{ note.createdAt | date: 'medium' }}</small>
+              </div>
+              <p class="note-body">{{ note.body }}</p>
+              @if (note.consultation) {
+                <small class="muted">Linked: {{ note.consultation.disease?.name || 'Consultation' }} ({{ note.consultation.status }})</small>
+              }
+            </article>
+          } @empty {
+            <p class="empty-state">No support notes yet.</p>
+          }
+
+          <div class="note-form">
+            <h4>Add case note</h4>
+            <div class="note-form-row">
+              <select [formField]="noteForm.category">
+                @for (cat of supportCategories; track cat.value) {
+                  <option [value]="cat.value">{{ cat.label }}</option>
+                }
+              </select>
+              <select [formField]="noteForm.consultationId">
+                <option value="">No consultation link</option>
+                @for (c of detail.consultations; track c.id) {
+                  <option [value]="c.id">{{ c.disease?.name || 'Consultation' }} — {{ c.status }}</option>
+                }
+              </select>
+            </div>
+            <textarea rows="3" [formField]="noteForm.body" attr.placeholder="What did you check? What should the next agent do?"></textarea>
+            @if (noteError) {
+              <p class="error">{{ noteError }}</p>
+            }
+            <button type="button" class="btn-save-note" (click)="submitSupportNote()" [disabled]="savingNote">
+              {{ savingNote ? 'Saving…' : 'Save note' }}
+            </button>
+          </div>
+        </section>
+      }
     }
   } @else {
     <p>Select a consumer to view details.</p>

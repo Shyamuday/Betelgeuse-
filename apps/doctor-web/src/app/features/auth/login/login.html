@@ -1,79 +1,79 @@
-<header class="login-header-bar">
-  <a routerLink="/login" class="login-brand">Doctor Console</a>
-  <nav class="login-nav" aria-label="Login navigation">
-    <button type="button" class="nav-tab" [class.active]="mode === 'signin'" (click)="mode = 'signin'">Sign in</button>
-    <button type="button" class="nav-tab" [class.active]="mode === 'enroll'" (click)="mode = 'enroll'">Enroll</button>
-    @if (patientPortalUrl) {
-      <a [href]="patientPortalUrl" class="nav-link-external" target="_blank" rel="noopener noreferrer">Patient site</a>
-    }
-  </nav>
-</header>
-
 <section class="login-card">
-  @if (mode === 'signin') {
+  <div class="switcher">
+    <button type="button" [class.active]="mode() === 'signin'" (click)="mode.set('signin')">Sign in</button>
+    <button type="button" [class.active]="mode() === 'enroll'" (click)="mode.set('enroll')">Enroll</button>
+  </div>
+
+  @if (mode() === 'signin') {
     <h2>Doctor Login</h2>
     <p>Use your doctor account to access dashboard and patient workflows.</p>
 
     <form (ngSubmit)="submit()">
       <label for="email">Email</label>
-      <input id="email" name="email" [(ngModel)]="email" type="email" />
+      <input id="email" [formField]="signInForm.email" type="email" />
+      @if (signInForm.email().invalid() && signInForm.email().touched()) {
+        <p class="error">
+          @for (fieldError of signInForm.email().errors(); track fieldError.kind) {
+            <span>{{ fieldError.message }}</span>
+          }
+        </p>
+      }
 
       <label for="password">Password</label>
-      <input id="password" name="password" [(ngModel)]="password" type="password" />
-
-      @if (error) {
-        <p class="error">{{ error }}</p>
+      <input id="password" [formField]="signInForm.password" type="password" />
+      @if (signInForm.password().invalid() && signInForm.password().touched()) {
+        <p class="error">
+          @for (fieldError of signInForm.password().errors(); track fieldError.kind) {
+            <span>{{ fieldError.message }}</span>
+          }
+        </p>
       }
-      @if (message) {
-        <p class="success">{{ message }}</p>
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+      @if (message()) {
+        <p class="success">{{ message() }}</p>
       }
 
-      <button type="submit" [disabled]="submitting">
-        {{ submitting ? 'Signing in...' : 'Sign in' }}
+      <button type="submit" [disabled]="submitting() || signInForm().invalid()">
+        {{ submitting() ? 'Signing in...' : 'Sign in' }}
       </button>
     </form>
 
-    <p class="divider">or</p>
-    @if (googleClientId) {
-      <app-google-sign-in-button [clientId]="googleClientId" (credential)="googleSignIn($event)" />
-      <p class="hint-google">Use the Google account whose email matches your doctor profile.</p>
-    } @else {
-      <p class="hint-google muted">
-        Google sign-in: set <code>googleClientId</code> in environment (same as API <code>GOOGLE_CLIENT_ID</code>).
-      </p>
-    }
+    <app-dev-login-panel (loggedIn)="onDevLoggedIn()" (fillAccount)="applyDevFill($event)" />
   } @else {
     <h2>Doctor Enrollment</h2>
     <p>Create doctor account with your specialty profile.</p>
 
     <form (ngSubmit)="enroll()">
       <label for="name">Full name</label>
-      <input id="name" name="name" [(ngModel)]="name" />
+      <input id="name" [formField]="enrollForm.name" />
 
       <label for="enrollEmail">Email</label>
-      <input id="enrollEmail" name="enrollEmail" [(ngModel)]="email" type="email" />
+      <input id="enrollEmail" [formField]="signInForm.email" type="email" />
 
       <label for="mobile">Mobile</label>
-      <input id="mobile" name="mobile" [(ngModel)]="mobile" />
+      <input id="mobile" [formField]="enrollForm.mobile" />
 
       <label for="specialty">Specialty</label>
-      <input id="specialty" name="specialty" [(ngModel)]="specialty" />
+      <input id="specialty" [formField]="enrollForm.specialty" />
 
       <label for="registrationNo">Registration number</label>
-      <input id="registrationNo" name="registrationNo" [(ngModel)]="registrationNo" />
+      <input id="registrationNo" [formField]="enrollForm.registrationNo" />
 
       <label for="enrollPassword">Password</label>
-      <input id="enrollPassword" name="enrollPassword" [(ngModel)]="password" type="password" />
+      <input id="enrollPassword" [formField]="signInForm.password" type="password" />
 
-      @if (error) {
-        <p class="error">{{ error }}</p>
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
       }
-      @if (message) {
-        <p class="success">{{ message }}</p>
+      @if (message()) {
+        <p class="success">{{ message() }}</p>
       }
 
-      <button type="submit" [disabled]="submitting">
-        {{ submitting ? 'Creating account...' : 'Create account' }}
+      <button type="submit" [disabled]="submitting() || signInForm().invalid() || enrollForm().invalid()">
+        {{ submitting() ? 'Creating account...' : 'Create account' }}
       </button>
     </form>
   }

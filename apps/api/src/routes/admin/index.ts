@@ -1,25 +1,47 @@
-import type express from 'express';
-import { registerAdminAuditRoutes } from './admin-audit.routes.js';
-import { registerAdminConsumerRoutes } from './admin-consumers.routes.js';
-import { registerAdminDiseaseRoutes } from './admin-diseases.routes.js';
-import { registerAdminDoctorListRoutes } from './admin-doctors-list.routes.js';
-import { registerAdminDoctorMutationRoutes } from './admin-doctors-mutations.routes.js';
-import { registerAdminLocationRoutes } from './admin-locations.routes.js';
-import { registerAdminPaymentRoutes } from './admin-payments.routes.js';
-import { registerAdminPermissionPresetRoutes } from './admin-permission-presets.routes.js';
-import { registerAdminReportsRoutes } from './admin-reports.routes.js';
-import { registerAdminStaffRoutes } from './admin-staff.routes.js';
+import { Router } from 'express';
+import type { Server as SocketIoServer } from 'socket.io';
+import { registerAdminAuditRoutes } from './audit.js';
+import { registerAdminConsultationRoutes } from './consultations.js';
+import { registerAdminConsumerRoutes } from './consumers.js';
+import { registerAdminDoctorRoutes } from './doctors.js';
+import { registerAdminPaymentRoutes } from './payments.js';
+import { registerAdminReportRoutes } from './reports.js';
+import { registerAdminPatientLookupRoutes } from '../store/patients.js';
+import { registerAdminSupportRoutes } from './support.js';
+import { registerAdminAdherenceRoutes } from './adherence.js';
+import { registerAdminAnalyticsRoutes } from '../analytics.js';
+import { registerAdminPurchaseOrderRoutes } from './purchase-orders.js';
+import { registerAdminCatalogOpsRoutes } from './catalog-ops.js';
+import { registerAdminUserRoutes } from './admins.js';
+import { registerAdminLabReferralRoutes } from './lab-referrals.js';
+import { registerAdminInventoryRoutes } from './inventory.js';
+import { registerAdminNotificationRoutes } from './notifications.js';
+import { registerAdminRbacRoutes } from './rbac.js';
+import { registerAdminEcosystemUserRoutes } from './ecosystem-users.js';
+import { registerAdminPortalUserRoutes } from './portal-users.js';
 
-/** Admin API: one register function per feature area. */
-export function registerAdminRoutes(app: express.Application) {
-  registerAdminStaffRoutes(app);
-  registerAdminPermissionPresetRoutes(app);
-  registerAdminDiseaseRoutes(app);
-  registerAdminLocationRoutes(app);
-  registerAdminDoctorListRoutes(app);
-  registerAdminDoctorMutationRoutes(app);
-  registerAdminConsumerRoutes(app);
-  registerAdminAuditRoutes(app);
-  registerAdminPaymentRoutes(app);
-  registerAdminReportsRoutes(app);
+export function createAdminRouter(io: SocketIoServer) {
+  const router = Router();
+
+  registerAdminDoctorRoutes(router);
+  registerAdminConsumerRoutes(router);
+  registerAdminSupportRoutes(router);
+  registerAdminAdherenceRoutes(router);
+  registerAdminAnalyticsRoutes(router);
+  registerAdminAuditRoutes(router);
+  registerAdminConsultationRoutes(router, io);
+  registerAdminPaymentRoutes(router);
+  registerAdminReportRoutes(router);
+  registerAdminPatientLookupRoutes(router);
+  registerAdminPurchaseOrderRoutes(router);
+  registerAdminCatalogOpsRoutes(router);
+  registerAdminUserRoutes(router);
+  registerAdminLabReferralRoutes(router);
+  registerAdminInventoryRoutes(router);
+  registerAdminNotificationRoutes(router);
+  registerAdminRbacRoutes(router);
+  registerAdminEcosystemUserRoutes(router);
+  registerAdminPortalUserRoutes(router);
+
+  return router;
 }

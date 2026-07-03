@@ -1,13 +1,8 @@
 import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import type { Role } from '@prisma/client';
-import { Role as PrismaRole } from '@prisma/client';
+import { AUTH_MESSAGES, DEFAULT_JWT_SECRET, JWT_EXPIRY } from './constants/auth.constants.js';
 import { prisma } from './db.js';
-
-export type StaffProfileSummary = {
-  isSuperAdmin: boolean;
-  permissionCodes: string[];
-};
 
 export type AuthUser = {
   id: string;
@@ -15,10 +10,7 @@ export type AuthUser = {
   name: string;
   email?: string | null;
   mobile?: string | null;
-  /**
-   * Present only for ADMIN. `null` = no profile row yet (legacy full access).
-   */
-  staffProfile?: StaffProfileSummary | null;
+  patientCode?: string | null;
 };
 
 declare global {
@@ -29,10 +21,9 @@ declare global {
   }
 }
 
-const DEFAULT_SECRET = 'dev-only-secret';
-const jwtSecret = process.env.JWT_SECRET || DEFAULT_SECRET;
+const jwtSecret = process.env.JWT_SECRET || DEFAULT_JWT_SECRET;
 
-if (jwtSecret === DEFAULT_SECRET) {
+if (jwtSecret === DEFAULT_JWT_SECRET) {
   if (process.env.NODE_ENV === 'production') {
     console.error('FATAL: JWT_SECRET must be set in production. Refusing to start.');
     process.exit(1);
@@ -42,17 +33,7 @@ if (jwtSecret === DEFAULT_SECRET) {
 }
 
 export function signToken(user: AuthUser) {
-  return jwt.sign(
-    {
-      id: user.id,
-      name: user.name,
-      role: user.role,
-      email: user.email ?? null,
-      mobile: user.mobile ?? null
-    },
-    jwtSecret,
-    { expiresIn: '7d' }
-  );
+  return jwt.sign(user, jwtSecret, { expiresIn: JWT_EXPIRY });
 }
 
 export async function authRequired(req: Request, res: Response, next: NextFunction) {
@@ -60,61 +41,35 @@ export async function authRequired(req: Request, res: Response, next: NextFuncti
   const token = header?.startsWith('Bearer ') ? header.slice(7) : undefined;
 
   if (!token) {
-    return res.status(401).json({ message: 'Authentication required' });
+    return res.status(401).json({ message: AUTH_MESSAGES.REQUIRED });
   }
 
   try {
-    const decoded = jwt.verify(token, jwtSecret) as AuthUser;
+    const decoded = jwt.verify(token, jwtSecret) as AuthUser & { userId?: string };
+    const userId = decoded.id ?? decoded.userId;
+    if (!userId) {
+      return res.status(401).json({ message: AUTH_MESSAGES.INVALID_TOKEN });
+    }
     const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: {
-        id: true,
-        name: true,
-        role: true,
-        email: true,
-        mobile: true,
-        isActive: true,
-        staffProfile: {
-          select: {
-            isSuperAdmin: true,
-            permissionCodes: true
-          }
-        }
-      }
+      where: { id: userId },
+      select: { id: true, name: true, role: true, email: true, mobile: true, patientCode: true, isActive: true }
     });
 
     if (!user?.isActive) {
-      return res.status(401).json({ message: 'User is inactive or missing' });
+      return res.status(401).json({ message: AUTH_MESSAGES.INACTIVE_USER });
     }
 
-    const staffProfile =
-      user.role === PrismaRole.ADMIN
-        ? user.staffProfile
-          ? {
-              isSuperAdmin: user.staffProfile.isSuperAdmin,
-              permissionCodes: user.staffProfile.permissionCodes
-            }
-          : null
-        : undefined;
-
-    req.user = {
-      id: user.id,
-      name: user.name,
-      role: user.role,
-      email: user.email,
-      mobile: user.mobile,
-      staffProfile
-    };
+    req.user = user;
     next();
   } catch {
-    return res.status(401).json({ message: 'Invalid or expired token' });
+    return res.status(401).json({ message: AUTH_MESSAGES.INVALID_TOKEN });
   }
 }
 
 export function allowRoles(...roles: Role[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user || !roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'You do not have access to this resource' });
+      return res.status(403).json({ message: AUTH_MESSAGES.FORBIDDEN });
     }
 
     next();

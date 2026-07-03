@@ -1,0 +1,19 @@
+.page { padding: 0.5rem; }
+.page-header { margin-bottom: 1rem; }
+.muted { color: #64748b; font-size: 0.85rem; }
+.tabs { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+.tabs button { border: 1px solid #e5e7eb; background: #fff; padding: 0.35rem 0.75rem; border-radius: 8px; }
+.tabs button.active { background: #eef2ff; border-color: #4f46e5; }
+.matrix-wrap { overflow: auto; }
+.matrix { border-collapse: collapse; min-width: 900px; width: 100%; }
+.matrix th, .matrix td { border: 1px solid #e5e7eb; padding: 0.45rem; text-align: left; font-size: 0.8rem; vertical-align: top; }
+.matrix th { background: #f8fafc; white-space: nowrap; }
+.center { text-align: center; }
+.retention-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+.card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 0.75rem; display: grid; gap: 0.25rem; }
+.purge-box { border: 1px solid #fecaca; background: #fff7ed; border-radius: 10px; padding: 1rem; display: grid; gap: 0.75rem; max-width: 420px; }
+.purge-box label { display: grid; gap: 0.25rem; }
+.actions { display: flex; gap: 0.5rem; }
+.danger { background: #dc2626; color: #fff; border: none; border-radius: 8px; padding: 0.45rem 0.75rem; }
+.error { color: #b91c1c; }
+.toast { position: fixed; bottom: 1rem; right: 1rem; background: #0f766e; color: #fff; padding: 0.6rem 1rem; border-radius: 8px; }

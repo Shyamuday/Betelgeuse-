@@ -1,5 +1,3 @@
-import type { MethodIntakeFlatRow } from './method-intake';
-
 export type OptionType = 'METHOD' | 'DIAGNOSED_DISEASE';
 
 export type TemplateItem = {
@@ -27,8 +25,6 @@ export type PrescriptionOption = {
 };
 
 export type MedicineRow = {
-  /** Encodes CGHS pick as tab-separated code, name, potency, amount; or `__other__`; or empty. */
-  formularyKey: string;
   medicineName: string;
   strength: string;
   dose: string;
@@ -37,17 +33,6 @@ export type MedicineRow = {
   durationDays: number;
   instructions: string;
   intakeTimesText: string;
-};
-
-export type LoadedPrescriptionItem = {
-  medicineName: string;
-  strength?: string | null;
-  dose?: string | null;
-  frequency?: string | null;
-  duration?: string | null;
-  durationDays?: number | null;
-  instructions?: string | null;
-  intakeTimes?: string[] | null;
 };
 
 export type LoadedPrescription = {
@@ -61,28 +46,51 @@ export type LoadedPrescription = {
   notes: string;
   methodOptionId?: string | null;
   diagnosedDiseaseOptionId?: string | null;
-  methodIntakeAnswers?: Record<string, string> | null;
-  methodOption?: { id?: string; label?: string } | null;
-  items: LoadedPrescriptionItem[];
+  items: Array<{
+    medicineName: string;
+    strength?: string | null;
+    dose?: string | null;
+    frequency?: string | null;
+    duration?: string | null;
+    durationDays?: number | null;
+    instructions?: string | null;
+    intakeTimes?: string[] | null;
+  }>;
 };
 
-export type ConsultationAttachmentRow = {
-  id: string;
-  kind: string;
-  fileName?: string | null;
-  mimeType?: string | null;
-  caption?: string | null;
-  fileUrl: string;
-  createdAt?: string;
-  uploadedBy?: { name?: string };
+export type PrescriptionPayload = {
+  methodOptionId: string;
+  diagnosedDiseaseOptionId: string;
+  diagnosis: string;
+  notes: string;
+  advice?: string;
+  followUpDate?: string;
+  status: 'DRAFT' | 'PUBLISHED';
+  safetyAcknowledged?: boolean;
+  items: Array<{
+    medicineName: string;
+    strength?: string;
+    dose?: string;
+    frequency?: string;
+    duration?: string;
+    durationDays?: number;
+    instructions?: string;
+    intakeTimes?: string[];
+  }>;
 };
 
-/** Method intake UI card (method profile only; kingdom/miasm use dedicated panels). */
-export type MethodIntakeUiPanel = {
-  id: string;
-  heading: string;
-  description: string;
-  profileTitle?: string;
-  profileHelper?: string;
-  rows: Array<MethodIntakeFlatRow & { showSectionHeader: boolean }>;
+export type SaveTemplatePayload = {
+  name: string;
+  diagnosis: string;
+  advice: string;
+  notes: string;
+  items: Array<{
+    medicineName: string;
+    strength?: string;
+    dose?: string;
+    frequency?: string;
+    duration?: string;
+    instructions?: string;
+    sortOrder: number;
+  }>;
 };

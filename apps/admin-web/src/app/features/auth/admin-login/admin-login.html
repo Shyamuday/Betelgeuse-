@@ -1,40 +1,36 @@
-<header class="login-header-bar">
-  <a routerLink="/login" class="login-brand">Admin Console</a>
-  <nav class="login-nav" aria-label="Login navigation">
-    <span class="nav-pill active" aria-current="page">Sign in</span>
-    @if (patientPortalUrl) {
-      <a [href]="patientPortalUrl" class="nav-link-external" target="_blank" rel="noopener noreferrer">
-        Patient site
-      </a>
-    }
-  </nav>
-</header>
-
 <section class="login-card">
   <h2>Admin Login</h2>
   <p>Manage doctors and consumers from one console.</p>
 
   <form (ngSubmit)="submit()">
     <label for="email">Email</label>
-    <input id="email" name="email" [(ngModel)]="email" type="email" />
-
-    <label for="password">Password</label>
-    <input id="password" name="password" [(ngModel)]="password" type="password" />
-
-    @if (error) {
-      <p class="error">{{ error }}</p>
+    <input id="email" [formField]="loginForm.email" type="email" />
+    @if (loginForm.email().invalid() && loginForm.email().touched()) {
+      <p class="error">
+        @for (fieldError of loginForm.email().errors(); track fieldError.kind) {
+          <span>{{ fieldError.message }}</span>
+        }
+      </p>
     }
 
-    <button type="submit" [disabled]="submitting">
-      {{ submitting ? 'Signing in...' : 'Sign in' }}
+    <label for="password">Password</label>
+    <input id="password" [formField]="loginForm.password" type="password" />
+    @if (loginForm.password().invalid() && loginForm.password().touched()) {
+      <p class="error">
+        @for (fieldError of loginForm.password().errors(); track fieldError.kind) {
+          <span>{{ fieldError.message }}</span>
+        }
+      </p>
+    }
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <button type="submit" [disabled]="submitting() || loginForm().invalid()">
+      {{ submitting() ? 'Signing in...' : 'Sign in' }}
     </button>
   </form>
 
-  <p class="divider">or</p>
-  @if (googleClientId) {
-    <app-google-sign-in-button [clientId]="googleClientId" (credential)="googleSignIn($event)" />
-    <p class="hint-google">Use the Google account whose email matches your admin profile.</p>
-  } @else {
-    <p class="hint-google muted">Google sign-in is unavailable until <code>googleClientId</code> is set (must match API <code>GOOGLE_CLIENT_ID</code>).</p>
-  }
+  <app-dev-login-panel (loggedIn)="onDevLoggedIn()" (fillAccount)="applyDevFill($event)" />
 </section>

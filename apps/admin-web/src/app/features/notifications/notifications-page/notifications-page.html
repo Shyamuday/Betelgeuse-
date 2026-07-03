@@ -1,0 +1,114 @@
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2>Notifications</h2>
+      <p class="muted">Message templates and platform broadcasts</p>
+    </div>
+    <div class="actions">
+      @if (tab() === 'templates') {
+        <button type="button" class="btn-primary" (click)="openCreateTemplate()">+ Template</button>
+      } @else {
+        <button type="button" class="btn-primary" (click)="openSendBroadcast()">Send broadcast</button>
+      }
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button type="button" [class.active]="tab() === 'templates'" (click)="tab.set('templates')">Templates</button>
+    <button type="button" [class.active]="tab() === 'broadcast'" (click)="tab.set('broadcast')">History</button>
+  </div>
+
+  @if (loading()) {
+    <p>Loading…</p>
+  } @else if (tab() === 'templates') {
+    <table class="table">
+      <thead><tr><th>Code</th><th>Name</th><th>Channel</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        @for (t of templates(); track t.id) {
+          <tr>
+            <td>{{ t.code }}</td>
+            <td>{{ t.name }}</td>
+            <td>{{ t.channel }}</td>
+            <td>{{ t.isActive ? 'Active' : 'Inactive' }}</td>
+            <td>
+              <button type="button" (click)="openEditTemplate(t)">Edit</button>
+              <button type="button" (click)="openSendBroadcast(t)">Use</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <table class="table">
+      <thead><tr><th>When</th><th>Title</th><th>Audience</th><th>Channel</th><th>Recipients</th></tr></thead>
+      <tbody>
+        @for (b of broadcasts(); track b.id) {
+          <tr>
+            <td>{{ b.createdAt | date:'short' }}</td>
+            <td>{{ b.title }}</td>
+            <td>{{ b.audience }}{{ b.audienceRole ? ' (' + b.audienceRole + ')' : '' }}</td>
+            <td>{{ b.channel }}</td>
+            <td>{{ b.recipientCount }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
+
+@if (modal()) {
+  <div class="overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      @if (modal() === 'send') {
+        <h3>Send broadcast</h3>
+        <label>Title <input [formField]="broadcastForm.title" /></label>
+        <label>Body <textarea [formField]="broadcastForm.body" rows="4"></textarea></label>
+        <label>Channel
+          <select [formField]="broadcastForm.channel">
+            @for (ch of channels; track ch) { <option [value]="ch">{{ ch }}</option> }
+          </select>
+        </label>
+        <label>Audience
+          <select [formField]="broadcastForm.audience">
+            @for (a of audiences; track a.value) { <option [value]="a.value">{{ a.label }}</option> }
+          </select>
+        </label>
+        @if (broadcastModel().audience === 'ROLE') {
+          <label>Role
+            <select [formField]="broadcastForm.audienceRole">
+              @for (r of roles; track r) { <option [value]="r">{{ r }}</option> }
+            </select>
+          </label>
+        }
+        <div class="actions">
+          <button type="button" (click)="closeModal()">Cancel</button>
+          <button type="button" class="btn-primary" [disabled]="saving()" (click)="sendBroadcast()">Send</button>
+        </div>
+      } @else {
+        <h3>{{ modal() === 'create' ? 'New template' : 'Edit template' }}</h3>
+        @if (modal() === 'create') {
+          <label>Code <input [formField]="templateForm.code" style="text-transform:uppercase" /></label>
+        }
+        <label>Name <input [formField]="templateForm.name" /></label>
+        <label>Title <input [formField]="templateForm.title" /></label>
+        <label>Body <textarea [formField]="templateForm.body" rows="4"></textarea></label>
+        <label>Channel
+          <select [formField]="templateForm.channel">
+            @for (ch of channels; track ch) { <option [value]="ch">{{ ch }}</option> }
+          </select>
+        </label>
+        @if (modal() === 'edit') {
+          <label class="check"><input type="checkbox" [formField]="templateForm.isActive" /> Active</label>
+        }
+        <div class="actions">
+          <button type="button" (click)="closeModal()">Cancel</button>
+          <button type="button" class="btn-primary" [disabled]="saving()" (click)="saveTemplate()">Save</button>
+        </div>
+      }
+      @if (error()) { <p class="error">{{ error() }}</p> }
+    </div>
+  </div>
+}
+
+@if (toast()) { <div class="toast">{{ toast() }}</div> }

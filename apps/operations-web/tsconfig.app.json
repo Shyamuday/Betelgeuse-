@@ -1,0 +1,54 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "tslib": ["../../node_modules/tslib"],
+      "@vitalis/platform-nav": ["../../libs/platform-nav/src/index.ts"],
+      "@vitalis/platform-nav/*": ["../../libs/platform-nav/src/*"],
+      "@vitalis/platform-ui": ["../../libs/platform-ui/src/index.ts"],
+      "@vitalis/platform-ui/*": ["../../libs/platform-ui/src/*"],
+      "@vitalis/app-notifications/notification-bell.component": [
+        "../../shared/app-notifications/notification-bell.component.ts"
+      ],
+      "@vitalis/app-notifications/types": ["../../shared/app-notifications/types.ts"],
+      "@vitalis/app-notifications/*": ["../../shared/app-notifications/*"],
+      "@vitalis/role-task-guides": ["../../shared/role-task-guides/index.ts"],
+      "@vitalis/role-task-guides/*": ["../../shared/role-task-guides/*"],
+      "@vitalis/clinic-api": ["../../libs/clinic-api/src/index.ts"],
+      "@vitalis/clinic-api/*": ["../../libs/clinic-api/src/*"],
+      "@vitalis/hr-ui": ["../../libs/hr-ui/src/index.ts"],
+      "@vitalis/hr-ui/*": ["../../libs/hr-ui/src/*"],
+      "@vitalis/store-ui": ["../../libs/store-ui/src/index.ts"],
+      "@vitalis/store-ui/*": ["../../libs/store-ui/src/*"],
+      "@vitalis/contracts": ["../../libs/contracts/src/index.ts"],
+      "@vitalis/contracts/*": ["../../libs/contracts/src/*"],
+      "@vitalis/admin-console": ["../../libs/admin-console/src/index.ts"],
+      "@vitalis/admin-console/*": ["../../apps/admin-web/src/app/*"]
+    },
+    "outDir": "./out-tsc/app",
+    "types": []
+  },
+  "files": ["src/main.ts"],
+  "include": [
+    "src/**/*.ts",
+    "../admin-web/src/app/features/**/*.ts",
+    "../admin-web/src/app/core/**/*.ts"
+  ],
+  "exclude": [
+    "../admin-web/src/app/app.routes.ts",
+    "../admin-web/src/app/app.config.ts",
+    "../admin-web/src/app/app.ts",
+    "../admin-web/src/app/layout/admin-shell/**",
+    "../admin-web/src/app/features/auth/**"
+  ],
+  "angularCompilerOptions": {
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    }
+  }
+}

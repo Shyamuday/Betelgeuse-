@@ -1,0 +1,51 @@
+enum ExpenseLevel {
+  CLINIC
+  STORE
+}
+
+enum ExpenseCategory {
+  RENT
+  ELECTRICITY
+  WATER
+  INTERNET
+  TELEPHONE
+  EQUIPMENT
+  SOFTWARE
+  FURNITURE
+  VEHICLE
+  STATIONERY
+  OFFICE_SUPPLIES
+  PACKAGING
+  CLEANING_SUPPLIES
+  MEDICAL_SUPPLIES
+  SALARY
+  TRAINING
+  INSURANCE
+  LEGAL
+  SECURITY
+  MARKETING
+  MAINTENANCE
+  LOGISTICS
+  BANK_CHARGES
+  MISC
+}
+
+model BusinessExpense {
+  id            String          @id @default(cuid())
+  level         ExpenseLevel
+  storeId       String?
+  store         Store?          @relation(fields: [storeId], references: [id])
+  category      ExpenseCategory
+  description   String
+  vendor        String?
+  billNo        String?
+  amountInPaise Int
+  expenseDate   DateTime
+  recordedById  String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([level, expenseDate])
+  @@index([storeId, expenseDate])
+  @@index([category])
+}

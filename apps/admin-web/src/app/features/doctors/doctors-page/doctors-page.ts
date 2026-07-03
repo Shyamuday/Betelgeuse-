@@ -1,340 +1,402 @@
-import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ADMIN_PERMISSIONS, adminHasAllPermissions } from '../../../core/admin-permissions';
-import { AdminAuth } from '../../../core/services/admin-auth';
-import { AdminApi } from '../../../core/services/admin-api';
-
-type Doctor = {
-  id: string;
-  name: string;
-  email?: string;
-  mobile?: string;
-  isActive: boolean;
-  createdAt?: string;
-  doctorProfile?: {
-    specialty?: string;
-    registrationNo?: string;
-    isAvailable?: boolean;
-  };
-};
-
-@Component({
-  selector: 'app-doctors-page',
-  imports: [CommonModule, FormsModule],
-  templateUrl: './doctors-page.html',
-  styleUrl: './doctors-page.scss'
-})
-export class DoctorsPage {
-  doctors: Doctor[] = [];
-  pendingDoctors: Doctor[] = [];
-  selectedPendingDoctorIds: string[] = [];
-  selectedDoctorId = '';
-
-  searchTerm = '';
-  pendingSearchTerm = '';
-  sortBy: 'name' | 'createdAt' | 'status' = 'name';
-  sortDirection: 'asc' | 'desc' = 'asc';
-  statusFilter: 'ALL' | 'ACTIVE' | 'INACTIVE' = 'ALL';
-
-  pageSize = 6;
-  doctorsPage = 1;
-  pendingPage = 1;
-  doctorsTotalPagesCount = 1;
-  pendingTotalPagesCount = 1;
-
-  loading = false;
-  mutating = false;
-  error = '';
-  message = '';
-  editName = '';
-  editEmail = '';
-  editMobile = '';
-  editSpecialty = '';
-  editRegistrationNo = '';
-  editIsAvailable = true;
-  createName = '';
-  createEmail = '';
-  createMobile = '';
-  createPassword = '';
-  createSpecialty = '';
-  createRegistrationNo = '';
-
-  constructor(
-    private readonly api: AdminApi,
-    readonly auth: AdminAuth
-  ) {
-    void this.load();
-  }
-
-  canWrite() {
-    return adminHasAllPermissions(this.auth.user(), ADMIN_PERMISSIONS.DOCTORS_WRITE);
-  }
-
-  async load() {
-    this.loading = true;
-    this.error = '';
-    try {
-      const [allDoctors, pending] = await Promise.all([
-        this.api.getDoctorsPaged({
-          page: this.doctorsPage,
-          pageSize: this.pageSize,
-          q: this.searchTerm,
-          status: this.statusFilter,
-          sortBy: this.sortBy,
-          sortDirection: this.sortDirection
-        }),
-        this.api.getPendingDoctorsPaged({
-          page: this.pendingPage,
-          pageSize: this.pageSize,
-          q: this.pendingSearchTerm
-        })
-      ]);
-      this.doctors = allDoctors.doctors || [];
-      this.pendingDoctors = pending.pendingDoctors || [];
-      this.doctorsTotalPagesCount = Math.max(1, Number(allDoctors.pagination?.totalPages || 1));
-      this.pendingTotalPagesCount = Math.max(1, Number(pending.pagination?.totalPages || 1));
-      this.selectedPendingDoctorIds = [];
-      this.selectedDoctorId = this.selectedDoctorId || this.visibleDoctors()[0]?.id || '';
-      this.syncEditFormFromSelectedDoctor();
-    } catch {
-      this.error = 'Could not load doctors.';
-    } finally {
-      this.loading = false;
-    }
-  }
-
-  async approveDoctor(doctorId: string) {
-    this.message = '';
-    this.error = '';
-    this.mutating = true;
-    try {
-      await this.api.approveDoctor(doctorId);
-      this.message = 'Doctor approved.';
-      await this.load();
-    } catch {
-      this.error = 'Could not approve doctor.';
-    } finally {
-      this.mutating = false;
-    }
-  }
-
-  async rejectDoctor(doctorId: string) {
-    this.message = '';
-    this.error = '';
-    this.mutating = true;
-    try {
-      await this.api.rejectDoctor(doctorId);
-      this.message = 'Doctor kept as pending/inactive.';
-      await this.load();
-    } catch {
-      this.error = 'Could not update doctor status.';
-    } finally {
-      this.mutating = false;
-    }
-  }
-
-  async toggleDoctorStatus(doctorId: string, makeActive: boolean) {
-    this.message = '';
-    this.error = '';
-    this.mutating = true;
-    try {
-      await this.api.setDoctorStatus(doctorId, makeActive);
-      this.message = makeActive ? 'Doctor activated.' : 'Doctor deactivated.';
-      await this.load();
-      this.selectedDoctorId = doctorId;
-      this.syncEditFormFromSelectedDoctor();
-    } catch {
-      this.error = 'Could not update doctor status.';
-    } finally {
-      this.mutating = false;
-    }
-  }
-
-  async saveDoctorEdits() {
-    this.message = '';
-    this.error = '';
-    const doctorId = this.selectedDoctorId;
-    if (!doctorId) {
-      return;
-    }
-
-    this.mutating = true;
-    try {
-      await this.api.updateDoctor(doctorId, {
-        name: this.editName.trim(),
-        email: this.editEmail.trim(),
-        mobile: this.editMobile.trim(),
-        specialty: this.editSpecialty.trim(),
-        registrationNo: this.editRegistrationNo.trim(),
-        isAvailable: this.editIsAvailable
-      });
-      this.message = 'Doctor profile updated.';
-      await this.load();
-      this.selectedDoctorId = doctorId;
-      this.syncEditFormFromSelectedDoctor();
-    } catch {
-      this.error = 'Could not update doctor profile.';
-    } finally {
-      this.mutating = false;
-    }
-  }
-
-  async createDoctor() {
-    this.message = '';
-    this.error = '';
-    this.mutating = true;
-    try {
-      await this.api.createDoctor({
-        name: this.createName.trim(),
-        email: this.createEmail.trim(),
-        mobile: this.createMobile.trim(),
-        password: this.createPassword,
-        specialty: this.createSpecialty.trim(),
-        registrationNo: this.createRegistrationNo.trim()
-      });
-      this.message = 'Doctor created successfully.';
-      this.createName = '';
-      this.createEmail = '';
-      this.createMobile = '';
-      this.createPassword = '';
-      this.createSpecialty = '';
-      this.createRegistrationNo = '';
-      await this.load();
-    } catch {
-      this.error = 'Could not create doctor.';
-    } finally {
-      this.mutating = false;
-    }
-  }
-
-  togglePendingDoctorSelection(doctorId: string, checked: boolean) {
-    if (checked) {
-      if (!this.selectedPendingDoctorIds.includes(doctorId)) {
-        this.selectedPendingDoctorIds = [...this.selectedPendingDoctorIds, doctorId];
-      }
-      return;
-    }
-
-    this.selectedPendingDoctorIds = this.selectedPendingDoctorIds.filter((id) => id !== doctorId);
-  }
-
-  isPendingDoctorSelected(doctorId: string) {
-    return this.selectedPendingDoctorIds.includes(doctorId);
-  }
-
-  toggleSelectAllVisiblePending(checked: boolean) {
-    const visiblePendingIds = this.visiblePendingDoctors().map((doctor) => doctor.id);
-    if (checked) {
-      this.selectedPendingDoctorIds = Array.from(new Set([...this.selectedPendingDoctorIds, ...visiblePendingIds]));
-      return;
-    }
-
-    this.selectedPendingDoctorIds = this.selectedPendingDoctorIds.filter((id) => !visiblePendingIds.includes(id));
-  }
-
-  allVisiblePendingSelected() {
-    const visiblePending = this.visiblePendingDoctors();
-    if (!visiblePending.length) {
-      return false;
-    }
-
-    return visiblePending.every((doctor) => this.selectedPendingDoctorIds.includes(doctor.id));
-  }
-
-  async bulkApproveSelected() {
-    if (!this.selectedPendingDoctorIds.length) {
-      return;
-    }
-
-    this.message = '';
-    this.error = '';
-    this.mutating = true;
-    try {
-      await Promise.all(this.selectedPendingDoctorIds.map((id) => this.api.approveDoctor(id)));
-      this.message = `${this.selectedPendingDoctorIds.length} doctors approved.`;
-      await this.load();
-    } catch {
-      this.error = 'Could not complete bulk approve.';
-    } finally {
-      this.mutating = false;
-    }
-  }
-
-  async bulkRejectSelected() {
-    if (!this.selectedPendingDoctorIds.length) {
-      return;
-    }
-
-    this.message = '';
-    this.error = '';
-    this.mutating = true;
-    try {
-      await Promise.all(this.selectedPendingDoctorIds.map((id) => this.api.rejectDoctor(id)));
-      this.message = `${this.selectedPendingDoctorIds.length} doctors kept pending.`;
-      await this.load();
-    } catch {
-      this.error = 'Could not complete bulk reject.';
-    } finally {
-      this.mutating = false;
-    }
-  }
-
-  async setDoctorsPage(page: number) {
-    this.doctorsPage = page;
-    await this.load();
-  }
-
-  async setPendingPage(page: number) {
-    this.pendingPage = page;
-    await this.load();
-  }
-
-  visibleDoctors() {
-    return this.doctors;
-  }
-
-  visiblePendingDoctors() {
-    return this.pendingDoctors;
-  }
-
-  doctorsTotalPages() {
-    return this.doctorsTotalPagesCount;
-  }
-
-  pendingTotalPages() {
-    return this.pendingTotalPagesCount;
-  }
-
-  doctorsPages() {
-    return Array.from({ length: this.doctorsTotalPages() }, (_, index) => index + 1);
-  }
-
-  pendingPages() {
-    return Array.from({ length: this.pendingTotalPages() }, (_, index) => index + 1);
-  }
-
-  selectedDoctorDetails() {
-    return this.doctors.find((doctor) => doctor.id === this.selectedDoctorId) || null;
-  }
-
-  setSelectedDoctor(doctorId: string) {
-    this.selectedDoctorId = doctorId;
-    this.syncEditFormFromSelectedDoctor();
-  }
-
-  private syncEditFormFromSelectedDoctor() {
-    const selected = this.selectedDoctorDetails();
-    if (!selected) {
-      return;
-    }
-
-    this.editName = selected.name || '';
-    this.editEmail = selected.email || '';
-    this.editMobile = selected.mobile || '';
-    this.editSpecialty = selected.doctorProfile?.specialty || '';
-    this.editRegistrationNo = selected.doctorProfile?.registrationNo || '';
-    this.editIsAvailable = selected.doctorProfile?.isAvailable ?? true;
-  }
-
-}
+import { CommonModule } from '@angular/common';
+import { Component, signal } from '@angular/core';
+import { form, FormField } from '@angular/forms/signals';
+import { AdminApi } from '../../../core/services/admin-api';
+import {
+  DOCTORS_LIST_DEFAULTS,
+  DOCTORS_PAGE_SIZE,
+  type DoctorSortField,
+  type DoctorStatusFilter
+} from '../constants/doctors-list.constants';
+import {
+  DOCTOR_TYPE_OPTIONS,
+  SPECIALTY_FOCUS_OPTIONS,
+  DOCTOR_TYPE_LABELS,
+  SPECIALTY_FOCUS_LABELS,
+  type HomeopathicDoctorType,
+  type HomeopathicSpecialtyFocus
+} from '../constants/doctor-types.constants';
+import type { SortDirection } from '../../../shared/constants/filter.constants';
+
+type Doctor = {
+  id: string;
+  name: string;
+  email?: string;
+  mobile?: string;
+  isActive: boolean;
+  createdAt?: string;
+  doctorProfile?: {
+    specialty?: string;
+    registrationNo?: string;
+    isAvailable?: boolean;
+    doctorType?: HomeopathicDoctorType;
+    specialtyFocus?: HomeopathicSpecialtyFocus | null;
+  };
+};
+
+function emptyCreateModel() {
+  return {
+    name: '',
+    email: '',
+    mobile: '',
+    password: '',
+    specialty: '',
+    registrationNo: '',
+    doctorType: 'JUNIOR_DOCTOR' as HomeopathicDoctorType,
+    specialtyFocus: '' as HomeopathicSpecialtyFocus | ''
+  };
+}
+
+function emptyEditModel() {
+  return {
+    name: '',
+    email: '',
+    mobile: '',
+    specialty: '',
+    registrationNo: '',
+    isAvailable: true,
+    doctorType: 'JUNIOR_DOCTOR' as HomeopathicDoctorType,
+    specialtyFocus: '' as HomeopathicSpecialtyFocus | ''
+  };
+}
+
+@Component({
+  selector: 'app-doctors-page',
+  imports: [CommonModule, FormField],
+  templateUrl: './doctors-page.html',
+  styleUrl: './doctors-page.scss'
+})
+export class DoctorsPage {
+  readonly doctorTypeOptions = DOCTOR_TYPE_OPTIONS;
+  readonly specialtyFocusOptions = SPECIALTY_FOCUS_OPTIONS;
+
+  readonly doctors = signal<Doctor[]>([]);
+  readonly pendingDoctors = signal<Doctor[]>([]);
+  selectedPendingDoctorIds: string[] = [];
+  selectedDoctorId = '';
+
+  readonly listFilterModel = signal({
+    searchTerm: '',
+    sortBy: DOCTORS_LIST_DEFAULTS.SORT_BY as DoctorSortField,
+    sortDirection: DOCTORS_LIST_DEFAULTS.SORT_DIRECTION as SortDirection,
+    statusFilter: DOCTORS_LIST_DEFAULTS.STATUS_FILTER as DoctorStatusFilter
+  });
+  readonly listFilterForm = form(this.listFilterModel);
+
+  readonly pendingFilterModel = signal({ searchTerm: '' });
+  readonly pendingFilterForm = form(this.pendingFilterModel);
+
+  readonly createModel = signal(emptyCreateModel());
+  readonly createForm = form(this.createModel);
+  readonly editModel = signal(emptyEditModel());
+  readonly editForm = form(this.editModel);
+
+  pageSize = DOCTORS_PAGE_SIZE;
+  doctorsPage = 1;
+  pendingPage = 1;
+  doctorsTotalPagesCount = 1;
+  pendingTotalPagesCount = 1;
+
+  readonly loading = signal(false);
+  readonly mutating = signal(false);
+  readonly error = signal('');
+  readonly message = signal('');
+
+  constructor(private readonly api: AdminApi) {
+    void this.load();
+  }
+
+  async load() {
+    this.loading.set(true);
+    this.error.set('');
+    const filters = this.listFilterModel();
+    const pendingFilters = this.pendingFilterModel();
+    try {
+      const [allDoctors, pending] = await Promise.all([
+        this.api.getDoctorsPaged({
+          page: this.doctorsPage,
+          pageSize: this.pageSize,
+          q: filters.searchTerm,
+          status: filters.statusFilter,
+          sortBy: filters.sortBy,
+          sortDirection: filters.sortDirection
+        }),
+        this.api.getPendingDoctorsPaged({
+          page: this.pendingPage,
+          pageSize: this.pageSize,
+          q: pendingFilters.searchTerm
+        })
+      ]);
+      this.doctors.set(allDoctors.doctors || []);
+      this.pendingDoctors.set(pending.pendingDoctors || []);
+      this.doctorsTotalPagesCount = Math.max(1, Number(allDoctors.pagination?.totalPages || 1));
+      this.pendingTotalPagesCount = Math.max(1, Number(pending.pagination?.totalPages || 1));
+      this.selectedPendingDoctorIds = [];
+      this.selectedDoctorId = this.selectedDoctorId || this.visibleDoctors()[0]?.id || '';
+      this.syncEditFormFromSelectedDoctor();
+    } catch {
+      this.error.set('Could not load doctors.');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  onListFilterChange() {
+    void this.setDoctorsPage(1);
+  }
+
+  onPendingFilterChange() {
+    void this.setPendingPage(1);
+  }
+
+  async approveDoctor(doctorId: string) {
+    this.message.set('');
+    this.error.set('');
+    this.mutating.set(true);
+    try {
+      await this.api.approveDoctor(doctorId);
+      this.message.set('Doctor approved.');
+      await this.load();
+    } catch {
+      this.error.set('Could not approve doctor.');
+    } finally {
+      this.mutating.set(false);
+    }
+  }
+
+  async rejectDoctor(doctorId: string) {
+    this.message.set('');
+    this.error.set('');
+    this.mutating.set(true);
+    try {
+      await this.api.rejectDoctor(doctorId);
+      this.message.set('Doctor kept as pending/inactive.');
+      await this.load();
+    } catch {
+      this.error.set('Could not update doctor status.');
+    } finally {
+      this.mutating.set(false);
+    }
+  }
+
+  async toggleDoctorStatus(doctorId: string, makeActive: boolean) {
+    this.message.set('');
+    this.error.set('');
+    this.mutating.set(true);
+    try {
+      await this.api.setDoctorStatus(doctorId, makeActive);
+      this.message.set(makeActive ? 'Doctor activated.' : 'Doctor deactivated.');
+      await this.load();
+      this.selectedDoctorId = doctorId;
+      this.syncEditFormFromSelectedDoctor();
+    } catch {
+      this.error.set('Could not update doctor status.');
+    } finally {
+      this.mutating.set(false);
+    }
+  }
+
+  async saveDoctorEdits() {
+    this.message.set('');
+    this.error.set('');
+    const doctorId = this.selectedDoctorId;
+    if (!doctorId) {
+      return;
+    }
+
+    const edit = this.editModel();
+    this.mutating.set(true);
+    try {
+      await this.api.updateDoctor(doctorId, {
+        name: edit.name.trim(),
+        email: edit.email.trim(),
+        mobile: edit.mobile.trim(),
+        specialty: edit.specialty.trim(),
+        registrationNo: edit.registrationNo.trim(),
+        isAvailable: edit.isAvailable,
+        doctorType: edit.doctorType,
+        specialtyFocus: edit.doctorType === 'SPECIALIST_CONSULTANT' ? edit.specialtyFocus || null : null
+      });
+      this.message.set('Doctor profile updated.');
+      await this.load();
+      this.selectedDoctorId = doctorId;
+      this.syncEditFormFromSelectedDoctor();
+    } catch {
+      this.error.set('Could not update doctor profile.');
+    } finally {
+      this.mutating.set(false);
+    }
+  }
+
+  async createDoctor() {
+    this.message.set('');
+    this.error.set('');
+    const create = this.createModel();
+    this.mutating.set(true);
+    try {
+      await this.api.createDoctor({
+        name: create.name.trim(),
+        email: create.email.trim(),
+        mobile: create.mobile.trim(),
+        password: create.password,
+        specialty: create.specialty.trim(),
+        registrationNo: create.registrationNo.trim(),
+        doctorType: create.doctorType,
+        specialtyFocus: create.doctorType === 'SPECIALIST_CONSULTANT' ? create.specialtyFocus || null : null
+      });
+      this.message.set('Doctor created successfully.');
+      this.createModel.set(emptyCreateModel());
+      await this.load();
+    } catch {
+      this.error.set('Could not create doctor.');
+    } finally {
+      this.mutating.set(false);
+    }
+  }
+
+  togglePendingDoctorSelection(doctorId: string, checked: boolean) {
+    if (checked) {
+      if (!this.selectedPendingDoctorIds.includes(doctorId)) {
+        this.selectedPendingDoctorIds = [...this.selectedPendingDoctorIds, doctorId];
+      }
+      return;
+    }
+
+    this.selectedPendingDoctorIds = this.selectedPendingDoctorIds.filter((id) => id !== doctorId);
+  }
+
+  isPendingDoctorSelected(doctorId: string) {
+    return this.selectedPendingDoctorIds.includes(doctorId);
+  }
+
+  toggleSelectAllVisiblePending(checked: boolean) {
+    const visiblePendingIds = this.visiblePendingDoctors().map((doctor) => doctor.id);
+    if (checked) {
+      this.selectedPendingDoctorIds = Array.from(new Set([...this.selectedPendingDoctorIds, ...visiblePendingIds]));
+      return;
+    }
+
+    this.selectedPendingDoctorIds = this.selectedPendingDoctorIds.filter((id) => !visiblePendingIds.includes(id));
+  }
+
+  allVisiblePendingSelected() {
+    const visiblePending = this.visiblePendingDoctors();
+    if (!visiblePending.length) {
+      return false;
+    }
+
+    return visiblePending.every((doctor) => this.selectedPendingDoctorIds.includes(doctor.id));
+  }
+
+  async bulkApproveSelected() {
+    if (!this.selectedPendingDoctorIds.length) {
+      return;
+    }
+
+    this.message.set('');
+    this.error.set('');
+    this.mutating.set(true);
+    try {
+      await Promise.all(this.selectedPendingDoctorIds.map((id) => this.api.approveDoctor(id)));
+      this.message.set(`${this.selectedPendingDoctorIds.length} doctors approved.`);
+      await this.load();
+    } catch {
+      this.error.set('Could not complete bulk approve.');
+    } finally {
+      this.mutating.set(false);
+    }
+  }
+
+  async bulkRejectSelected() {
+    if (!this.selectedPendingDoctorIds.length) {
+      return;
+    }
+
+    this.message.set('');
+    this.error.set('');
+    this.mutating.set(true);
+    try {
+      await Promise.all(this.selectedPendingDoctorIds.map((id) => this.api.rejectDoctor(id)));
+      this.message.set(`${this.selectedPendingDoctorIds.length} doctors kept pending.`);
+      await this.load();
+    } catch {
+      this.error.set('Could not complete bulk reject.');
+    } finally {
+      this.mutating.set(false);
+    }
+  }
+
+  async setDoctorsPage(page: number) {
+    this.doctorsPage = page;
+    await this.load();
+  }
+
+  async setPendingPage(page: number) {
+    this.pendingPage = page;
+    await this.load();
+  }
+
+  visibleDoctors() {
+    return this.doctors();
+  }
+
+  visiblePendingDoctors() {
+    return this.pendingDoctors();
+  }
+
+  doctorsTotalPages() {
+    return this.doctorsTotalPagesCount;
+  }
+
+  pendingTotalPages() {
+    return this.pendingTotalPagesCount;
+  }
+
+  doctorsPages() {
+    return Array.from({ length: this.doctorsTotalPages() }, (_, index) => index + 1);
+  }
+
+  pendingPages() {
+    return Array.from({ length: this.pendingTotalPages() }, (_, index) => index + 1);
+  }
+
+  selectedDoctorDetails() {
+    return this.doctors().find((doctor) => doctor.id === this.selectedDoctorId) || null;
+  }
+
+  setSelectedDoctor(doctorId: string) {
+    this.selectedDoctorId = doctorId;
+    this.syncEditFormFromSelectedDoctor();
+  }
+
+  private syncEditFormFromSelectedDoctor() {
+    const selected = this.selectedDoctorDetails();
+    if (!selected) {
+      return;
+    }
+
+    this.editModel.set({
+      name: selected.name || '',
+      email: selected.email || '',
+      mobile: selected.mobile || '',
+      specialty: selected.doctorProfile?.specialty || '',
+      registrationNo: selected.doctorProfile?.registrationNo || '',
+      isAvailable: selected.doctorProfile?.isAvailable ?? true,
+      doctorType: selected.doctorProfile?.doctorType || 'JUNIOR_DOCTOR',
+      specialtyFocus: selected.doctorProfile?.specialtyFocus || ''
+    });
+  }
+
+  isSpecialistType(type: HomeopathicDoctorType) {
+    return type === 'SPECIALIST_CONSULTANT';
+  }
+
+  doctorTypeLabel(type?: HomeopathicDoctorType) {
+    return type ? DOCTOR_TYPE_LABELS[type] : 'Not set';
+  }
+
+  specialtyFocusLabel(focus?: HomeopathicSpecialtyFocus | null) {
+    return focus ? SPECIALTY_FOCUS_LABELS[focus] : '';
+  }
+}
+

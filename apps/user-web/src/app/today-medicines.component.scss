@@ -1,0 +1,141 @@
+.medicine-panel {
+  display: grid;
+  gap: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #fff;
+}
+
+.panel-head h2 {
+  margin: 0 0 0.25rem;
+}
+
+.muted {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.attention-block {
+  border: 1px solid #fcd34d;
+  border-radius: 14px;
+  padding: 0.85rem;
+  background: #fffbeb;
+}
+
+.attention-block h3,
+section h3 {
+  margin: 0 0 0.35rem;
+}
+
+.consult-card.attention {
+  border-color: #f59e0b;
+}
+
+.status-pill {
+  display: inline-block;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-pill.missed,
+.status-missed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-skipped {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-pending {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-taken,
+.consult-card.done {
+  opacity: 0.92;
+}
+
+.status-taken {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.snooze-default {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.5rem 0 0.75rem;
+  font-size: 0.9rem;
+}
+
+.snooze-default select {
+  max-width: 180px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.chip-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.45rem;
+}
+
+.chip-row.compact {
+  margin-top: 0.35rem;
+}
+
+.chip {
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #fff;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.reason-form textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
+  resize: vertical;
+  font: inherit;
+}
+
+button.primary {
+  border: 0;
+  border-radius: 8px;
+  background: #0f62fe;
+  color: #fff;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+}
+
+button.secondary {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #334155;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

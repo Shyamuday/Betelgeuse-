@@ -1,12 +1,20 @@
 import twilio from 'twilio';
+import { PrismaInAppNotificationProvider } from './services/in-app-notifications.js';
 
 export type NotificationChannel = 'IN_APP' | 'SMS' | 'WHATSAPP' | 'EMAIL' | 'PUSH';
-export type NotificationEventType = 'DOSE_REMINDER' | 'DOSE_MISSED' | 'BOOKING_CONFIRMED' | 'DOCTOR_ASSIGNED' | 'PRESCRIPTION_READY';
+export type NotificationEventType =
+  | 'DOSE_REMINDER'
+  | 'DOSE_MISSED'
+  | 'BOOKING_CONFIRMED'
+  | 'DOCTOR_ASSIGNED'
+  | 'PRESCRIPTION_READY'
+  | 'PLATFORM_BROADCAST';
 
 export type NotificationMessage = {
   eventType: NotificationEventType;
   channel: NotificationChannel;
-  recipientId: string;
+  recipientId?: string;
+  recipientStoreStaffId?: string;
   recipientName?: string | null;
   recipientMobile?: string | null;
   recipientEmail?: string | null;
@@ -116,7 +124,7 @@ export function createNotificationService(enabledChannels: NotificationChannel[]
   const fallback = new ConsoleNotificationProvider('notification-fallback');
   const twilioProvider = createTwilioProviderOrNull();
   const providers: Partial<Record<NotificationChannel, NotificationProvider>> = {
-    IN_APP: new ConsoleNotificationProvider('notification-in-app'),
+    IN_APP: new PrismaInAppNotificationProvider(),
     SMS: twilioProvider || new ConsoleNotificationProvider('notification-sms'),
     WHATSAPP: twilioProvider || new ConsoleNotificationProvider('notification-whatsapp'),
     EMAIL: new ConsoleNotificationProvider('notification-email'),

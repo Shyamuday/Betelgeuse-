@@ -1,0 +1,12 @@
+.page { padding: 0.5rem; }
+.page-header { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+.muted { color: #64748b; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { border-top: 1px solid #e5e7eb; padding: 0.5rem; text-align: left; font-size: 0.9rem; }
+.overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.45); display: grid; place-items: center; }
+.modal { background: #fff; padding: 1rem; border-radius: 12px; width: min(420px, 92vw); display: grid; gap: 0.5rem; }
+.modal label { display: grid; gap: 0.2rem; font-size: 0.85rem; }
+.check { display: flex; align-items: center; gap: 0.4rem; }
+.actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+.btn-primary { background: #4f46e5; color: #fff; border: none; border-radius: 8px; padding: 0.45rem 0.75rem; }
+.toast { position: fixed; bottom: 1rem; right: 1rem; background: #0f766e; color: #fff; padding: 0.6rem 1rem; border-radius: 8px; }

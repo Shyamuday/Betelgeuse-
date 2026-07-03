@@ -1,0 +1,66 @@
+<div class="earn-page">
+  <div class="earn-hdr">
+    <div>
+      <h2>My Earnings</h2>
+      <p>Salary, consultation share, and net estimated pay</p>
+    </div>
+    <input type="month" [formField]="monthForm.selectedMonth" (change)="load()" />
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading earnings…</div>
+  } @else if (error()) {
+    <div class="error">{{ error() }}</div>
+  } @else {
+    <div class="cards">
+      <div class="card">
+        <div class="lbl">Monthly Salary (Net)</div>
+        <div class="val">₹{{ formatPaise(payslip()?.salary?.netPaise ?? 0) }}</div>
+        <div class="sub">Gross ₹{{ formatPaise(payslip()?.salary?.grossPaise ?? 0) }} · Leave {{ payslip()?.salary?.leaveDays ?? 0 }} days</div>
+      </div>
+      <div class="card">
+        <div class="lbl">Consultation Earnings ({{ payslip()?.consultation?.doctorSharePercent ?? 60 }}%)</div>
+        <div class="val">₹{{ formatPaise(payslip()?.consultation?.consultationEarningsInPaise ?? 0) }}</div>
+        <div class="sub">{{ payslip()?.consultation?.paidConsultations ?? 0 }} paid consultations this month</div>
+      </div>
+      <div class="card net">
+        <div class="lbl">Total Estimated Pay</div>
+        <div class="val">₹{{ formatPaise(payslip()?.totalEstimatedPayInPaise ?? 0) }}</div>
+        <div class="sub">Salary net + consultation share</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Last 3 Months</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th class="num">Gross Salary (₹)</th>
+            <th class="num">Leave Days</th>
+            <th class="num">Net Salary (₹)</th>
+            <th class="num">Total Est. Pay (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of history(); track row.month) {
+            <tr>
+              <td>{{ row.month }}</td>
+              <td class="num">{{ formatPaise(row.grossPaise) }}</td>
+              <td class="num">{{ row.leaveDays }}</td>
+              <td class="num">{{ formatPaise(row.netPaise) }}</td>
+              <td class="num">{{ formatPaise(row.totalEstimatedPayInPaise) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (consultationSummary()) {
+      <div class="panel">
+        <h3>Recent Consultation Payments</h3>
+        <p class="sub">Showing up to 50 recent paid consultations from dashboard summary.</p>
+      </div>
+    }
+  }
+</div>

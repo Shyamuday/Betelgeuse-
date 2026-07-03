@@ -1,0 +1,51 @@
+
+    <div class="page">
+      <div class="page-header">
+        <div>
+          <h2>Platform admins</h2>
+          <p class="muted">Create and manage super-admin accounts for admin-web</p>
+        </div>
+        <button type="button" class="btn-primary" (click)="openCreate()">+ Add admin</button>
+      </div>
+
+      @if (loading()) {
+        <p class="loading-text">Loading admins…</p>
+      } @else if (error() && !admins().length) {
+        <p class="error">{{ error() }}</p>
+      } @else {
+        <div class="grid">
+          @for (admin of admins(); track admin.id) {
+            <article class="card">
+              <strong>{{ admin.name }}</strong>
+              <p>{{ admin.email }}</p>
+              @if (admin.mobile) { <small>{{ admin.mobile }}</small> }
+              <span class="badge" [class.off]="!admin.isActive">{{ admin.isActive ? 'Active' : 'Inactive' }}</span>
+              <button type="button" class="btn-sec" (click)="toggleStatus(admin)">
+                {{ admin.isActive ? 'Deactivate' : 'Activate' }}
+              </button>
+            </article>
+          }
+        </div>
+      }
+    </div>
+
+    @if (modal()) {
+      <div class="overlay" (click)="closeModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <h3>New admin user</h3>
+          <label>Name <input [formField]="draftForm.name" /></label>
+          <label>Email <input type="email" [formField]="draftForm.email" /></label>
+          <label>Password <input type="password" [formField]="draftForm.password" /></label>
+          <label>Mobile <input [formField]="draftForm.mobile" /></label>
+          @if (error()) { <p class="error">{{ error() }}</p> }
+          <div class="actions">
+            <button type="button" class="btn-ghost" (click)="closeModal()">Cancel</button>
+            <button type="button" class="btn-primary" [disabled]="saving()" (click)="create()">
+              {{ saving() ? 'Creating…' : 'Create' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (toast()) { <div class="toast">{{ toast() }}</div> }

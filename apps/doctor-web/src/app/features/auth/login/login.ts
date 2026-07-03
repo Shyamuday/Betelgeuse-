@@ -1,92 +1,110 @@
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { form, FormField, required } from '@angular/forms/signals';
+import { DEFAULT_AUTHED_ROUTE } from '../../../core/constants/app-routes.constants';
 import { Auth } from '../../../core/services/auth';
-import { environment } from '../../../../environments/environment';
-import { GoogleSignInButtonComponent } from '../google-sign-in-button/google-sign-in-button';
+import { DevLoginPanelComponent } from '@vitalis/platform-ui';
+import { DEV_DEMO_ACCOUNTS } from '../../../core/constants/dev-demo.constants';
+import type { DevFillCredentials } from '@vitalis/platform-ui';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, RouterLink, GoogleSignInButtonComponent],
+  imports: [FormField, DevLoginPanelComponent],
   templateUrl: './login.html',
-  styleUrl: './login.scss',
+  styleUrl: './login.scss'
 })
 export class Login {
-  readonly patientPortalUrl = environment.patientPortalUrl?.trim() || '';
-  readonly googleClientId = environment.googleClientId?.trim() || '';
+  private readonly auth = inject(Auth);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
-  mode: 'signin' | 'enroll' = 'signin';
+  mode = signal<'signin' | 'enroll'>('signin');
 
-  email = '';
-  password = '';
-  error = '';
-  message = '';
-  submitting = false;
-  name = '';
-  mobile = '';
-  specialty = '';
-  registrationNo = '';
+  readonly signInModel = signal({
+    email: DEV_DEMO_ACCOUNTS.doctor.email as string,
+    password: DEV_DEMO_ACCOUNTS.password as string
+  });
+  readonly signInForm = form(this.signInModel, (schema) => {
+    required(schema.email, { message: 'Email is required' });
+    required(schema.password, { message: 'Password is required' });
+  });
 
-  constructor(
-    private readonly auth: Auth,
-    private readonly router: Router
-  ) {}
+  readonly enrollModel = signal({
+    name: '',
+    mobile: '',
+    specialty: '',
+    registrationNo: ''
+  });
+  readonly enrollForm = form(this.enrollModel, (schema) => {
+    required(schema.name, { message: 'Name is required' });
+    required(schema.specialty, { message: 'Specialty is required' });
+  });
+
+  error = signal('');
+  message = signal('');
+  submitting = signal(false);
+
+  private navigateAfterLogin(): void {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    void this.router.navigateByUrl(returnUrl && returnUrl.startsWith('/') ? returnUrl : `/${DEFAULT_AUTHED_ROUTE}`);
+  }
 
   async submit() {
-    this.error = '';
-    this.message = '';
-    this.submitting = true;
+    if (this.signInForm().invalid()) return;
+    const { email, password } = this.signInModel();
+    this.error.set('');
+    this.message.set('');
+    this.submitting.set(true);
     try {
-      const result = await this.auth.login(this.email, this.password);
+      const result = await this.auth.login(email, password);
       if (!result.ok) {
-        this.error = result.message;
+        this.error.set(result.message);
         return;
       }
-      void this.router.navigateByUrl('/dashboard');
+      void this.navigateAfterLogin();
     } finally {
-      this.submitting = false;
+      this.submitting.set(false);
     }
+  }
+
+  onDevLoggedIn() {
+    void this.navigateAfterLogin();
+  }
+
+  applyDevFill(credentials: DevFillCredentials) {
+    this.signInModel.update((model) => ({
+      ...model,
+      ...(credentials.email ? { email: credentials.email } : {}),
+      ...(credentials.password ? { password: credentials.password } : {})
+    }));
   }
 
   async enroll() {
-    this.error = '';
-    this.message = '';
-    this.submitting = true;
+    if (this.signInForm().invalid() || this.enrollForm().invalid()) return;
+    const { email, password } = this.signInModel();
+    const { name, mobile, specialty, registrationNo } = this.enrollModel();
+    this.error.set('');
+    this.message.set('');
+    this.submitting.set(true);
     try {
       const result = await this.auth.enrollDoctor({
-        name: this.name,
-        email: this.email,
-        mobile: this.mobile || undefined,
-        password: this.password,
-        specialty: this.specialty,
-        registrationNo: this.registrationNo || undefined
+        name,
+        email,
+        mobile: mobile || undefined,
+        password,
+        specialty,
+        registrationNo: registrationNo || undefined
       });
 
       if (!result.ok) {
-        this.error = result.message;
+        this.error.set(result.message);
         return;
       }
 
-      this.mode = 'signin';
-      this.message = result.message;
+      this.mode.set('signin');
+      this.message.set(result.message);
     } finally {
-      this.submitting = false;
-    }
-  }
-
-  async googleSignIn(idToken: string) {
-    this.error = '';
-    this.message = '';
-    this.submitting = true;
-    try {
-      const result = await this.auth.loginWithGoogle(idToken);
-      if (!result.ok) {
-        this.error = result.message;
-        return;
-      }
-      void this.router.navigateByUrl('/dashboard');
-    } finally {
-      this.submitting = false;
+      this.submitting.set(false);
     }
   }
 }

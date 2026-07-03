@@ -3,6 +3,11 @@ node_modules/
 apps/*/node_modules/
 .pnpm-store/
 
+# Deploy artifacts (generated on EC2)
+deploy/static/
+deploy/.env
+deploy/certbot/
+
 # Build output
 dist/
 apps/*/dist/
