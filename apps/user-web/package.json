@@ -5,10 +5,6 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "build:mobile": "ng build && npx cap sync",
-    "cap:sync": "npx cap sync",
-    "cap:android": "npx cap open android",
-    "cap:ios": "npx cap open ios",
     "lint": "tsc -p tsconfig.app.json --noEmit",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -24,10 +20,6 @@
     "@angular/forms": "^22.0.5",
     "@angular/platform-browser": "^22.0.5",
     "@angular/router": "^22.0.5",
-    "@capacitor/android": "^6.2.1",
-    "@capacitor/cli": "^6.2.1",
-    "@capacitor/core": "^6.2.1",
-    "@capacitor/ios": "^6.2.1",
     "rxjs": "~7.8.0",
     "socket.io-client": "^4.8.1",
     "tslib": "^2.3.0"

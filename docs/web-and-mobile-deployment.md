@@ -1,51 +1,52 @@
 # Web and mobile deployment from the same code
 
-Vitalis uses **one Angular application per audience** (patient, doctor, admin). Each app is built once and deployed **as a website** (static hosting) and **packaged as a native shell** (Ionic + Capacitor) without duplicating business logic.
+Vitalis uses **one Angular application per audience**. Each app is built once and deployed **as a website** (static hosting) and, where applicable, **packaged as a native shell** (Ionic + Capacitor) without duplicating business logic.
 
 ## Architecture
 
-| Audience | Source app | Website output | Mobile wrapper |
-|----------|------------|----------------|----------------|
-| Patient | `apps/web` | Static files from `ng build` | `apps/mobile-patient` |
+| Audience | Source app | Website | Mobile wrapper (Capacitor 8) |
+|----------|------------|---------|------------------------------|
+| Patient | `apps/user-web` | `ng build` → `dist/user-web/browser` | `apps/mobile-patient` |
 | Doctor | `apps/doctor-web` | Same | `apps/mobile-doctor` |
-| Admin | `apps/admin-web` | Same | `apps/mobile-admin` |
+| Platform admin | `apps/admin-web` | Same (also embedded in operations) | `apps/mobile-admin` |
+| Operations staff | `apps/operations-web` | Port 5800 — **web only** (no store shell yet) | — |
 
-The folders under `apps/mobile-*` are **thin Capacitor projects**. Their WebView loads the **production build** of the matching Angular app copied into `www/browser`. The placeholder Ionic pages under `mobile-*/src` are only relevant if you run `ionic serve` inside the shell; **store builds should always run `build:spa` + `sync`** so patients and staff see the real Vitalis UI.
+The folders under `apps/mobile-*` are **thin Ionic/Capacitor projects**. Their WebView loads the **production build** of the matching Angular app copied into `www/browser`. Placeholder pages under `mobile-*/src` are only for `ionic serve` inside the shell; **store builds must run `sync`** so users see the real Vitalis UI.
+
+> **Note:** `apps/web` is a legacy patient fork from an older branch. Use **`apps/user-web`** for patient web and mobile.
 
 ## Web deployment
 
-1. Set production values in each app’s `src/environments/environment.prod.ts` (API base URL, Supabase URL/key as needed).
-2. From the app directory, build with the default configuration (typically `base href="/"`):
+1. Set production values in each app’s `src/environments/environment.prod.ts` (API base URL, etc.).
+2. Build from the repository root:
 
    ```bash
-   npm run build --prefix apps/web
-   npm run build --prefix apps/doctor-web
-   npm run build --prefix apps/admin-web
+   npm run build:user
+   npm run build:doctor
+   npm run build:operations
    ```
 
-3. Upload the build output to your host. With the Angular application builder, artifacts usually land under `dist/<project>/browser` when no custom `outputPath` is set; if your `angular.json` only sets `browser`, check the CLI output for **Output location**.
-
-4. Configure the host to serve `index.html` for client-side routes (SPA fallback).
-
-5. Run the API (`apps/api`) on a reachable HTTPS origin and ensure CORS allows your web origins if the browser calls the API from a different domain.
+3. Deploy the build output (`dist/<project>/browser`) to static hosting with SPA fallback (`index.html` for client routes).
+4. Run the API (`apps/api`) on HTTPS and allow your web origins in CORS.
 
 ## Mobile deployment (Capacitor)
 
-Mobile builds use the **same** Angular source but a **relative base href** so assets resolve inside the WebView.
+Mobile builds use the **same** Angular source with **`--base-href ./`** so assets resolve inside the WebView.
 
-### Per-app commands
-
-From repository root:
+### Commands (from repository root)
 
 ```bash
-# Patient — builds apps/web into mobile-patient/www, then updates Android/iOS assets
+# Patient — builds user-web into mobile-patient/www, then cap sync
 npm run mobile:patient:sync
+npm run mobile:patient:android   # open Android Studio
 
 # Doctor
 npm run mobile:doctor:sync
+npm run mobile:doctor:android
 
-# Admin
+# Platform admin (admin-web SPA, not operations-web)
 npm run mobile:admin:sync
+npm run mobile:admin:android
 ```
 
 Equivalent from each mobile directory:
@@ -54,48 +55,52 @@ Equivalent from each mobile directory:
 npm run sync --prefix apps/mobile-patient
 ```
 
-`sync` runs `build:spa` (production Angular build with `--base-href ./` and output under `../mobile-*/www`) and then `npx cap sync`.
+`sync` runs `build:spa` (production Angular build with `--base-href ./` and output under `apps/mobile-*/www`) and then `npx cap sync`.
 
 ### Native projects
 
-- **Android:** after sync, open `apps/mobile-*/android` in Android Studio, set signing, then build an AAB/APK for Play Console.
-- **iOS (macOS only):** from each `apps/mobile-*` folder, run `npx cap add ios` once if the `ios` folder is not present, then `npx cap open ios` and archive in Xcode.
+- **Android:** after sync, open `apps/mobile-*/android` in Android Studio, configure signing, build AAB/APK.
+- **iOS (macOS only):** run `npx cap add ios` once if needed, then `npx cap open ios` and archive in Xcode.
 
-### App identifiers
+### App identifiers (`capacitor.config.ts`)
 
-Configured in each `capacitor.config.ts`:
+| Shell | Bundle ID | Store name |
+|-------|-----------|------------|
+| `mobile-patient` | `in.vitaliscare.patient` | Vitalis Patient |
+| `mobile-doctor` | `in.vitaliscare.doctor` | Vitalis Doctor |
+| `mobile-admin` | `in.vitaliscare.admin` | Vitalis Admin |
 
-- Patient: `in.vitaliscare.patient` — **Vitalis Patient**
-- Doctor: `in.vitaliscare.doctor` — **Vitalis Doctor**
-- Admin: `in.vitaliscare.admin` — **Vitalis Admin**
+Patient mobile uses the **`mobile-patient`** shell only (not an in-app Capacitor config under `user-web`).
 
 ## Environments and secrets
 
-- **Never** commit production API keys or secrets; use CI variables or host-specific env injection.
-- Patient, doctor, and admin SPAs read `environment.prod.ts` at **build time**. Rebuild (web and/or mobile) when URLs or feature flags change.
-- The API (`apps/api`) uses its own environment (e.g. `JWT_SECRET`, database URL, Razorpay, Twilio) on the server, independent of the front-end build.
+- **Never** commit production API keys or secrets; use CI variables or host env injection.
+- SPAs read `environment.prod.ts` at **build time**. Rebuild web and/or mobile when URLs or feature flags change.
+- The API uses its own env (`JWT_SECRET`, `DATABASE_URL`, Razorpay, Twilio), independent of front-end builds.
 
 ## Repository hygiene
 
-- `apps/mobile-*/www/` is **gitignored**; it is produced by `build:spa` / `sync`.
-- Generated Android build folders may be ignored per root `.gitignore`; commit the **Capacitor Android project** so CI and teammates can open/sync without re-running `cap add android`.
+- `apps/mobile-*/www/` is **gitignored**; produced by `build:spa` / `sync`.
+- Commit Capacitor **Android** project folders so teammates can sync without re-running `cap add android`.
 
 ## CI suggestion
 
-- **Web:** lint + build `apps/web`, `apps/doctor-web`, `apps/admin-web`; optionally upload artifacts to hosting.
-- **Mobile:** optionally add a job that runs `npm run mobile:patient:sync` (etc.) on a runner with Android SDK **or** only verifies `build:spa` and relies on local/Xcode workflows for store binaries.
+- **Web:** lint + `npm run build:all` (user-web, doctor-web, operations-web).
+- **Mobile:** optionally verify `npm run mobile:patient:sync` on a runner with Android SDK, or only run `build:spa` in CI and leave store binaries to local/Xcode workflows.
 
 ## Quick reference
 
 | Goal | Command |
 |------|---------|
-| Develop patient site | `npm run dev:web` |
-| Ship patient site | `npm run build --prefix apps/web` → deploy output |
-| Ship patient app binary | `npm run mobile:patient:sync` → Android Studio / Xcode |
+| Develop patient site | `npm run dev:user` |
+| Ship patient site | `npm run build:user` → deploy `dist/user-web/browser` |
+| Ship patient app | `npm run mobile:patient:sync` → Android Studio / Xcode |
+| Develop doctor site | `npm run dev:doctor` |
+| Ship doctor app | `npm run mobile:doctor:sync` |
+| Operations staff portal | `npm run dev:operations` (web only, port 5800) |
+| Platform admin mobile | `npm run mobile:admin:sync` |
 
-Same pattern for `doctor-web` / `mobile-doctor` and `admin-web` / `mobile-admin`.
+## Tooling
 
-## Tooling (lint & format)
-
-- **Lint:** Every app under `apps/*` uses the same pattern: `npm run lint` runs **`tsc -p tsconfig.app.json --noEmit`** (API uses project `tsconfig` via its script). Ionic shells no longer use ESLint for CI.
-- **Format:** Repo-wide Prettier lives at **`.prettierrc`** (root). From the monorepo root, after `npm install`: **`npm run format`** (write) or **`npm run format:check`** (CI-style check). Paths are scoped in **`.prettierignore`** (e.g. `node_modules`, `www`, native projects).
+- **Lint:** `npm run lint` per app (`tsc -p tsconfig.app.json --noEmit` for Angular apps).
+- **Format:** root Prettier (`.prettierrc`) — `npm run format` / `format:check` when configured at root.

@@ -20,9 +20,21 @@ For homeopathic doctor types (Chief Consultant, Intern, Specialist, etc.), see *
 
 For AWS EC2 sizing and production deployment (100–500 patients/day), see **[docs/infrastructure-ec2.md](docs/infrastructure-ec2.md)**.
 
+For web + Ionic/Capacitor store builds, see **[docs/web-and-mobile-deployment.md](docs/web-and-mobile-deployment.md)**.
+
+## Mobile (Ionic + Capacitor)
+
+| Store app | Source SPA | Sync command |
+|-----------|------------|--------------|
+| Vitalis Patient | `apps/user-web` | `npm run mobile:patient:sync` |
+| Vitalis Doctor | `apps/doctor-web` | `npm run mobile:doctor:sync` |
+| Vitalis Admin | `apps/admin-web` | `npm run mobile:admin:sync` |
+
+Operations staff use **`apps/operations-web`** in the browser only (port 5800).
+
 ## Stack
 
-- Patient web app: `apps/user-web` (Angular + Capacitor)
+- Patient web app: `apps/user-web` (Angular); native shell: `apps/mobile-patient` (Ionic + Capacitor 8)
 - Operations portal: `apps/operations-web` (staff, partners, store, embedded admin)
 - Doctor web app: `apps/doctor-web` (Angular)
 - Admin UI modules: `apps/admin-web` (compiled into operations-web)

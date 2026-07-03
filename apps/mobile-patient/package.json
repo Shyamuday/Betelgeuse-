@@ -7,7 +7,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "build:spa": "npm run build --prefix ../web -- --configuration production --base-href ./ --output-path ../mobile-patient/www",
+    "build:spa": "npm run build --prefix ../user-web -- --configuration production --base-href ./ --output-path ../mobile-patient/www",
     "sync": "npm run build:spa && npx cap sync",
     "open:android": "npx cap open android",
     "open:ios": "npx cap open ios",
@@ -55,5 +55,5 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.9.2"
   },
-  "description": "An Ionic project"
+  "description": "Capacitor shell for patient app (builds apps/user-web)"
 }
