@@ -1,14 +1,15 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { PlatformAuthService } from './platform-auth.service';
 import type { AuthResponse } from '../models';
+import type { StaffLoginResponse } from './platform-auth.service';
 import type { DevAppGuide } from '../core/types/dev-demo.types';
 
 export type { DevFillCredentials, DevPersona, DevAppGuide } from '../core/types/dev-demo.types';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class DevDemoService {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(PlatformAuthService);
@@ -23,11 +24,11 @@ export class DevDemoService {
 
   async quickLogin(personaId: string) {
     const response = await firstValueFrom(
-      this.http.post<AuthResponse>(`${environment.apiUrl}/dev/quick-login`, {
+      this.http.post<AuthResponse & StaffLoginResponse>(`${environment.apiUrl}/dev/quick-login`, {
         persona: personaId,
         app: environment.devAppId
       })
     );
-    this.auth.applyDevAuth(response);
+    this.auth.applyLoginResponse(response);
   }
 }

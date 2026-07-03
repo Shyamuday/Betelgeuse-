@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { AppFooterComponent } from './app-footer.component';
 import { AppHeaderComponent } from './app-header.component';
 import { AuthFormOverlayComponent } from './auth/auth-form-overlay.component';
@@ -9,8 +9,8 @@ import { AppOverlayService } from './overlay.service';
 
 @Component({
   selector: 'app-treatments',
-  imports: [CommonModule, AppHeaderComponent, AppFooterComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [CommonModule, AppHeaderComponent, AppFooterComponent]
+,
   templateUrl: './treatments.component.html',
 })
 export class TreatmentsComponent {

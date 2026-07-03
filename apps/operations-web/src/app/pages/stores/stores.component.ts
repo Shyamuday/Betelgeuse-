@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HrApiService } from '../../services/hr-api.service';
 import { StoreInfo } from '../../models';
@@ -8,7 +8,6 @@ import { TOAST_DURATION_MS } from '../../core/constants/timing.constants';
   selector: 'app-stores',
   imports: [FormsModule],
   templateUrl: './stores.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './stores.component.scss'
 })
 export class StoresComponent implements OnInit {
@@ -24,7 +23,7 @@ export class StoresComponent implements OnInit {
 
   storeForm = { name: '', code: '', address: '', phone: '' };
   managerForm = { name: '', email: '', password: '', designation: 'Store Manager', joiningDate: '' };
-  staffForm = { name: '', staffCode: '', pin: '', designation: 'Store Assistant', phone: '', joiningDate: '' };
+  staffForm = { name: '', staffCode: '', email: '', password: '', designation: 'Store Assistant', phone: '', joiningDate: '' };
 
   ngOnInit(): void { this.load(); }
 
@@ -55,7 +54,7 @@ export class StoresComponent implements OnInit {
 
   openCreateStaff(store: StoreInfo): void {
     this.selectedStore.set(store);
-    this.staffForm = { name: '', staffCode: '', pin: '', designation: 'Store Assistant', phone: '', joiningDate: '' };
+    this.staffForm = { name: '', staffCode: '', email: '', password: '', designation: 'Store Assistant', phone: '', joiningDate: '' };
     this.error.set('');
     this.modal.set('staff');
   }
@@ -96,10 +95,10 @@ export class StoresComponent implements OnInit {
   }
 
   saveStaff(): void {
-    if (!this.staffForm.name || !this.staffForm.staffCode || !this.staffForm.pin) {
-      this.error.set('Name, staff code and PIN are required'); return;
+    if (!this.staffForm.name || !this.staffForm.staffCode || !this.staffForm.email || !this.staffForm.password) {
+      this.error.set('Name, staff code, email, and password are required'); return;
     }
-    if (this.staffForm.pin.length < 4) { this.error.set('PIN must be at least 4 digits'); return; }
+    if (this.staffForm.password.length < 8) { this.error.set('Password must be at least 8 characters'); return; }
     this.saving.set(true);
     this.error.set('');
     this.api.createStoreStaff(this.selectedStore()!.id, this.staffForm).subscribe({

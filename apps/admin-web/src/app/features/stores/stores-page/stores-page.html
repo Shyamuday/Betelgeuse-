@@ -162,10 +162,11 @@
         <div class="modal" (click)="$event.stopPropagation()">
           <div class="mhdr"><h3>🧑‍💼 Add Staff — {{ selectedStore()?.name }}</h3><button class="close-btn" (click)="closeModal()">✕</button></div>
           <div class="mbody">
-            <div class="info-box">Staff log in with a <strong>PIN</strong> on the Store App — no email needed</div>
+            <div class="info-box">Staff log in at the <strong>Operations portal</strong> (port 5800) with email and password</div>
             <div class="fg"><label>Full Name *</label><input [(ngModel)]="staffForm.name" placeholder="Staff Name" /></div>
             <div class="fg"><label>Staff Code * (unique ID)</label><input [(ngModel)]="staffForm.staffCode" placeholder="S001" style="text-transform:uppercase" /></div>
-            <div class="fg"><label>PIN * (4–8 digits)</label><input type="password" [(ngModel)]="staffForm.pin" maxlength="8" placeholder="e.g. 1234" /></div>
+            <div class="fg"><label>Email *</label><input type="email" [(ngModel)]="staffForm.email" placeholder="staff@store.vitalis.local" /></div>
+            <div class="fg"><label>Password * (min 8 characters)</label><input type="password" [(ngModel)]="staffForm.password" placeholder="Initial password" /></div>
             <div class="fg"><label>Designation</label><input [(ngModel)]="staffForm.designation" placeholder="Store Assistant" /></div>
             <div class="fg"><label>Phone</label><input type="tel" [(ngModel)]="staffForm.phone" /></div>
             <div class="fg"><label>Joining Date</label><input type="date" [(ngModel)]="staffForm.joiningDate" /></div>

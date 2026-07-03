@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable ServiceService } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -11,7 +11,7 @@ import type {
   RubricSearchResult
 } from './case-analysis-page.types';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class CaseAnalysisApiService {
   private readonly apiBase = environment.apiUrl;
 

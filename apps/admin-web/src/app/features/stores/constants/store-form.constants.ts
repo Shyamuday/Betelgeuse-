@@ -14,12 +14,10 @@ export const STORE_FORM_DEFAULTS = {
 } as const;
 
 export const STORE_VALIDATION = {
-  PASSWORD_MIN_LENGTH: 6,
-  PIN_MIN_LENGTH: 4,
-  PIN_MAX_LENGTH: 8
+  PASSWORD_MIN_LENGTH: 8
 } as const;
 
-export const STORE_APP_PORT = 4300;
+export const STORE_APP_PORT = 5800;
 
 export const STORE_STATUS_COLORS = {
   ACTIVE: '#4ade80',

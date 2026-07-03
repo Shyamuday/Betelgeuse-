@@ -1,12 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  computed,
-  signal,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RoleTaskGuideComponent } from './shared/role-task-guide/role-task-guide.component';
@@ -68,8 +61,8 @@ import {
     TodayMedicinesComponent,
     PatientProfileComponent,
     RoleTaskGuideComponent,
-  ],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  ]
+,
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent implements OnInit, OnDestroy {

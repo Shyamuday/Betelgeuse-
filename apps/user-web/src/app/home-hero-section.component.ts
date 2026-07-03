@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -12,7 +12,6 @@ type BookStep = 'form' | 'otp' | 'loading' | 'done';
   selector: 'app-home-hero-section',
   imports: [CommonModule, FormsModule],
   styleUrl: './home-hero-section.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './home-hero-section.component.html',
 })
 export class HomeHeroSectionComponent {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, inject, signal } from '@angular/core';
 import { Prescription } from './models';
 import { PrescriptionPdfService } from './core/services/prescription-pdf.service';
 
@@ -8,7 +8,6 @@ import { PrescriptionPdfService } from './core/services/prescription-pdf.service
   standalone: true,
   imports: [CommonModule],
   styleUrl: './prescription-history.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './prescription-history.component.html',
 })
 export class PrescriptionHistoryComponent {

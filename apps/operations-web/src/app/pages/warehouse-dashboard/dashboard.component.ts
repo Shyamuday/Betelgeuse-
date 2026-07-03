@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { WarehouseApiService } from '../../services/warehouse-api.service';
 
@@ -7,7 +7,6 @@ import { WarehouseApiService } from '../../services/warehouse-api.service';
   standalone: true,
   imports: [DatePipe],
   templateUrl: './dashboard.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {

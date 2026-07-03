@@ -24,6 +24,7 @@ import {
 } from '../dev/demo-manifest.js';
 import { prisma } from '../db.js';
 import { asyncRoute, publicUserSelect, toAuthResponse } from '../utils/helpers.js';
+import { sessionPayloadForStoreStaff } from '../constants/rbac-helpers.js';
 import { signStoreToken } from './store/shared.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || DEFAULT_JWT_SECRET;
@@ -110,12 +111,36 @@ devRouter.post(
           where: { email },
           select: publicUserSelect
         });
-        if (!user) {
+        if (user) {
+          return res.json(toAuthResponse(user));
+        }
+
+        const staff = await prisma.storeStaff.findFirst({
+          where: { email, isActive: true },
+          include: { store: { select: { id: true, name: true } } }
+        });
+        if (!staff) {
           return res.status(404).json({
-            message: 'Demo user not found. Run: npm run seed --prefix apps/api'
+            message: 'Demo account not found. Run: npm run seed --prefix apps/api'
           });
         }
-        return res.json(toAuthResponse(user));
+
+        const token = signStoreToken({
+          staffId: staff.id,
+          storeId: staff.storeId,
+          role: staff.role as typeof STORE_ROLES.MANAGER | typeof STORE_ROLES.STAFF,
+          name: staff.name
+        });
+        const session = sessionPayloadForStoreStaff({
+          id: staff.id,
+          name: staff.name,
+          email: staff.email,
+          role: staff.role,
+          staffCode: staff.staffCode,
+          storeId: staff.storeId,
+          storeName: staff.store.name
+        });
+        return res.json({ token, ...session });
       }
 
       case 'hr': {
@@ -137,68 +162,6 @@ devRouter.post(
             email: user.email,
             role: user.role,
             hrProfile: user.hrProfile
-          }
-        });
-      }
-
-      case 'store-pin': {
-        const staff = await prisma.storeStaff.findUnique({
-          where: { staffCode: DEV_DEMO_ACCOUNTS.storeStaff.staffCode },
-          include: { store: { select: { id: true, name: true } } }
-        });
-        if (!staff?.isActive) {
-          return res.status(404).json({
-            message: 'Demo store staff not found. Run: npm run seed --prefix apps/api'
-          });
-        }
-        const token = signStoreToken({
-          staffId: staff.id,
-          storeId: staff.storeId,
-          role: STORE_ROLES.STAFF,
-          name: staff.name
-        });
-        return res.json({
-          token,
-          staff: {
-            id: staff.id,
-            name: staff.name,
-            role: staff.role,
-            staffCode: staff.staffCode,
-            storeId: staff.storeId,
-            storeName: staff.store.name
-          }
-        });
-      }
-
-      case 'store-manager': {
-        const staff = await prisma.storeStaff.findFirst({
-          where: {
-            role: STORE_ROLES.MANAGER,
-            isActive: true,
-            email: DEV_DEMO_ACCOUNTS.storeManager.email
-          },
-          include: { store: { select: { id: true, name: true } } }
-        });
-        if (!staff) {
-          return res.status(404).json({
-            message: 'Demo store manager not found. Run: npm run seed --prefix apps/api'
-          });
-        }
-        const token = signStoreToken({
-          staffId: staff.id,
-          storeId: staff.storeId,
-          role: STORE_ROLES.MANAGER,
-          name: staff.name
-        });
-        return res.json({
-          token,
-          staff: {
-            id: staff.id,
-            name: staff.name,
-            role: staff.role,
-            staffCode: staff.staffCode,
-            storeId: staff.storeId,
-            storeName: staff.store.name
           }
         });
       }

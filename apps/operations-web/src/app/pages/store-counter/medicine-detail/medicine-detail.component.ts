@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { StoreApiService } from '../../../services/store-api.service';
@@ -8,7 +8,6 @@ import { MedicineDetailResponse, StockBatch } from '../../../store-models';
   selector: 'app-medicine-detail',
   imports: [RouterLink, DatePipe],
   templateUrl: './medicine-detail.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './medicine-detail.component.scss'
 })
 export class MedicineDetailComponent implements OnInit {

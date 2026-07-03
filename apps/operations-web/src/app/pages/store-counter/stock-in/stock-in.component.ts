@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StoreApiService } from '../../../services/store-api.service';
@@ -10,7 +10,6 @@ import { PAGE_SIZES } from '../../../core/constants/store/pagination.constants';
   selector: 'app-stock-in',
   imports: [FormsModule],
   templateUrl: './stock-in.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './stock-in.component.scss'
 })
 export class StockInComponent implements OnInit {

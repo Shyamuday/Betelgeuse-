@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable ServiceService } from '@angular/core';
 import { AdminReportsApi } from './admin/admin-reports.api';
 import { AdminDoctorsApi } from './admin/admin-doctors.api';
 import { AdminCatalogApi } from './admin/admin-catalog.api';
@@ -6,9 +6,7 @@ import { AdminHrApi } from './admin/admin-hr.api';
 import { AdminFinanceApi } from './admin/admin-finance.api';
 import { AdminOpsApi } from './admin/admin-ops.api';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Service()
 export class AdminApi {
   constructor(
     private readonly reports: AdminReportsApi,

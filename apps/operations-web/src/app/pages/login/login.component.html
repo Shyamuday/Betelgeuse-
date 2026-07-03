@@ -15,42 +15,54 @@
 
         <form class="login-form" (ngSubmit)="onSubmit()">
           <div class="form-group">
-            <label class="form-label">Email Address</label>
+            <label class="form-label" for="login-email">Email Address</label>
             <input
+              id="login-email"
               class="form-input"
               type="email"
-              [(ngModel)]="email"
-              name="email"
+              [formField]="loginForm.email"
               placeholder="hr@hospital.com"
-              required
               autocomplete="email"
             />
+            @if (loginForm.email().invalid() && loginForm.email().touched()) {
+              <p class="error">
+                @for (fieldError of loginForm.email().errors(); track fieldError.kind) {
+                  <span>{{ fieldError.message }}</span>
+                }
+              </p>
+            }
           </div>
 
           <div class="form-group">
-            <label class="form-label">Password</label>
+            <label class="form-label" for="login-password">Password</label>
             <div class="input-wrap">
               <input
+                id="login-password"
                 class="form-input"
                 [type]="showPass() ? 'text' : 'password'"
-                [(ngModel)]="password"
-                name="password"
+                [formField]="loginForm.password"
                 placeholder="Enter password"
-                required
                 autocomplete="current-password"
               />
               <button
                 type="button"
                 class="pass-toggle"
-                (click)="showPass.set(!showPass())"
+                (click)="showPass.update((visible) => !visible)"
               >{{ showPass() ? '🙈' : '👁️' }}</button>
             </div>
+            @if (loginForm.password().invalid() && loginForm.password().touched()) {
+              <p class="error">
+                @for (fieldError of loginForm.password().errors(); track fieldError.kind) {
+                  <span>{{ fieldError.message }}</span>
+                }
+              </p>
+            }
           </div>
 
           <button
             type="submit"
             class="login-btn"
-            [disabled]="loading()"
+            [disabled]="loading() || loginForm().invalid()"
           >
             @if (loading()) {
               <span class="spinner"></span> Signing in...
@@ -63,4 +75,3 @@
         <app-dev-login-panel (loggedIn)="onDevLoggedIn()" (fillAccount)="applyDevFill($event)" />
       </div>
     </div>
-  

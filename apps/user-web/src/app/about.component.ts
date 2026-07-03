@@ -1,11 +1,11 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { AppFooterComponent } from './app-footer.component';
 import { AppHeaderComponent } from './app-header.component';
 
 @Component({
   selector: 'app-about',
-  imports: [AppHeaderComponent, AppFooterComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [AppHeaderComponent, AppFooterComponent]
+,
   templateUrl: './about.component.html',
 })
 export class AboutComponent {

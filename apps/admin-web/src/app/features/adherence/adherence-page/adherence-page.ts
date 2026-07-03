@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AdminApi } from '../../../core/services/admin-api';
@@ -63,7 +63,6 @@ type AdherenceReport = {
   selector: 'app-adherence-page',
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './adherence-page.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './adherence-page.scss'
 })
 export class AdherencePage {

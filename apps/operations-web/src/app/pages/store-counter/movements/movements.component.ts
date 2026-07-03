@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { StoreApiService } from '../../../services/store-api.service';
 import { StockMovement } from '../../../store-models';
 import { DatePipe } from '@angular/common';
@@ -16,7 +16,6 @@ function movementDisplayKey(type: string): MovementDisplayKey | null {
   selector: 'app-movements',
   imports: [DatePipe],
   templateUrl: './movements.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './movements.component.scss'
 })
 export class MovementsComponent implements OnInit {

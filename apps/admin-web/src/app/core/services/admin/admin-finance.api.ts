@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable ServiceService } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { AdminAuth } from '../admin-auth';
@@ -6,7 +6,7 @@ import { API_PATHS } from '../../constants/api-paths.constants';
 
 import { AdminApiBase } from './admin-api-base';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class AdminFinanceApi extends AdminApiBase {
   constructor(http: HttpClient, auth: AdminAuth) {
     super(http, auth);

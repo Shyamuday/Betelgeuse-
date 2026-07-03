@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DeliveryApiService } from '../../services/delivery-api.service';
 import { DEV_DEMO_ACCOUNTS } from '../../core/constants/dev-demo.constants';
@@ -8,7 +8,6 @@ import { DEV_DEMO_ACCOUNTS } from '../../core/constants/dev-demo.constants';
   standalone: true,
   imports: [FormsModule],
   templateUrl: './orders.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './orders.component.scss'
 })
 export class OrdersComponent implements OnInit {

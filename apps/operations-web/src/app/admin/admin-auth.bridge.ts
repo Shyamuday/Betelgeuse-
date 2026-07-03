@@ -1,11 +1,11 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { PlatformAuthService } from '../services/platform-auth.service';
 import { AdminAuth } from '../../../../admin-web/src/app/core/services/admin-auth';
 
 /** Bridges platform staff auth for embedded admin-console pages. */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class AdminAuthBridge extends AdminAuth {
   private readonly platform = inject(PlatformAuthService);
 

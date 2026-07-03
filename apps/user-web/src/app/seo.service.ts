@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Injectable, inject } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -7,7 +7,7 @@ import { SEO_DEFAULTS } from './core/constants/branding.constants';
 import { diseaseInfos } from './disease/disease-info.constants';
 import { homeopathyApproaches } from './treatment-approach/homeopathy-approaches.constants';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class SeoService {
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);

@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import {
@@ -8,7 +8,7 @@ import {
 } from '../models';
 import { API_PATHS } from '../core/constants/api-paths.constants';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class HrApiService {
   private http = inject(HttpClient);
   private base = environment.apiUrl;
@@ -108,7 +108,7 @@ export class HrApiService {
     return this.http.post<{ staff: StoreStaff }>(`${this.base}${API_PATHS.HR.STORES}/${storeId}/managers`, data);
   }
 
-  createStoreStaff(storeId: string, data: { name: string; staffCode: string; pin: string; designation?: string; phone?: string; joiningDate?: string }) {
+  createStoreStaff(storeId: string, data: { name: string; staffCode: string; email: string; password: string; designation?: string; phone?: string; joiningDate?: string }) {
     return this.http.post<{ staff: StoreStaff }>(`${this.base}${API_PATHS.HR.STORES}/${storeId}/staff`, data);
   }
 

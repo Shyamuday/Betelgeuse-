@@ -1,4 +1,4 @@
-import { Injectable, Injector, Type, inject } from '@angular/core';
+import { Injector, Type, inject, Service } from '@angular/core';
 import { Overlay, OverlayConfig, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { Subject } from 'rxjs';
@@ -50,7 +50,7 @@ export class AppOverlayRef<TResult = unknown> {
   }
 }
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class AppOverlayService {
   private readonly overlay = inject(Overlay);
   private readonly injector = inject(Injector);

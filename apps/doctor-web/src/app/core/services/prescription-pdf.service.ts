@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -6,7 +6,7 @@ import { API_PATHS } from '../constants/api-paths.constants';
 import { AUTH_TOKEN_KEY } from '../constants/auth.constants';
 import { BLOB_REVOKE_MS } from '../constants/timing.constants';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class PrescriptionPdfService {
   private readonly http = inject(HttpClient);
   private readonly apiBase = environment.apiUrl;

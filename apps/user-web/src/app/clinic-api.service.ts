@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable ServiceService } from '@angular/core';
 import { from } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { API_PATHS } from './core/constants/api-paths.constants';
@@ -18,7 +18,7 @@ import type { RazorpayCheckoutResponse, RazorpayOrderResponse, RealtimeSubscript
 
 export type { RazorpayCheckoutResponse, RazorpayOrderResponse, RealtimeSubscription } from './clinic-api/clinic-api.types';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class ClinicApiService {
   private readonly client = new ClinicApiClient();
 

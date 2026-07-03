@@ -1,4 +1,4 @@
-import { Injectable, computed, inject } from '@angular/core';
+import { computed, inject, Service } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, from, tap } from 'rxjs';
 import { AUTH_PATHS, AUTH_TOKEN_KEY, ROLE_DASHBOARD_PATHS } from '../core/constants/auth.constants';
@@ -11,7 +11,7 @@ type AuthResponse = {
   user: User;
 };
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class AuthService {
   private readonly patientAuth = inject(PatientAuthService);
   private readonly http = inject(HttpClient);

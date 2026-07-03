@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { LabResult } from './models';
 
 @Component({
@@ -7,7 +7,6 @@ import { LabResult } from './models';
   standalone: true,
   imports: [CommonModule],
   styleUrl: './lab-results.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './lab-results.component.html',
 })
 export class LabResultsComponent {

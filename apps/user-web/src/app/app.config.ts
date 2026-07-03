@@ -1,6 +1,10 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
-import { provideRouter } from '@angular/router';
+import {
+  provideRouter,
+  withExperimentalAutoCleanupInjectors,
+  withExperimentalPlatformNavigation
+} from '@angular/router';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './auth/auth.interceptor';
@@ -8,7 +12,12 @@ import { authInterceptor } from './auth/auth.interceptor';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
-    provideHttpClient(withXhr(), withInterceptors([authInterceptor])),
-  ],
+    provideZonelessChangeDetection(),
+    provideRouter(
+      routes,
+      withExperimentalPlatformNavigation(),
+      withExperimentalAutoCleanupInjectors()
+    ),
+    provideHttpClient(withXhr(), withInterceptors([authInterceptor]))
+  ]
 };

@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-admin-stats',
   standalone: true,
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [CommonModule]
+,
   templateUrl: './admin-stats.component.html',
 })
 export class AdminStatsComponent {

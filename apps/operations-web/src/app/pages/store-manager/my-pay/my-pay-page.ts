@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { StoreApiService } from '../../../services/store-api.service';
 import { formatPaise } from './constants/my-pay.constants';
@@ -7,7 +7,6 @@ import { formatPaise } from './constants/my-pay.constants';
   selector: 'app-my-pay-page',
   imports: [FormsModule],
   templateUrl: './my-pay-page.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './my-pay-page.scss'
 })
 export class MyPayPage implements OnInit {

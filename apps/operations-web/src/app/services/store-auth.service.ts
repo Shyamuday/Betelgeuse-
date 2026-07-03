@@ -1,10 +1,10 @@
-import { Injectable, computed, inject } from '@angular/core';
+import { computed, inject, Service } from '@angular/core';
 import { StoreStaff } from '../store-models';
 import { STORE_STAFF_ROLES } from '../core/constants/store/auth.constants';
 import { PlatformAuthService } from './platform-auth.service';
 
 /** Bridges store pages to the unified platform session (store staff use the same token). */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class StoreAuthService {
   private platform = inject(PlatformAuthService);
 

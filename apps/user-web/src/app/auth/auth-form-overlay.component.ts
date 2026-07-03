@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -23,8 +23,8 @@ type ForgotStep = 'none' | 'email' | 'sent' | 'reset';
 
 @Component({
   selector: 'app-auth-form-overlay',
-  imports: [CommonModule, FormsModule, DevLoginPanelComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [CommonModule, FormsModule, DevLoginPanelComponent]
+,
   templateUrl: './auth-form-overlay.component.html',
 })
 export class AuthFormOverlayComponent {

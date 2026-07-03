@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable ServiceService } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { API_PATHS } from '../../core/constants/api-paths.constants';
@@ -28,7 +28,7 @@ export type WorklistResponse = {
   };
 };
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class WorklistApiService {
   private readonly apiBase = environment.apiUrl;
 

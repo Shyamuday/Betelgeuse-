@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { DiagnosticApiService } from '../../services/diagnostic-api.service';
@@ -15,7 +15,6 @@ type ResultLine = {
   standalone: true,
   imports: [FormsModule, DatePipe],
   templateUrl: './referrals.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './referrals.component.scss'
 })
 export class ReferralsComponent implements OnInit {

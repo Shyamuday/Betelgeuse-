@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -49,7 +49,6 @@ type LabReferral = {
   selector: 'app-patients-page',
   imports: [FormsModule, CommonModule, DatePipe, PatientIdCardComponent, RouterLink, PatientHealthProfileComponent],
   templateUrl: './patients-page.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './patients-page.scss'
 })
 export class PatientsPage {

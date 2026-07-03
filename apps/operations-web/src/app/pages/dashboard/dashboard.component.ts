@@ -1,6 +1,8 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { HrApiService } from '../../services/hr-api.service';
+import { httpResource } from '@angular/common/http';
+import { environment } from '../../environments/environment';
+import { API_PATHS } from '../core/constants/api-paths.constants';
 import { DashboardData } from '../../models';
 
 @Component({
@@ -8,20 +10,15 @@ import { DashboardData } from '../../models';
   standalone: true,
   imports: [DatePipe],
   templateUrl: './dashboard.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dashboard.component.scss'
 })
-export class DashboardComponent implements OnInit {
-  private api = inject(HrApiService);
-  data = signal<DashboardData | null>(null);
-  loading = signal(true);
+export class DashboardComponent {
+  readonly dashboard = httpResource<DashboardData>(
+    () => `${environment.apiUrl}${API_PATHS.HR.DASHBOARD}`
+  );
 
-  ngOnInit() {
-    this.api.getDashboard().subscribe({
-      next: (d) => { this.data.set(d); this.loading.set(false); },
-      error: () => this.loading.set(false)
-    });
-  }
+  data = () => (this.dashboard.hasValue() ? this.dashboard.value() : null);
+  loading = () => this.dashboard.isLoading();
 
   totalLeaves() {
     const stats = this.data()?.leaveStats;

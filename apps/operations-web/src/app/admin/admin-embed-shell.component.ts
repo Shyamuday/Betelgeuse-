@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { NAV_ITEMS } from '../../../../admin-web/src/app/core/constants/app-routes.constants';
 import { RoleTaskGuideComponent } from '../shared/role-task-guide/role-task-guide.component';
@@ -11,8 +11,7 @@ import { ADMIN_ROUTE_CAPABILITIES } from './admin.guards';
   standalone: true,
   imports: [RouterLink, RouterLinkActive, RouterOutlet, RoleTaskGuideComponent, NotificationBellHost],
   templateUrl: './admin-embed-shell.component.html',
-  styleUrl: './admin-embed-shell.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager
+  styleUrl: './admin-embed-shell.component.scss'
 })
 export class AdminEmbedShellComponent implements OnInit {
   private auth = inject(PlatformAuthService);

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { APP_OVERLAY_DATA, APP_OVERLAY_REF } from '../overlay.tokens';
 import { AppOverlayRef } from '../overlay.service';
 
@@ -11,8 +11,8 @@ type AuthStatusOverlayData = {
 
 @Component({
   selector: 'app-auth-status-overlay',
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [CommonModule]
+,
   templateUrl: './auth-status-overlay.component.html',
 })
 export class AuthStatusOverlayComponent {

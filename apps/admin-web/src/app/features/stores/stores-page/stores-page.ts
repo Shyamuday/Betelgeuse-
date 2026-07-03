@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../../../core/services/admin-api';
 import { TOAST_DURATION_MS } from '../../../core/constants/timing.constants';
@@ -15,7 +15,6 @@ import {
   selector: 'app-stores-page',
   imports: [FormsModule],
   templateUrl: './stores-page.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './stores-page.scss'
 })
 export class StoresPage implements OnInit {
@@ -39,7 +38,7 @@ export class StoresPage implements OnInit {
   storeForm = { name: '', code: '', address: '', phone: '' };
   editForm = { name: '', address: '', phone: '', isActive: true };
   mgrForm = { name: '', email: '', password: '', designation: STORE_FORM_DEFAULTS.MANAGER_DESIGNATION, joiningDate: '' };
-  staffForm = { name: '', staffCode: '', pin: '', designation: STORE_FORM_DEFAULTS.STAFF_DESIGNATION, phone: '', joiningDate: '' };
+  staffForm = { name: '', staffCode: '', email: '', password: '', designation: STORE_FORM_DEFAULTS.STAFF_DESIGNATION, phone: '', joiningDate: '' };
 
   ngOnInit(): void { this.load(); }
 
@@ -69,7 +68,7 @@ export class StoresPage implements OnInit {
 
   openStaffModal(s: any): void {
     this.selectedStore.set(s);
-    this.staffForm = { name: '', staffCode: '', pin: '', designation: STORE_FORM_DEFAULTS.STAFF_DESIGNATION, phone: '', joiningDate: '' };
+    this.staffForm = { name: '', staffCode: '', email: '', password: '', designation: STORE_FORM_DEFAULTS.STAFF_DESIGNATION, phone: '', joiningDate: '' };
     this.err.set('');
     this.modal.set(STORE_MODAL_TYPES.STAFF);
   }
@@ -132,8 +131,12 @@ export class StoresPage implements OnInit {
   }
 
   async saveStaff(): Promise<void> {
-    if (!this.staffForm.name || !this.staffForm.staffCode || !this.staffForm.pin) { this.err.set('Name, code and PIN required'); return; }
-    if (this.staffForm.pin.length < STORE_VALIDATION.PIN_MIN_LENGTH) { this.err.set('PIN must be 4+ digits'); return; }
+    if (!this.staffForm.name || !this.staffForm.staffCode || !this.staffForm.email || !this.staffForm.password) {
+      this.err.set('Name, code, email and password required'); return;
+    }
+    if (this.staffForm.password.length < STORE_VALIDATION.PASSWORD_MIN_LENGTH) {
+      this.err.set('Password must be at least 8 characters'); return;
+    }
     this.saving.set(true);
     try {
       await this.api.createAdminStoreStaff(this.selectedStore()!.id, this.staffForm);

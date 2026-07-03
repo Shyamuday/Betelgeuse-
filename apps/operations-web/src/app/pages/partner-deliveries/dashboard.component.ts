@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { DeliveryApiService } from '../../services/delivery-api.service';
 
 @Component({
@@ -6,7 +6,6 @@ import { DeliveryApiService } from '../../services/delivery-api.service';
   standalone: true,
   imports: [],
   templateUrl: './dashboard.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {

@@ -1,12 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   BILLING_PLAN_CODES,
@@ -25,8 +18,8 @@ export type BookConsultationPayload = {
 @Component({
   selector: 'app-book-consultation-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [CommonModule, FormsModule]
+,
   templateUrl: './book-consultation-panel.component.html',
 })
 export class BookConsultationPanelComponent implements OnChanges {

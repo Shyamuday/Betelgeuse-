@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { StoreApiService } from '../../../services/store-api.service';
 import { StaffActivity, StaffDetailResponse } from '../../../store-models';
@@ -17,7 +17,6 @@ function activityDisplayKey(type: string): ActivityDisplayKey | null {
   selector: 'app-staff-activity',
   imports: [DatePipe],
   templateUrl: './staff-activity.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './staff-activity.component.scss'
 })
 export class StaffActivityComponent implements OnInit {

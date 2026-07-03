@@ -1,11 +1,10 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CorporateWellnessApiService } from '../../services/corporate-wellness-api.service';
 
 @Component({
   selector: 'app-accounts',
   standalone: true,
   templateUrl: './accounts.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './accounts.component.scss'
 })
 export class AccountsComponent implements OnInit {

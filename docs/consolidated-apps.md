@@ -1,45 +1,44 @@
 # Consolidated frontend apps
 
-The platform uses **4 primary portals** (+ optional store POS).
+The platform uses **3 primary web portals** (+ API).
 
-## Target map
+## App map
 
-| Portal | App folder | Port | Absorbs |
-|--------|------------|------|---------|
+| Portal | App folder | Port | Includes |
+|--------|------------|------|----------|
 | **Patient** | `apps/user-web` | 4200 | Patient mobile/web (Capacitor) |
 | **Clinical** | `apps/doctor-web` | 4202 | Doctor consultations |
-| **Operations** | `apps/operations-web` | 5800 | Staff: HR, reception, clinic manager, accountant, branch owner, coordinator, call center, marketing, **full admin console** |
-| **Partners** | `apps/partners-web` | 5900 | Supplier, warehouse, delivery, diagnostic, corporate wellness, insurance |
-| **Store POS** (optional) | `apps/store` + `store-manager-web` | 4300–4301 | PIN login, tablet POS |
+| **Operations** | `apps/operations-web` | 5800 | All staff, partners, store counter, store manager, embedded admin |
+| **Admin UI source** | `apps/admin-web` | — | Compiled into operations-web at `/admin/*` |
+| **API** | `apps/api` | 4000 | Backend |
 
-Legacy per-role apps under `apps/*-web` are **deprecated**. Root `dev:hr`, `dev:receptionist`, etc. alias to `dev:operations` or `dev:partners`.
+Legacy per-role apps (`hr-web`, `partners-web`, `store`, etc.) have been **removed**. Root `dev:*` scripts alias to `dev:operations`.
 
 ## Auth model
 
-- Staff login: `POST /auth/staff-login`
-- Session: `GET /me` → `{ user, capabilities, portal, defaultRoute }`
+- Login: `POST /auth/staff-login` with email + password (platform users and store staff)
+- Session: `GET /me` for platform users; store staff receive capabilities in the login response
 - Nav from `libs/platform-nav` filtered by capabilities
 
 ## Dev commands
 
 ```bash
-npm run dev:operations   # http://localhost:5800 — all staff + admin
-npm run dev:partners     # http://localhost:5900 — external partners
+npm run dev:operations   # http://localhost:5800 — everything except patient/doctor
 npm run dev:admin        # alias → operations-web
+npm run dev:doctor       # http://localhost:4202
+npm run dev:user         # http://localhost:4200
 ```
 
-## Admin console in operations
+## Store staff
 
-Platform admins use `/admin/*` inside operations-web. Admin pages are shared from `apps/admin-web` (same components, embedded with route prefix `admin`).
-
-Standalone `admin-web` (port 4201) remains buildable for reference but **`dev:admin` points to operations**.
+- Counter: `staff@ranchi.vitalis.local` → `/store/dashboard`
+- Manager: `manager@ranchi.vitalis.local` → `/store-manager/dashboard`
+- No PIN login — email + password only
 
 ## Migration status
 
-- [x] API capabilities on `/me`
-- [x] `operations-web` + `partners-web` with capability guards
+- [x] Single operations portal (staff + partners + store)
+- [x] Email/password auth for store staff
 - [x] Full admin console embedded at `/admin/*`
-- [x] Legacy `dev:*` scripts alias to consolidated apps
+- [x] Legacy app folders removed
 - [x] CI builds consolidated apps only
-- [x] Capacitor scaffold on `user-web`
-- [x] Remove legacy app folders after production cutover

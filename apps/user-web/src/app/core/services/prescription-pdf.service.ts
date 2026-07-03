@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { API_PATHS } from '../constants/api-paths.constants';
 import { BLOB_REVOKE_MS } from '../constants/timing.constants';
 import { environment } from '../../../environments/environment';
@@ -12,7 +12,7 @@ export type PrescriptionPdfMeta = {
   patientName?: string | null;
 };
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class PrescriptionPdfService {
   private readonly auth = inject(AuthService);
   private readonly apiBase = environment.apiUrl;

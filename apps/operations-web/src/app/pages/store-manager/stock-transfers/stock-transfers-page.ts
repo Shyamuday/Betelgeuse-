@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { StoreApiService } from '../../../services/store-api.service';
 
@@ -7,7 +7,6 @@ import { StoreApiService } from '../../../services/store-api.service';
   standalone: true,
   imports: [DatePipe],
   templateUrl: './stock-transfers-page.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './stock-transfers-page.scss'
 })
 export class StockTransfersPage implements OnInit {

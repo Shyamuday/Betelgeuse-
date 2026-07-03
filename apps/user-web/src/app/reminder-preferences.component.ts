@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DEFAULT_QUIET_HOURS } from './core/constants/timing.constants';
 
@@ -16,7 +16,6 @@ export type ReminderPrefs = {
   standalone: true,
   imports: [FormsModule],
   templateUrl: './reminder-preferences.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './reminder-preferences.component.scss',
 })
 export class ReminderPreferencesComponent {

@@ -1,4 +1,4 @@
-import { Injectable, signal, inject, computed } from '@angular/core';
+import { signal, inject, computed, Service } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
@@ -18,7 +18,7 @@ import { OPERATIONS_NAV_ITEMS, navItemsForCapabilities } from '../../../../../li
 
 export type StaffLoginResponse = AuthResponse & Partial<SessionResponse> & { storeStaff?: StoreStaff };
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class PlatformAuthService {
   private http = inject(HttpClient);
   private router = inject(Router);

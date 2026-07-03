@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { StoreApiService } from '../../../services/store-api.service';
@@ -14,7 +14,6 @@ import {
   selector: 'app-medicines-admin',
   imports: [FormsModule, RouterLink],
   templateUrl: './medicines-admin.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './medicines-admin.component.scss'
 })
 export class MedicinesAdminComponent implements OnInit {

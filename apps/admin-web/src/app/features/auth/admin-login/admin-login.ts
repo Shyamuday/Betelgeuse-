@@ -1,6 +1,6 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { form, FormField, required } from '@angular/forms/signals';
 import { AdminAuth } from '../../../core/services/admin-auth';
 import { DEFAULT_AUTHED_ROUTE } from '../../../core/constants/app-routes.constants';
 import { DevLoginPanelComponent } from '../../../shared/dev-login-panel/dev-login-panel';
@@ -9,34 +9,40 @@ import type { DevFillCredentials } from '../../../core/types/dev-demo.types';
 
 @Component({
   selector: 'app-admin-login',
-  imports: [FormsModule, DevLoginPanelComponent],
+  imports: [FormField, DevLoginPanelComponent],
   templateUrl: './admin-login.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './admin-login.scss'
 })
 export class AdminLogin {
-  email: string = DEV_DEMO_ACCOUNTS.admin.email;
-  password: string = DEV_DEMO_ACCOUNTS.password;
-  error = '';
-  submitting = false;
+  private readonly auth = inject(AdminAuth);
+  private readonly router = inject(Router);
 
-  constructor(
-    private readonly auth: AdminAuth,
-    private readonly router: Router
-  ) { }
+  readonly loginModel = signal({
+    email: DEV_DEMO_ACCOUNTS.admin.email,
+    password: DEV_DEMO_ACCOUNTS.password
+  });
+  readonly loginForm = form(this.loginModel, (schema) => {
+    required(schema.email, { message: 'Email is required' });
+    required(schema.password, { message: 'Password is required' });
+  });
+
+  error = signal('');
+  submitting = signal(false);
 
   async submit() {
-    this.error = '';
-    this.submitting = true;
+    if (this.loginForm().invalid()) return;
+    const { email, password } = this.loginModel();
+    this.error.set('');
+    this.submitting.set(true);
     try {
-      const result = await this.auth.login(this.email, this.password);
+      const result = await this.auth.login(email, password);
       if (!result.ok) {
-        this.error = result.message;
+        this.error.set(result.message);
         return;
       }
       void this.router.navigateByUrl(`/${DEFAULT_AUTHED_ROUTE}`);
     } finally {
-      this.submitting = false;
+      this.submitting.set(false);
     }
   }
 
@@ -45,7 +51,10 @@ export class AdminLogin {
   }
 
   applyDevFill(credentials: DevFillCredentials) {
-    if (credentials.email) this.email = credentials.email;
-    if (credentials.password) this.password = credentials.password;
+    this.loginModel.update((model) => ({
+      ...model,
+      ...(credentials.email ? { email: credentials.email } : {}),
+      ...(credentials.password ? { password: credentials.password } : {})
+    }));
   }
 }

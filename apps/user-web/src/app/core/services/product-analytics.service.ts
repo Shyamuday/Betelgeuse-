@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable ServiceService } from '@angular/core';
 import { API_PATHS } from '../constants/api-paths.constants';
 import { ClinicApiClient } from '../../clinic-api/clinic-api.client';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class ProductAnalyticsService {
   private readonly client = new ClinicApiClient();
 

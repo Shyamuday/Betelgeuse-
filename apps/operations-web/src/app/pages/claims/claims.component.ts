@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { InsuranceApiService } from '../../services/insurance-api.service';
 
@@ -11,7 +11,6 @@ function formatPaise(paise: number): string {
   standalone: true,
   imports: [FormsModule],
   templateUrl: './claims.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './claims.component.scss'
 })
 export class ClaimsComponent implements OnInit {

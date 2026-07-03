@@ -8,10 +8,7 @@ Clinic platform — Angular frontend + pure Node.js/Express/TypeScript backend.
 |-----|------|------|
 | Patient | `apps/user-web` | 4200 |
 | Doctor | `apps/doctor-web` | 4202 |
-| Operations (staff + admin) | `apps/operations-web` | 5800 |
-| Partners | `apps/partners-web` | 5900 |
-| Store staff | `apps/store` | 4300 |
-| Store manager | `apps/store-manager-web` | 4301 |
+| Operations (staff, partners, store, admin) | `apps/operations-web` | 5800 |
 | Admin UI source (embedded) | `apps/admin-web` | — |
 | API | `apps/api` | 4000 |
 
@@ -24,8 +21,7 @@ For homeopathic doctor types (Chief Consultant, Intern, Specialist, etc.), see *
 ## Stack
 
 - Patient web app: `apps/user-web` (Angular + Capacitor)
-- Operations portal: `apps/operations-web` (staff + embedded admin)
-- Partners portal: `apps/partners-web`
+- Operations portal: `apps/operations-web` (staff, partners, store, embedded admin)
 - Doctor web app: `apps/doctor-web` (Angular)
 - Admin UI modules: `apps/admin-web` (compiled into operations-web)
 - Backend API: `apps/api` (Express 5 + TypeScript + Prisma)
@@ -111,13 +107,10 @@ npm run seed --prefix apps/api
 | App | Port | Quick-login persona |
 |-----|------|---------------------|
 | Patient | 4200 | Rahul / Priya |
-| Admin | 4201 | Clinic Admin |
+| Operations | 5800 | All staff, partners, store counter, store manager, admin |
 | Doctor | 4202 | Dr. Meera Sharma |
-| Store staff | 4300 | Counter Staff |
-| Store manager | 4301 | Ranchi Store Manager |
-| HR | 4400 | HR Manager |
 
-**Shared credentials:** `Password@123` (staff/admin/doctor/patients/manager) · **PIN** `Password@123` for store staff `RNC-STF1` · **OTP** `123456` · patient mobile `9876543210`
+**Shared credentials:** `Password@123` (staff/admin/doctor/patients/store) · Store counter: `staff@ranchi.vitalis.local` · Store manager: `manager@ranchi.vitalis.local` · **OTP** `123456` · patient mobile `9876543210`
 
 On each login screen in dev: demo **emails show automatically**, the first account **fills the form on load**, click **Fill** to switch demo users, then use normal **Sign in** (any other email works too), or **Instant** for one-click JWT login.
 

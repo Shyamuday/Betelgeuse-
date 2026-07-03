@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -26,7 +26,7 @@ import {
 import { API_BASE, STORE_API_PATHS } from '../core/constants/store/api-paths.constants';
 import { ACTIVITY_PERIODS, DEFAULT_PAGE, EXPIRING_ALERTS_DEFAULT_DAYS, PAGE_SIZES } from '../core/constants/store/pagination.constants';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class StoreApiService {
   private http = inject(HttpClient);
   private base = `${environment.apiUrl}${API_BASE.STORE}`;

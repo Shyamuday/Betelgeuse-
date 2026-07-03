@@ -1,10 +1,10 @@
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { AuthFormOverlayComponent } from './auth/auth-form-overlay.component';
 import { AppOverlayService } from './overlay.service';
 
 @Component({
-  selector: 'app-footer',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  selector: 'app-footer'
+,
   templateUrl: './app-footer.component.html',
 })
 export class AppFooterComponent {

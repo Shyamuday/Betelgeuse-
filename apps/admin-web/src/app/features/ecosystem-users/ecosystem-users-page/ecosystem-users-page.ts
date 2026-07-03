@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
-import { Component, inject, OnInit, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../../../core/services/admin-api';
 import { TOAST_DURATION_LONG_MS } from '../../../core/constants/timing.constants';
@@ -20,7 +20,6 @@ type UserPool = 'ecosystem' | 'staff' | 'partner';
   selector: 'app-ecosystem-users-page',
   imports: [CommonModule, FormsModule, DatePipe, DecimalPipe],
   templateUrl: './ecosystem-users-page.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './ecosystem-users-page.scss'
 })
 export class EcosystemUsersPage implements OnInit {

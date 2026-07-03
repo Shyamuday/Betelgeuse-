@@ -172,7 +172,7 @@
           </div>
           <div class="modal-body">
             <div class="info-box">
-              Staff log in with a <strong>PIN</strong> on the Store App — no email needed.
+              Staff log in at the <strong>Operations portal</strong> with email and password.
             </div>
             <div class="fg">
               <label>Full Name *</label>
@@ -183,8 +183,12 @@
               <input [(ngModel)]="staffForm.staffCode" placeholder="S001" style="text-transform:uppercase" />
             </div>
             <div class="fg">
-              <label>PIN * (4–8 digits)</label>
-              <input type="password" [(ngModel)]="staffForm.pin" placeholder="e.g. 1234" maxlength="8" />
+              <label>Email *</label>
+              <input type="email" [(ngModel)]="staffForm.email" placeholder="staff@store.vitalis.local" />
+            </div>
+            <div class="fg">
+              <label>Password * (min 8 characters)</label>
+              <input type="password" [(ngModel)]="staffForm.password" placeholder="Initial password" />
             </div>
             <div class="fg">
               <label>Designation</label>

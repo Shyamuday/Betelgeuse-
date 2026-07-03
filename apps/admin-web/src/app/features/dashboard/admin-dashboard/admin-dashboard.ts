@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AdminApi } from '../../../core/services/admin-api';
@@ -16,7 +16,6 @@ import {
   selector: 'app-admin-dashboard',
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './admin-dashboard.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './admin-dashboard.scss'
 })
 export class AdminDashboard {

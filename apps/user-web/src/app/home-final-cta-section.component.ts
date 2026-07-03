@@ -1,10 +1,10 @@
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { AuthFormOverlayComponent } from './auth/auth-form-overlay.component';
 import { AppOverlayService } from './overlay.service';
 
 @Component({
-  selector: 'app-home-final-cta-section',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  selector: 'app-home-final-cta-section'
+,
   templateUrl: './home-final-cta-section.component.html',
 })
 export class HomeFinalCtaSectionComponent {

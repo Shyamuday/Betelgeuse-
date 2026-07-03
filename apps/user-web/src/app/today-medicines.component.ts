@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DoseEvent } from './models';
 
@@ -26,7 +26,6 @@ export const SNOOZE_OPTIONS = [15, 30, 60] as const;
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './today-medicines.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './today-medicines.component.scss',
 })
 export class TodayMedicinesComponent {

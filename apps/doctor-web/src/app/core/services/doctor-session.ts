@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable ServiceService } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -13,7 +13,7 @@ export type DoctorSession = {
   doctorProfile: DoctorProfileSummary | null;
 };
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class DoctorSessionService {
   private readonly apiBase = environment.apiUrl;
   private session: DoctorSession | null = null;

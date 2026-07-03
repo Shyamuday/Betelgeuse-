@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, signal } from '@angular/core';
 import { io, type Socket } from 'socket.io-client';
 import type { InAppNotificationItem, NotificationBellConfig } from './types';
 
@@ -10,8 +10,7 @@ const SOCKET_EVENT_NOTIFICATION_NEW = 'notification:new';
   standalone: true,
   imports: [CommonModule, DatePipe],
   templateUrl: './notification-bell.component.html',
-  styleUrl: './notification-bell.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager
+  styleUrl: './notification-bell.component.scss'
 })
 export class NotificationBellComponent implements OnInit, OnDestroy {
   @Input({ required: true }) config!: NotificationBellConfig;

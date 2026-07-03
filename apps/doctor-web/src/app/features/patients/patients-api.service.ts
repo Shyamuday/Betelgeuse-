@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable ServiceService } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -34,7 +34,7 @@ export type PatientSearchResponse = {
   hint?: string;
 };
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class PatientsApiService {
   private readonly apiBase = environment.apiUrl;
 

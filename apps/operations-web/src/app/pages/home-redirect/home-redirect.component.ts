@@ -1,12 +1,11 @@
-import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { PlatformAuthService } from '../../services/platform-auth.service';
 
 @Component({
   selector: 'app-home-redirect',
   standalone: true,
-  template: '',
-  changeDetection: ChangeDetectionStrategy.Eager
+  template: ''
 })
 export class HomeRedirectComponent implements OnInit {
   private auth = inject(PlatformAuthService);

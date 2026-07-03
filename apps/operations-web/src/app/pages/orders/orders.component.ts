@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { SupplierApiService } from '../../services/supplier-api.service';
@@ -8,7 +8,6 @@ import { SupplierApiService } from '../../services/supplier-api.service';
   standalone: true,
   imports: [FormsModule, DatePipe],
   templateUrl: './orders.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './orders.component.scss'
 })
 export class OrdersComponent implements OnInit {

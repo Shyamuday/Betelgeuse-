@@ -160,27 +160,36 @@ router.post(HR_API_ROUTES.STORE_MANAGERS, hrAuthMiddleware, asyncRoute(async (re
 // POST /hr/stores/:storeId/staff — HR creates a regular store staff member
 router.post(HR_API_ROUTES.STORE_STAFF_CREATE, hrAuthMiddleware, asyncRoute(async (req, res) => {
   const storeId = req.params['storeId'] as string;
-  const { name, staffCode, pin, designation, phone, joiningDate } = req.body as {
-    name: string; staffCode: string; pin: string;
-    designation?: string; phone?: string; joiningDate?: string;
+  const { name, staffCode, email, password, designation, phone, joiningDate } = req.body as {
+    name: string;
+    staffCode: string;
+    email: string;
+    password: string;
+    designation?: string;
+    phone?: string;
+    joiningDate?: string;
   };
-  if (!name || !staffCode || !pin) {
-    res.status(400).json({ error: 'name, staffCode, and pin are required' }); return;
+  if (!name || !staffCode || !email || !password) {
+    res.status(400).json({ error: 'name, staffCode, email, and password are required' }); return;
   }
-  if (pin.length < 4) { res.status(400).json({ error: 'PIN must be at least 4 digits' }); return; }
+  if (password.length < 8) { res.status(400).json({ error: 'Password must be at least 8 characters' }); return; }
 
   await prisma.store.findUniqueOrThrow({ where: { id: storeId } });
 
   const existing = await prisma.storeStaff.findUnique({ where: { staffCode: staffCode.toUpperCase() } });
   if (existing) { res.status(409).json({ error: 'Staff code already taken' }); return; }
 
+  const emailTaken = await prisma.storeStaff.findFirst({ where: { email, isActive: true } });
+  if (emailTaken) { res.status(409).json({ error: 'Email already in use by another store staff member' }); return; }
+
   const bcrypt = await import('bcryptjs');
-  const pinHash = await bcrypt.hash(pin, 10);
+  const pinHash = await bcrypt.hash(password, 10);
 
   const staff = await prisma.storeStaff.create({
     data: {
       name,
       staffCode: staffCode.toUpperCase(),
+      email,
       pinHash,
       phone,
       designation: designation ?? 'Store Staff',

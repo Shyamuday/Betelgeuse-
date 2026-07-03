@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { signal, Service } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ClinicApiService } from './clinic-api.service';
 import { ProductAnalyticsService } from './core/services/product-analytics.service';
@@ -7,7 +7,7 @@ import { AuthService } from './auth/auth.service';
 import { BillingPlan, Consultation, Disease, Doctor, DoseEvent, LabResult, Prescription } from './models';
 import { ReminderPrefs } from './reminder-preferences.component';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class DashboardDataService {
   constructor(
     private readonly api: ClinicApiService,
@@ -69,7 +69,7 @@ export class DashboardDataService {
 
 export type PaymentFlowState = 'IDLE' | 'CREATING_ORDER' | 'OPENING_CHECKOUT' | 'VERIFYING' | 'SUCCESS' | 'ERROR';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class DashboardPaymentService {
   readonly paymentFlowState = signal<PaymentFlowState>('IDLE');
   readonly paymentFlowConsultation = signal<Consultation | null>(null);

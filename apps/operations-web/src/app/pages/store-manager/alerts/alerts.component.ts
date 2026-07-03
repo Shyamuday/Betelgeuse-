@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { StoreApiService } from '../../../services/store-api.service';
@@ -8,7 +8,6 @@ import { MedicineWithStock, StockBatch } from '../../../store-models';
   selector: 'app-alerts',
   imports: [RouterLink, DatePipe],
   templateUrl: './alerts.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './alerts.component.scss'
 })
 export class AlertsComponent implements OnInit {

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -12,7 +12,6 @@ import { WorklistApiService } from '../../worklist/worklist-api.service';
   selector: 'app-dashboard-home',
   imports: [CommonModule, RouterLink],
   templateUrl: './dashboard-home.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dashboard-home.scss',
 })
 export class DashboardHome {

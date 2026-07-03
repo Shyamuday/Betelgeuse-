@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { API_PATHS } from './core/constants/api-paths.constants';
 import { environment } from '../environments/environment';
@@ -32,7 +32,6 @@ type PatientIdCard = {
   standalone: true,
   imports: [CommonModule, FormsModule],
   styleUrl: './patient-profile.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './patient-profile.component.html',
 })
 export class PatientProfileComponent implements OnInit {

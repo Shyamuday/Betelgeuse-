@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -7,7 +7,7 @@ import type { DevAppGuide } from '../types/dev-demo.types';
 
 export type { DevFillCredentials, DevPersona, DevAppGuide } from '../types/dev-demo.types';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class DevDemoService {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AdminAuth);

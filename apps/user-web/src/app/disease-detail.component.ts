@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AppFooterComponent } from './app-footer.component';
 import { AppHeaderComponent } from './app-header.component';
@@ -11,8 +11,8 @@ import { AppOverlayService } from './overlay.service';
 
 @Component({
   selector: 'app-disease-detail',
-  imports: [CommonModule, AppHeaderComponent, AppFooterComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [CommonModule, AppHeaderComponent, AppFooterComponent]
+,
   templateUrl: './disease-detail.component.html',
 })
 export class DiseaseDetailComponent implements OnInit {

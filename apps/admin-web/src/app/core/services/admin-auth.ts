@@ -1,13 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable ServiceService } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AUTH_MESSAGES, AUTH_TOKEN_KEY, STAFF_ROLES } from '../constants/auth.constants';
 import { API_PATHS } from '../constants/api-paths.constants';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Service()
 export class AdminAuth {
   private readonly tokenKey = AUTH_TOKEN_KEY;
   private readonly apiBase = environment.apiUrl;
