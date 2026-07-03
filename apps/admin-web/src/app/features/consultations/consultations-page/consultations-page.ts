@@ -29,7 +29,9 @@ export class ConsultationsPage implements OnInit {
   q = '';
 
   modal = signal(false);
+  statusModal = signal(false);
   selectedConsult = signal<any>(null);
+  statusValue = 'ASSIGNED';
   doctors = signal<any[]>([]);
   filteredDoctors = signal<any[]>([]);
   doctorsLoading = signal(false);
@@ -41,9 +43,21 @@ export class ConsultationsPage implements OnInit {
 
   statusFilters = [
     { label: 'All Statuses', value: '' },
-    { label: 'Pending', value: 'PENDING' },
-    { label: 'Active', value: 'ACTIVE' },
-    { label: 'Completed', value: 'COMPLETED' }
+    { label: 'Payment pending', value: 'PAYMENT_PENDING' },
+    { label: 'Paid', value: 'PAID' },
+    { label: 'Assigned', value: 'ASSIGNED' },
+    { label: 'In progress', value: 'IN_PROGRESS' },
+    { label: 'Completed', value: 'COMPLETED' },
+    { label: 'Cancelled', value: 'CANCELLED' }
+  ];
+  statusOptions = [
+    'PAYMENT_PENDING',
+    'PAID',
+    'ASSIGNED',
+    'IN_PROGRESS',
+    'PRESCRIPTION_UPLOADED',
+    'COMPLETED',
+    'CANCELLED'
   ];
   assignedFilters = [
     { label: 'All', value: '' },
@@ -63,7 +77,7 @@ export class ConsultationsPage implements OnInit {
   }
 
   loadUnassignedCount(): void {
-    this.api.getAdminConsultations({ assigned: 'no', status: 'PENDING', pageSize: 1 })
+    this.api.getAdminConsultations({ assigned: 'no', status: 'PAID', pageSize: 1 })
       .then(r => this.unassignedCount.set(r.total))
       .catch(() => {});
   }
@@ -113,7 +127,32 @@ export class ConsultationsPage implements OnInit {
     );
   }
 
-  closeModal(): void { this.modal.set(false); }
+  closeModal(): void { this.modal.set(false); this.statusModal.set(false); }
+
+  openStatus(c: any): void {
+    this.selectedConsult.set(c);
+    this.statusValue = c.status;
+    this.err.set('');
+    this.statusModal.set(true);
+  }
+
+  async confirmStatus(): Promise<void> {
+    if (!this.selectedConsult()) return;
+    this.saving.set(true);
+    this.err.set('');
+    try {
+      const r = await this.api.updateConsultationStatus(this.selectedConsult()!.id, this.statusValue);
+      this.consultations.update(list =>
+        list.map(c => c.id === this.selectedConsult()!.id ? { ...c, status: r.consultation.status } : c)
+      );
+      this.statusModal.set(false);
+      this.showToast('Status updated ✓');
+    } catch (e: any) {
+      this.err.set(e?.error?.message ?? 'Status update failed');
+    } finally {
+      this.saving.set(false);
+    }
+  }
 
   async confirmAssign(): Promise<void> {
     if (!this.selectedDoctorId() || !this.selectedConsult()) return;

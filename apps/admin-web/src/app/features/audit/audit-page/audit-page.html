@@ -26,6 +26,9 @@
     </select>
     <button type="button" (click)="applyFilters()" [disabled]="loading">Search</button>
     <button type="button" class="ghost" (click)="clearFilters()" [disabled]="loading">Clear</button>
+    <button type="button" class="ghost" (click)="exportCsv()" [disabled]="exporting || loading">
+      {{ exporting ? 'Exporting…' : 'Export CSV' }}
+    </button>
   </div>
 
   <small class="muted">{{ total }} entr{{ total === 1 ? 'y' : 'ies' }}</small>

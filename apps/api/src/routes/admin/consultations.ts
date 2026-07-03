@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { Role } from '@prisma/client';
+import { Role, ConsultationStatus } from '@prisma/client';
 import type { Server as SocketIoServer } from 'socket.io';
 import { authRequired, allowRoles } from '../../auth.js';
 import { prisma } from '../../db.js';
@@ -129,6 +129,59 @@ export function registerAdminConsultationRoutes(router: Router, io: SocketIoServ
       });
 
       res.json({ consultation, message: 'Doctor assigned successfully.' });
+    })
+  );
+
+  router.patch(
+    '/admin/consultations/:id/status',
+    authRequired,
+    allowRoles(Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const body = z.object({ status: z.nativeEnum(ConsultationStatus) }).parse(req.body);
+
+      const existing = await prisma.consultation.findUnique({
+        where: { id: routeParam(req, 'id') },
+        include: {
+          patient: { select: { id: true, name: true } },
+          disease: { select: { name: true } }
+        }
+      });
+      if (!existing) {
+        return res.status(404).json({ message: 'Consultation not found.' });
+      }
+
+      const consultation = await prisma.consultation.update({
+        where: { id: existing.id },
+        data: { status: body.status },
+        include: {
+          patient: { select: { id: true, name: true, mobile: true } },
+          assignedDoctor: { select: { id: true, name: true } },
+          disease: { select: { id: true, name: true } },
+          payment: { select: { status: true, amountInPaise: true } }
+        }
+      });
+
+      await writeAuditLog({
+        actorId: req.user!.id,
+        actorRole: req.user!.role,
+        action: 'consultation.status_override',
+        targetType: 'consultation',
+        targetId: consultation.id,
+        summary: `Status changed ${existing.status} → ${body.status} for ${existing.patient?.name || 'patient'}.`,
+        metadata: {
+          previousStatus: existing.status,
+          nextStatus: body.status,
+          patientId: consultation.patientId,
+          diseaseName: existing.disease?.name ?? null
+        }
+      });
+
+      io.to(`user:${consultation.patientId}`).emit('consultation:updated', {
+        consultationId: consultation.id,
+        status: consultation.status
+      });
+
+      res.json({ consultation, message: 'Consultation status updated.' });
     })
   );
 }

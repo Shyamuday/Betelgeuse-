@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { RoleTaskGuideComponent } from '../../shared/role-task-guide/role-task-guide.component';
 import { AdminAuth } from '../../core/services/admin-auth';
 import { NAV_ITEMS, ROUTE_PATHS } from '../../core/constants/app-routes.constants';
 
 @Component({
   selector: 'app-admin-shell',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, RoleTaskGuideComponent],
   templateUrl: './admin-shell.html',
   styleUrl: './admin-shell.scss'
 })

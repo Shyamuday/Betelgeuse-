@@ -45,6 +45,7 @@ import { createDiagnosticRouter } from './routes/diagnostic/router.js';
 import { labReferralsRouter } from './routes/lab-referrals.js';
 import { devRouter } from './routes/dev.js';
 import { createRepertoryRouter } from './routes/repertory/index.js';
+import { roleGuidesRouter } from './routes/role-guides.js';
 import { ReceptionScopeError } from './routes/reception/shared.js';
 import { ClinicManagerScopeError } from './services/clinic-manager-hub.js';
 import { PurchaseOrderError } from './services/purchase-orders.js';
@@ -161,6 +162,7 @@ app.use('/store/auth/manager-login', authLimiter);
 //
 
 app.use(authRouter);
+app.use('/role-guides', roleGuidesRouter);
 app.use(catalogRouter);
 app.use(slotsRouter);
 app.use(dosesRouter);

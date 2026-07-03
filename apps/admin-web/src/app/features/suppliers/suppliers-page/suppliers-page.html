@@ -1,0 +1,56 @@
+
+    <div class="page">
+      <div class="page-header">
+        <div>
+          <h2>Suppliers</h2>
+          <p class="muted">Manage medicine suppliers for purchase orders</p>
+        </div>
+        <button type="button" class="btn-primary" (click)="openCreate()">+ Add supplier</button>
+      </div>
+
+      @if (loading()) {
+        <p>Loading…</p>
+      } @else {
+        <table class="table">
+          <thead><tr><th>Code</th><th>Name</th><th>Email</th><th>Phone</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            @for (s of suppliers(); track s.id) {
+              <tr>
+                <td>{{ s.code }}</td>
+                <td>{{ s.name }}</td>
+                <td>{{ s.email || '—' }}</td>
+                <td>{{ s.phone || '—' }}</td>
+                <td>{{ s.isActive ? 'Active' : 'Inactive' }}</td>
+                <td><button type="button" (click)="openEdit(s)">Edit</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    @if (modal()) {
+      <div class="overlay" (click)="closeModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <h3>{{ modal() === 'create' ? 'New supplier' : 'Edit supplier' }}</h3>
+          @if (modal() === 'create') {
+            <label>Code <input [(ngModel)]="form.code" style="text-transform:uppercase" /></label>
+          }
+          <label>Name <input [(ngModel)]="form.name" /></label>
+          <label>Email <input [(ngModel)]="form.email" /></label>
+          <label>Phone <input [(ngModel)]="form.phone" /></label>
+          <label>Address <input [(ngModel)]="form.address" /></label>
+          <label>GSTIN <input [(ngModel)]="form.gstin" /></label>
+          @if (modal() === 'edit') {
+            <label class="check"><input type="checkbox" [(ngModel)]="form.isActive" /> Active</label>
+          }
+          @if (error()) { <p class="error">{{ error() }}</p> }
+          <div class="actions">
+            <button type="button" (click)="closeModal()">Cancel</button>
+            <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">Save</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (toast()) { <div class="toast">{{ toast() }}</div> }

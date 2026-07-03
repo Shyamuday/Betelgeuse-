@@ -37,6 +37,9 @@ export class AdminApi {
   exportPaymentsCsv(...args: Parameters<AdminReportsApi['exportPaymentsCsv']>) {
     return this.reports.exportPaymentsCsv(...(args as Parameters<AdminReportsApi['exportPaymentsCsv']>));
   }
+  exportAuditCsv(...args: Parameters<AdminReportsApi['exportAuditCsv']>) {
+    return this.reports.exportAuditCsv(...(args as Parameters<AdminReportsApi['exportAuditCsv']>));
+  }
   getDoctors(...args: Parameters<AdminDoctorsApi['getDoctors']>) {
     return this.doctors.getDoctors(...(args as Parameters<AdminDoctorsApi['getDoctors']>));
   }
@@ -240,6 +243,36 @@ export class AdminApi {
   }
   searchMedicines(...args: Parameters<AdminOpsApi['searchMedicines']>) {
     return this.ops.searchMedicines(...(args as Parameters<AdminOpsApi['searchMedicines']>));
+  }
+  listMedicines(...args: Parameters<AdminOpsApi['listMedicines']>) {
+    return this.ops.listMedicines(...(args as Parameters<AdminOpsApi['listMedicines']>));
+  }
+  createMedicine(...args: Parameters<AdminOpsApi['createMedicine']>) {
+    return this.ops.createMedicine(...(args as Parameters<AdminOpsApi['createMedicine']>));
+  }
+  updateMedicine(...args: Parameters<AdminOpsApi['updateMedicine']>) {
+    return this.ops.updateMedicine(...(args as Parameters<AdminOpsApi['updateMedicine']>));
+  }
+  listSuppliers(...args: Parameters<AdminOpsApi['listSuppliers']>) {
+    return this.ops.listSuppliers(...(args as Parameters<AdminOpsApi['listSuppliers']>));
+  }
+  createSupplier(...args: Parameters<AdminOpsApi['createSupplier']>) {
+    return this.ops.createSupplier(...(args as Parameters<AdminOpsApi['createSupplier']>));
+  }
+  updateSupplier(...args: Parameters<AdminOpsApi['updateSupplier']>) {
+    return this.ops.updateSupplier(...(args as Parameters<AdminOpsApi['updateSupplier']>));
+  }
+  getAdmins(...args: Parameters<AdminOpsApi['getAdmins']>) {
+    return this.ops.getAdmins(...(args as Parameters<AdminOpsApi['getAdmins']>));
+  }
+  createAdmin(...args: Parameters<AdminOpsApi['createAdmin']>) {
+    return this.ops.createAdmin(...(args as Parameters<AdminOpsApi['createAdmin']>));
+  }
+  setAdminStatus(...args: Parameters<AdminOpsApi['setAdminStatus']>) {
+    return this.ops.setAdminStatus(...(args as Parameters<AdminOpsApi['setAdminStatus']>));
+  }
+  updateConsultationStatus(...args: Parameters<AdminOpsApi['updateConsultationStatus']>) {
+    return this.ops.updateConsultationStatus(...(args as Parameters<AdminOpsApi['updateConsultationStatus']>));
   }
   getAdminStore(...args: Parameters<AdminHrApi['getAdminStore']>) {
     return this.hr.getAdminStore(...(args as Parameters<AdminHrApi['getAdminStore']>));

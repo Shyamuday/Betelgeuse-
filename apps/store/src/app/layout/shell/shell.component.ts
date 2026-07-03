@@ -1,11 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { RoleTaskGuideComponent } from '../../shared/role-task-guide/role-task-guide.component';
 import { NAV_ITEMS, ROUTE_PATHS } from '../../core/constants/app-routes.constants';
 import { StoreAuthService } from '../../services/store-auth.service';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, RoleTaskGuideComponent],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss'
 })

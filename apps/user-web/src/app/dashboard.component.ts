@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { RoleTaskGuideComponent } from './shared/role-task-guide/role-task-guide.component';
 import { AppFooterComponent } from './app-footer.component';
 import { AppHeaderComponent } from './app-header.component';
 import { AdminStatsComponent } from './admin-stats.component';
@@ -40,6 +41,7 @@ import { BillingPlan, Consultation, Disease, DoseEvent, Doctor, LabResult, Presc
     ReminderPreferencesComponent,
     TodayMedicinesComponent,
     PatientProfileComponent,
+    RoleTaskGuideComponent,
   ],
   templateUrl: './dashboard.component.html'
 })

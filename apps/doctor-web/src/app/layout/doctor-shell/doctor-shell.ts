@@ -1,5 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { RoleTaskGuideComponent } from '../../shared/role-task-guide/role-task-guide.component';
 import { Auth } from '../../core/services/auth';
 import { DoctorSessionService } from '../../core/services/doctor-session';
 
@@ -23,7 +24,7 @@ const NAV_ICONS: Record<string, { icon: string; shortLabel: string }> = {
 
 @Component({
   selector: 'app-doctor-shell',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, RoleTaskGuideComponent],
   templateUrl: './doctor-shell.html',
   styleUrl: './doctor-shell.scss',
 })
@@ -32,6 +33,7 @@ export class DoctorShell implements OnInit {
   doctorName = '';
   doctorTypeLabel = '';
   specialtyLabel = '';
+  doctorTypeKey: string | null = null;
   loadingSession = true;
   menuOpen = signal(false);
 
@@ -46,6 +48,7 @@ export class DoctorShell implements OnInit {
       this.doctorName = profile.name;
       this.doctorTypeLabel = profile.doctorProfile?.doctorTypeLabel || 'Doctor';
       this.specialtyLabel = profile.doctorProfile?.specialty || '';
+      this.doctorTypeKey = profile.doctorProfile?.doctorType ?? null;
       this.navItems = this.decorateNav(this.session.navItems());
     } catch {
       this.navItems = this.decorateNav(this.session.navItems());

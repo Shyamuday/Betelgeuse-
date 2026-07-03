@@ -45,6 +45,7 @@ export class AuditPage {
   loading = false;
   error = '';
   expandedLogId = '';
+  exporting = false;
 
   constructor(private readonly api: AdminApi) {
     void this.load();
@@ -107,6 +108,28 @@ export class AuditPage {
       return JSON.stringify(metadata, null, 2);
     } catch {
       return String(metadata);
+    }
+  }
+
+  async exportCsv() {
+    this.exporting = true;
+    try {
+      const csv = await this.api.exportAuditCsv({
+        q: this.searchTerm,
+        action: this.actionFilter,
+        targetType: this.targetTypeFilter
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `audit-logs-${Date.now()}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      this.error = 'Could not export audit CSV.';
+    } finally {
+      this.exporting = false;
     }
   }
 }

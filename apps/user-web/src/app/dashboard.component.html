@@ -2,6 +2,10 @@
     <app-header [subtitle]="title()" [user]="auth.user()" [whatsappLink]="whatsappLink" (logout)="logout()" />
 
     <main class="dashboard">
+      @if (auth.user()?.role === 'PATIENT') {
+        <app-role-task-guide appKey="user-web" />
+      }
+
       @if (isLoading()) {
         <section class="panel">
           <p class="loading-text">Loading clinic data…</p>

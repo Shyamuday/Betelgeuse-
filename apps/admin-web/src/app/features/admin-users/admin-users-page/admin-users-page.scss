@@ -1,0 +1,15 @@
+.page { padding: 0.5rem; }
+.page-header { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.muted { color: #64748b; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.75rem; }
+.card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 0.85rem; display: grid; gap: 0.35rem; }
+.badge { font-size: 0.75rem; font-weight: 700; color: #166534; }
+.badge.off { color: #991b1b; }
+.btn-primary, .btn-sec, .btn-ghost { border-radius: 8px; padding: 0.45rem 0.75rem; cursor: pointer; }
+.btn-primary { background: #4f46e5; color: #fff; border: none; }
+.btn-sec { background: #f1f5f9; border: 1px solid #cbd5e1; }
+.overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.45); display: grid; place-items: center; z-index: 40; }
+.modal { background: #fff; border-radius: 12px; padding: 1rem; width: min(420px, 92vw); display: grid; gap: 0.6rem; }
+.modal label { display: grid; gap: 0.25rem; font-size: 0.85rem; }
+.actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+.toast { position: fixed; bottom: 1rem; right: 1rem; background: #0f766e; color: #fff; padding: 0.6rem 1rem; border-radius: 8px; }

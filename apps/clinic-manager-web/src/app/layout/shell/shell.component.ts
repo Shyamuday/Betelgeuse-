@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { RoleTaskGuideComponent } from '../../shared/role-task-guide/role-task-guide.component';
 import { HrAuthService } from '../../services/hr-auth.service';
 import { NAV_ITEMS } from '../../core/constants/app-routes.constants';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, RoleTaskGuideComponent],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss'
 })

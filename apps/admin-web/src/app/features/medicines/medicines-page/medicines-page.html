@@ -1,0 +1,59 @@
+
+    <div class="page">
+      <div class="page-header">
+        <div>
+          <h2>Medicine catalog</h2>
+          <p class="muted">Global medicine master used across all stores</p>
+        </div>
+        <button type="button" class="btn-primary" (click)="openCreate()">+ Add medicine</button>
+      </div>
+
+      <div class="toolbar">
+        <input [(ngModel)]="q" placeholder="Search medicines…" (keyup.enter)="load()" />
+        <button type="button" (click)="load()">Search</button>
+      </div>
+
+      @if (loading()) {
+        <p>Loading…</p>
+      } @else {
+        <table class="table">
+          <thead><tr><th>Name</th><th>Potency</th><th>Manufacturer</th><th>Min stock</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            @for (m of medicines(); track m.id) {
+              <tr>
+                <td>{{ m.name }}</td>
+                <td>{{ m.potency }}</td>
+                <td>{{ m.manufacturer || '—' }}</td>
+                <td>{{ m.minStockLevel }}</td>
+                <td>{{ m.isActive ? 'Active' : 'Inactive' }}</td>
+                <td><button type="button" (click)="openEdit(m)">Edit</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    @if (modal()) {
+      <div class="overlay" (click)="closeModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <h3>{{ modal() === 'create' ? 'New medicine' : 'Edit medicine' }}</h3>
+          <label>Name <input [(ngModel)]="form.name" /></label>
+          <label>Potency <input [(ngModel)]="form.potency" /></label>
+          <label>Short name <input [(ngModel)]="form.shortName" /></label>
+          <label>Manufacturer <input [(ngModel)]="form.manufacturer" /></label>
+          <label>Category <input [(ngModel)]="form.category" /></label>
+          <label>Min stock <input type="number" [(ngModel)]="form.minStockLevel" /></label>
+          @if (modal() === 'edit') {
+            <label class="check"><input type="checkbox" [(ngModel)]="form.isActive" /> Active</label>
+          }
+          @if (error()) { <p class="error">{{ error() }}</p> }
+          <div class="actions">
+            <button type="button" (click)="closeModal()">Cancel</button>
+            <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">Save</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (toast()) { <div class="toast">{{ toast() }}</div> }

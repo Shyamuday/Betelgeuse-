@@ -71,11 +71,79 @@ export class AdminOpsApi extends AdminApiBase {
     );
   }
 
-  searchMedicines(q: string, page = 1) {
+  searchMedicines(q: string, page = 1, includeInactive = false) {
     return firstValueFrom(
       this.http.get<{ medicines: Array<any>; pagination: { total: number } }>(
         `${this.apiBase}${API_PATHS.ADMIN.MEDICINES}`,
-        { params: { q, page: String(page), pageSize: '20' } }
+        {
+          params: {
+            q,
+            page: String(page),
+            pageSize: '20',
+            ...(includeInactive ? { includeInactive: 'true' } : {})
+          }
+        }
+      )
+    );
+  }
+
+  listMedicines(params?: { q?: string; page?: number; includeInactive?: boolean }) {
+    return this.searchMedicines(params?.q ?? '', params?.page ?? 1, params?.includeInactive ?? true);
+  }
+
+  createMedicine(payload: Record<string, unknown>) {
+    return firstValueFrom(
+      this.http.post<{ medicine: any }>(`${this.apiBase}${API_PATHS.ADMIN.MEDICINES}`, payload)
+    );
+  }
+
+  updateMedicine(id: string, payload: Record<string, unknown>) {
+    return firstValueFrom(
+      this.http.put<{ medicine: any }>(`${this.apiBase}${API_PATHS.ADMIN.MEDICINES}/${id}`, payload)
+    );
+  }
+
+  listSuppliers(includeInactive = true) {
+    return firstValueFrom(
+      this.http.get<{ suppliers: Array<any> }>(`${this.apiBase}${API_PATHS.ADMIN.SUPPLIERS}`, {
+        params: includeInactive ? { includeInactive: 'true' } : {}
+      })
+    );
+  }
+
+  createSupplier(payload: Record<string, unknown>) {
+    return firstValueFrom(
+      this.http.post<{ supplier: any }>(`${this.apiBase}${API_PATHS.ADMIN.SUPPLIERS}`, payload)
+    );
+  }
+
+  updateSupplier(id: string, payload: Record<string, unknown>) {
+    return firstValueFrom(
+      this.http.patch<{ supplier: any }>(`${this.apiBase}${API_PATHS.ADMIN.SUPPLIERS}/${id}`, payload)
+    );
+  }
+
+  getAdmins() {
+    return firstValueFrom(this.http.get<{ admins: Array<any> }>(`${this.apiBase}${API_PATHS.ADMIN.ADMINS}`));
+  }
+
+  createAdmin(payload: { name: string; email: string; password: string; mobile?: string }) {
+    return firstValueFrom(
+      this.http.post<{ admin: any }>(`${this.apiBase}${API_PATHS.ADMIN.ADMINS}`, payload)
+    );
+  }
+
+  setAdminStatus(id: string, isActive: boolean) {
+    return firstValueFrom(
+      this.http.patch<{ admin: any }>(`${this.apiBase}${API_PATHS.ADMIN.ADMIN_STATUS(id)}`, { isActive })
+    );
+  }
+
+  updateConsultationStatus(consultationId: string, status: string) {
+    return firstValueFrom(
+      this.http.patch<{ consultation: any }>(
+        `${this.apiBase}${API_PATHS.ADMIN.CONSULTATION_STATUS(consultationId)}`,
+        { status }
       )
     );
   }

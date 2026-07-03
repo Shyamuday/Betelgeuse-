@@ -103,4 +103,22 @@ export class AdminReportsApi extends AdminApiBase {
     }
     return response.text();
   }
+
+  async exportAuditCsv(params: {
+    q?: string;
+    action?: string;
+    targetType?: string;
+  }) {
+    const query = new URLSearchParams({ export: API_EXPORT_FORMAT.CSV });
+    if (params.q?.trim()) query.set('q', params.q.trim());
+    if (params.action?.trim()) query.set('action', params.action.trim());
+    if (params.targetType?.trim()) query.set('targetType', params.targetType.trim());
+    const response = await fetch(`${this.apiBase}${API_PATHS.ADMIN.AUDIT_LOGS}?${query.toString()}`, {
+      headers: { Authorization: `Bearer ${this.auth.token()}` }
+    });
+    if (!response.ok) {
+      throw new Error('Could not export audit CSV.');
+    }
+    return response.text();
+  }
 }
