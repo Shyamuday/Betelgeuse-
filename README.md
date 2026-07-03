@@ -18,6 +18,8 @@ For AI-assisted case analysis (image upload, camera capture, rubric suggestions)
 
 For homeopathic doctor types (Chief Consultant, Intern, Specialist, etc.), see **[docs/homeopathic-doctor-types.md](docs/homeopathic-doctor-types.md)**.
 
+For AWS EC2 sizing and production deployment (100–500 patients/day), see **[docs/infrastructure-ec2.md](docs/infrastructure-ec2.md)**.
+
 ## Stack
 
 - Patient web app: `apps/user-web` (Angular + Capacitor)
@@ -127,3 +129,14 @@ Disable in dev: set `DISABLE_DEV_DEMO=true` in API `.env`.
 - Admin doctor management and assignment
 - Doctor chat, prescription upload, and completion workflow
 - Medicine dose scheduling and adherence tracking
+
+## Production deployment
+
+Target load: **100–500 patients per day** → **1× EC2 `t3.small`** + **1× RDS `db.t3.small`**.
+
+```bash
+cp deploy/.env.production.example deploy/.env   # fill in secrets and domains
+bash deploy/scripts/deploy.sh                   # build frontends, migrate, start Docker
+```
+
+See **[docs/infrastructure-ec2.md](docs/infrastructure-ec2.md)** for architecture, security groups, TLS, and scale-out path.

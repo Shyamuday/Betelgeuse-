@@ -28,6 +28,6 @@ $COMPOSE up -d
 
 echo "==> Health check..."
 sleep 5
-$COMPOSE exec api wget -qO- http://127.0.0.1:4000/health || true
+$COMPOSE exec api node -e "fetch('http://127.0.0.1:4000/health').then((r)=>r.json()).then(console.log).catch(console.error)" || true
 
 echo "==> Deploy complete. Verify https://api.example.com/health"

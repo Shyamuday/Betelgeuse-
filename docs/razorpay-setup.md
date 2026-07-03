@@ -104,7 +104,7 @@ https://your-ngrok-url.ngrok-free.app/payments/razorpay-webhook
 ## 6. Production Checklist
 
 - Use Razorpay live keys.
-- Deploy `apps/api` to a secure HTTPS domain.
+- Deploy `apps/api` to a secure HTTPS domain (see [infrastructure-ec2.md](infrastructure-ec2.md)).
 - Set `WEB_ORIGIN` to the deployed Angular domain.
 - Set `RAZORPAY_WEBHOOK_SECRET`.
 - Test successful payment.
