@@ -35,7 +35,9 @@ import { patientsRouter } from './routes/patients.js';
 import { scanRouter } from './routes/scan.js';
 import { doctorWorklistRouter } from './routes/doctor-worklist.js';
 import { analyticsRouter } from './routes/analytics.js';
+import { createReceptionRouter } from './routes/reception/router.js';
 import { devRouter } from './routes/dev.js';
+import { ReceptionScopeError } from './routes/reception/shared.js';
 
 // ── Schedulers ─────────────────────────────────────────────────────────────────
 import {
@@ -60,7 +62,8 @@ const {
   DOCTOR: doctorOrigin,
   STORE: storeOrigin,
   STORE_MANAGER: storeManagerOrigin,
-  HR: hrOrigin
+  HR: hrOrigin,
+  RECEPTIONIST: receptionistOrigin
 } = SERVER_CONFIG.ORIGINS;
 
 // ── Socket.IO ──────────────────────────────────────────────────────────────────
@@ -98,7 +101,7 @@ io.on('connection', (socket) => {
 // ── Middleware ─────────────────────────────────────────────────────────────────
 
 app.use(cors({
-  origin: [webOrigin, adminOrigin, doctorOrigin, storeOrigin, storeManagerOrigin, hrOrigin],
+  origin: [webOrigin, adminOrigin, doctorOrigin, storeOrigin, storeManagerOrigin, hrOrigin, receptionistOrigin],
   credentials: true
 }));
 app.use('/payments/razorpay-webhook', express.raw({ type: 'application/json' }));
@@ -153,10 +156,14 @@ app.use(analyticsRouter);
 app.use(scanRouter);
 app.use('/store', storeRouter);
 app.use('/hr', hrRouter);
+app.use(createReceptionRouter(io));
 
 // ── Global error handler ───────────────────────────────────────────────────────
 
 app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  if (error instanceof ReceptionScopeError) {
+    return res.status(400).json({ message: error.message });
+  }
   if (error instanceof z.ZodError) {
     return res.status(400).json({ message: 'Validation failed', issues: error.issues });
   }

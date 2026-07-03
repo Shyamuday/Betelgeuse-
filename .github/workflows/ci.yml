@@ -19,6 +19,7 @@ jobs:
           - apps/store
           - apps/store-manager-web
           - apps/hr-web
+          - apps/receptionist-web
 
     defaults:
       run:

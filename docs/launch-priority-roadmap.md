@@ -194,10 +194,17 @@ Minimum acceptance:
 
 ### 4) Front Desk / Receptionist (Platform Phase 2)
 
-**Status: Next** — receptionist app or consolidated front-desk flows for walk-in registration, appointment queue, and payment collection (see `docs/platform-ecosystem-architecture.md`).
+**Status: Done** — `RECEPTIONIST` role + `ReceptionistProfile`; reception API (`/reception/queue`, walk-in registration, cash collection, doctor assignment); `receptionist-web` app on port 4500 with queue board and walk-in form; demo persona `reception@vitalisclinic.local`.
 
 - Dedicated receptionist role and app
 - Walk-in patient registration and queue management
+
+### 5) Clinic Manager Hub (Platform Phase 2)
+
+**Status: Next** — branch operations dashboard combining schedules, attendance view, and branch KPIs (see `docs/platform-ecosystem-architecture.md`).
+
+- Day-to-day branch operations console
+- Staff attendance and schedule visibility
 
 ## Recommended Implementation Order
 

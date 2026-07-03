@@ -3,6 +3,7 @@ enum Role {
   DOCTOR
   ADMIN
   HR
+  RECEPTIONIST
 }
 
 model User {
@@ -34,8 +35,9 @@ model User {
   patientSupportNotes  SupportCaseNote[] @relation("PatientSupportNotes")
   productEvents        ProductEvent[]    @relation("ProductEventActor")
   passwordResetTokens PasswordResetToken[]
-  hrProfile          HrProfile?
-  hrStoreAccess      HrStoreAccess[] @relation("HrUserAccess")
+  hrProfile              HrProfile?
+  receptionistProfile    ReceptionistProfile?
+  hrStoreAccess          HrStoreAccess[] @relation("HrUserAccess")
   hrStoreGrants      HrStoreAccess[] @relation("HrAccessGrantor")
   leaveApprovals     LeaveRequest[]  @relation("LeaveApprovals")
   createdAt           DateTime       @default(now())

@@ -6,7 +6,8 @@ export const SERVER_CONFIG = {
     DOCTOR: process.env.DOCTOR_ORIGIN || 'http://localhost:4202',
     STORE: process.env.STORE_ORIGIN || 'http://localhost:4300',
     STORE_MANAGER: process.env.STORE_MANAGER_ORIGIN || 'http://localhost:4301',
-    HR: process.env.HR_ORIGIN || 'http://localhost:4400'
+    HR: process.env.HR_ORIGIN || 'http://localhost:4400',
+    RECEPTIONIST: process.env.RECEPTIONIST_ORIGIN || 'http://localhost:4500'
   },
   API_PUBLIC_URL: process.env.API_PUBLIC_URL || process.env.API_URL || 'http://localhost:4000',
   SMTP: {

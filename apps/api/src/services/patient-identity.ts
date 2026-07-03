@@ -112,6 +112,13 @@ export async function resolveActorClinicStoreId(userId: string, role: Role) {
     });
     return doctor?.clinicStoreId ?? null;
   }
+  if (role === Role.RECEPTIONIST) {
+    const profile = await prisma.receptionistProfile.findUnique({
+      where: { userId },
+      select: { storeId: true }
+    });
+    return profile?.storeId ?? null;
+  }
   return null;
 }
 

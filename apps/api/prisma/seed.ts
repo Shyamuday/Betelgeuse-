@@ -102,6 +102,29 @@ async function main() {
     }
   });
 
+  const receptionistUser = await prisma.user.upsert({
+    where: { email: DEV_DEMO_ACCOUNTS.receptionist.email },
+    update: { isActive: true, passwordHash, role: Role.RECEPTIONIST },
+    create: {
+      name: DEV_DEMO_ACCOUNTS.receptionist.name,
+      email: DEV_DEMO_ACCOUNTS.receptionist.email,
+      passwordHash,
+      role: Role.RECEPTIONIST,
+      isActive: true
+    }
+  });
+
+  await prisma.receptionistProfile.upsert({
+    where: { userId: receptionistUser.id },
+    update: { storeId: ranchiStore.id, employeeId: DEV_DEMO_ACCOUNTS.receptionist.employeeId },
+    create: {
+      userId: receptionistUser.id,
+      storeId: ranchiStore.id,
+      employeeId: DEV_DEMO_ACCOUNTS.receptionist.employeeId,
+      designation: 'Receptionist'
+    }
+  });
+
   const managerPinHash = await bcrypt.hash(DEV_DEMO_PASSWORD, 10);
   await prisma.storeStaff.upsert({
     where: { staffCode: DEV_DEMO_ACCOUNTS.storeManager.staffCode },
