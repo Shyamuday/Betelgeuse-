@@ -14,9 +14,22 @@ This document describes the full role and application landscape for a scalable d
 | **Store Staff** | `apps/store` | 4300 | Counter staff (PIN login) | Built |
 | **Store Manager** | `apps/store-manager-web` | 4301 | Branch pharmacy managers | Built |
 | **HR** | `apps/hr-web` | 4400 | HR / admin HR operations | Built |
+| **Receptionist** | `apps/receptionist-web` | 4500 | Walk-ins, queue, scheduling | Built |
+| **Clinic Manager** | `apps/clinic-manager-web` | 4600 | Branch operations | Built |
+| **Accountant** | `apps/accountant-web` | 4700 | Finance summaries | Built |
+| **Supplier** | `apps/supplier-web` | 4800 | PO fulfillment | Built |
+| **Warehouse** | `apps/warehouse-web` | 4900 | Central stock | Built |
+| **Delivery** | `apps/delivery-web` | 5000 | Medicine delivery | Built |
+| **Diagnostic** | `apps/diagnostic-web` | 5100 | Lab partner referrals | Built |
+| **Branch Owner** | `apps/branch-owner-web` | 5200 | Branch P&L / ops | Built |
+| **Coordinator** | `apps/coordinator-web` | 5300 | Adherence follow-ups | Built |
+| **Call Center** | `apps/callcenter-web` | 5400 | Patient lookup | Built |
+| **Marketing** | `apps/marketing-web` | 5500 | Funnel analytics | Built |
+| **Corporate Wellness** | `apps/corporate-wellness-web` | 5600 | Employer enrollments | Built |
+| **Insurance** | `apps/insurance-web` | 5700 | Claims | Built |
 | **API** | `apps/api` | 4000 | All apps | Built |
 
-Shared backend: one PostgreSQL database, Prisma ORM, JWT auth (platform + store tokens), Socket.io, Razorpay, notifications.
+**19 web apps** + API share one PostgreSQL database, Prisma ORM, JWT auth (platform + store tokens), Socket.io (live notification push), Razorpay, and notifications.
 
 **Already covered in current apps (partial or full):**
 

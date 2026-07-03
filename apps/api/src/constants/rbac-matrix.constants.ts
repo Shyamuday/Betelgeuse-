@@ -87,6 +87,18 @@ export const RBAC_CAPABILITIES: RbacCapability[] = [
     roles: [Role.ADMIN]
   },
   {
+    id: 'admin.portal_users',
+    label: 'Staff & partner portal users',
+    description: 'Create receptionist, clinic manager, accountant, supplier, warehouse, delivery, and diagnostic accounts',
+    roles: [Role.ADMIN]
+  },
+  {
+    id: 'hr.portal',
+    label: 'HR portal',
+    description: 'Doctor onboarding, employees, leaves, and payroll',
+    roles: [Role.HR, Role.ADMIN]
+  },
+  {
     id: 'branch_owner.portal',
     label: 'Branch owner portal',
     description: 'Branch P&L and operations dashboard',
@@ -121,6 +133,36 @@ export const RBAC_CAPABILITIES: RbacCapability[] = [
     label: 'Insurance partner portal',
     description: 'Insurance claims submission and tracking',
     roles: [Role.INSURANCE_PARTNER, Role.ADMIN]
+  },
+  {
+    id: 'receptionist.portal',
+    label: 'Receptionist portal',
+    description: 'Walk-ins, queue, and consultation scheduling',
+    roles: [Role.RECEPTIONIST, Role.ADMIN]
+  },
+  {
+    id: 'clinic_manager.portal',
+    label: 'Clinic manager portal',
+    description: 'Branch operations and staff oversight',
+    roles: [Role.CLINIC_MANAGER, Role.ADMIN]
+  },
+  {
+    id: 'accountant.portal',
+    label: 'Accountant portal',
+    description: 'Finance summaries and expense tracking',
+    roles: [Role.ACCOUNTANT, Role.ADMIN]
+  },
+  {
+    id: 'store_staff.portal',
+    label: 'Store staff portal',
+    description: 'Dispense medicines and manage branch stock',
+    roles: [Role.WAREHOUSE_MANAGER, Role.ADMIN]
+  },
+  {
+    id: 'store_manager.portal',
+    label: 'Store manager portal',
+    description: 'Multi-branch stock oversight for store managers',
+    roles: [Role.WAREHOUSE_MANAGER, Role.ADMIN]
   },
   {
     id: 'store.stock',

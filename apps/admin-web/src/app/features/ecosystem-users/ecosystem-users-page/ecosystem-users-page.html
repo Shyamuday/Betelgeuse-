@@ -1,29 +1,50 @@
 <div class="page">
   <div class="page-header">
     <div>
-      <h2 class="page-title">🌐 Ecosystem portal users</h2>
-      <p class="page-sub">Manage branch owners, coordinators, call center, marketing, corporate wellness, and insurance partners</p>
+      <h2 class="page-title">🌐 Portal users</h2>
+      <p class="page-sub">Ecosystem, staff, partner accounts — plus corporate enrollments and insurance claims</p>
     </div>
     <div class="header-actions">
-      <button type="button" class="btn-ghost" (click)="openCorporate()">+ Corporate account</button>
-      <button type="button" class="btn-primary" (click)="openCreate()">+ Add portal user</button>
+      @if (sectionTab() === 'corporate') {
+        <button type="button" class="btn-ghost" (click)="openCorporate()">+ Corporate account</button>
+        <button type="button" class="btn-primary" (click)="openEnroll()" [disabled]="!selectedCorporateId()">+ Enroll patient</button>
+      } @else if (sectionTab() === 'users') {
+        @if (userPool() === 'ecosystem') {
+          <button type="button" class="btn-ghost" (click)="openCorporate()">+ Corporate account</button>
+        }
+        <button type="button" class="btn-primary" (click)="openCreate()">+ Add portal user</button>
+      }
     </div>
   </div>
 
-  <div class="role-tabs">
-    <button type="button" [class.active]="activeRole() === 'ALL'" (click)="setRoleFilter('ALL')">All</button>
-    @for (opt of roleOptions; track opt.value) {
-      <button type="button" [class.active]="activeRole() === opt.value" (click)="setRoleFilter(opt.value)">
-        {{ opt.label }}
-      </button>
-    }
+  <div class="section-tabs">
+    <button type="button" [class.active]="sectionTab() === 'users'" (click)="setSectionTab('users')">Users</button>
+    <button type="button" [class.active]="sectionTab() === 'corporate'" (click)="setSectionTab('corporate')">Corporate enrollments</button>
+    <button type="button" [class.active]="sectionTab() === 'insurance'" (click)="setSectionTab('insurance')">Insurance claims</button>
   </div>
+
+  @if (sectionTab() === 'users') {
+    <div class="pool-tabs">
+      <button type="button" [class.active]="userPool() === 'ecosystem'" (click)="setUserPool('ecosystem')">Ecosystem (Phase D/E)</button>
+      <button type="button" [class.active]="userPool() === 'staff'" (click)="setUserPool('staff')">Staff portals</button>
+      <button type="button" [class.active]="userPool() === 'partner'" (click)="setUserPool('partner')">Partner portals</button>
+    </div>
+
+    <div class="role-tabs">
+      <button type="button" [class.active]="activeRole() === 'ALL'" (click)="setRoleFilter('ALL')">All</button>
+      @for (opt of currentRoleOptions(); track opt.value) {
+        <button type="button" [class.active]="activeRole() === opt.value" (click)="setRoleFilter(opt.value)">
+          {{ opt.label }}
+        </button>
+      }
+    </div>
+  }
 
   @if (loading()) {
     <div class="loading"><div class="spinner"></div></div>
   } @else if (error() && !modal()) {
     <p class="err">{{ error() }}</p>
-  } @else {
+  } @else if (sectionTab() === 'users') {
     <div class="user-grid">
       @for (u of filteredUsers(); track u.id) {
         <div class="user-card">
@@ -53,10 +74,86 @@
       <div class="empty">
         <div>🌐</div>
         <h3>No portal users</h3>
-        <p>Create accounts for the Phase D/E ecosystem apps.</p>
+        <p>Create accounts for this portal group.</p>
         <button type="button" class="btn-primary" (click)="openCreate()">Add first user</button>
       </div>
     }
+  } @else if (sectionTab() === 'corporate') {
+    @if (!corporates().length) {
+      <div class="empty">
+        <div>🏢</div>
+        <h3>No corporate accounts</h3>
+        <p>Create a corporate account before enrolling employees.</p>
+        <button type="button" class="btn-primary" (click)="openCorporate()">Create corporate account</button>
+      </div>
+    } @else {
+      <div class="fg corp-select">
+        <label>Corporate account</label>
+        <select [ngModel]="selectedCorporateId()" (ngModelChange)="loadEnrollments($event)">
+          @for (c of corporates(); track c.id) {
+            <option [value]="c.id">{{ c.name }} ({{ c.code }}) — {{ c.enrollmentCount }} enrolled</option>
+          }
+        </select>
+      </div>
+
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Patient</th>
+              <th>Code</th>
+              <th>Contact</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of enrollments(); track e.id) {
+              <tr>
+                <td>{{ e.patient.name }}</td>
+                <td>{{ e.patient.patientCode ?? '—' }}</td>
+                <td>{{ e.patient.mobile ?? e.patient.email ?? '—' }}</td>
+                <td>
+                  <button type="button" class="btn-toggle deact" (click)="removeEnrollment(e.patient.id)">Remove</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        @if (!enrollments().length) {
+          <p class="table-empty">No enrollments for this account yet.</p>
+        }
+      </div>
+    }
+  } @else {
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Claim</th>
+            <th>Patient</th>
+            <th>Partner</th>
+            <th>Status</th>
+            <th>Amount</th>
+            <th>Submitted</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of claims(); track c.id) {
+            <tr>
+              <td>{{ c.claimNumber ?? c.id.slice(0, 8) }}</td>
+              <td>{{ c.patient?.name ?? '—' }}</td>
+              <td>{{ c.partner?.companyName ?? '—' }}</td>
+              <td><span class="status-pill">{{ claimStatusLabel(c.status) }}</span></td>
+              <td>{{ c.amountInPaise != null ? (c.amountInPaise / 100 | number:'1.0-0') : '—' }}</td>
+              <td>{{ c.createdAt | date:'mediumDate' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      @if (!claims().length) {
+        <p class="table-empty">No insurance claims yet.</p>
+      }
+    </div>
   }
 </div>
 
@@ -71,7 +168,7 @@
         <div class="fg">
           <label>Role *</label>
           <select [(ngModel)]="createForm.role">
-            @for (opt of roleOptions; track opt.value) {
+            @for (opt of currentRoleOptions(); track opt.value) {
               <option [value]="opt.value">{{ opt.label }}</option>
             }
           </select>
@@ -85,6 +182,36 @@
             <select [(ngModel)]="createForm.storeId">
               @for (s of stores(); track s.id) {
                 <option [value]="s.id">{{ s.name }} ({{ s.code }})</option>
+              }
+            </select>
+          </div>
+        }
+        @if (needsWarehouse(createForm.role)) {
+          <div class="fg">
+            <label>Warehouse *</label>
+            <select [(ngModel)]="createForm.warehouseId">
+              @for (w of warehouses(); track w.id) {
+                <option [value]="w.id">{{ w.name }} ({{ w.code }})</option>
+              }
+            </select>
+          </div>
+        }
+        @if (needsSupplier(createForm.role)) {
+          <div class="fg">
+            <label>Supplier *</label>
+            <select [(ngModel)]="createForm.supplierId">
+              @for (s of suppliers(); track s.id) {
+                <option [value]="s.id">{{ s.name }} ({{ s.code }})</option>
+              }
+            </select>
+          </div>
+        }
+        @if (needsDiagnostic(createForm.role)) {
+          <div class="fg">
+            <label>Diagnostic center *</label>
+            <select [(ngModel)]="createForm.diagnosticCenterId">
+              @for (d of diagnosticCenters(); track d.id) {
+                <option [value]="d.id">{{ d.name }} ({{ d.code }})</option>
               }
             </select>
           </div>
@@ -103,7 +230,7 @@
           <div class="fg"><label>Company name *</label><input [(ngModel)]="createForm.companyName" /></div>
           <div class="fg"><label>Company code *</label><input [(ngModel)]="createForm.companyCode" style="text-transform:uppercase" /></div>
         }
-        @if (createForm.role !== 'CORPORATE_WELLNESS' && createForm.role !== 'INSURANCE_PARTNER') {
+        @if (createForm.role !== 'CORPORATE_WELLNESS' && createForm.role !== 'INSURANCE_PARTNER' && createForm.role !== 'SUPPLIER' && createForm.role !== 'DIAGNOSTIC_PARTNER') {
           <div class="fg"><label>Employee ID</label><input [(ngModel)]="createForm.employeeId" /></div>
           <div class="fg"><label>Designation</label><input [(ngModel)]="createForm.designation" /></div>
         }
@@ -137,6 +264,36 @@
             </select>
           </div>
         }
+        @if (needsWarehouse(selected()!.role)) {
+          <div class="fg">
+            <label>Warehouse</label>
+            <select [(ngModel)]="editForm.warehouseId">
+              @for (w of warehouses(); track w.id) {
+                <option [value]="w.id">{{ w.name }} ({{ w.code }})</option>
+              }
+            </select>
+          </div>
+        }
+        @if (needsSupplier(selected()!.role)) {
+          <div class="fg">
+            <label>Supplier</label>
+            <select [(ngModel)]="editForm.supplierId">
+              @for (s of suppliers(); track s.id) {
+                <option [value]="s.id">{{ s.name }} ({{ s.code }})</option>
+              }
+            </select>
+          </div>
+        }
+        @if (needsDiagnostic(selected()!.role)) {
+          <div class="fg">
+            <label>Diagnostic center</label>
+            <select [(ngModel)]="editForm.diagnosticCenterId">
+              @for (d of diagnosticCenters(); track d.id) {
+                <option [value]="d.id">{{ d.name }} ({{ d.code }})</option>
+              }
+            </select>
+          </div>
+        }
         @if (selected()!.role === 'CORPORATE_WELLNESS') {
           <div class="fg">
             <label>Corporate account</label>
@@ -151,7 +308,7 @@
           <div class="fg"><label>Company name</label><input [(ngModel)]="editForm.companyName" /></div>
           <div class="fg"><label>Company code</label><input [(ngModel)]="editForm.companyCode" style="text-transform:uppercase" /></div>
         }
-        @if (selected()!.role !== 'CORPORATE_WELLNESS' && selected()!.role !== 'INSURANCE_PARTNER') {
+        @if (selected()!.role !== 'CORPORATE_WELLNESS' && selected()!.role !== 'INSURANCE_PARTNER' && selected()!.role !== 'SUPPLIER' && selected()!.role !== 'DIAGNOSTIC_PARTNER') {
           <div class="fg"><label>Employee ID</label><input [(ngModel)]="editForm.employeeId" /></div>
           <div class="fg"><label>Designation</label><input [(ngModel)]="editForm.designation" /></div>
         }
@@ -184,6 +341,37 @@
         <button type="button" class="btn-primary" [disabled]="saving()" (click)="createCorporate()">
           {{ saving() ? 'Creating…' : 'Create account' }}
         </button>
+      </div>
+      @if (error()) { <div class="err">⚠️ {{ error() }}</div> }
+    </div>
+  </div>
+}
+
+@if (modal() === 'enroll') {
+  <div class="overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-hdr">
+        <h3>Enroll patient — {{ selectedCorporate()?.name }}</h3>
+        <button type="button" class="close-btn" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="fg">
+          <label>Search patients</label>
+          <div class="search-row">
+            <input [(ngModel)]="enrollQuery" placeholder="Name, mobile, or patient code" (keyup.enter)="searchPatients()" />
+            <button type="button" class="btn-ghost" [disabled]="searchingPatients()" (click)="searchPatients()">Search</button>
+          </div>
+        </div>
+        @if (patientHits().length) {
+          <div class="hit-list">
+            @for (p of patientHits(); track p.id) {
+              <button type="button" class="hit-row" (click)="enrollPatient(p.id)">
+                <span>{{ p.name }}</span>
+                <span class="muted">{{ p.patientCode ?? p.mobile ?? p.email }}</span>
+              </button>
+            }
+          </div>
+        }
       </div>
       @if (error()) { <div class="err">⚠️ {{ error() }}</div> }
     </div>

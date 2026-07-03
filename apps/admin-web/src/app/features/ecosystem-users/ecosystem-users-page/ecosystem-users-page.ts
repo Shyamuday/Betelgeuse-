@@ -1,12 +1,24 @@
+import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, OnInit, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../../../core/services/admin-api';
 import { TOAST_DURATION_LONG_MS } from '../../../core/constants/timing.constants';
-import { ECOSYSTEM_ROLE_LABELS, ECOSYSTEM_ROLE_OPTIONS } from '../../../core/constants/platform-roles.constants';
+import {
+  ECOSYSTEM_ROLE_LABELS,
+  ECOSYSTEM_ROLE_OPTIONS,
+  STAFF_PORTAL_ROLE_LABELS,
+  STAFF_PORTAL_ROLE_OPTIONS,
+  PARTNER_PORTAL_ROLE_LABELS,
+  PARTNER_PORTAL_ROLE_OPTIONS,
+  ALL_PORTAL_ROLE_LABELS
+} from '../../../core/constants/platform-roles.constants';
+
+type SectionTab = 'users' | 'corporate' | 'insurance';
+type UserPool = 'ecosystem' | 'staff' | 'partner';
 
 @Component({
   selector: 'app-ecosystem-users-page',
-  imports: [FormsModule],
+  imports: [CommonModule, FormsModule, DatePipe, DecimalPipe],
   templateUrl: './ecosystem-users-page.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './ecosystem-users-page.scss'
@@ -14,19 +26,32 @@ import { ECOSYSTEM_ROLE_LABELS, ECOSYSTEM_ROLE_OPTIONS } from '../../../core/con
 export class EcosystemUsersPage implements OnInit {
   private api = inject(AdminApi);
 
-  readonly roleOptions = ECOSYSTEM_ROLE_OPTIONS;
-  readonly roleLabels = ECOSYSTEM_ROLE_LABELS;
+  readonly ecosystemRoleOptions = ECOSYSTEM_ROLE_OPTIONS;
+  readonly staffRoleOptions = STAFF_PORTAL_ROLE_OPTIONS;
+  readonly partnerRoleOptions = PARTNER_PORTAL_ROLE_OPTIONS;
+  readonly roleLabels = ALL_PORTAL_ROLE_LABELS;
 
+  sectionTab = signal<SectionTab>('users');
+  userPool = signal<UserPool>('ecosystem');
   users = signal<any[]>([]);
   stores = signal<any[]>([]);
+  warehouses = signal<any[]>([]);
+  suppliers = signal<any[]>([]);
+  diagnosticCenters = signal<any[]>([]);
   corporates = signal<any[]>([]);
+  claims = signal<any[]>([]);
+  enrollments = signal<any[]>([]);
+  patientHits = signal<any[]>([]);
+
   loading = signal(true);
   saving = signal(false);
+  searchingPatients = signal(false);
   error = signal('');
   toast = signal('');
   activeRole = signal('ALL');
-  modal = signal<'create' | 'edit' | 'corporate' | null>(null);
+  modal = signal<'create' | 'edit' | 'corporate' | 'enroll' | null>(null);
   selected = signal<any>(null);
+  selectedCorporateId = signal('');
 
   createForm = {
     role: 'BRANCH_OWNER',
@@ -36,6 +61,9 @@ export class EcosystemUsersPage implements OnInit {
     employeeId: '',
     designation: '',
     storeId: '',
+    warehouseId: '',
+    supplierId: '',
+    diagnosticCenterId: '',
     corporateId: '',
     companyName: '',
     companyCode: ''
@@ -45,18 +73,36 @@ export class EcosystemUsersPage implements OnInit {
     employeeId: '',
     designation: '',
     storeId: '',
+    warehouseId: '',
+    supplierId: '',
+    diagnosticCenterId: '',
     corporateId: '',
     companyName: '',
     companyCode: ''
   };
 
   corporateForm = { code: '', name: '', contactEmail: '' };
+  enrollQuery = '';
+  enrollPatientId = '';
+
+  currentRoleOptions = computed(() => {
+    switch (this.userPool()) {
+      case 'staff':
+        return this.staffRoleOptions;
+      case 'partner':
+        return this.partnerRoleOptions;
+      default:
+        return this.ecosystemRoleOptions;
+    }
+  });
 
   filteredUsers = computed(() => {
     const role = this.activeRole();
     const list = this.users();
     return role === 'ALL' ? list : list.filter((u) => u.role === role);
   });
+
+  selectedCorporate = computed(() => this.corporates().find((c) => c.id === this.selectedCorporateId()) ?? null);
 
   ngOnInit(): void {
     void this.load();
@@ -66,6 +112,24 @@ export class EcosystemUsersPage implements OnInit {
     this.loading.set(true);
     this.error.set('');
     try {
+      const tab = this.sectionTab();
+      if (tab === 'users') {
+        await this.loadUsers();
+      } else if (tab === 'corporate') {
+        await this.loadCorporateTab();
+      } else {
+        await this.loadInsuranceTab();
+      }
+    } catch {
+      this.error.set('Could not load portal data.');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  private async loadUsers() {
+    const pool = this.userPool();
+    if (pool === 'ecosystem') {
       const [meta, usersRes, corporatesRes] = await Promise.all([
         this.api.getEcosystemUsersMeta(),
         this.api.getEcosystemUsers(),
@@ -74,11 +138,47 @@ export class EcosystemUsersPage implements OnInit {
       this.stores.set(meta.stores);
       this.corporates.set(corporatesRes.accounts);
       this.users.set(usersRes.users);
-    } catch {
-      this.error.set('Could not load ecosystem users.');
-    } finally {
-      this.loading.set(false);
+    } else {
+      const [meta, usersRes] = await Promise.all([this.api.getPortalUsersMeta(), this.api.getPortalUsers()]);
+      this.stores.set(meta.stores);
+      this.warehouses.set(meta.warehouses);
+      this.suppliers.set(meta.suppliers);
+      this.diagnosticCenters.set(meta.diagnosticCenters);
+      const roles = pool === 'staff' ? STAFF_PORTAL_ROLE_LABELS : PARTNER_PORTAL_ROLE_LABELS;
+      this.users.set(usersRes.users.filter((u) => roles[u.role]));
     }
+  }
+
+  private async loadCorporateTab() {
+    const corporatesRes = await this.api.getEcosystemCorporates();
+    this.corporates.set(corporatesRes.accounts);
+    const first = corporatesRes.accounts[0]?.id ?? '';
+    this.selectedCorporateId.set(first);
+    if (first) await this.loadEnrollments(first);
+    else this.enrollments.set([]);
+  }
+
+  private async loadInsuranceTab() {
+    const res = await this.api.getInsuranceClaimsAdmin();
+    this.claims.set(res.claims);
+  }
+
+  async loadEnrollments(corporateId: string) {
+    this.selectedCorporateId.set(corporateId);
+    const res = await this.api.getCorporateEnrollments(corporateId);
+    this.enrollments.set(res.enrollments);
+  }
+
+  setSectionTab(tab: SectionTab) {
+    this.sectionTab.set(tab);
+    this.activeRole.set('ALL');
+    void this.load();
+  }
+
+  setUserPool(pool: UserPool) {
+    this.userPool.set(pool);
+    this.activeRole.set('ALL');
+    void this.load();
   }
 
   setRoleFilter(role: string) {
@@ -89,7 +189,40 @@ export class EcosystemUsersPage implements OnInit {
     return this.roleLabels[role] ?? role;
   }
 
+  isPortalUser(user: any) {
+    return Boolean(
+      user.receptionistProfile ||
+        user.clinicManagerProfile ||
+        user.accountantProfile ||
+        user.supplierProfile ||
+        user.warehouseManagerProfile ||
+        user.deliveryExecutiveProfile ||
+        user.diagnosticCenterProfile
+    );
+  }
+
   profileSummary(user: any): string {
+    if (user.receptionistProfile?.store) {
+      return `${user.receptionistProfile.store.name} (${user.receptionistProfile.store.code})`;
+    }
+    if (user.clinicManagerProfile?.store) {
+      return `${user.clinicManagerProfile.store.name} (${user.clinicManagerProfile.store.code})`;
+    }
+    if (user.accountantProfile) {
+      return user.accountantProfile.designation ?? 'Accountant';
+    }
+    if (user.supplierProfile?.supplier) {
+      return `${user.supplierProfile.supplier.name} (${user.supplierProfile.supplier.code})`;
+    }
+    if (user.warehouseManagerProfile?.warehouse) {
+      return `${user.warehouseManagerProfile.warehouse.name} (${user.warehouseManagerProfile.warehouse.code})`;
+    }
+    if (user.deliveryExecutiveProfile?.store) {
+      return `${user.deliveryExecutiveProfile.store.name} — delivery`;
+    }
+    if (user.diagnosticCenterProfile?.diagnosticCenter) {
+      return `${user.diagnosticCenterProfile.diagnosticCenter.name} (${user.diagnosticCenterProfile.diagnosticCenter.code})`;
+    }
     switch (user.role) {
       case 'BRANCH_OWNER':
         return user.branchOwnerProfile?.store
@@ -115,18 +248,36 @@ export class EcosystemUsersPage implements OnInit {
   }
 
   needsStore(role: string) {
-    return role === 'BRANCH_OWNER' || role === 'PATIENT_COORDINATOR';
+    return role === 'BRANCH_OWNER' || role === 'PATIENT_COORDINATOR' || role === 'RECEPTIONIST' || role === 'CLINIC_MANAGER' || role === 'DELIVERY_EXECUTIVE';
+  }
+
+  needsWarehouse(role: string) {
+    return role === 'WAREHOUSE_MANAGER';
+  }
+
+  needsSupplier(role: string) {
+    return role === 'SUPPLIER';
+  }
+
+  needsDiagnostic(role: string) {
+    return role === 'DIAGNOSTIC_PARTNER';
   }
 
   openCreate() {
+    const pool = this.userPool();
+    const defaultRole =
+      pool === 'staff' ? 'RECEPTIONIST' : pool === 'partner' ? 'SUPPLIER' : this.activeRole() === 'ALL' ? 'BRANCH_OWNER' : this.activeRole();
     this.createForm = {
-      role: this.activeRole() === 'ALL' ? 'BRANCH_OWNER' : this.activeRole(),
+      role: defaultRole,
       name: '',
       email: '',
       password: '',
       employeeId: '',
       designation: '',
       storeId: this.stores()[0]?.id ?? '',
+      warehouseId: this.warehouses()[0]?.id ?? '',
+      supplierId: this.suppliers()[0]?.id ?? '',
+      diagnosticCenterId: this.diagnosticCenters()[0]?.id ?? '',
       corporateId: this.corporates()[0]?.id ?? '',
       companyName: '',
       companyCode: ''
@@ -143,14 +294,33 @@ export class EcosystemUsersPage implements OnInit {
         user.patientCoordinatorProfile?.employeeId ??
         user.callCenterProfile?.employeeId ??
         user.marketingProfile?.employeeId ??
+        user.receptionistProfile?.employeeId ??
+        user.clinicManagerProfile?.employeeId ??
+        user.accountantProfile?.employeeId ??
+        user.warehouseManagerProfile?.employeeId ??
+        user.deliveryExecutiveProfile?.employeeId ??
         '',
       designation:
         user.branchOwnerProfile?.designation ??
         user.patientCoordinatorProfile?.designation ??
         user.callCenterProfile?.designation ??
         user.marketingProfile?.designation ??
+        user.receptionistProfile?.designation ??
+        user.clinicManagerProfile?.designation ??
+        user.accountantProfile?.designation ??
+        user.warehouseManagerProfile?.designation ??
+        user.deliveryExecutiveProfile?.designation ??
         '',
-      storeId: user.branchOwnerProfile?.storeId ?? user.patientCoordinatorProfile?.storeId ?? '',
+      storeId:
+        user.branchOwnerProfile?.storeId ??
+        user.patientCoordinatorProfile?.storeId ??
+        user.receptionistProfile?.storeId ??
+        user.clinicManagerProfile?.storeId ??
+        user.deliveryExecutiveProfile?.storeId ??
+        '',
+      warehouseId: user.warehouseManagerProfile?.warehouseId ?? '',
+      supplierId: user.supplierProfile?.supplierId ?? '',
+      diagnosticCenterId: user.diagnosticCenterProfile?.diagnosticCenterId ?? '',
       corporateId: user.corporateWellnessProfile?.corporateId ?? '',
       companyName: user.insurancePartnerProfile?.companyName ?? '',
       companyCode: user.insurancePartnerProfile?.companyCode ?? ''
@@ -163,6 +333,14 @@ export class EcosystemUsersPage implements OnInit {
     this.corporateForm = { code: '', name: '', contactEmail: '' };
     this.error.set('');
     this.modal.set('corporate');
+  }
+
+  openEnroll() {
+    this.enrollQuery = '';
+    this.enrollPatientId = '';
+    this.patientHits.set([]);
+    this.error.set('');
+    this.modal.set('enroll');
   }
 
   closeModal() {
@@ -178,18 +356,34 @@ export class EcosystemUsersPage implements OnInit {
     }
     this.saving.set(true);
     try {
-      await this.api.createEcosystemUser({
-        role: f.role,
-        name: f.name,
-        email: f.email,
-        password: f.password,
-        employeeId: f.employeeId || undefined,
-        designation: f.designation || undefined,
-        storeId: this.needsStore(f.role) ? f.storeId : undefined,
-        corporateId: f.role === 'CORPORATE_WELLNESS' ? f.corporateId : undefined,
-        companyName: f.role === 'INSURANCE_PARTNER' ? f.companyName : undefined,
-        companyCode: f.role === 'INSURANCE_PARTNER' ? f.companyCode : undefined
-      });
+      const pool = this.userPool();
+      if (pool === 'ecosystem') {
+        await this.api.createEcosystemUser({
+          role: f.role,
+          name: f.name,
+          email: f.email,
+          password: f.password,
+          employeeId: f.employeeId || undefined,
+          designation: f.designation || undefined,
+          storeId: this.needsStore(f.role) ? f.storeId : undefined,
+          corporateId: f.role === 'CORPORATE_WELLNESS' ? f.corporateId : undefined,
+          companyName: f.role === 'INSURANCE_PARTNER' ? f.companyName : undefined,
+          companyCode: f.role === 'INSURANCE_PARTNER' ? f.companyCode : undefined
+        });
+      } else {
+        await this.api.createPortalUser({
+          role: f.role,
+          name: f.name,
+          email: f.email,
+          password: f.password,
+          employeeId: f.employeeId || undefined,
+          designation: f.designation || undefined,
+          storeId: this.needsStore(f.role) ? f.storeId : undefined,
+          warehouseId: this.needsWarehouse(f.role) ? f.warehouseId : undefined,
+          supplierId: this.needsSupplier(f.role) ? f.supplierId : undefined,
+          diagnosticCenterId: this.needsDiagnostic(f.role) ? f.diagnosticCenterId : undefined
+        });
+      }
       this.showToast('User created.');
       this.closeModal();
       await this.load();
@@ -205,14 +399,22 @@ export class EcosystemUsersPage implements OnInit {
     if (!user) return;
     this.saving.set(true);
     try {
-      await this.api.updateEcosystemUser(user.id, {
+      const payload = {
         employeeId: this.editForm.employeeId || undefined,
         designation: this.editForm.designation || undefined,
         storeId: this.needsStore(user.role) ? this.editForm.storeId : undefined,
+        warehouseId: this.needsWarehouse(user.role) ? this.editForm.warehouseId : undefined,
+        supplierId: this.needsSupplier(user.role) ? this.editForm.supplierId : undefined,
+        diagnosticCenterId: this.needsDiagnostic(user.role) ? this.editForm.diagnosticCenterId : undefined,
         corporateId: user.role === 'CORPORATE_WELLNESS' ? this.editForm.corporateId : undefined,
         companyName: user.role === 'INSURANCE_PARTNER' ? this.editForm.companyName : undefined,
         companyCode: user.role === 'INSURANCE_PARTNER' ? this.editForm.companyCode : undefined
-      });
+      };
+      if (this.isPortalUser(user)) {
+        await this.api.updatePortalUser(user.id, payload);
+      } else {
+        await this.api.updateEcosystemUser(user.id, payload);
+      }
       this.showToast('Profile updated.');
       this.closeModal();
       await this.load();
@@ -241,14 +443,67 @@ export class EcosystemUsersPage implements OnInit {
     }
   }
 
+  async searchPatients() {
+    if (!this.enrollQuery.trim()) return;
+    this.searchingPatients.set(true);
+    try {
+      const res = await this.api.searchPatients(this.enrollQuery.trim());
+      this.patientHits.set(res.patients ?? []);
+    } catch {
+      this.patientHits.set([]);
+    } finally {
+      this.searchingPatients.set(false);
+    }
+  }
+
+  async enrollPatient(patientId?: string) {
+    const id = patientId ?? this.enrollPatientId;
+    const corporateId = this.selectedCorporateId();
+    if (!id || !corporateId) {
+      this.error.set('Select a corporate account and patient.');
+      return;
+    }
+    this.saving.set(true);
+    try {
+      await this.api.enrollCorporatePatient(corporateId, id);
+      this.showToast('Patient enrolled.');
+      this.closeModal();
+      await this.loadEnrollments(corporateId);
+    } catch (e: any) {
+      this.error.set(e?.error?.message || 'Enrollment failed.');
+    } finally {
+      this.saving.set(false);
+    }
+  }
+
+  async removeEnrollment(patientId: string) {
+    const corporateId = this.selectedCorporateId();
+    if (!corporateId) return;
+    try {
+      await this.api.removeCorporateEnrollment(corporateId, patientId);
+      this.showToast('Enrollment removed.');
+      await this.loadEnrollments(corporateId);
+    } catch {
+      this.showToast('Remove failed.');
+    }
+  }
+
   async toggleStatus(user: any) {
     try {
-      await this.api.setEcosystemUserStatus(user.id, !user.isActive);
+      if (this.isPortalUser(user)) {
+        await this.api.setPortalUserStatus(user.id, !user.isActive);
+      } else {
+        await this.api.setEcosystemUserStatus(user.id, !user.isActive);
+      }
       this.showToast(user.isActive ? 'User deactivated.' : 'User activated.');
       await this.load();
     } catch {
       this.showToast('Status update failed.');
     }
+  }
+
+  claimStatusLabel(status: string) {
+    return status.replace(/_/g, ' ');
   }
 
   private showToast(msg: string) {

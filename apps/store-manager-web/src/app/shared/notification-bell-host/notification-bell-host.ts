@@ -17,3 +17,4 @@ export class NotificationBellHost {
     apiPath: '/store/notifications'
   };
 }
+

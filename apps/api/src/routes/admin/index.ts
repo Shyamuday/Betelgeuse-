@@ -18,6 +18,7 @@ import { registerAdminInventoryRoutes } from './inventory.js';
 import { registerAdminNotificationRoutes } from './notifications.js';
 import { registerAdminRbacRoutes } from './rbac.js';
 import { registerAdminEcosystemUserRoutes } from './ecosystem-users.js';
+import { registerAdminPortalUserRoutes } from './portal-users.js';
 
 export function createAdminRouter(io: SocketIoServer) {
   const router = Router();
@@ -40,6 +41,7 @@ export function createAdminRouter(io: SocketIoServer) {
   registerAdminNotificationRoutes(router);
   registerAdminRbacRoutes(router);
   registerAdminEcosystemUserRoutes(router);
+  registerAdminPortalUserRoutes(router);
 
   return router;
 }

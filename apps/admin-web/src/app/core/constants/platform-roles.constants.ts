@@ -7,7 +7,36 @@ export const ECOSYSTEM_ROLE_LABELS: Record<string, string> = {
   INSURANCE_PARTNER: 'Insurance partner'
 };
 
+export const STAFF_PORTAL_ROLE_LABELS: Record<string, string> = {
+  RECEPTIONIST: 'Receptionist',
+  CLINIC_MANAGER: 'Clinic manager',
+  ACCOUNTANT: 'Accountant'
+};
+
+export const PARTNER_PORTAL_ROLE_LABELS: Record<string, string> = {
+  SUPPLIER: 'Supplier partner',
+  WAREHOUSE_MANAGER: 'Warehouse manager',
+  DELIVERY_EXECUTIVE: 'Delivery executive',
+  DIAGNOSTIC_PARTNER: 'Diagnostic partner'
+};
+
+export const ALL_PORTAL_ROLE_LABELS: Record<string, string> = {
+  ...ECOSYSTEM_ROLE_LABELS,
+  ...STAFF_PORTAL_ROLE_LABELS,
+  ...PARTNER_PORTAL_ROLE_LABELS
+};
+
 export const ECOSYSTEM_ROLE_OPTIONS = Object.entries(ECOSYSTEM_ROLE_LABELS).map(([value, label]) => ({
+  value,
+  label
+}));
+
+export const STAFF_PORTAL_ROLE_OPTIONS = Object.entries(STAFF_PORTAL_ROLE_LABELS).map(([value, label]) => ({
+  value,
+  label
+}));
+
+export const PARTNER_PORTAL_ROLE_OPTIONS = Object.entries(PARTNER_PORTAL_ROLE_LABELS).map(([value, label]) => ({
   value,
   label
 }));

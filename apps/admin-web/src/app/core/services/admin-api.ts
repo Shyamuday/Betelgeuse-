@@ -316,6 +316,33 @@ export class AdminApi {
   createEcosystemCorporate(...args: Parameters<AdminOpsApi['createEcosystemCorporate']>) {
     return this.ops.createEcosystemCorporate(...(args as Parameters<AdminOpsApi['createEcosystemCorporate']>));
   }
+  enrollCorporatePatient(...args: Parameters<AdminOpsApi['enrollCorporatePatient']>) {
+    return this.ops.enrollCorporatePatient(...(args as Parameters<AdminOpsApi['enrollCorporatePatient']>));
+  }
+  getCorporateEnrollments(...args: Parameters<AdminOpsApi['getCorporateEnrollments']>) {
+    return this.ops.getCorporateEnrollments(...(args as Parameters<AdminOpsApi['getCorporateEnrollments']>));
+  }
+  removeCorporateEnrollment(...args: Parameters<AdminOpsApi['removeCorporateEnrollment']>) {
+    return this.ops.removeCorporateEnrollment(...(args as Parameters<AdminOpsApi['removeCorporateEnrollment']>));
+  }
+  getInsuranceClaimsAdmin(...args: Parameters<AdminOpsApi['getInsuranceClaimsAdmin']>) {
+    return this.ops.getInsuranceClaimsAdmin(...(args as Parameters<AdminOpsApi['getInsuranceClaimsAdmin']>));
+  }
+  getPortalUsersMeta(...args: Parameters<AdminOpsApi['getPortalUsersMeta']>) {
+    return this.ops.getPortalUsersMeta(...(args as Parameters<AdminOpsApi['getPortalUsersMeta']>));
+  }
+  getPortalUsers(...args: Parameters<AdminOpsApi['getPortalUsers']>) {
+    return this.ops.getPortalUsers(...(args as Parameters<AdminOpsApi['getPortalUsers']>));
+  }
+  createPortalUser(...args: Parameters<AdminOpsApi['createPortalUser']>) {
+    return this.ops.createPortalUser(...(args as Parameters<AdminOpsApi['createPortalUser']>));
+  }
+  updatePortalUser(...args: Parameters<AdminOpsApi['updatePortalUser']>) {
+    return this.ops.updatePortalUser(...(args as Parameters<AdminOpsApi['updatePortalUser']>));
+  }
+  setPortalUserStatus(...args: Parameters<AdminOpsApi['setPortalUserStatus']>) {
+    return this.ops.setPortalUserStatus(...(args as Parameters<AdminOpsApi['setPortalUserStatus']>));
+  }
   getAuditRetentionStats(...args: Parameters<AdminReportsApi['getAuditRetentionStats']>) {
     return this.reports.getAuditRetentionStats(...(args as Parameters<AdminReportsApi['getAuditRetentionStats']>));
   }

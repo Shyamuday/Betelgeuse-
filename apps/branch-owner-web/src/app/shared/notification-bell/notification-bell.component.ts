@@ -1,13 +1,17 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { io, type Socket } from 'socket.io-client';
 import type { InAppNotificationItem, NotificationBellConfig } from './types';
+
+const SOCKET_EVENT_NOTIFICATION_NEW = 'notification:new';
 
 @Component({
   selector: 'app-shared-notification-bell',
   standalone: true,
   imports: [CommonModule, DatePipe],
   templateUrl: './notification-bell.component.html',
-  styleUrl: './notification-bell.component.scss'
+  styleUrl: './notification-bell.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager
 })
 export class NotificationBellComponent implements OnInit, OnDestroy {
   @Input({ required: true }) config!: NotificationBellConfig;
@@ -19,15 +23,19 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   error = signal('');
 
   private pollTimer: ReturnType<typeof setInterval> | null = null;
+  private socket: Socket | null = null;
 
   ngOnInit(): void {
     void this.refreshUnread();
     const pollMs = this.config.pollMs ?? 30000;
     this.pollTimer = setInterval(() => void this.refreshUnread(), pollMs);
+    this.connectSocket();
   }
 
   ngOnDestroy(): void {
     if (this.pollTimer) clearInterval(this.pollTimer);
+    this.socket?.disconnect();
+    this.socket = null;
   }
 
   toggle(): void {
@@ -45,6 +53,24 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     return localStorage.getItem(this.config.tokenKey);
   }
 
+  private connectSocket(): void {
+    if (this.config.socketEnabled === false) return;
+    const token = this.token();
+    if (!token) return;
+
+    this.socket = io(this.config.apiBase, {
+      auth: { token },
+      transports: ['websocket', 'polling']
+    });
+
+    this.socket.on(SOCKET_EVENT_NOTIFICATION_NEW, (payload: InAppNotificationItem) => {
+      this.unreadCount.update((count) => count + 1);
+      if (this.open()) {
+        this.items.update((list) => [payload, ...list].slice(0, 20));
+      }
+    });
+  }
+
   private async apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     const token = this.token();
     if (!token) throw new Error('Not signed in');
@@ -56,9 +82,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
         ...(init?.headers ?? {})
       }
     });
-    if (!response.ok) {
-      throw new Error('Request failed');
-    }
+    if (!response.ok) throw new Error('Request failed');
     return response.json() as Promise<T>;
   }
 
@@ -79,6 +103,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
         `${this.config.apiPath}?page=1&pageSize=20`
       );
       this.items.set(result.notifications);
+      await this.refreshUnread();
     } catch {
       this.error.set('Could not load notifications.');
     } finally {
@@ -90,10 +115,10 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     if (item.readAt) return;
     try {
       await this.apiFetch(`${this.config.apiPath}/${item.id}/read`, { method: 'PATCH' });
-      this.items.update((list: InAppNotificationItem[]) =>
-        list.map((row: InAppNotificationItem) => (row.id === item.id ? { ...row, readAt: new Date().toISOString() } : row))
+      this.items.update((list) =>
+        list.map((row) => (row.id === item.id ? { ...row, readAt: new Date().toISOString() } : row))
       );
-      this.unreadCount.update((count: number) => Math.max(0, count - 1));
+      this.unreadCount.update((count) => Math.max(0, count - 1));
     } catch {
       this.error.set('Could not mark notification read.');
     }
@@ -102,7 +127,9 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   async markAllRead(): Promise<void> {
     try {
       await this.apiFetch(`${this.config.apiPath}/read-all`, { method: 'POST', body: '{}' });
-      this.items.update((list: InAppNotificationItem[]) => list.map((row: InAppNotificationItem) => ({ ...row, readAt: row.readAt ?? new Date().toISOString() })));
+      this.items.update((list) =>
+        list.map((row) => ({ ...row, readAt: row.readAt ?? new Date().toISOString() }))
+      );
       this.unreadCount.set(0);
     } catch {
       this.error.set('Could not mark all read.');

@@ -248,4 +248,64 @@ export class AdminOpsApi extends AdminApiBase {
       this.http.post<{ account: any }>(`${this.apiBase}${API_PATHS.ADMIN.ECOSYSTEM_CORPORATES}`, payload)
     );
   }
+
+  enrollCorporatePatient(corporateId: string, patientId: string) {
+    return firstValueFrom(
+      this.http.post<{ enrollment: any }>(`${this.apiBase}${API_PATHS.ADMIN.ECOSYSTEM_ENROLLMENTS(corporateId)}`, {
+        patientId
+      })
+    );
+  }
+
+  getCorporateEnrollments(corporateId: string) {
+    return firstValueFrom(
+      this.http.get<{ enrollments: any[] }>(`${this.apiBase}${API_PATHS.ADMIN.ECOSYSTEM_ENROLLMENTS(corporateId)}`)
+    );
+  }
+
+  removeCorporateEnrollment(corporateId: string, patientId: string) {
+    return firstValueFrom(
+      this.http.delete(`${this.apiBase}${API_PATHS.ADMIN.ECOSYSTEM_ENROLLMENTS(corporateId)}/${patientId}`)
+    );
+  }
+
+  getInsuranceClaimsAdmin() {
+    return firstValueFrom(
+      this.http.get<{ claims: any[] }>(`${this.apiBase}${API_PATHS.ADMIN.ECOSYSTEM_INSURANCE_CLAIMS}`)
+    );
+  }
+
+  getPortalUsersMeta() {
+    return firstValueFrom(
+      this.http.get<{ roles: string[]; stores: any[]; warehouses: any[]; suppliers: any[]; diagnosticCenters: any[] }>(
+        `${this.apiBase}${API_PATHS.ADMIN.PORTAL_USERS_META}`
+      )
+    );
+  }
+
+  getPortalUsers(role?: string) {
+    return firstValueFrom(
+      this.http.get<{ users: any[] }>(`${this.apiBase}${API_PATHS.ADMIN.PORTAL_USERS}`, {
+        params: role ? { role } : {}
+      })
+    );
+  }
+
+  createPortalUser(payload: Record<string, unknown>) {
+    return firstValueFrom(
+      this.http.post<{ user: any }>(`${this.apiBase}${API_PATHS.ADMIN.PORTAL_USERS}`, payload)
+    );
+  }
+
+  updatePortalUser(id: string, payload: Record<string, unknown>) {
+    return firstValueFrom(
+      this.http.patch<{ user: any }>(`${this.apiBase}${API_PATHS.ADMIN.PORTAL_USERS}/${id}`, payload)
+    );
+  }
+
+  setPortalUserStatus(id: string, isActive: boolean) {
+    return firstValueFrom(
+      this.http.patch<{ user: any }>(`${this.apiBase}${API_PATHS.ADMIN.PORTAL_USER_STATUS(id)}`, { isActive })
+    );
+  }
 }

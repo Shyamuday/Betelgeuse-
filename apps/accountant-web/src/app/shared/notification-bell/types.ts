@@ -11,7 +11,8 @@ export type InAppNotificationItem = {
 export type NotificationBellConfig = {
   apiBase: string;
   tokenKey: string;
-  /** `/notifications` for platform users, `/store/notifications` for store staff */
   apiPath: string;
   pollMs?: number;
+  socketEnabled?: boolean;
+  socketAuth?: 'user' | 'store-staff';
 };

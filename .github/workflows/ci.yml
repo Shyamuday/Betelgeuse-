@@ -26,6 +26,12 @@ jobs:
           - apps/warehouse-web
           - apps/delivery-web
           - apps/diagnostic-web
+          - apps/branch-owner-web
+          - apps/coordinator-web
+          - apps/callcenter-web
+          - apps/marketing-web
+          - apps/corporate-wellness-web
+          - apps/insurance-web
 
     defaults:
       run:

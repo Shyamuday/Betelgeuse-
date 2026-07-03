@@ -15,5 +15,7 @@ export class NotificationBellHost {
     apiBase: environment.apiUrl,
     tokenKey: AUTH_TOKEN_KEY,
     apiPath: '/notifications',
+    socketEnabled: true,
+    socketAuth: 'user' as const
   };
 }

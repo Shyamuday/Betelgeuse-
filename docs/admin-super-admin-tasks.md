@@ -50,7 +50,18 @@ Operational checklist for giving `admin-web` full platform control. Work through
 |---|------|-------|
 | F1 | ~~Patient in-app notification inbox~~ | ✅ Done — all apps have bell + inbox API |
 | F2 | Admin inventory adjustments | Read-only overview; store managers adjust stock locally |
-| F3 | Real-time socket push in bell UI | API emits `notification:new`; UI polls every 30s for now |
+| F3 | Real-time socket push in bell UI | ✅ Done — `socket.io-client` in all apps; bell listens for `notification:new` |
+
+---
+
+## Phase D — Portal user management (completed)
+
+| # | Task | API | UI | Status |
+|---|------|-----|-----|--------|
+| D1 | Ecosystem portal users (6 roles) | `GET/POST/PATCH /admin/ecosystem-users` | Portal Users page | ✅ |
+| D2 | Staff & partner portal users | `GET/POST/PATCH /admin/portal-users` | Portal Users → Staff / Partner tabs | ✅ |
+| D3 | Corporate enrollments admin | `GET/POST/DELETE .../corporates/:id/enrollments` | Portal Users → Corporate tab | ✅ |
+| D4 | Insurance claims oversight | `GET /admin/ecosystem-users/insurance/claims` | Portal Users → Insurance tab | ✅ |
 
 ---
 
@@ -66,4 +77,6 @@ Operational checklist for giving `admin-web` full platform control. Work through
 | Date | Change |
 |------|--------|
 | 2026-07-03 | Phase B complete (B1–B5) |
-| 2026-07-03 | Platform in-app notifications (inbox API + bell in all 13 web apps) |
+| 2026-07-03 | Platform in-app notifications (inbox API + bell in all 19 web apps) |
+| 2026-07-03 | Portal Users admin (ecosystem + staff/partner + corporate enrollments + insurance claims) |
+| 2026-07-03 | Socket push in notification bell across all apps |

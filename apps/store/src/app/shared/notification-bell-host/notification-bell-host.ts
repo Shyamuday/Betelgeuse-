@@ -14,6 +14,9 @@ export class NotificationBellHost {
   readonly config = {
     apiBase: environment.apiUrl,
     tokenKey: AUTH_TOKEN_KEY,
-    apiPath: '/store/notifications'
+    apiPath: '/store/notifications',
+    socketEnabled: true,
+    socketAuth: 'store-staff' as const
   };
 }
+

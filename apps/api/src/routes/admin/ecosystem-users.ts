@@ -486,4 +486,84 @@ export function registerAdminEcosystemUserRoutes(router: Router) {
       res.json({ user: serializeUser(user) });
     })
   );
+
+  router.get(
+    '/admin/ecosystem-users/corporates/:id/enrollments',
+    authRequired,
+    allowRoles(Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const corporateId = routeParam(req, 'id');
+      await prisma.corporateAccount.findUniqueOrThrow({ where: { id: corporateId } });
+      const enrollments = await prisma.corporateEnrollment.findMany({
+        where: { corporateId },
+        include: {
+          patient: { select: { id: true, name: true, email: true, patientCode: true, mobile: true } }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+      res.json({ enrollments });
+    })
+  );
+
+  router.post(
+    authRequired,
+    allowRoles(Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const corporateId = routeParam(req, 'id');
+      const { patientId } = z.object({ patientId: z.string().min(1) }).parse(req.body);
+      await prisma.corporateAccount.findUniqueOrThrow({ where: { id: corporateId } });
+      const patient = await prisma.user.findFirst({ where: { id: patientId, role: Role.PATIENT } });
+      if (!patient) return res.status(404).json({ message: 'Patient not found.' });
+
+      const enrollment = await prisma.corporateEnrollment.upsert({
+        where: { corporateId_patientId: { corporateId, patientId } },
+        update: {},
+        create: { corporateId, patientId },
+        include: {
+          patient: { select: { id: true, name: true, email: true, patientCode: true, mobile: true } }
+        }
+      });
+
+      await writeAuditLog({
+        actorId: req.user!.id,
+        actorRole: req.user!.role,
+        action: 'ecosystem.enrollment.create',
+        targetType: 'corporate_enrollment',
+        targetId: enrollment.id,
+        summary: `Enrolled ${patient.name} in corporate program.`,
+        metadata: { corporateId, patientId }
+      });
+
+      res.status(201).json({ enrollment });
+    })
+  );
+
+  router.delete(
+    '/admin/ecosystem-users/corporates/:corporateId/enrollments/:patientId',
+    authRequired,
+    allowRoles(Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const corporateId = routeParam(req, 'corporateId');
+      const patientId = routeParam(req, 'patientId');
+      await prisma.corporateEnrollment.deleteMany({ where: { corporateId, patientId } });
+      res.json({ ok: true });
+    })
+  );
+
+  router.get(
+    '/admin/ecosystem-users/insurance/claims',
+    authRequired,
+    allowRoles(Role.ADMIN),
+    asyncRoute(async (_req, res) => {
+      const claims = await prisma.insuranceClaim.findMany({
+        include: {
+          patient: { select: { id: true, name: true, patientCode: true, mobile: true } },
+          partner: { select: { id: true, companyName: true, companyCode: true, user: { select: { email: true } } } }
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 200
+      });
+      res.json({ claims });
+    })
+  );
 }
