@@ -1,7 +1,6 @@
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { switchMap } from 'rxjs/operators';
 import { PlatformAuthService } from '../../services/platform-auth.service';
 import { DevLoginPanelComponent } from '../../shared/dev-login-panel/dev-login-panel';
 import { DEV_DEMO_ACCOUNTS } from '../../core/constants/dev-demo.constants';
@@ -32,11 +31,17 @@ export class LoginComponent {
 
     this.auth
       .login(this.email, this.password)
-      .pipe(switchMap(() => this.auth.fetchMe()))
       .subscribe({
         next: () => {
           this.loading.set(false);
-          void this.router.navigate([`/${this.auth.defaultRoute()}`]);
+          if (this.auth.capabilities().length) {
+            void this.router.navigate([`/${this.auth.defaultRoute()}`]);
+            return;
+          }
+          this.auth.fetchMe().subscribe({
+            next: () => void this.router.navigate([`/${this.auth.defaultRoute()}`]),
+            error: (err) => this.error.set(err?.error?.message ?? 'Failed to load session.')
+          });
         },
         error: (err) => {
           this.loading.set(false);

@@ -5,7 +5,7 @@ export type PlatformNavItem = {
   capability: string;
 };
 
-/** Navigation for the unified operations (staff) portal. */
+/** Navigation for the unified operations portal (staff, partners, store). */
 export const OPERATIONS_NAV_ITEMS: PlatformNavItem[] = [
   { path: '/admin/dashboard', label: 'Admin console', icon: '⚙️', capability: 'admin.dashboard' },
   { path: '/admin/ecosystem-users', label: 'Portal users', icon: '🌐', capability: 'admin.ecosystem_users' },
@@ -26,20 +26,28 @@ export const OPERATIONS_NAV_ITEMS: PlatformNavItem[] = [
   { path: '/follow-ups', label: 'Follow-ups', icon: '🔔', capability: 'coordinator.portal' },
   { path: '/patients', label: 'Patient search', icon: '🔍', capability: 'call_center.portal' },
   { path: '/consultations', label: 'Consultations', icon: '💬', capability: 'call_center.portal' },
-  { path: '/funnels', label: 'Funnels', icon: '📣', capability: 'marketing.portal' }
-];
-
-/** Navigation for the unified partners portal. */
-export const PARTNERS_NAV_ITEMS: PlatformNavItem[] = [
+  { path: '/funnels', label: 'Funnels', icon: '📣', capability: 'marketing.portal' },
   { path: '/orders', label: 'Purchase orders', icon: '📦', capability: 'supplier.portal' },
   { path: '/warehouse', label: 'Warehouse', icon: '🏭', capability: 'store_staff.portal' },
   { path: '/warehouse-transfers', label: 'Transfers', icon: '↔️', capability: 'store_staff.portal' },
-  { path: '/deliveries', label: 'Deliveries', icon: '🚚', capability: 'delivery.ops' },
+  { path: '/partner-deliveries', label: 'Deliveries', icon: '🚚', capability: 'delivery.ops' },
   { path: '/delivery-orders', label: 'My runs', icon: '📦', capability: 'delivery.ops' },
   { path: '/lab-referrals', label: 'Lab referrals', icon: '🧪', capability: 'diagnostic.portal' },
   { path: '/accounts', label: 'Corporate accounts', icon: '🏢', capability: 'corporate_wellness.portal' },
-  { path: '/claims', label: 'Insurance claims', icon: '📄', capability: 'insurance.portal' }
+  { path: '/claims', label: 'Insurance claims', icon: '📄', capability: 'insurance.portal' },
+  { path: '/store/dashboard', label: 'Store counter', icon: '🏪', capability: 'store_counter.portal' },
+  { path: '/store/search', label: 'Dispense', icon: '💊', capability: 'store_counter.portal' },
+  { path: '/store/stock-in', label: 'Stock in', icon: '📦', capability: 'store.stock' },
+  { path: '/store/stock-out', label: 'Stock out', icon: '📤', capability: 'store.stock' },
+  { path: '/store/alerts', label: 'Stock alerts', icon: '🔔', capability: 'store_counter.portal' },
+  { path: '/store-manager/dashboard', label: 'Store manager', icon: '👔', capability: 'store_manager.portal' },
+  { path: '/store-manager/purchase-orders', label: 'Incoming POs', icon: '📥', capability: 'store_manager.portal' },
+  { path: '/store-manager/stock-transfers', label: 'Transfers', icon: '↔️', capability: 'store_manager.portal' },
+  { path: '/store-manager/deliveries', label: 'Medicine deliveries', icon: '🛵', capability: 'store_manager.portal' }
 ];
+
+/** @deprecated Partners portal merged into operations — use OPERATIONS_NAV_ITEMS. */
+export const PARTNERS_NAV_ITEMS = OPERATIONS_NAV_ITEMS;
 
 export function navItemsForCapabilities(
   items: PlatformNavItem[],

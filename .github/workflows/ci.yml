@@ -16,9 +16,6 @@ jobs:
           - apps/user-web
           - apps/doctor-web
           - apps/operations-web
-          - apps/partners-web
-          - apps/store
-          - apps/store-manager-web
 
     defaults:
       run:

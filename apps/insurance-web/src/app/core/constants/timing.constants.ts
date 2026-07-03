@@ -1,3 +1,0 @@
-export const SEARCH_DEBOUNCE_MS = 400;
-export const TOAST_DURATION_MS = 3000;
-export const SAVE_SUCCESS_DURATION_MS = 3000;

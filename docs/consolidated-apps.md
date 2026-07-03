@@ -42,4 +42,4 @@ Standalone `admin-web` (port 4201) remains buildable for reference but **`dev:ad
 - [x] Legacy `dev:*` scripts alias to consolidated apps
 - [x] CI builds consolidated apps only
 - [x] Capacitor scaffold on `user-web`
-- [ ] Remove legacy app folders after production cutover
+- [x] Remove legacy app folders after production cutover

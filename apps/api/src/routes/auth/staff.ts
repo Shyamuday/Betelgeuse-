@@ -6,6 +6,9 @@ import { prisma } from '../../db.js';
 import { getMailTransporter, smtpFrom } from '../../services/mail.js';
 import { asyncRoute, publicUserSelect, toAuthResponse, logAuthEvent, hashToken, randomToken } from '../../utils/helpers.js';
 import { PRODUCT_EVENTS, trackProductEvent } from '../../services/product-analytics.js';
+import { sessionPayloadForStoreStaff } from '../../constants/rbac-helpers.js';
+import { signStoreToken } from '../store/shared.js';
+import { STORE_ROLES } from '../../constants/store-api-routes.constants.js';
 import { webOrigin } from './shared.js';
 
 export function registerAuthStaffRoutes(router: Router) {
@@ -21,8 +24,41 @@ router.post(
     });
 
     if (!user?.passwordHash || user.role === Role.PATIENT) {
-      logAuthEvent('staff_login_failure', { email: body.email, reason: 'invalid_credentials' });
-      return res.status(401).json({ message: 'Invalid credentials' });
+      const staff = await prisma.storeStaff.findFirst({
+        where: { email: body.email, isActive: true },
+        include: { store: { select: { id: true, name: true } } }
+      });
+
+      if (!staff) {
+        logAuthEvent('staff_login_failure', { email: body.email, reason: 'invalid_credentials' });
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      const staffValid = await bcrypt.compare(body.password, staff.pinHash);
+      if (!staffValid) {
+        logAuthEvent('staff_login_failure', { email: body.email, reason: 'invalid_credentials' });
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      const token = signStoreToken({
+        staffId: staff.id,
+        storeId: staff.storeId,
+        role: staff.role as typeof STORE_ROLES.MANAGER | typeof STORE_ROLES.STAFF,
+        name: staff.name
+      });
+
+      const session = sessionPayloadForStoreStaff({
+        id: staff.id,
+        name: staff.name,
+        email: staff.email,
+        role: staff.role,
+        staffCode: staff.staffCode,
+        storeId: staff.storeId,
+        storeName: staff.store.name
+      });
+
+      logAuthEvent('staff_login_success', { storeStaffId: staff.id, role: staff.role });
+      return res.json({ token, ...session });
     }
 
     if (!user.isActive && user.role === Role.DOCTOR) {

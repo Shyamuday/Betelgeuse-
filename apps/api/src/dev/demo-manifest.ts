@@ -118,7 +118,8 @@ export const DEV_DEMO_ACCOUNTS = {
   },
   storeStaff: {
     name: 'Counter Staff Demo',
-    staffCode: 'RNC-STF1'
+    staffCode: 'RNC-STF1',
+    email: 'staff@ranchi.vitalis.local'
   }
 } as const;
 
@@ -130,30 +131,13 @@ export const DEV_SEED_IDS = {
 
 export const DEV_DEMO_APPS = [
   { id: 'user-web', label: 'Patient app', port: 4200, url: SERVER_CONFIG.ORIGINS.WEB },
-  { id: 'admin-web', label: 'Admin console', port: 4201, url: SERVER_CONFIG.ORIGINS.ADMIN },
   { id: 'doctor-web', label: 'Doctor app', port: 4202, url: SERVER_CONFIG.ORIGINS.DOCTOR },
-  { id: 'store', label: 'Store staff', port: 4300, url: SERVER_CONFIG.ORIGINS.STORE },
-  { id: 'store-manager-web', label: 'Store manager', port: 4301, url: SERVER_CONFIG.ORIGINS.STORE_MANAGER },
-  { id: 'hr-web', label: 'HR portal', port: 4400, url: SERVER_CONFIG.ORIGINS.HR },
-  { id: 'receptionist-web', label: 'Reception desk', port: 4500, url: SERVER_CONFIG.ORIGINS.RECEPTIONIST },
-  { id: 'clinic-manager-web', label: 'Clinic manager', port: 4600, url: SERVER_CONFIG.ORIGINS.CLINIC_MANAGER },
-  { id: 'accountant-web', label: 'Accountant', port: 4700, url: SERVER_CONFIG.ORIGINS.ACCOUNTANT },
-  { id: 'supplier-web', label: 'Supplier portal', port: 4800, url: SERVER_CONFIG.ORIGINS.SUPPLIER },
-  { id: 'warehouse-web', label: 'Warehouse hub', port: 4900, url: SERVER_CONFIG.ORIGINS.WAREHOUSE },
-  { id: 'delivery-web', label: 'Delivery executive', port: 5000, url: SERVER_CONFIG.ORIGINS.DELIVERY },
-  { id: 'diagnostic-web', label: 'Diagnostic center', port: 5100, url: SERVER_CONFIG.ORIGINS.DIAGNOSTIC },
-  { id: 'branch-owner-web', label: 'Branch owner', port: 5200, url: SERVER_CONFIG.ORIGINS.BRANCH_OWNER },
-  { id: 'coordinator-web', label: 'Patient coordinator', port: 5300, url: SERVER_CONFIG.ORIGINS.COORDINATOR },
-  { id: 'callcenter-web', label: 'Call center', port: 5400, url: SERVER_CONFIG.ORIGINS.CALL_CENTER },
-  { id: 'marketing-web', label: 'Marketing', port: 5500, url: SERVER_CONFIG.ORIGINS.MARKETING },
-  { id: 'corporate-wellness-web', label: 'Corporate wellness', port: 5600, url: SERVER_CONFIG.ORIGINS.CORPORATE_WELLNESS },
-  { id: 'insurance-web', label: 'Insurance partner', port: 5700, url: SERVER_CONFIG.ORIGINS.INSURANCE },
-  { id: 'operations-web', label: 'Operations (unified staff)', port: 5800, url: SERVER_CONFIG.ORIGINS.OPERATIONS },
-  { id: 'partners-web', label: 'Partners (unified external)', port: 5900, url: SERVER_CONFIG.ORIGINS.PARTNERS },
+  { id: 'operations-web', label: 'Operations (staff, partners, store)', port: 5800, url: SERVER_CONFIG.ORIGINS.OPERATIONS },
+  { id: 'admin-web', label: 'Admin source (embedded in operations)', port: 4201, url: SERVER_CONFIG.ORIGINS.ADMIN },
   { id: 'api', label: 'API + demo guide', port: 4000, url: SERVER_CONFIG.API_PUBLIC_URL }
 ] as const;
 
-export type DevDemoAuthKind = 'platform' | 'hr' | 'store-pin' | 'store-manager';
+export type DevDemoAuthKind = 'platform' | 'hr';
 
 export type DevDemoPersona = {
   id: string;
@@ -311,17 +295,17 @@ export const DEV_DEMO_PERSONAS: DevDemoPersona[] = [
   },
   {
     id: 'store-staff',
-    label: 'Counter Staff (RNC-STF1)',
-    app: 'store',
-    authKind: 'store-pin',
-    description: 'Store counter PIN login for dispensing.',
+    label: 'Counter Staff (Ranchi)',
+    app: 'operations-web',
+    authKind: 'platform',
+    description: 'Store counter — dispense medicines and manage branch stock.',
     testHints: ['Patient scan', 'Medicine lookup', 'Stock counter']
   },
   {
     id: 'store-manager',
     label: 'Ranchi Store Manager',
-    app: 'store-manager-web',
-    authKind: 'store-manager',
+    app: 'operations-web',
+    authKind: 'platform',
     description: 'Store manager dashboard for inventory and staff.',
     testHints: ['Inventory', 'Home deliveries', 'Incoming POs', 'Stock transfers']
   }
@@ -355,7 +339,7 @@ export const DEV_DEMO_SCENARIOS = [
     title: 'Store scan flow',
     steps: [
       'Seed creates patient RNC-000001',
-      'Login as store staff (PIN)',
+      'Login as store staff (email + password at operations portal)',
       'Scan or open http://localhost:4000/go/p/RNC-000001',
       'Verify patient card and prescription context'
     ]
@@ -478,16 +462,15 @@ export const DEV_DEMO_ALL_ACCOUNTS = [
   },
   {
     role: 'Store manager',
-    app: 'store-manager-web',
+    app: 'operations-web',
     login: DEV_DEMO_ACCOUNTS.storeManager.email,
     password: DEV_DEMO_PASSWORD
   },
   {
     role: 'Store staff',
-    app: 'store',
-    login: DEV_DEMO_ACCOUNTS.storeStaff.staffCode,
-    password: DEV_DEMO_PASSWORD,
-    note: 'Use as Staff ID; PIN is the password'
+    app: 'operations-web',
+    login: DEV_DEMO_ACCOUNTS.storeStaff.email,
+    password: DEV_DEMO_PASSWORD
   }
 ] as const;
 
@@ -509,7 +492,9 @@ const PERSONA_EMAIL: Record<string, string> = {
   'call-center': DEV_DEMO_ACCOUNTS.callCenter.email,
   marketing: DEV_DEMO_ACCOUNTS.marketing.email,
   corporate: DEV_DEMO_ACCOUNTS.corporate.email,
-  insurance: DEV_DEMO_ACCOUNTS.insurance.email
+  insurance: DEV_DEMO_ACCOUNTS.insurance.email,
+  'store-staff': DEV_DEMO_ACCOUNTS.storeStaff.email,
+  'store-manager': DEV_DEMO_ACCOUNTS.storeManager.email
 };
 
 export function getPersonaCredentials(personaId: string): DevDemoPersonaCredentials {
@@ -568,7 +553,7 @@ export function getPersonaCredentials(personaId: string): DevDemoPersonaCredenti
     case 'insurance':
       return { email: DEV_DEMO_ACCOUNTS.insurance.email, password };
     case 'store-staff':
-      return { staffCode: DEV_DEMO_ACCOUNTS.storeStaff.staffCode, pin: password, password };
+      return { email: DEV_DEMO_ACCOUNTS.storeStaff.email, password };
     case 'store-manager':
       return { email: DEV_DEMO_ACCOUNTS.storeManager.email, password };
     default:
@@ -614,21 +599,19 @@ const OPERATIONS_SOURCE_APPS = new Set([
   'branch-owner-web',
   'coordinator-web',
   'callcenter-web',
-  'marketing-web'
-]);
-
-const PARTNERS_SOURCE_APPS = new Set([
+  'marketing-web',
   'supplier-web',
   'warehouse-web',
   'delivery-web',
   'diagnostic-web',
   'corporate-wellness-web',
-  'insurance-web'
+  'insurance-web',
+  'store',
+  'store-manager-web'
 ]);
 
 export function personaMatchesApp(persona: DevDemoPersona, appId: string): boolean {
   if (persona.app === appId) return true;
   if (appId === 'operations-web' && OPERATIONS_SOURCE_APPS.has(persona.app)) return true;
-  if (appId === 'partners-web' && PARTNERS_SOURCE_APPS.has(persona.app)) return true;
   return false;
 }

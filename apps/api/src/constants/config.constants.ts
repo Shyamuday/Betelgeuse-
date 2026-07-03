@@ -1,43 +1,15 @@
-export const SERVER_CONFIG = {
-  DEFAULT_PORT: 4000,
-  ORIGINS: {
-    WEB: process.env.WEB_ORIGIN || 'http://localhost:4200',
-    ADMIN: process.env.ADMIN_ORIGIN || 'http://localhost:4201',
-    DOCTOR: process.env.DOCTOR_ORIGIN || 'http://localhost:4202',
-    STORE: process.env.STORE_ORIGIN || 'http://localhost:4300',
-    STORE_MANAGER: process.env.STORE_MANAGER_ORIGIN || 'http://localhost:4301',
-    HR: process.env.HR_ORIGIN || 'http://localhost:4400',
-    RECEPTIONIST: process.env.RECEPTIONIST_ORIGIN || 'http://localhost:4500',
-    CLINIC_MANAGER: process.env.CLINIC_MANAGER_ORIGIN || 'http://localhost:4600',
-    ACCOUNTANT: process.env.ACCOUNTANT_ORIGIN || 'http://localhost:4700',
-    SUPPLIER: process.env.SUPPLIER_ORIGIN || 'http://localhost:4800',
-    WAREHOUSE: process.env.WAREHOUSE_ORIGIN || 'http://localhost:4900',
-    DELIVERY: process.env.DELIVERY_ORIGIN || 'http://localhost:5000',
-    DIAGNOSTIC: process.env.DIAGNOSTIC_ORIGIN || 'http://localhost:5100',
-    BRANCH_OWNER: process.env.BRANCH_OWNER_ORIGIN || 'http://localhost:5200',
-    COORDINATOR: process.env.COORDINATOR_ORIGIN || 'http://localhost:5300',
-    CALL_CENTER: process.env.CALL_CENTER_ORIGIN || 'http://localhost:5400',
-    MARKETING: process.env.MARKETING_ORIGIN || 'http://localhost:5500',
-    CORPORATE_WELLNESS: process.env.CORPORATE_WELLNESS_ORIGIN || 'http://localhost:5600',
-    INSURANCE: process.env.INSURANCE_ORIGIN || 'http://localhost:5700',
-    OPERATIONS: process.env.OPERATIONS_ORIGIN || 'http://localhost:5800',
-    PARTNERS: process.env.PARTNERS_ORIGIN || 'http://localhost:5900'
-  },
-  API_PUBLIC_URL: process.env.API_PUBLIC_URL || process.env.API_URL || 'http://localhost:4000',
-  SMTP: {
-    DEFAULT_PORT: 587,
-    DEFAULT_FROM: 'noreply@vitaliscare.in'
-  },
-  DEV_OTP: process.env.DEV_OTP || '123456'
-} as const;
-
-export const SCHEDULER_CONFIG = {
-  DOSE_OVERDUE_SWEEP_MIN_MS: 60_000,
-  DOSE_OVERDUE_SWEEP_DEFAULT_MS: 5 * 60_000,
-  DOSE_REMINDER_WINDOW_MIN_MINUTES: 5,
-  DOSE_REMINDER_WINDOW_DEFAULT_MINUTES: 30,
-  LEAVE_RESTORE_MS: 24 * 60 * 60 * 1000,
-  BATCH_TAKE_LIMIT: 1000
-} as const;
-
-export const CURRENCY_CODE = 'INR';
+export const SERVER_CONFIG = {
+  DEFAULT_PORT: 4000,
+  ORIGINS: {
+    WEB: process.env.WEB_ORIGIN || 'http://localhost:4200',
+    ADMIN: process.env.ADMIN_ORIGIN || 'http://localhost:4201',
+    DOCTOR: process.env.DOCTOR_ORIGIN || 'http://localhost:4202',
+    OPERATIONS: process.env.OPERATIONS_ORIGIN || 'http://localhost:5800'
+  },
+  API_PUBLIC_URL: process.env.API_PUBLIC_URL || process.env.API_URL || 'http://localhost:4000',
+  SMTP: {
+    DEFAULT_PORT: 587,
+    DEFAULT_FROM: 'noreply@vitaliscare.in'
+  },
+  DEV_OTP: process.env.DEV_OTP || '123456'
+} as const;

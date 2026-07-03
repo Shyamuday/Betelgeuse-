@@ -612,10 +612,15 @@ async function main() {
 
   await prisma.storeStaff.upsert({
     where: { staffCode: DEV_DEMO_ACCOUNTS.storeStaff.staffCode },
-    update: { pinHash: managerPinHash, isActive: true },
+    update: {
+      email: DEV_DEMO_ACCOUNTS.storeStaff.email,
+      pinHash: managerPinHash,
+      isActive: true
+    },
     create: {
       name: DEV_DEMO_ACCOUNTS.storeStaff.name,
       staffCode: DEV_DEMO_ACCOUNTS.storeStaff.staffCode,
+      email: DEV_DEMO_ACCOUNTS.storeStaff.email,
       pinHash: managerPinHash,
       role: 'STAFF',
       storeId: ranchiStore.id,
@@ -1076,7 +1081,7 @@ async function main() {
   console.log(`HR: ${DEV_DEMO_ACCOUNTS.hr.email}`);
   console.log(`Patients: ${DEV_DEMO_ACCOUNTS.patientRahul.patientCode} (Rahul), ${DEV_DEMO_ACCOUNTS.patientPriya.patientCode} (Priya)`);
   console.log(`Store manager: ${DEV_DEMO_ACCOUNTS.storeManager.email}`);
-  console.log(`Store staff PIN: ${DEV_DEMO_ACCOUNTS.storeStaff.staffCode} / ${DEV_DEMO_PASSWORD}`);
+  console.log(`Store staff: ${DEV_DEMO_ACCOUNTS.storeStaff.email} / ${DEV_DEMO_PASSWORD}`);
   console.log(`Demo guide: http://localhost:4000/dev/demo-guide`);
   console.log(`Scan QR: http://localhost:4000/go/p/${DEV_DEMO_ACCOUNTS.patientRahul.patientCode}`);
 }

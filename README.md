@@ -7,11 +7,12 @@ Clinic platform — Angular frontend + pure Node.js/Express/TypeScript backend.
 | App | Path | Port |
 |-----|------|------|
 | Patient | `apps/user-web` | 4200 |
-| Admin | `apps/admin-web` | 4201 |
 | Doctor | `apps/doctor-web` | 4202 |
+| Operations (staff + admin) | `apps/operations-web` | 5800 |
+| Partners | `apps/partners-web` | 5900 |
 | Store staff | `apps/store` | 4300 |
 | Store manager | `apps/store-manager-web` | 4301 |
-| HR | `apps/hr-web` | 4400 |
+| Admin UI source (embedded) | `apps/admin-web` | — |
 | API | `apps/api` | 4000 |
 
 For the full role/app roadmap and phasing (receptionist, clinic manager, supplier portal, etc.), see **[docs/platform-ecosystem-architecture.md](docs/platform-ecosystem-architecture.md)**.
@@ -22,9 +23,11 @@ For homeopathic doctor types (Chief Consultant, Intern, Specialist, etc.), see *
 
 ## Stack
 
-- Patient web app: `apps/user-web` (Angular)
-- Admin web app: `apps/admin-web` (Angular)
+- Patient web app: `apps/user-web` (Angular + Capacitor)
+- Operations portal: `apps/operations-web` (staff + embedded admin)
+- Partners portal: `apps/partners-web`
 - Doctor web app: `apps/doctor-web` (Angular)
+- Admin UI modules: `apps/admin-web` (compiled into operations-web)
 - Backend API: `apps/api` (Express 5 + TypeScript + Prisma)
 - Database: PostgreSQL (via `DATABASE_URL`)
 - ORM: Prisma

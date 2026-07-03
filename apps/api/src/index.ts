@@ -82,24 +82,7 @@ const {
   WEB: webOrigin,
   ADMIN: adminOrigin,
   DOCTOR: doctorOrigin,
-  STORE: storeOrigin,
-  STORE_MANAGER: storeManagerOrigin,
-  HR: hrOrigin,
-  RECEPTIONIST: receptionistOrigin,
-  CLINIC_MANAGER: clinicManagerOrigin,
-  ACCOUNTANT: accountantOrigin,
-  SUPPLIER: supplierOrigin,
-  WAREHOUSE: warehouseOrigin,
-  DELIVERY: deliveryOrigin,
-  DIAGNOSTIC: diagnosticOrigin,
-  BRANCH_OWNER: branchOwnerOrigin,
-  COORDINATOR: coordinatorOrigin,
-  CALL_CENTER: callCenterOrigin,
-  MARKETING: marketingOrigin,
-  CORPORATE_WELLNESS: corporateWellnessOrigin,
-  INSURANCE: insuranceOrigin,
-  OPERATIONS: operationsOrigin,
-  PARTNERS: partnersOrigin
+  OPERATIONS: operationsOrigin
 } = SERVER_CONFIG.ORIGINS;
 
 // ── Socket.IO ──────────────────────────────────────────────────────────────────
@@ -108,24 +91,7 @@ const socketOrigins = [
   webOrigin,
   adminOrigin,
   doctorOrigin,
-  storeOrigin,
-  storeManagerOrigin,
-  hrOrigin,
-  receptionistOrigin,
-  clinicManagerOrigin,
-  accountantOrigin,
-  supplierOrigin,
-  warehouseOrigin,
-  deliveryOrigin,
-  diagnosticOrigin,
-  branchOwnerOrigin,
-  coordinatorOrigin,
-  callCenterOrigin,
-  marketingOrigin,
-  corporateWellnessOrigin,
-  insuranceOrigin,
-  operationsOrigin,
-  partnersOrigin
+  operationsOrigin
 ];
 
 const io = new SocketIoServer(httpServer, {
@@ -183,7 +149,7 @@ io.on('connection', (socket) => {
 // ── Middleware ─────────────────────────────────────────────────────────────────
 
 app.use(cors({
-  origin: [webOrigin, adminOrigin, doctorOrigin, storeOrigin, storeManagerOrigin, hrOrigin, receptionistOrigin, clinicManagerOrigin, accountantOrigin, supplierOrigin, warehouseOrigin, deliveryOrigin, diagnosticOrigin, branchOwnerOrigin, coordinatorOrigin, callCenterOrigin, marketingOrigin, corporateWellnessOrigin, insuranceOrigin, operationsOrigin, partnersOrigin],
+  origin: [webOrigin, adminOrigin, doctorOrigin, operationsOrigin],
   credentials: true
 }));
 app.use('/payments/razorpay-webhook', express.raw({ type: 'application/json' }));

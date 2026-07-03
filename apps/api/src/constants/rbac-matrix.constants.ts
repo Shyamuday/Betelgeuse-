@@ -159,6 +159,12 @@ export const RBAC_CAPABILITIES: RbacCapability[] = [
     roles: [Role.WAREHOUSE_MANAGER, Role.ADMIN]
   },
   {
+    id: 'store_counter.portal',
+    label: 'Store counter',
+    description: 'Branch dispensary counter — search, dispense, and stock',
+    roles: []
+  },
+  {
     id: 'store_manager.portal',
     label: 'Store manager portal',
     description: 'Multi-branch stock oversight for store managers',

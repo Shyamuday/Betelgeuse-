@@ -5,6 +5,10 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:mobile": "ng build && npx cap sync",
+    "cap:sync": "npx cap sync",
+    "cap:android": "npx cap open android",
+    "cap:ios": "npx cap open ios",
     "lint": "tsc -p tsconfig.app.json --noEmit",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
