@@ -1,0 +1,109 @@
+.panel {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 1rem 0;
+  background: #fff;
+}
+
+.panel-head,
+.toolbar-row,
+.search-row,
+.actions,
+.selected-remedy {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.toolbar,
+.search-row {
+  display: grid;
+  gap: 0.45rem;
+  max-width: 920px;
+}
+
+input,
+select,
+textarea,
+button {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+}
+
+button {
+  background: #0f766e;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button.ghost,
+.link-btn {
+  background: #fff;
+  color: #0f766e;
+  text-decoration: none;
+}
+
+.summary {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.muted,
+.hint,
+small {
+  color: #64748b;
+}
+
+.error {
+  color: #b91c1c;
+}
+
+.message {
+  color: #047857;
+}
+
+.rubric-card,
+.selected-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-top: 0.55rem;
+}
+
+.search-results,
+.selected-list {
+  margin-top: 0.75rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.55rem;
+  text-align: left;
+}
+
+tr.selected {
+  background: #ecfdf5;
+}
+
+.selected-remedy {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+}

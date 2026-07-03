@@ -1,0 +1,110 @@
+enum RepertorySourceCode {
+  REPERTORIUM_PUBLICUM
+}
+
+enum CaseAnalysisStatus {
+  DRAFT
+  FINALIZED
+}
+
+model RepertorySource {
+  id          String              @id @default(cuid())
+  code        RepertorySourceCode @unique
+  name        String
+  description String?
+  isActive    Boolean             @default(true)
+  rubrics     RepertoryRubric[]
+  analyses    CaseAnalysis[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model HomeopathicRemedy {
+  id               String                  @id @default(cuid())
+  name             String
+  abbreviation     String
+  normalizedName   String                  @unique
+  rubricLinks      RepertoryRubricRemedy[]
+  analysisResults  CaseAnalysisResult[]
+  selectedAnalyses CaseAnalysis[]          @relation("SelectedRemedy")
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+
+  @@index([abbreviation])
+}
+
+model RepertoryRubric {
+  id             String                  @id @default(cuid())
+  sourceId       String
+  chapter        String
+  subchapter     String?
+  text           String
+  normalizedText String
+  parentPath     String?
+  source         RepertorySource         @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  remedies       RepertoryRubricRemedy[]
+  caseRubrics    CaseAnalysisRubric[]
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+
+  @@index([sourceId, chapter])
+  @@index([normalizedText])
+}
+
+model RepertoryRubricRemedy {
+  id       String            @id @default(cuid())
+  rubricId String
+  remedyId String
+  grade    Int
+  rubric   RepertoryRubric   @relation(fields: [rubricId], references: [id], onDelete: Cascade)
+  remedy   HomeopathicRemedy @relation(fields: [remedyId], references: [id], onDelete: Cascade)
+
+  @@unique([rubricId, remedyId])
+  @@index([remedyId])
+}
+
+model CaseAnalysis {
+  id               String               @id @default(cuid())
+  consultationId   String
+  doctorId         String
+  sourceId         String?
+  status           CaseAnalysisStatus   @default(DRAFT)
+  notes            String?
+  selectedRemedyId String?
+  consultation     Consultation         @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  doctor           User                 @relation("DoctorCaseAnalyses", fields: [doctorId], references: [id], onDelete: Restrict)
+  source           RepertorySource?     @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  selectedRemedy   HomeopathicRemedy?   @relation("SelectedRemedy", fields: [selectedRemedyId], references: [id], onDelete: SetNull)
+  rubrics          CaseAnalysisRubric[]
+  results          CaseAnalysisResult[]
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  @@index([consultationId, createdAt])
+  @@index([doctorId])
+}
+
+model CaseAnalysisRubric {
+  id         String          @id @default(cuid())
+  analysisId String
+  rubricId   String
+  weight     Int             @default(1)
+  analysis   CaseAnalysis    @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  rubric     RepertoryRubric @relation(fields: [rubricId], references: [id], onDelete: Restrict)
+
+  @@unique([analysisId, rubricId])
+}
+
+model CaseAnalysisResult {
+  id         String            @id @default(cuid())
+  analysisId String
+  remedyId   String
+  totalScore Int
+  coverage   Int
+  rank       Int
+  analysis   CaseAnalysis      @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  remedy     HomeopathicRemedy @relation(fields: [remedyId], references: [id], onDelete: Cascade)
+
+  @@unique([analysisId, remedyId])
+  @@index([analysisId, rank])
+}

@@ -50,6 +50,7 @@ model Consultation {
   messages        Message[]
   prescriptions   Prescription[]
   supportNotes    SupportCaseNote[]
+  caseAnalyses    CaseAnalysis[]
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 }

@@ -36,6 +36,7 @@ model Store {
   consultations Consultation[] @relation("ConsultationClinic")
   hrAccess  HrStoreAccess[]
   receptionists ReceptionistProfile[]
+  clinicManagers ClinicManagerProfile[]
   expenses  BusinessExpense[]
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt

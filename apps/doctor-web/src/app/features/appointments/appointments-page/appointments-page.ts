@@ -3,6 +3,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
 import { AppointmentsPrescriptionsService } from './appointments-prescriptions.service';
 import { PrescriptionPdfService } from '../../../core/services/prescription-pdf.service';
 import type {
@@ -20,11 +22,12 @@ import {
 
 @Component({
   selector: 'app-appointments-page',
-  imports: [FormsModule, DatePipe, PatientHealthProfileComponent],
+  imports: [FormsModule, DatePipe, PatientHealthProfileComponent, RouterLink],
   templateUrl: './appointments-page.html',
   styleUrl: './appointments-page.scss'
 })
 export class AppointmentsPage {
+  readonly caseAnalysisPath = ROUTE_PATHS.CASE_ANALYSIS;
   consultationId = '';
   methodOptionId = '';
   diagnosedDiseaseOptionId = '';
@@ -66,6 +69,10 @@ export class AppointmentsPage {
     private readonly route: ActivatedRoute
   ) {
     this.consultationId = this.route.snapshot.queryParamMap.get('consultationId') || '';
+    const remedySuggestion = this.route.snapshot.queryParamMap.get('remedy') || '';
+    if (remedySuggestion) {
+      this.medicineRows[0].medicineName = remedySuggestion;
+    }
     void this.loadOptions();
     void this.loadTemplates();
     if (this.consultationId) {

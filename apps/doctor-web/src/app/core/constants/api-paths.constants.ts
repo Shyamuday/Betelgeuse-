@@ -11,7 +11,13 @@ export const API_PATHS = {
     PRESCRIPTIONS: '/doctor/prescriptions',
     PRESCRIPTION_PDF: (id: string) => `/patient/prescriptions/${id}/pdf`,
     PRESCRIPTION_SHARE: (id: string) => `/patient/prescriptions/${id}/share`,
-    APPOINTMENT_PRESCRIPTIONS: (consultationId: string) => `/doctor/appointments/${consultationId}/prescriptions`
+    APPOINTMENT_PRESCRIPTIONS: (consultationId: string) => `/doctor/appointments/${consultationId}/prescriptions`,
+    REPERTORY_SOURCES: '/doctor/repertory/sources',
+    REPERTORY_RUBRICS_SEARCH: '/doctor/repertory/rubrics/search',
+    CONSULTATION_CASE_ANALYSES: (consultationId: string) => `/doctor/consultations/${consultationId}/case-analyses`,
+    CASE_ANALYSIS: (analysisId: string) => `/doctor/case-analyses/${analysisId}`,
+    CASE_ANALYSIS_REPERTORIZE: (analysisId: string) => `/doctor/case-analyses/${analysisId}/repertorize`,
+    CASE_ANALYSIS_SELECT_REMEDY: (analysisId: string) => `/doctor/case-analyses/${analysisId}/select-remedy`
   },
   HR: {
     SELF_DOCTOR_LEAVES: '/hr/self/doctor-leaves',

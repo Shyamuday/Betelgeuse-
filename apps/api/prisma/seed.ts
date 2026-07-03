@@ -1,6 +1,7 @@
 import { PrismaClient, PrescriptionOptionType, Role, ConsultationStatus, PrescriptionStatus, DoseEventStatus, SupportNoteCategory, ProductEventCategory, PaymentStatus } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import bcrypt from 'bcryptjs';
+import { seedRepertory } from './seeds/repertory-seed.js';
 import {
   DEV_DEMO_ACCOUNTS,
   DEV_DEMO_PASSWORD,
@@ -122,6 +123,29 @@ async function main() {
       storeId: ranchiStore.id,
       employeeId: DEV_DEMO_ACCOUNTS.receptionist.employeeId,
       designation: 'Receptionist'
+    }
+  });
+
+  const clinicManagerUser = await prisma.user.upsert({
+    where: { email: DEV_DEMO_ACCOUNTS.clinicManager.email },
+    update: { isActive: true, passwordHash, role: Role.CLINIC_MANAGER },
+    create: {
+      name: DEV_DEMO_ACCOUNTS.clinicManager.name,
+      email: DEV_DEMO_ACCOUNTS.clinicManager.email,
+      passwordHash,
+      role: Role.CLINIC_MANAGER,
+      isActive: true
+    }
+  });
+
+  await prisma.clinicManagerProfile.upsert({
+    where: { userId: clinicManagerUser.id },
+    update: { storeId: ranchiStore.id, employeeId: DEV_DEMO_ACCOUNTS.clinicManager.employeeId },
+    create: {
+      userId: clinicManagerUser.id,
+      storeId: ranchiStore.id,
+      employeeId: DEV_DEMO_ACCOUNTS.clinicManager.employeeId,
+      designation: 'Clinic Manager'
     }
   });
 
@@ -537,6 +561,8 @@ async function main() {
       }
     });
   }
+
+  await seedRepertory(prisma);
 
   console.log('── Dev demo seed complete ──');
   console.log(`Shared password/PIN: ${DEV_DEMO_PASSWORD}`);

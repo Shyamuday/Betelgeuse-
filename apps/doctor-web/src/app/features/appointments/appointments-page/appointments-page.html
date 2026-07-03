@@ -43,6 +43,9 @@
   <div class="actions">
     <button type="button" (click)="loadConsultationPrescriptions()">Load history</button>
     <button type="button" (click)="resetEditorForFollowUp()">New follow-up version</button>
+    @if (consultationId) {
+      <a class="link-btn" [routerLink]="['/', caseAnalysisPath, consultationId, 'case-analysis']">Case analysis</a>
+    }
   </div>
 
   @if (loadedPrescriptions.length) {

@@ -26,6 +26,11 @@ export const DEV_DEMO_ACCOUNTS = {
     name: 'Front Desk Demo',
     employeeId: 'REC-001'
   },
+  clinicManager: {
+    email: 'clinic@vitalisclinic.local',
+    name: 'Branch Manager Demo',
+    employeeId: 'CM-001'
+  },
   patientRahul: {
     email: 'patient1@vitalisclinic.local',
     name: 'Rahul Verma',
@@ -66,6 +71,7 @@ export const DEV_DEMO_APPS = [
   { id: 'store-manager-web', label: 'Store manager', port: 4301, url: SERVER_CONFIG.ORIGINS.STORE_MANAGER },
   { id: 'hr-web', label: 'HR portal', port: 4400, url: SERVER_CONFIG.ORIGINS.HR },
   { id: 'receptionist-web', label: 'Reception desk', port: 4500, url: SERVER_CONFIG.ORIGINS.RECEPTIONIST },
+  { id: 'clinic-manager-web', label: 'Clinic manager', port: 4600, url: SERVER_CONFIG.ORIGINS.CLINIC_MANAGER },
   { id: 'api', label: 'API + demo guide', port: 4000, url: SERVER_CONFIG.API_PUBLIC_URL }
 ] as const;
 
@@ -128,6 +134,14 @@ export const DEV_DEMO_PERSONAS: DevDemoPersona[] = [
     authKind: 'platform',
     description: 'Walk-in registration, queue, cash collection, doctor assignment.',
     testHints: ['Walk-in patient', 'Queue board', 'Collect cash', 'Assign doctor']
+  },
+  {
+    id: 'clinic-manager',
+    label: 'Branch Manager (Ranchi)',
+    app: 'clinic-manager-web',
+    authKind: 'platform',
+    description: 'Branch operations dashboard — KPIs, staff roster, doctor schedules.',
+    testHints: ['Today KPIs', 'Queue snapshot', 'Staff attendance', 'Doctor slots']
   },
   {
     id: 'store-staff',
@@ -209,6 +223,12 @@ export const DEV_DEMO_ALL_ACCOUNTS = [
     password: DEV_DEMO_PASSWORD
   },
   {
+    role: 'Clinic manager',
+    app: 'clinic-manager-web',
+    login: DEV_DEMO_ACCOUNTS.clinicManager.email,
+    password: DEV_DEMO_PASSWORD
+  },
+  {
     role: 'Patient — Rahul',
     app: 'user-web',
     login: DEV_DEMO_ACCOUNTS.patientRahul.email,
@@ -245,7 +265,8 @@ const PERSONA_EMAIL: Record<string, string> = {
   'patient-rahul': DEV_DEMO_ACCOUNTS.patientRahul.email,
   'patient-priya': DEV_DEMO_ACCOUNTS.patientPriya.email,
   hr: DEV_DEMO_ACCOUNTS.hr.email,
-  receptionist: DEV_DEMO_ACCOUNTS.receptionist.email
+  receptionist: DEV_DEMO_ACCOUNTS.receptionist.email,
+  'clinic-manager': DEV_DEMO_ACCOUNTS.clinicManager.email
 };
 
 export function getPersonaCredentials(personaId: string): DevDemoPersonaCredentials {
@@ -279,6 +300,8 @@ export function getPersonaCredentials(personaId: string): DevDemoPersonaCredenti
       return { email: DEV_DEMO_ACCOUNTS.hr.email, password };
     case 'receptionist':
       return { email: DEV_DEMO_ACCOUNTS.receptionist.email, password };
+    case 'clinic-manager':
+      return { email: DEV_DEMO_ACCOUNTS.clinicManager.email, password };
     case 'store-staff':
       return { staffCode: DEV_DEMO_ACCOUNTS.storeStaff.staffCode, pin: password, password };
     case 'store-manager':

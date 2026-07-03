@@ -4,6 +4,7 @@ enum Role {
   ADMIN
   HR
   RECEPTIONIST
+  CLINIC_MANAGER
 }
 
 model User {
@@ -37,9 +38,11 @@ model User {
   passwordResetTokens PasswordResetToken[]
   hrProfile              HrProfile?
   receptionistProfile    ReceptionistProfile?
+  clinicManagerProfile   ClinicManagerProfile?
   hrStoreAccess          HrStoreAccess[] @relation("HrUserAccess")
   hrStoreGrants      HrStoreAccess[] @relation("HrAccessGrantor")
   leaveApprovals     LeaveRequest[]  @relation("LeaveApprovals")
+  caseAnalyses       CaseAnalysis[]  @relation("DoctorCaseAnalyses")
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
 

@@ -81,6 +81,7 @@
       </small>
       <div class="actions">
         <button type="button" (click)="openInAppointments(item.id)">Open appointment</button>
+        <button type="button" class="ghost" (click)="openCaseAnalysis(item.id)">Case analysis</button>
         @if (item.patient?.patientCode) {
           <button type="button" class="ghost" (click)="scanPatient(item.patient?.patientCode)">Scan patient</button>
         }
@@ -104,6 +105,7 @@
       <small class="muted">Patient {{ item.patient?.patientCode || item.patient?.id }}</small>
       <div class="actions">
         <button type="button" (click)="openInAppointments(item.id)">Open appointment</button>
+        <button type="button" class="ghost" (click)="openCaseAnalysis(item.id)">Case analysis</button>
       </div>
     </article>
   } @empty {
@@ -124,6 +126,7 @@
       <small class="muted">Patient {{ item.patient?.patientCode || item.patient?.id }}</small>
       <div class="actions">
         <button type="button" (click)="openInAppointments(item.id)">Open appointment</button>
+        <button type="button" class="ghost" (click)="openCaseAnalysis(item.id)">Case analysis</button>
         @if (item.patient?.patientCode) {
           <button type="button" class="ghost" (click)="scanPatient(item.patient?.patientCode)">Scan patient</button>
         }

@@ -201,7 +201,7 @@ Minimum acceptance:
 
 ### 5) Clinic Manager Hub (Platform Phase 2)
 
-**Status: Next** — branch operations dashboard combining schedules, attendance view, and branch KPIs (see `docs/platform-ecosystem-architecture.md`).
+**Status: Done** — `CLINIC_MANAGER` role + `ClinicManagerProfile`; clinic-manager API (`/clinic-manager/dashboard`, `/roster`, `/schedules`); `clinic-manager-web` on port 4600 with branch KPIs, staff attendance roster, and doctor slot visibility; demo persona `clinic@vitalisclinic.local`.
 
 - Day-to-day branch operations console
 - Staff attendance and schedule visibility

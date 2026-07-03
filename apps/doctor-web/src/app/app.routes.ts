@@ -24,6 +24,11 @@ export const routes: Routes = [
       { path: ROUTE_PATHS.WORKLIST, component: WorklistPage },
       { path: ROUTE_PATHS.DASHBOARD, component: DashboardHome },
       { path: ROUTE_PATHS.APPOINTMENTS, component: AppointmentsPage },
+      {
+        path: `${ROUTE_PATHS.CASE_ANALYSIS}/:consultationId/case-analysis`,
+        loadComponent: () =>
+          import('./features/case-analysis/case-analysis-page/case-analysis-page').then((m) => m.CaseAnalysisPage)
+      },
       { path: ROUTE_PATHS.PATIENTS, component: PatientsPage },
       { path: ROUTE_PATHS.PROFILE, component: ProfilePage },
       { path: ROUTE_PATHS.LEAVES, component: MyLeaves },
