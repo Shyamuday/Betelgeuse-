@@ -17,6 +17,7 @@ jobs:
           - apps/doctor-web
           - apps/admin-web
           - apps/store
+          - apps/store-manager-web
           - apps/hr-web
 
     defaults:
@@ -36,6 +37,10 @@ jobs:
 
       - name: Install
         run: npm ci
+
+      - name: Prisma generate
+        if: matrix.app == 'apps/api'
+        run: npm run prisma:generate
 
       - name: Lint
         run: npm run lint

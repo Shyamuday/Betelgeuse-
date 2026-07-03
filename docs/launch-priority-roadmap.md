@@ -159,6 +159,39 @@ Minimum acceptance:
 
 - Instrumentation for core funnels
 
+## Post-Launch Operations
+
+### Dev Demo System (all apps)
+
+**Status: Done** — fixed demo manifest, `GET /dev/demo-guide`, quick-login and fill on all six apps, dev OTP echo, seed aligned to personas; disabled in production via `NODE_ENV` / `DISABLE_DEV_DEMO`.
+
+- One-click and fill-to-login for testing every app with shared dummy data
+
+---
+
+## Phase 3 (Platform Scale)
+
+### 1) CI & Build Hardening
+
+**Status: Done** — `store-manager-web` added to CI matrix; API job runs `prisma generate` before lint/build.
+
+- Every app in the monorepo validates on push/PR
+- Prisma client generated before API typecheck
+
+### 2) Admin HR Ops Reliability
+
+**Status: Done** — HR middleware accepts platform admin JWT (`id` or `userId`); Employees, Leaves, and Stores pages use shared loading/empty/error + retry patterns.
+
+- Admin can use HR-backed pages without a separate HR login
+- Failed API loads show a clear message and retry
+
+### 3) Branch Finance Exports (Accountant basics)
+
+**Status: Next** — extend admin finance with branch-scoped P&L summary and GST-ready payroll/payment export bundles (see `docs/platform-ecosystem-architecture.md` Phase 3).
+
+- Per-branch revenue vs payroll vs expenses
+- Downloadable CSV bundles for accountant reconciliation
+
 ## Recommended Implementation Order
 
 1. Doctor worklist + follow-up due

@@ -34,6 +34,7 @@ export class EmployeesPage implements OnInit {
 
   employees = signal<any[]>([]);
   loading = signal(true);
+  error = signal('');
   q = '';
   activeFilter = signal<string>(FILTER_ALL);
   activeStatus = signal<string>(FILTER_ALL);
@@ -63,9 +64,10 @@ export class EmployeesPage implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    this.error.set('');
     this.api.getHrEmployees({ q: this.q, type: this.activeFilter(), status: this.activeStatus() })
       .then(r => { this.employees.set(r.employees); this.loading.set(false); })
-      .catch(() => this.loading.set(false));
+      .catch(() => { this.loading.set(false); this.error.set('Could not load employees. Check your connection and try again.'); });
   }
 
   onSearch(): void {

@@ -25,6 +25,7 @@ export class StoresPage implements OnInit {
 
   stores = signal<any[]>([]);
   loading = signal(true);
+  error = signal('');
   saving = signal(false);
   modal = signal<StoreModalType | null>(null);
   selectedStore = signal<any>(null);
@@ -39,9 +40,10 @@ export class StoresPage implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    this.error.set('');
     this.api.getAdminStores()
       .then(r => { this.stores.set(r.stores); this.loading.set(false); })
-      .catch(() => this.loading.set(false));
+      .catch(() => { this.loading.set(false); this.error.set('Could not load stores. Check your connection and try again.'); });
   }
 
   openModal(m: StoreModalType): void { this.err.set(''); this.modal.set(m); }

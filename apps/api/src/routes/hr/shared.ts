@@ -12,6 +12,15 @@ export interface AuthPayload {
   role: string;
 }
 
+/** Platform admin JWT uses `id`; HR login uses `userId`. */
+type JwtHrClaims = AuthPayload & { id?: string };
+
+function normalizeHrPayload(decoded: JwtHrClaims): AuthPayload | null {
+  const userId = decoded.userId ?? decoded.id;
+  if (!userId || !decoded.role) return null;
+  return { userId, role: decoded.role };
+}
+
 export interface HrRequest extends Request {
   hrPayload: AuthPayload;
   accessibleStoreIds: string[] | null;
@@ -27,7 +36,9 @@ export function hrAuthMiddleware(req: Request, res: Response, next: NextFunction
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) { res.status(401).json({ error: 'Unauthorized' }); return; }
   try {
-    const payload = jwt.verify(header.slice(7), JWT_SECRET) as AuthPayload;
+    const decoded = jwt.verify(header.slice(7), JWT_SECRET) as JwtHrClaims;
+    const payload = normalizeHrPayload(decoded);
+    if (!payload) { res.status(401).json({ error: 'Invalid token' }); return; }
     if (payload.role !== HR_ROLES.ADMIN && payload.role !== HR_ROLES.HR) {
       res.status(403).json({ error: 'HR or Admin access required' }); return;
     }
@@ -53,7 +64,9 @@ export function adminOnly(req: Request, res: Response, next: NextFunction): void
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) { res.status(401).json({ error: 'Unauthorized' }); return; }
   try {
-    const payload = jwt.verify(header.slice(7), JWT_SECRET) as AuthPayload;
+    const decoded = jwt.verify(header.slice(7), JWT_SECRET) as JwtHrClaims;
+    const payload = normalizeHrPayload(decoded);
+    if (!payload) { res.status(401).json({ error: 'Invalid token' }); return; }
     if (payload.role !== HR_ROLES.ADMIN) { res.status(403).json({ error: 'Admin only' }); return; }
     (req as HrRequest).hrPayload = payload;
     (req as HrRequest).accessibleStoreIds = null;

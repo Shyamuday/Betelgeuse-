@@ -23,7 +23,14 @@
       </div>
 
       @if (loading()) {
-        <div class="loading"><div class="spinner"></div></div>
+        <p class="loading-text">Loading leave records…</p>
+      } @else if (error()) {
+        <div class="error-row">
+          <p class="error">{{ error() }}</p>
+          <button type="button" class="retry-btn" (click)="load()">Retry</button>
+        </div>
+      } @else if (!leaves().length) {
+        <p class="empty-state">No leaves found for this filter.</p>
       } @else {
         <div class="leave-list">
           @for (l of leaves(); track l.id) {
@@ -63,9 +70,6 @@
             </div>
           }
         </div>
-        @if (leaves().length === 0) {
-          <div class="empty"><div>📋</div><p>No leaves found for this filter</p></div>
-        }
         @if (total() > pageSize) {
           <div class="pagination">
             <button [disabled]="page() <= 1" (click)="prevPage()">‹ Prev</button>

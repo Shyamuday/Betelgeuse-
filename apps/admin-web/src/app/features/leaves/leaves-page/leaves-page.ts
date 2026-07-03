@@ -32,6 +32,7 @@ export class LeavesPage implements OnInit {
 
   leaves = signal<any[]>([]);
   loading = signal(true);
+  error = signal('');
   total = signal(0);
   page = signal(1);
   pageSize = PAGE_SIZES.LEAVES;
@@ -68,9 +69,10 @@ export class LeavesPage implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    this.error.set('');
     this.api.getAdminLeaves({ status: this.statusFilter(), empType: this.empTypeFilter(), page: this.page(), pageSize: this.pageSize })
       .then(r => { this.leaves.set(r.leaves); this.total.set(r.total); this.loading.set(false); })
-      .catch(() => this.loading.set(false));
+      .catch(() => { this.loading.set(false); this.error.set('Could not load leave records. Check your connection and try again.'); });
   }
 
   setStatus(v: string): void { this.statusFilter.set(v); this.page.set(1); this.load(); }

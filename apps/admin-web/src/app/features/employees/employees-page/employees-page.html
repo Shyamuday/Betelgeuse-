@@ -23,7 +23,14 @@
       </div>
 
       @if (loading()) {
-        <div class="loading"><div class="spinner"></div></div>
+        <p class="loading-text">Loading employees…</p>
+      } @else if (error()) {
+        <div class="error-row">
+          <p class="error">{{ error() }}</p>
+          <button type="button" class="retry-btn" (click)="load()">Retry</button>
+        </div>
+      } @else if (!employees().length) {
+        <p class="empty-state">No employees match your filters.</p>
       } @else {
         <div class="emp-count">{{ employees().length }} employees</div>
         <div class="emp-grid">
@@ -57,9 +64,6 @@
             </div>
           }
         </div>
-        @if (employees().length === 0) {
-          <div class="empty"><div>👥</div><p>No employees found</p></div>
-        }
       }
     </div>
 

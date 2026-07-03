@@ -9,7 +9,15 @@
       </div>
 
       @if (loading()) {
-        <div class="loading"><div class="spinner"></div></div>
+        <p class="loading-text">Loading stores…</p>
+      } @else if (error()) {
+        <div class="error-row">
+          <p class="error">{{ error() }}</p>
+          <button type="button" class="retry-btn" (click)="load()">Retry</button>
+        </div>
+      } @else if (!stores().length) {
+        <p class="empty-state">No stores yet. Create your first store to get started.</p>
+        <button class="btn-primary" (click)="openModal('store')">Create Store</button>
       } @else {
         <div class="store-grid">
           @for (s of stores(); track s.id) {
@@ -53,14 +61,6 @@
             </div>
           }
         </div>
-        @if (stores().length === 0) {
-          <div class="empty">
-            <div>🏪</div>
-            <h3>No stores yet</h3>
-            <p>Create your first store to get started.</p>
-            <button class="btn-primary" (click)="openModal('store')">Create Store</button>
-          </div>
-        }
       }
     </div>
 
