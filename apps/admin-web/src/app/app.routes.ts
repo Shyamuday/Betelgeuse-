@@ -23,6 +23,9 @@ import { PurchaseOrdersPage } from './features/purchase-orders/purchase-orders-p
 import { AdminUsersPage } from './features/admin-users/admin-users-page/admin-users-page';
 import { SuppliersPage } from './features/suppliers/suppliers-page/suppliers-page';
 import { MedicinesPage } from './features/medicines/medicines-page/medicines-page';
+import { InventoryPage } from './features/inventory/inventory-page/inventory-page';
+import { NotificationsPage } from './features/notifications/notifications-page/notifications-page';
+import { SecurityPage } from './features/security/security-page/security-page';
 
 export const routes: Routes = [
   { path: ROUTE_PATHS.LOGIN, component: AdminLogin },
@@ -44,10 +47,13 @@ export const routes: Routes = [
       { path: ROUTE_PATHS.PURCHASE_ORDERS, component: PurchaseOrdersPage },
       { path: ROUTE_PATHS.SUPPLIERS, component: SuppliersPage },
       { path: ROUTE_PATHS.MEDICINES, component: MedicinesPage },
+      { path: ROUTE_PATHS.INVENTORY, component: InventoryPage },
+      { path: ROUTE_PATHS.NOTIFICATIONS, component: NotificationsPage },
       { path: ROUTE_PATHS.ADMIN_USERS, component: AdminUsersPage },
       { path: ROUTE_PATHS.CONSULTATIONS, component: ConsultationsPage },
       { path: ROUTE_PATHS.PAYMENTS, component: PaymentsPage },
       { path: ROUTE_PATHS.AUDIT, component: AuditPage },
+      { path: ROUTE_PATHS.SECURITY, component: SecurityPage },
       { path: ROUTE_PATHS.ADHERENCE, component: AdherencePage },
       { path: ROUTE_PATHS.ANALYTICS, component: AnalyticsPage },
       { path: ROUTE_PATHS.FINANCE, component: FinancePage },

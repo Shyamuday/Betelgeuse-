@@ -32,25 +32,31 @@ Operational checklist for giving `admin-web` full platform control. Work through
 
 ---
 
-## Phase C — Later (not in scope unless requested)
+## Phase C — Extended platform control
+
+| # | Task | API | UI | Status |
+|---|------|-----|-----|--------|
+| C1 | Lab referrals admin UI | — | — | ⏭ Skipped |
+| C2 | Case Analysis AI / clinical media | — | — | ⏭ Skipped |
+| C3 | Inventory stock levels per branch | `GET /admin/inventory/overview`, `GET .../stores/:id/stock` | Inventory page | ✅ |
+| C4 | Notification templates / broadcast | `GET/POST/PATCH /admin/notifications/templates`, `POST /admin/notifications/broadcast` | Notifications page | ✅ |
+| C5 | Audit log retention / RBAC matrix | `GET/POST /admin/audit-retention/*`, `GET /admin/rbac/matrix` | Security page | ✅ |
+
+---
+
+## Future (optional)
 
 | # | Task | Notes |
 |---|------|-------|
-| C1 | Lab referrals admin UI | Skipped — no referral commission model |
-| C2 | Case Analysis AI / clinical media | Skipped — no AI for now |
-| C3 | Inventory stock levels per branch | Needs store-scoped stock API for admin |
-| C4 | Notification templates / broadcast | New subsystem |
-| C5 | Audit log retention / RBAC matrix | Compliance hardening |
+| F1 | Patient in-app notification inbox | Broadcast currently uses SMS/email/console channels |
+| F2 | Admin inventory adjustments | Read-only overview; store managers adjust stock locally |
 
 ---
 
 ## Implementation order
 
-1. B1 Audit CSV export  
-2. B2 Consultation status override  
-3. B3 Platform admin users  
-4. B4 Supplier directory  
-5. B5 Medicine catalog  
+**Phase A–B:** stores, patients, POs, finance, audit, consultations, admins, suppliers, medicines  
+**Phase C:** inventory overview → notification templates/broadcast → security (RBAC + retention)
 
 ---
 
@@ -59,3 +65,4 @@ Operational checklist for giving `admin-web` full platform control. Work through
 | Date | Change |
 |------|--------|
 | 2026-07-03 | Phase B complete (B1–B5) |
+| 2026-07-03 | Phase C complete (C3–C5); C1/C2 remain skipped |

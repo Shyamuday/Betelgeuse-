@@ -1,0 +1,84 @@
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2>Inventory</h2>
+      <p class="muted">Stock levels across branches and warehouses</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p>Loading…</p>
+  } @else if (error()) {
+    <p class="error">{{ error() }}</p>
+  } @else {
+    <div class="overview-grid">
+      @for (store of overview(); track store.id) {
+        <button
+          type="button"
+          class="store-card"
+          [class.active]="selectedStoreId() === store.id"
+          (click)="selectStore(store.id)"
+        >
+          <strong>{{ store.name }}</strong>
+          <span class="muted">{{ store.code }} · {{ store.kind }}</span>
+          <div class="stats">
+            <span>{{ store.skuCount }} SKUs</span>
+            <span>{{ store.totalQty }} units</span>
+            @if (store.lowStockCount) {
+              <span class="warn">{{ store.lowStockCount }} low</span>
+            }
+            @if (store.outOfStockCount) {
+              <span class="danger">{{ store.outOfStockCount }} out</span>
+            }
+          </div>
+        </button>
+      }
+    </div>
+
+    @if (selectedStore()) {
+      <div class="detail">
+        <h3>{{ selectedStore()!.name }} stock</h3>
+        <div class="toolbar">
+          <input [(ngModel)]="q" placeholder="Search medicine…" (keyup.enter)="loadStock()" />
+          <select [(ngModel)]="statusFilter" (change)="loadStock()">
+            <option value="">All statuses</option>
+            <option value="ACTIVE">Active</option>
+            <option value="LOW_STOCK">Low stock</option>
+            <option value="OUT_OF_STOCK">Out of stock</option>
+          </select>
+          <button type="button" (click)="loadStock()">Search</button>
+        </div>
+
+        @if (stockLoading()) {
+          <p>Loading stock…</p>
+        } @else {
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Medicine</th>
+                <th>Potency</th>
+                <th>Qty</th>
+                <th>Min</th>
+                <th>Status</th>
+                <th>Rack</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of stocks(); track row.id) {
+                <tr>
+                  <td>{{ row.medicine.name }}</td>
+                  <td>{{ row.medicine.potency }}</td>
+                  <td>{{ row.currentQty }}</td>
+                  <td>{{ row.medicine.minStockLevel }}</td>
+                  <td>{{ row.status }}</td>
+                  <td>{{ row.rack?.locationString || '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    }
+  }
+</div>

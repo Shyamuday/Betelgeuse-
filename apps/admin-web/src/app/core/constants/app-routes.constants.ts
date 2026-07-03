@@ -19,7 +19,10 @@ export const ROUTE_PATHS = {
   PURCHASE_ORDERS: 'purchase-orders',
   ADMIN_USERS: 'admin-users',
   SUPPLIERS: 'suppliers',
-  MEDICINES: 'medicines'
+  MEDICINES: 'medicines',
+  INVENTORY: 'inventory',
+  NOTIFICATIONS: 'notifications',
+  SECURITY: 'security'
 } as const;
 
 export const DEFAULT_AUTHED_ROUTE = ROUTE_PATHS.DASHBOARD;
@@ -37,10 +40,13 @@ export const NAV_ITEMS = [
   { path: `/${ROUTE_PATHS.PURCHASE_ORDERS}`, label: '📦 Purchase Orders' },
   { path: `/${ROUTE_PATHS.SUPPLIERS}`, label: '🏭 Suppliers' },
   { path: `/${ROUTE_PATHS.MEDICINES}`, label: '💊 Medicines' },
+  { path: `/${ROUTE_PATHS.INVENTORY}`, label: '📦 Inventory' },
+  { path: `/${ROUTE_PATHS.NOTIFICATIONS}`, label: '🔔 Notifications' },
   { path: `/${ROUTE_PATHS.ADMIN_USERS}`, label: '🔐 Admin Users' },
   { path: `/${ROUTE_PATHS.CONSULTATIONS}`, label: '🩺 Consultations' },
   { path: `/${ROUTE_PATHS.PAYMENTS}`, label: '💳 Payments' },
   { path: `/${ROUTE_PATHS.AUDIT}`, label: '📋 Audit Trail' },
+  { path: `/${ROUTE_PATHS.SECURITY}`, label: '🛡️ Security' },
   { path: `/${ROUTE_PATHS.ADHERENCE}`, label: '📉 Adherence Risk' },
   { path: `/${ROUTE_PATHS.ANALYTICS}`, label: '📈 Product Analytics' },
   { path: `/${ROUTE_PATHS.FINANCE}`, label: '📊 Finance' },

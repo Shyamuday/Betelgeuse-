@@ -121,4 +121,35 @@ export class AdminReportsApi extends AdminApiBase {
     }
     return response.text();
   }
+
+  getAuditRetentionStats() {
+    return firstValueFrom(
+      this.http.get<{
+        total: number;
+        olderThan30Days: number;
+        olderThan90Days: number;
+        olderThan365Days: number;
+        oldestAt: string | null;
+      }>(`${this.apiBase}${API_PATHS.ADMIN.AUDIT_RETENTION_STATS}`)
+    );
+  }
+
+  purgeAuditLogs(payload: { olderThanDays: number; dryRun?: boolean }) {
+    return firstValueFrom(
+      this.http.post<{ dryRun: boolean; olderThanDays: number; deletedCount: number; cutoff: string }>(
+        `${this.apiBase}${API_PATHS.ADMIN.AUDIT_RETENTION_PURGE}`,
+        payload
+      )
+    );
+  }
+
+  getRbacMatrix() {
+    return firstValueFrom(
+      this.http.get<{
+        roles: string[];
+        capabilities: Array<{ id: string; label: string; description: string; roles: string[] }>;
+        matrix: Array<{ role: string; capabilities: string[] }>;
+      }>(`${this.apiBase}${API_PATHS.ADMIN.RBAC_MATRIX}`)
+    );
+  }
 }

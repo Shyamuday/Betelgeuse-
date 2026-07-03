@@ -14,6 +14,9 @@ import { registerAdminPurchaseOrderRoutes } from './purchase-orders.js';
 import { registerAdminCatalogOpsRoutes } from './catalog-ops.js';
 import { registerAdminUserRoutes } from './admins.js';
 import { registerAdminLabReferralRoutes } from './lab-referrals.js';
+import { registerAdminInventoryRoutes } from './inventory.js';
+import { registerAdminNotificationRoutes } from './notifications.js';
+import { registerAdminRbacRoutes } from './rbac.js';
 
 export function createAdminRouter(io: SocketIoServer) {
   const router = Router();
@@ -32,6 +35,9 @@ export function createAdminRouter(io: SocketIoServer) {
   registerAdminCatalogOpsRoutes(router);
   registerAdminUserRoutes(router);
   registerAdminLabReferralRoutes(router);
+  registerAdminInventoryRoutes(router);
+  registerAdminNotificationRoutes(router);
+  registerAdminRbacRoutes(router);
 
   return router;
 }

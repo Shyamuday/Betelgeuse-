@@ -274,6 +274,36 @@ export class AdminApi {
   updateConsultationStatus(...args: Parameters<AdminOpsApi['updateConsultationStatus']>) {
     return this.ops.updateConsultationStatus(...(args as Parameters<AdminOpsApi['updateConsultationStatus']>));
   }
+  getInventoryOverview(...args: Parameters<AdminOpsApi['getInventoryOverview']>) {
+    return this.ops.getInventoryOverview(...(args as Parameters<AdminOpsApi['getInventoryOverview']>));
+  }
+  getStoreStock(...args: Parameters<AdminOpsApi['getStoreStock']>) {
+    return this.ops.getStoreStock(...(args as Parameters<AdminOpsApi['getStoreStock']>));
+  }
+  getNotificationTemplates(...args: Parameters<AdminOpsApi['getNotificationTemplates']>) {
+    return this.ops.getNotificationTemplates(...(args as Parameters<AdminOpsApi['getNotificationTemplates']>));
+  }
+  createNotificationTemplate(...args: Parameters<AdminOpsApi['createNotificationTemplate']>) {
+    return this.ops.createNotificationTemplate(...(args as Parameters<AdminOpsApi['createNotificationTemplate']>));
+  }
+  updateNotificationTemplate(...args: Parameters<AdminOpsApi['updateNotificationTemplate']>) {
+    return this.ops.updateNotificationTemplate(...(args as Parameters<AdminOpsApi['updateNotificationTemplate']>));
+  }
+  getNotificationBroadcasts(...args: Parameters<AdminOpsApi['getNotificationBroadcasts']>) {
+    return this.ops.getNotificationBroadcasts(...(args as Parameters<AdminOpsApi['getNotificationBroadcasts']>));
+  }
+  sendNotificationBroadcast(...args: Parameters<AdminOpsApi['sendNotificationBroadcast']>) {
+    return this.ops.sendNotificationBroadcast(...(args as Parameters<AdminOpsApi['sendNotificationBroadcast']>));
+  }
+  getAuditRetentionStats(...args: Parameters<AdminReportsApi['getAuditRetentionStats']>) {
+    return this.reports.getAuditRetentionStats(...(args as Parameters<AdminReportsApi['getAuditRetentionStats']>));
+  }
+  purgeAuditLogs(...args: Parameters<AdminReportsApi['purgeAuditLogs']>) {
+    return this.reports.purgeAuditLogs(...(args as Parameters<AdminReportsApi['purgeAuditLogs']>));
+  }
+  getRbacMatrix(...args: Parameters<AdminReportsApi['getRbacMatrix']>) {
+    return this.reports.getRbacMatrix(...(args as Parameters<AdminReportsApi['getRbacMatrix']>));
+  }
   getAdminStore(...args: Parameters<AdminHrApi['getAdminStore']>) {
     return this.hr.getAdminStore(...(args as Parameters<AdminHrApi['getAdminStore']>));
   }

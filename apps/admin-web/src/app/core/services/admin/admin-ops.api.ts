@@ -147,4 +147,59 @@ export class AdminOpsApi extends AdminApiBase {
       )
     );
   }
+
+  getInventoryOverview() {
+    return firstValueFrom(
+      this.http.get<{ stores: Array<any> }>(`${this.apiBase}${API_PATHS.ADMIN.INVENTORY_OVERVIEW}`)
+    );
+  }
+
+  getStoreStock(storeId: string, params?: { q?: string; status?: string; page?: number }) {
+    return firstValueFrom(
+      this.http.get<{ store: any; stocks: Array<any>; pagination: any }>(
+        `${this.apiBase}${API_PATHS.ADMIN.INVENTORY_STORE_STOCK(storeId)}`,
+        {
+          params: {
+            page: String(params?.page ?? 1),
+            pageSize: '50',
+            ...(params?.q ? { q: params.q } : {}),
+            ...(params?.status ? { status: params.status } : {})
+          }
+        }
+      )
+    );
+  }
+
+  getNotificationTemplates() {
+    return firstValueFrom(
+      this.http.get<{ templates: Array<any> }>(`${this.apiBase}${API_PATHS.ADMIN.NOTIFICATION_TEMPLATES}`)
+    );
+  }
+
+  createNotificationTemplate(payload: Record<string, unknown>) {
+    return firstValueFrom(
+      this.http.post<{ template: any }>(`${this.apiBase}${API_PATHS.ADMIN.NOTIFICATION_TEMPLATES}`, payload)
+    );
+  }
+
+  updateNotificationTemplate(id: string, payload: Record<string, unknown>) {
+    return firstValueFrom(
+      this.http.patch<{ template: any }>(`${this.apiBase}${API_PATHS.ADMIN.NOTIFICATION_TEMPLATES}/${id}`, payload)
+    );
+  }
+
+  getNotificationBroadcasts() {
+    return firstValueFrom(
+      this.http.get<{ broadcasts: Array<any> }>(`${this.apiBase}${API_PATHS.ADMIN.NOTIFICATION_BROADCASTS}`)
+    );
+  }
+
+  sendNotificationBroadcast(payload: Record<string, unknown>) {
+    return firstValueFrom(
+      this.http.post<{ broadcast: any; recipientCount: number }>(
+        `${this.apiBase}${API_PATHS.ADMIN.NOTIFICATION_BROADCAST}`,
+        payload
+      )
+    );
+  }
 }

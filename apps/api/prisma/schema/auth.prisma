@@ -56,6 +56,7 @@ model User {
   hrStoreGrants      HrStoreAccess[] @relation("HrAccessGrantor")
   leaveApprovals     LeaveRequest[]  @relation("LeaveApprovals")
   caseAnalyses       CaseAnalysis[]  @relation("DoctorCaseAnalyses")
+  notificationBroadcasts NotificationBroadcast[] @relation("NotificationBroadcasts")
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
 
