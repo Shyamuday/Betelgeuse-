@@ -1,11 +1,15 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { AdminApi } from '../../../core/services/admin-api';
 import { TOAST_DURATION_MS } from '../../../core/constants/timing.constants';
 
+function emptyAdminForm() {
+  return { name: '', email: '', password: '', mobile: '' };
+}
+
 @Component({
   selector: 'app-admin-users-page',
-  imports: [FormsModule],
+  imports: [FormField],
   templateUrl: './admin-users-page.html',
   styleUrl: './admin-users-page.scss'
 })
@@ -18,7 +22,9 @@ export class AdminUsersPage implements OnInit {
   modal = signal(false);
   error = signal('');
   toast = signal('');
-  form = { name: '', email: '', password: '', mobile: '' };
+
+  readonly draftModel = signal(emptyAdminForm());
+  readonly draftForm = form(this.draftModel);
 
   ngOnInit(): void { void this.load(); }
 
@@ -35,7 +41,7 @@ export class AdminUsersPage implements OnInit {
   }
 
   openCreate() {
-    this.form = { name: '', email: '', password: '', mobile: '' };
+    this.draftModel.set(emptyAdminForm());
     this.error.set('');
     this.modal.set(true);
   }
@@ -43,17 +49,18 @@ export class AdminUsersPage implements OnInit {
   closeModal() { this.modal.set(false); }
 
   async create() {
-    if (!this.form.name || !this.form.email || !this.form.password) {
+    const form = this.draftModel();
+    if (!form.name || !form.email || !form.password) {
       this.error.set('Name, email, and password are required.');
       return;
     }
     this.saving.set(true);
     try {
       await this.api.createAdmin({
-        name: this.form.name,
-        email: this.form.email,
-        password: this.form.password,
-        mobile: this.form.mobile || undefined
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        mobile: form.mobile || undefined
       });
       this.modal.set(false);
       this.showToast('Admin user created.');

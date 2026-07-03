@@ -49,7 +49,7 @@
           </div>
         } @else {
           <label>Patient</label>
-          <input [(ngModel)]="patientQuery" (input)="searchPatients()" placeholder="Search name or patient code" />
+          <input [formField]="createForm.patientQuery" (input)="searchPatients()" placeholder="Search name or patient code" />
           @if (patientHits().length) {
             <div class="hits">
               @for (p of patientHits(); track p.id) {
@@ -60,19 +60,19 @@
             </div>
           }
           <label>Delivery address</label>
-          <input [(ngModel)]="deliveryAddress" />
+          <input [formField]="createForm.deliveryAddress" />
           <label>Phone</label>
-          <input [(ngModel)]="deliveryPhone" />
+          <input [formField]="createForm.deliveryPhone" />
           <label>Notes</label>
-          <input [(ngModel)]="notes" placeholder="Optional" />
+          <input [formField]="createForm.notes" placeholder="Optional" />
           <div class="line-actions">
             <strong>Items</strong>
             <button type="button" (click)="addLine()">+ Add line</button>
           </div>
-          @for (line of lines(); track $index) {
+          @for (line of createFormModel().lines; track $index) {
             <div class="recv-line">
-              <input [(ngModel)]="line.label" placeholder="Medicine label" />
-              <label>Qty <input type="number" [(ngModel)]="line.qty" min="1" /></label>
+              <input [formField]="createForm.lines[$index].label" placeholder="Medicine label" />
+              <label>Qty <input type="number" [formField]="createForm.lines[$index].qty" min="1" /></label>
             </div>
           }
           <div class="actions">

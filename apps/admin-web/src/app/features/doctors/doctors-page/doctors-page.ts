@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../../../core/services/admin-api';
 import {
@@ -44,8 +44,8 @@ export class DoctorsPage {
   readonly doctorTypeOptions = DOCTOR_TYPE_OPTIONS;
   readonly specialtyFocusOptions = SPECIALTY_FOCUS_OPTIONS;
 
-  doctors: Doctor[] = [];
-  pendingDoctors: Doctor[] = [];
+  readonly doctors = signal<Doctor[]>([]);
+  readonly pendingDoctors = signal<Doctor[]>([]);
   selectedPendingDoctorIds: string[] = [];
   selectedDoctorId = '';
 
@@ -61,10 +61,10 @@ export class DoctorsPage {
   doctorsTotalPagesCount = 1;
   pendingTotalPagesCount = 1;
 
-  loading = false;
-  mutating = false;
-  error = '';
-  message = '';
+  readonly loading = signal(false);
+  readonly mutating = signal(false);
+  readonly error = signal('');
+  readonly message = signal('');
   editName = '';
   editEmail = '';
   editMobile = '';
@@ -87,8 +87,8 @@ export class DoctorsPage {
   }
 
   async load() {
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
     try {
       const [allDoctors, pending] = await Promise.all([
         this.api.getDoctorsPaged({
@@ -105,76 +105,76 @@ export class DoctorsPage {
           q: this.pendingSearchTerm
         })
       ]);
-      this.doctors = allDoctors.doctors || [];
-      this.pendingDoctors = pending.pendingDoctors || [];
+      this.doctors.set(allDoctors.doctors || []);
+      this.pendingDoctors.set(pending.pendingDoctors || []);
       this.doctorsTotalPagesCount = Math.max(1, Number(allDoctors.pagination?.totalPages || 1));
       this.pendingTotalPagesCount = Math.max(1, Number(pending.pagination?.totalPages || 1));
       this.selectedPendingDoctorIds = [];
       this.selectedDoctorId = this.selectedDoctorId || this.visibleDoctors()[0]?.id || '';
       this.syncEditFormFromSelectedDoctor();
     } catch {
-      this.error = 'Could not load doctors.';
+      this.error.set('Could not load doctors.');
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 
   async approveDoctor(doctorId: string) {
-    this.message = '';
-    this.error = '';
-    this.mutating = true;
+    this.message.set('');
+    this.error.set('');
+    this.mutating.set(true);
     try {
       await this.api.approveDoctor(doctorId);
-      this.message = 'Doctor approved.';
+      this.message.set('Doctor approved.');
       await this.load();
     } catch {
-      this.error = 'Could not approve doctor.';
+      this.error.set('Could not approve doctor.');
     } finally {
-      this.mutating = false;
+      this.mutating.set(false);
     }
   }
 
   async rejectDoctor(doctorId: string) {
-    this.message = '';
-    this.error = '';
-    this.mutating = true;
+    this.message.set('');
+    this.error.set('');
+    this.mutating.set(true);
     try {
       await this.api.rejectDoctor(doctorId);
-      this.message = 'Doctor kept as pending/inactive.';
+      this.message.set('Doctor kept as pending/inactive.');
       await this.load();
     } catch {
-      this.error = 'Could not update doctor status.';
+      this.error.set('Could not update doctor status.');
     } finally {
-      this.mutating = false;
+      this.mutating.set(false);
     }
   }
 
   async toggleDoctorStatus(doctorId: string, makeActive: boolean) {
-    this.message = '';
-    this.error = '';
-    this.mutating = true;
+    this.message.set('');
+    this.error.set('');
+    this.mutating.set(true);
     try {
       await this.api.setDoctorStatus(doctorId, makeActive);
-      this.message = makeActive ? 'Doctor activated.' : 'Doctor deactivated.';
+      this.message.set(makeActive ? 'Doctor activated.' : 'Doctor deactivated.');
       await this.load();
       this.selectedDoctorId = doctorId;
       this.syncEditFormFromSelectedDoctor();
     } catch {
-      this.error = 'Could not update doctor status.';
+      this.error.set('Could not update doctor status.');
     } finally {
-      this.mutating = false;
+      this.mutating.set(false);
     }
   }
 
   async saveDoctorEdits() {
-    this.message = '';
-    this.error = '';
+    this.message.set('');
+    this.error.set('');
     const doctorId = this.selectedDoctorId;
     if (!doctorId) {
       return;
     }
 
-    this.mutating = true;
+    this.mutating.set(true);
     try {
       await this.api.updateDoctor(doctorId, {
         name: this.editName.trim(),
@@ -186,21 +186,21 @@ export class DoctorsPage {
         doctorType: this.editDoctorType,
         specialtyFocus: this.editDoctorType === 'SPECIALIST_CONSULTANT' ? this.editSpecialtyFocus || null : null
       });
-      this.message = 'Doctor profile updated.';
+      this.message.set('Doctor profile updated.');
       await this.load();
       this.selectedDoctorId = doctorId;
       this.syncEditFormFromSelectedDoctor();
     } catch {
-      this.error = 'Could not update doctor profile.';
+      this.error.set('Could not update doctor profile.');
     } finally {
-      this.mutating = false;
+      this.mutating.set(false);
     }
   }
 
   async createDoctor() {
-    this.message = '';
-    this.error = '';
-    this.mutating = true;
+    this.message.set('');
+    this.error.set('');
+    this.mutating.set(true);
     try {
       await this.api.createDoctor({
         name: this.createName.trim(),
@@ -212,7 +212,7 @@ export class DoctorsPage {
         doctorType: this.createDoctorType,
         specialtyFocus: this.createDoctorType === 'SPECIALIST_CONSULTANT' ? this.createSpecialtyFocus || null : null
       });
-      this.message = 'Doctor created successfully.';
+      this.message.set('Doctor created successfully.');
       this.createName = '';
       this.createEmail = '';
       this.createMobile = '';
@@ -223,9 +223,9 @@ export class DoctorsPage {
       this.createSpecialtyFocus = '';
       await this.load();
     } catch {
-      this.error = 'Could not create doctor.';
+      this.error.set('Could not create doctor.');
     } finally {
-      this.mutating = false;
+      this.mutating.set(false);
     }
   }
 
@@ -268,17 +268,17 @@ export class DoctorsPage {
       return;
     }
 
-    this.message = '';
-    this.error = '';
-    this.mutating = true;
+    this.message.set('');
+    this.error.set('');
+    this.mutating.set(true);
     try {
       await Promise.all(this.selectedPendingDoctorIds.map((id) => this.api.approveDoctor(id)));
-      this.message = `${this.selectedPendingDoctorIds.length} doctors approved.`;
+      this.message.set(`${this.selectedPendingDoctorIds.length} doctors approved.`);
       await this.load();
     } catch {
-      this.error = 'Could not complete bulk approve.';
+      this.error.set('Could not complete bulk approve.');
     } finally {
-      this.mutating = false;
+      this.mutating.set(false);
     }
   }
 
@@ -287,17 +287,17 @@ export class DoctorsPage {
       return;
     }
 
-    this.message = '';
-    this.error = '';
-    this.mutating = true;
+    this.message.set('');
+    this.error.set('');
+    this.mutating.set(true);
     try {
       await Promise.all(this.selectedPendingDoctorIds.map((id) => this.api.rejectDoctor(id)));
-      this.message = `${this.selectedPendingDoctorIds.length} doctors kept pending.`;
+      this.message.set(`${this.selectedPendingDoctorIds.length} doctors kept pending.`);
       await this.load();
     } catch {
-      this.error = 'Could not complete bulk reject.';
+      this.error.set('Could not complete bulk reject.');
     } finally {
-      this.mutating = false;
+      this.mutating.set(false);
     }
   }
 
@@ -312,11 +312,11 @@ export class DoctorsPage {
   }
 
   visibleDoctors() {
-    return this.doctors;
+    return this.doctors();
   }
 
   visiblePendingDoctors() {
-    return this.pendingDoctors;
+    return this.pendingDoctors();
   }
 
   doctorsTotalPages() {
@@ -336,7 +336,7 @@ export class DoctorsPage {
   }
 
   selectedDoctorDetails() {
-    return this.doctors.find((doctor) => doctor.id === this.selectedDoctorId) || null;
+    return this.doctors().find((doctor) => doctor.id === this.selectedDoctorId) || null;
   }
 
   setSelectedDoctor(doctorId: string) {

@@ -1,6 +1,6 @@
 import { Component, inject, signal, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { form, FormField } from '@angular/forms/signals';
 import { HrApiService } from '../../services/hr-api.service';
 import { Doctor, Employee, Letter, WorkShift, EmployeeStatus } from '../../models';
 import { employeeStatusBadgeClass } from '../constants/employee-status.constants';
@@ -35,7 +35,7 @@ interface EmployeeForm {
 @Component({
   selector: 'app-employee-drawer',
   standalone: true,
-  imports: [FormsModule, DatePipe],
+  imports: [FormField, DatePipe],
   templateUrl: './employee-drawer.component.html',
   styleUrl: './employee-drawer.component.scss'
 })
@@ -58,14 +58,16 @@ export class EmployeeDrawerComponent implements OnChanges {
   letterLoading = signal(false);
   letterGenerating = signal(false);
 
-  clinicName = '';
-  clinicAddress = '';
+  readonly letterModel = signal({ clinicName: '', clinicAddress: '' });
+  readonly letterForm = form(this.letterModel);
+
   today = new Date();
 
   shifts = WORK_SHIFT_OPTIONS;
   weekdays = WEEK_DAYS;
 
-  form: EmployeeForm = this.emptyForm();
+  readonly employeeFormModel = signal<EmployeeForm>(this.emptyForm());
+  readonly employeeForm = form(this.employeeFormModel);
 
   private emptyForm(): EmployeeForm {
     return {
@@ -92,7 +94,7 @@ export class EmployeeDrawerComponent implements OnChanges {
     if (changes['employee'] && this.employee) {
       const emp = this.employee;
       const doctor = emp as Doctor;
-      this.form = {
+      this.employeeFormModel.set({
         employeeId: emp.employeeId ?? '',
         designation: emp.designation ?? '',
         department: emp.department ?? '',
@@ -109,9 +111,10 @@ export class EmployeeDrawerComponent implements OnChanges {
         doctorType: (doctor.doctorType as HomeopathicDoctorType) || 'JUNIOR_DOCTOR',
         specialtyFocus: (doctor.specialtyFocus as HomeopathicSpecialtyFocus) || '',
         specialty: doctor.specialty ?? ''
-      };
+      });
       this.activeTab.set('profile');
       this.letter.set(null);
+      this.letterModel.set({ clinicName: '', clinicAddress: '' });
       this.saveError.set('');
       this.saveSuccess.set(false);
     }
@@ -122,7 +125,7 @@ export class EmployeeDrawerComponent implements OnChanges {
   }
 
   isSpecialistType() {
-    return this.form.doctorType === 'SPECIALIST_CONSULTANT';
+    return this.employeeFormModel().doctorType === 'SPECIALIST_CONSULTANT';
   }
 
   letterContent(): Record<string, string | boolean | undefined> {
@@ -136,12 +139,18 @@ export class EmployeeDrawerComponent implements OnChanges {
 
   close() { this.closed.emit(); }
 
+  setWorkShift(value: WorkShift) {
+    this.employeeFormModel.update((f) => ({ ...f, workShift: value }));
+  }
+
   toggleDay(day: string) {
-    const days = [...this.form.weeklyOffDays];
-    const idx = days.indexOf(day);
-    if (idx >= 0) days.splice(idx, 1);
-    else days.push(day);
-    this.form.weeklyOffDays = days;
+    this.employeeFormModel.update((f) => {
+      const days = [...f.weeklyOffDays];
+      const idx = days.indexOf(day);
+      if (idx >= 0) days.splice(idx, 1);
+      else days.push(day);
+      return { ...f, weeklyOffDays: days };
+    });
   }
 
   statusClass = employeeStatusBadgeClass;
@@ -154,32 +163,33 @@ export class EmployeeDrawerComponent implements OnChanges {
   save() {
     const emp = this.employee;
     if (!emp) return;
+    const form = this.employeeFormModel();
     this.saving.set(true);
     this.saveError.set('');
     this.saveSuccess.set(false);
 
     const payload: Record<string, unknown> = {
-      employeeId: this.form.employeeId || undefined,
-      designation: this.form.designation || undefined,
-      department: this.form.department || undefined,
-      joiningDate: this.form.joiningDate || undefined,
-      probationEndDate: this.form.probationEndDate || undefined,
-      employeeStatus: this.form.employeeStatus,
-      workShift: this.form.workShift ?? undefined,
-      shiftStart: this.form.shiftStart || undefined,
-      shiftEnd: this.form.shiftEnd || undefined,
-      weeklyOffDays: this.form.weeklyOffDays.length ? this.form.weeklyOffDays : undefined,
-      emergencyContact: this.form.emergencyContact || undefined
+      employeeId: form.employeeId || undefined,
+      designation: form.designation || undefined,
+      department: form.department || undefined,
+      joiningDate: form.joiningDate || undefined,
+      probationEndDate: form.probationEndDate || undefined,
+      employeeStatus: form.employeeStatus,
+      workShift: form.workShift ?? undefined,
+      shiftStart: form.shiftStart || undefined,
+      shiftEnd: form.shiftEnd || undefined,
+      weeklyOffDays: form.weeklyOffDays.length ? form.weeklyOffDays : undefined,
+      emergencyContact: form.emergencyContact || undefined
     };
 
     if (emp.empType === 'DOCTOR') {
-      payload['doctorType'] = this.form.doctorType;
-      payload['specialtyFocus'] = this.isSpecialistType() ? this.form.specialtyFocus || null : null;
-      payload['specialty'] = this.form.specialty || undefined;
-      if (this.form.salary !== null) payload['salaryPerMonth'] = Math.round(this.form.salary * 100);
-      if (this.form.consultationFee !== null) payload['consultationFee'] = Math.round(this.form.consultationFee * 100);
-    } else if (this.form.salary !== null) {
-      payload['salary'] = this.form.salary;
+      payload['doctorType'] = form.doctorType;
+      payload['specialtyFocus'] = this.isSpecialistType() ? form.specialtyFocus || null : null;
+      payload['specialty'] = form.specialty || undefined;
+      if (form.salary !== null) payload['salaryPerMonth'] = Math.round(form.salary * 100);
+      if (form.consultationFee !== null) payload['consultationFee'] = Math.round(form.consultationFee * 100);
+    } else if (form.salary !== null) {
+      payload['salary'] = form.salary;
     }
 
     if (emp.empType === 'DOCTOR') {
@@ -231,11 +241,12 @@ export class EmployeeDrawerComponent implements OnChanges {
   generateLetter() {
     const emp = this.employee;
     if (!emp) return;
+    const { clinicName, clinicAddress } = this.letterModel();
     this.letterGenerating.set(true);
     const obs = emp.empType === 'DOCTOR'
       ? this.api.generateDoctorLetter(emp.id, {
-          clinicName: this.clinicName || undefined,
-          clinicAddress: this.clinicAddress || undefined
+          clinicName: clinicName || undefined,
+          clinicAddress: clinicAddress || undefined
         })
       : this.api.generateStoreStaffLetter(emp.id);
 

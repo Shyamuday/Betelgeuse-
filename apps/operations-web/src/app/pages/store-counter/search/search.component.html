@@ -10,13 +10,13 @@
         <input
           class="search-input"
           type="text"
-          [ngModel]="query()"
-          (ngModelChange)="onSearch($event)"
+          [formField]="searchForm.q"
+          (input)="onSearch()"
           placeholder="Search by name, potency, manufacturer..."
           autocomplete="off"
           autocorrect="off"
         />
-        @if (query()) {
+        @if (searchModel().q) {
           <button class="clear-btn" (click)="clearSearch()">✕</button>
         }
         <button
@@ -95,7 +95,7 @@
       }
 
       <!-- Empty state -->
-      @if (!loading() && query() && medicines().length === 0) {
+      @if (!loading() && searchModel().q && medicines().length === 0) {
         <div class="empty-state">
           <div class="empty-icon">💊</div>
           <h3>No medicines found</h3>
@@ -103,7 +103,7 @@
         </div>
       }
 
-      @if (!loading() && !query() && medicines().length === 0) {
+      @if (!loading() && !searchModel().q && medicines().length === 0) {
         <div class="empty-state">
           <div class="empty-icon">🔍</div>
           <h3>Search for medicines</h3>

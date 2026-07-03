@@ -1,13 +1,13 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { form, FormField, required } from '@angular/forms/signals';
 import { ReceptionApiService } from '../../services/reception-api.service';
 import { ROUTE_PATHS } from '../../core/constants/app-routes.constants';
 
 @Component({
   selector: 'app-walk-in',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormField],
   templateUrl: './walk-in.component.html',
   styleUrl: './walk-in.component.scss'
 })
@@ -20,14 +20,19 @@ export class WalkInComponent implements OnInit {
   error = signal('');
   toast = signal('');
 
-  form = {
+  readonly walkInModel = signal({
     name: '',
     mobile: '',
     email: '',
     diseaseId: '',
     collectCash: true,
     notes: ''
-  };
+  });
+  readonly walkInForm = form(this.walkInModel, (schema) => {
+    required(schema.name, { message: 'Name is required' });
+    required(schema.mobile, { message: 'Mobile is required' });
+    required(schema.diseaseId, { message: 'Concern is required' });
+  });
 
   ngOnInit(): void {
     this.api.getDiseases()
@@ -40,7 +45,8 @@ export class WalkInComponent implements OnInit {
   }
 
   async submit(): Promise<void> {
-    if (!this.form.name || !this.form.mobile || !this.form.diseaseId) {
+    const form = this.walkInModel();
+    if (this.walkInForm().invalid()) {
       this.error.set('Name, mobile, and concern are required.');
       return;
     }
@@ -48,12 +54,12 @@ export class WalkInComponent implements OnInit {
     this.error.set('');
     try {
       await this.api.walkIn({
-        name: this.form.name,
-        mobile: this.form.mobile,
-        email: this.form.email || null,
-        diseaseId: this.form.diseaseId,
-        collectCash: this.form.collectCash,
-        notes: this.form.notes || undefined
+        name: form.name,
+        mobile: form.mobile,
+        email: form.email || null,
+        diseaseId: form.diseaseId,
+        collectCash: form.collectCash,
+        notes: form.notes || undefined
       });
       this.toast.set('Walk-in registered');
       setTimeout(() => this.router.navigate([`/${ROUTE_PATHS.QUEUE}`]), 800);

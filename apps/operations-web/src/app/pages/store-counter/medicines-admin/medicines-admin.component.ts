@@ -1,8 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { StoreApiService } from '../../../services/store-api.service';
-import { Medicine, MedicineWithStock } from '../../../store-models';
+import { Medicine, MedicineWithStock } from '../../../models/store';
 import { PAGE_SIZES } from '../../../core/constants/store/pagination.constants';
 import {
   CUSTOM_POTENCY_VALUE,
@@ -10,9 +10,16 @@ import {
   MEDICINE_POTENCIES
 } from '../../../shared/store/constants/medicine-form.constants';
 
+function emptyMedicineForm() {
+  return {
+    name: '', shortName: '', alternateName: '', potency: '', customPotency: '',
+    category: '', manufacturer: '', minStockLevel: 10, description: ''
+  };
+}
+
 @Component({
   selector: 'app-medicines-admin',
-  imports: [FormsModule, RouterLink],
+  imports: [FormField, RouterLink],
   templateUrl: './medicines-admin.component.html',
   styleUrl: './medicines-admin.component.scss'
 })
@@ -21,10 +28,11 @@ export class MedicinesAdminComponent implements OnInit {
 
   medicines = signal<MedicineWithStock[]>([]);
   loading = signal(true);
-  searchQuery = '';
-  potencyFilter = '';
   page = signal(1);
   totalPages = signal(1);
+
+  readonly filterModel = signal({ searchQuery: '', potencyFilter: '' });
+  readonly filterForm = form(this.filterModel);
 
   showModal = signal(false);
   editingId = signal<string | null>(null);
@@ -35,10 +43,8 @@ export class MedicinesAdminComponent implements OnInit {
   categories = MEDICINE_CATEGORIES;
   customPotencyValue = CUSTOM_POTENCY_VALUE;
 
-  form = {
-    name: '', shortName: '', alternateName: '', potency: '', customPotency: '',
-    category: '', manufacturer: '', minStockLevel: 10, description: ''
-  };
+  readonly medicineFormModel = signal(emptyMedicineForm());
+  readonly medicineForm = form(this.medicineFormModel);
 
   private timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -46,7 +52,8 @@ export class MedicinesAdminComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
-    this.api.getMedicines({ q: this.searchQuery, potency: this.potencyFilter, page: this.page(), pageSize: PAGE_SIZES.MEDICINES_ADMIN }).subscribe({
+    const filter = this.filterModel();
+    this.api.getMedicines({ q: filter.searchQuery, potency: filter.potencyFilter, page: this.page(), pageSize: PAGE_SIZES.MEDICINES_ADMIN }).subscribe({
       next: (res) => {
         this.medicines.set(res.medicines);
         this.totalPages.set(res.pagination.totalPages);
@@ -65,7 +72,7 @@ export class MedicinesAdminComponent implements OnInit {
 
   openModal(): void {
     this.editingId.set(null);
-    this.form = { name: '', shortName: '', alternateName: '', potency: '', customPotency: '', category: '', manufacturer: '', minStockLevel: 10, description: '' };
+    this.medicineFormModel.set(emptyMedicineForm());
     this.saveError.set('');
     this.showModal.set(true);
   }
@@ -73,7 +80,17 @@ export class MedicinesAdminComponent implements OnInit {
   openEdit(m: Medicine): void {
     this.editingId.set(m.id);
     const isKnownPotency = (MEDICINE_POTENCIES as readonly string[]).includes(m.potency);
-    this.form = { name: m.name, shortName: m.shortName ?? '', alternateName: m.alternateName ?? '', potency: isKnownPotency ? m.potency : CUSTOM_POTENCY_VALUE, customPotency: isKnownPotency ? '' : m.potency, category: m.category ?? '', manufacturer: m.manufacturer ?? '', minStockLevel: m.minStockLevel, description: m.description ?? '' };
+    this.medicineFormModel.set({
+      name: m.name,
+      shortName: m.shortName ?? '',
+      alternateName: m.alternateName ?? '',
+      potency: isKnownPotency ? m.potency : CUSTOM_POTENCY_VALUE,
+      customPotency: isKnownPotency ? '' : m.potency,
+      category: m.category ?? '',
+      manufacturer: m.manufacturer ?? '',
+      minStockLevel: m.minStockLevel,
+      description: m.description ?? ''
+    });
     this.saveError.set('');
     this.showModal.set(true);
   }
@@ -81,25 +98,30 @@ export class MedicinesAdminComponent implements OnInit {
   closeModal(): void { this.showModal.set(false); }
 
   isFormValid(): boolean {
-    return !!(this.form.name.trim() && (this.form.potency && this.form.potency !== CUSTOM_POTENCY_VALUE || this.form.customPotency.trim()));
+    const form = this.medicineFormModel();
+    return !!(form.name.trim() && (form.potency && form.potency !== CUSTOM_POTENCY_VALUE || form.customPotency.trim()));
   }
 
-  getPotency(): string { return this.form.potency === CUSTOM_POTENCY_VALUE ? this.form.customPotency : this.form.potency; }
+  getPotency(): string {
+    const form = this.medicineFormModel();
+    return form.potency === CUSTOM_POTENCY_VALUE ? form.customPotency : form.potency;
+  }
 
   save(): void {
     if (!this.isFormValid()) return;
     this.saving.set(true);
     this.saveError.set('');
+    const form = this.medicineFormModel();
 
     const payload = {
-      name: this.form.name.trim(),
-      shortName: this.form.shortName || undefined,
-      alternateName: this.form.alternateName || undefined,
+      name: form.name.trim(),
+      shortName: form.shortName || undefined,
+      alternateName: form.alternateName || undefined,
       potency: this.getPotency(),
-      category: this.form.category || undefined,
-      manufacturer: this.form.manufacturer || undefined,
-      minStockLevel: this.form.minStockLevel,
-      description: this.form.description || undefined
+      category: form.category || undefined,
+      manufacturer: form.manufacturer || undefined,
+      minStockLevel: form.minStockLevel,
+      description: form.description || undefined
     };
 
     const req = this.editingId()

@@ -88,5 +88,47 @@ export const API_PATHS = {
     ME: '/insurance/me',
     CLAIMS: '/insurance/claims',
     CLAIM_STATUS: (id: string) => `/insurance/claims/${id}/status`
+  },
+  STORE: {
+    AUTH: {
+      LOGIN: '/store/auth/login',
+      MANAGER_LOGIN: '/store/auth/manager-login'
+    },
+    DASHBOARD: '/store/dashboard',
+    MEDICINES: '/store/medicines',
+    RACKS: '/store/racks',
+    STOCK: {
+      ADD: '/store/stock/add',
+      REMOVE: '/store/stock/remove'
+    },
+    ALERTS: {
+      LOW_STOCK: '/store/alerts/low-stock',
+      EXPIRING: '/store/alerts/expiring'
+    },
+    MOVEMENTS: '/store/movements',
+    STAFF: {
+      ACTIVITY: '/store/staff/activity',
+      DETAIL_ACTIVITY: (staffId: string) => `/store/staff/${staffId}/activity`,
+      MY_PAYSLIP: '/store/staff/my-payslip'
+    },
+    EXPENSES: '/store/expenses',
+    PATIENTS: {
+      SEARCH: '/store/patients/search',
+      CREATE: '/store/patients',
+      BY_MOBILE: (mobile: string) => `/store/patients/by-mobile/${encodeURIComponent(mobile)}`
+    },
+    SCAN_PATIENT: (patientCode: string) => `/store/scan/patient/${encodeURIComponent(patientCode)}`,
+    SCAN_DOSE_GIVE: (doseId: string) => `/store/scan/dose-events/${encodeURIComponent(doseId)}/give`,
+    HR: {
+      STAFF: '/store/hr/staff',
+      STAFF_DETAIL: (id: string) => `/store/hr/staff/${id}`,
+      STAFF_LETTER: (id: string) => `/store/hr/staff/${id}/letter`
+    },
+    PURCHASE_ORDERS: '/store/purchase-orders',
+    PURCHASE_ORDER: (id: string) => `/store/purchase-orders/${id}`,
+    PURCHASE_ORDER_GRN: (id: string) => `/store/purchase-orders/${id}/grn`,
+    STOCK_TRANSFERS: '/store/stock-transfers',
+    STOCK_TRANSFER_RECEIVE: (id: string) => `/store/stock-transfers/${id}/receive`,
+    DELIVERIES: '/store/deliveries'
   }
 } as const;

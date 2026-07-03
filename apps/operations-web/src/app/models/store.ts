@@ -1,4 +1,7 @@
-export interface StoreStaff {
+import type { EmployeeStatus, WorkShift } from '../models';
+
+/** Store counter / manager portal session (distinct from HR `StoreStaff` employee record). */
+export interface StorePortalStaff {
   id: string;
   name: string;
   role: 'MANAGER' | 'STAFF';
@@ -8,9 +11,9 @@ export interface StoreStaff {
   storeName?: string;
 }
 
-export interface AuthResponse {
+export interface StorePortalAuthResponse {
   token: string;
-  staff: StoreStaff;
+  staff: StorePortalStaff;
 }
 
 export interface Medicine {
@@ -174,9 +177,6 @@ export interface StaffActivityResponse {
   since: string;
   staff: StaffActivity[];
 }
-
-export type WorkShift = 'MORNING' | 'AFTERNOON' | 'EVENING' | 'NIGHT' | 'FULL_DAY' | 'CUSTOM';
-export type EmployeeStatus = 'ACTIVE' | 'ON_LEAVE' | 'RESIGNED' | 'TERMINATED';
 
 export interface StaffHrProfile {
   id: string;

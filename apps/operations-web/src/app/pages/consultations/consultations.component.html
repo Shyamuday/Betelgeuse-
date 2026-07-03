@@ -4,7 +4,7 @@
       <h2>Recent consultations</h2>
       <p>Latest consults across the platform for call-center context</p>
     </div>
-    <button type="button" class="btn-refresh" (click)="load()" [disabled]="loading()">Refresh</button>
+    <button type="button" class="btn-refresh" (click)="reload()" [disabled]="loading()">Refresh</button>
   </div>
 
   @if (loading()) {

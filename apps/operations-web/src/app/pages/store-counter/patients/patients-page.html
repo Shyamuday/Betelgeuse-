@@ -8,8 +8,8 @@
     <input
       type="search"
       placeholder="Search patient name, mobile, or ID…"
-      [ngModel]="query()"
-      (ngModelChange)="onSearch($event)"
+      [formField]="searchForm.q"
+      (input)="onSearchFromField()"
     />
     @if (isManager()) {
       <button type="button" class="btn primary" (click)="openRegister()">Register walk-in</button>
@@ -51,15 +51,15 @@
       <h2>Register walk-in patient</h2>
       <label>
         Full name
-        <input [(ngModel)]="registerForm.name" placeholder="Patient full name" />
+        <input [formField]="registerForm.name" placeholder="Patient full name" />
       </label>
       <label>
         Mobile
-        <input [(ngModel)]="registerForm.mobile" placeholder="10-digit mobile (optional)" />
+        <input [formField]="registerForm.mobile" placeholder="10-digit mobile (optional)" />
       </label>
       <label>
         Email
-        <input [(ngModel)]="registerForm.email" placeholder="Email (optional)" />
+        <input [formField]="registerForm.email" placeholder="Email (optional)" />
       </label>
       @if (registerError()) {
         <p class="error-text">{{ registerError() }}</p>

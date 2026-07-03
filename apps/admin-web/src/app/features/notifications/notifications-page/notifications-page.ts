@@ -1,13 +1,28 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { AdminApi } from '../../../core/services/admin-api';
 import { TOAST_DURATION_MS } from '../../../core/constants/timing.constants';
 import { PLATFORM_BROADCAST_ROLES } from '../../../core/constants/platform-roles.constants';
 
+function emptyTemplateForm() {
+  return { code: '', name: '', title: '', body: '', channel: 'IN_APP', isActive: true };
+}
+
+function emptyBroadcastForm() {
+  return {
+    title: '',
+    body: '',
+    channel: 'IN_APP',
+    audience: 'ALL_PATIENTS',
+    audienceRole: 'PATIENT',
+    templateId: ''
+  };
+}
+
 @Component({
   selector: 'app-notifications-page',
-  imports: [FormsModule, DatePipe],
+  imports: [FormField, DatePipe],
   templateUrl: './notifications-page.html',
   styleUrl: './notifications-page.scss'
 })
@@ -24,15 +39,10 @@ export class NotificationsPage implements OnInit {
   error = signal('');
   toast = signal('');
 
-  templateForm = { code: '', name: '', title: '', body: '', channel: 'IN_APP', isActive: true };
-  broadcastForm = {
-    title: '',
-    body: '',
-    channel: 'IN_APP',
-    audience: 'ALL_PATIENTS',
-    audienceRole: 'PATIENT',
-    templateId: ''
-  };
+  readonly templateModel = signal(emptyTemplateForm());
+  readonly templateForm = form(this.templateModel);
+  readonly broadcastModel = signal(emptyBroadcastForm());
+  readonly broadcastForm = form(this.broadcastModel);
 
   readonly channels = ['IN_APP', 'SMS', 'WHATSAPP', 'EMAIL', 'PUSH'];
   readonly audiences = [
@@ -61,34 +71,34 @@ export class NotificationsPage implements OnInit {
   }
 
   openCreateTemplate() {
-    this.templateForm = { code: '', name: '', title: '', body: '', channel: 'IN_APP', isActive: true };
+    this.templateModel.set(emptyTemplateForm());
     this.error.set('');
     this.modal.set('create');
   }
 
   openEditTemplate(template: any) {
     this.selected.set(template);
-    this.templateForm = {
+    this.templateModel.set({
       code: template.code,
       name: template.name,
       title: template.title,
       body: template.body,
       channel: template.channel,
       isActive: template.isActive !== false
-    };
+    });
     this.error.set('');
     this.modal.set('edit');
   }
 
   openSendBroadcast(template?: any) {
-    this.broadcastForm = {
+    this.broadcastModel.set({
       title: template?.title ?? '',
       body: template?.body ?? '',
       channel: template?.channel ?? 'IN_APP',
       audience: 'ALL_PATIENTS',
       audienceRole: 'PATIENT',
       templateId: template?.id ?? ''
-    };
+    });
     this.error.set('');
     this.modal.set('send');
   }
@@ -96,26 +106,27 @@ export class NotificationsPage implements OnInit {
   closeModal() { this.modal.set(null); }
 
   async saveTemplate() {
-    if (!this.templateForm.name || !this.templateForm.title || !this.templateForm.body) {
+    const form = this.templateModel();
+    if (!form.name || !form.title || !form.body) {
       this.error.set('Name, title, and body are required.');
       return;
     }
     this.saving.set(true);
     try {
       if (this.modal() === 'create') {
-        if (!this.templateForm.code) {
+        if (!form.code) {
           this.error.set('Code is required.');
           return;
         }
-        await this.api.createNotificationTemplate(this.templateForm);
+        await this.api.createNotificationTemplate(form);
         this.showToast('Template created.');
       } else {
         await this.api.updateNotificationTemplate(this.selected()!.id, {
-          name: this.templateForm.name,
-          title: this.templateForm.title,
-          body: this.templateForm.body,
-          channel: this.templateForm.channel,
-          isActive: this.templateForm.isActive
+          name: form.name,
+          title: form.title,
+          body: form.body,
+          channel: form.channel,
+          isActive: form.isActive
         });
         this.showToast('Template updated.');
       }
@@ -129,15 +140,16 @@ export class NotificationsPage implements OnInit {
   }
 
   async sendBroadcast() {
-    if (!this.broadcastForm.title || !this.broadcastForm.body) {
+    const form = this.broadcastModel();
+    if (!form.title || !form.body) {
       this.error.set('Title and body are required.');
       return;
     }
     this.saving.set(true);
     try {
       const result = await this.api.sendNotificationBroadcast({
-        ...this.broadcastForm,
-        templateId: this.broadcastForm.templateId || undefined
+        ...form,
+        templateId: form.templateId || undefined
       });
       this.showToast(`Sent to ${result.recipientCount} recipients.`);
       this.modal.set(null);

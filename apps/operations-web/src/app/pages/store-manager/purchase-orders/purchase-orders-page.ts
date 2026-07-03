@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
 import { StoreApiService } from '../../../services/store-api.service';
 
@@ -14,10 +14,14 @@ type ReceiveLine = {
   sellingPricePerUnit: number;
 };
 
+function emptyReceiveForm() {
+  return { note: '', lines: [] as ReceiveLine[] };
+}
+
 @Component({
   selector: 'app-purchase-orders-page',
   standalone: true,
-  imports: [FormsModule, DatePipe],
+  imports: [FormField, DatePipe],
   templateUrl: './purchase-orders-page.html',
   styleUrl: './purchase-orders-page.scss'
 })
@@ -28,9 +32,10 @@ export class PurchaseOrdersPage implements OnInit {
   error = signal('');
   orders = signal<any[]>([]);
   receivingId = signal<string | null>(null);
-  receiveLines = signal<ReceiveLine[]>([]);
-  note = '';
   toast = signal('');
+
+  readonly receiveFormModel = signal(emptyReceiveForm());
+  readonly receiveForm = form(this.receiveFormModel);
 
   ngOnInit(): void {
     this.load();
@@ -61,9 +66,9 @@ export class PurchaseOrdersPage implements OnInit {
     const expiry = defaultExpiry.toISOString().slice(0, 10);
 
     this.receivingId.set(order.id);
-    this.note = '';
-    this.receiveLines.set(
-      order.lines
+    this.receiveFormModel.set({
+      note: '',
+      lines: order.lines
         .filter((line: any) => line.qtyReceived < line.qtyOrdered)
         .map((line: any) => ({
           purchaseOrderLineId: line.id,
@@ -75,23 +80,23 @@ export class PurchaseOrdersPage implements OnInit {
           purchasePricePerUnit: line.unitPriceInPaise,
           sellingPricePerUnit: Math.round(line.unitPriceInPaise * 1.25)
         }))
-    );
+    });
   }
 
   closeReceive(): void {
     this.receivingId.set(null);
-    this.receiveLines.set([]);
-    this.note = '';
+    this.receiveFormModel.set(emptyReceiveForm());
   }
 
   submitReceive(): void {
     const id = this.receivingId();
     if (!id) return;
-    const lines = this.receiveLines().filter((line) => line.qtyReceived > 0);
+    const form = this.receiveFormModel();
+    const lines = form.lines.filter((line) => line.qtyReceived > 0);
     if (!lines.length) return;
 
     this.api.postPurchaseOrderGrn(id, {
-      note: this.note || undefined,
+      note: form.note || undefined,
       lines: lines.map((line) => ({
         purchaseOrderLineId: line.purchaseOrderLineId,
         qtyReceived: line.qtyReceived,

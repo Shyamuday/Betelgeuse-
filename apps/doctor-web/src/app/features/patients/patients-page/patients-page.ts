@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -45,6 +45,22 @@ type LabReferral = {
   totals: { testCount: number; completedTests: number };
 };
 
+type AdherenceSummary = {
+  patientId: string;
+  days: number;
+  totals: { total: number; taken: number; skipped: number; missed: number; pending: number };
+  adherencePercent: number;
+  trend: Array<{
+    date: string;
+    total: number;
+    taken: number;
+    skipped: number;
+    missed: number;
+    pending: number;
+    adherencePercent: number;
+  }>;
+};
+
 @Component({
   selector: 'app-patients-page',
   imports: [FormsModule, CommonModule, DatePipe, PatientIdCardComponent, RouterLink, PatientHealthProfileComponent],
@@ -57,49 +73,34 @@ export class PatientsPage {
 
   patientSearchQuery = '';
   patientSearchScope: 'auto' | 'clinic' | 'global' = 'auto';
-  patientSearchLoading = false;
-  patientSearchError = '';
-  patientSearchHint = '';
-  patientSearchResults: PatientSearchResult[] = [];
-  selectedPatient: PatientSearchResult | null = null;
-  patientCard: PatientIdCardData | null = null;
-  patientCardLoading = false;
+  readonly patientSearchLoading = signal(false);
+  readonly patientSearchError = signal('');
+  readonly patientSearchHint = signal('');
+  readonly patientSearchResults = signal<PatientSearchResult[]>([]);
+  readonly selectedPatient = signal<PatientSearchResult | null>(null);
+  readonly patientCard = signal<PatientIdCardData | null>(null);
+  readonly patientCardLoading = signal(false);
 
   showCreatePatient = false;
   createPatientName = '';
   createPatientEmail = '';
   createPatientMobile = '';
-  createPatientSaving = false;
-  createPatientError = '';
+  readonly createPatientSaving = signal(false);
+  readonly createPatientError = signal('');
 
   patientId = '';
   days: 7 | 30 = 7;
-  loading = false;
-  error = '';
-  message = '';
-  doseEvents: DoseEvent[] = [];
-  doseEventsLoading = false;
-  doseEventsError = '';
-  patientClinical: PatientClinicalProfile | null = null;
-  labReferrals: LabReferral[] = [];
-  labReferralsLoading = false;
-  labReferralsError = '';
-
-  summary: {
-    patientId: string;
-    days: number;
-    totals: { total: number; taken: number; skipped: number; missed: number; pending: number };
-    adherencePercent: number;
-    trend: Array<{
-      date: string;
-      total: number;
-      taken: number;
-      skipped: number;
-      missed: number;
-      pending: number;
-      adherencePercent: number;
-    }>;
-  } | null = null;
+  readonly loading = signal(false);
+  readonly error = signal('');
+  readonly message = signal('');
+  readonly doseEvents = signal<DoseEvent[]>([]);
+  readonly doseEventsLoading = signal(false);
+  readonly doseEventsError = signal('');
+  readonly patientClinical = signal<PatientClinicalProfile | null>(null);
+  readonly labReferrals = signal<LabReferral[]>([]);
+  readonly labReferralsLoading = signal(false);
+  readonly labReferralsError = signal('');
+  readonly summary = signal<AdherenceSummary | null>(null);
 
   constructor(
     private readonly http: HttpClient,
@@ -107,40 +108,47 @@ export class PatientsPage {
   ) {}
 
   async searchPatients(forceGlobal = false) {
-    this.patientSearchError = '';
-    this.patientSearchHint = '';
-    this.patientSearchResults = [];
-    this.selectedPatient = null;
+    this.patientSearchError.set('');
+    this.patientSearchHint.set('');
+    this.patientSearchResults.set([]);
+    this.selectedPatient.set(null);
     const q = this.patientSearchQuery.trim();
     if (q.length < 2) {
-      this.patientSearchError = 'Enter mobile, email, patient ID, or name (min 2 chars).';
+      this.patientSearchError.set('Enter mobile, email, patient ID, or name (min 2 chars).');
       return;
     }
 
-    this.patientSearchLoading = true;
+    this.patientSearchLoading.set(true);
     try {
       const scope = forceGlobal ? 'global' : this.patientSearchScope;
       const response = await this.patientsApi.searchPatients(q, scope);
-      this.patientSearchResults = response.patients;
-      this.patientSearchHint = response.hint || (response.scopeUsed === 'clinic' ? 'Showing patients from your clinic branch.' : response.scopeUsed === 'global' ? 'Showing patients from all branches.' : '');
-      if (!this.patientSearchResults.length && scope !== 'global') {
-        this.patientSearchHint = 'No patients at your clinic. Try global search.';
+      this.patientSearchResults.set(response.patients);
+      this.patientSearchHint.set(
+        response.hint ||
+          (response.scopeUsed === 'clinic'
+            ? 'Showing patients from your clinic branch.'
+            : response.scopeUsed === 'global'
+              ? 'Showing patients from all branches.'
+              : '')
+      );
+      if (!response.patients.length && scope !== 'global') {
+        this.patientSearchHint.set('No patients at your clinic. Try global search.');
       }
     } catch {
-      this.patientSearchError = 'Could not search patients.';
+      this.patientSearchError.set('Could not search patients.');
     } finally {
-      this.patientSearchLoading = false;
+      this.patientSearchLoading.set(false);
     }
   }
 
   selectPatient(patient: PatientSearchResult) {
-    this.selectedPatient = patient;
+    this.selectedPatient.set(patient);
     this.patientId = patient.id;
-    this.patientClinical = {
+    this.patientClinical.set({
       allergies: patient.allergies,
       currentMedications: patient.currentMedications,
       chronicConditions: patient.chronicConditions
-    };
+    });
     void this.loadPatientCard(patient.id);
     void this.loadTrend();
   }
@@ -149,137 +157,138 @@ export class PatientsPage {
     try {
       const response = await this.patientsApi.getPatient(patientId);
       const patient = response.patient;
-      this.patientClinical = {
+      this.patientClinical.set({
         allergies: patient.allergies,
         currentMedications: patient.currentMedications,
         chronicConditions: patient.chronicConditions
-      };
+      });
     } catch {
-      this.patientClinical = null;
+      this.patientClinical.set(null);
     }
   }
 
   private async loadPatientCard(patientId: string) {
-    this.patientCardLoading = true;
-    this.patientCard = null;
+    this.patientCardLoading.set(true);
+    this.patientCard.set(null);
     try {
       const response = await this.patientsApi.getPatientCard(patientId);
-      this.patientCard = response.card;
+      this.patientCard.set(response.card);
     } catch {
-      if (this.selectedPatient?.patientCode) {
-        this.patientCard = {
-          patientCode: this.selectedPatient.patientCode,
-          name: this.selectedPatient.name,
-          mobile: this.selectedPatient.mobile,
-          email: this.selectedPatient.email,
-          clinic: this.selectedPatient.homeClinicStore ?? null,
+      const selected = this.selectedPatient();
+      if (selected?.patientCode) {
+        this.patientCard.set({
+          patientCode: selected.patientCode,
+          name: selected.name,
+          mobile: selected.mobile,
+          email: selected.email,
+          clinic: selected.homeClinicStore ?? null,
           issuedAt: new Date().toISOString()
-        };
+        });
       }
     } finally {
-      this.patientCardLoading = false;
+      this.patientCardLoading.set(false);
     }
   }
 
   async createPatient() {
-    this.createPatientError = '';
+    this.createPatientError.set('');
     const name = this.createPatientName.trim();
     if (!name) {
-      this.createPatientError = 'Name is required.';
+      this.createPatientError.set('Name is required.');
       return;
     }
-    this.createPatientSaving = true;
+    this.createPatientSaving.set(true);
     try {
       const response = await this.patientsApi.createPatient({
         name,
         email: this.createPatientEmail.trim() || undefined,
         mobile: this.createPatientMobile.trim() || undefined
       });
-      this.message = `Patient created: ${response.patient.patientCode || response.patient.id}`;
+      this.message.set(`Patient created: ${response.patient.patientCode || response.patient.id}`);
       this.showCreatePatient = false;
       this.createPatientName = '';
       this.createPatientEmail = '';
       this.createPatientMobile = '';
-      this.patientSearchResults = [response.patient];
+      this.patientSearchResults.set([response.patient]);
       this.selectPatient(response.patient);
       if (response.patient.patientCode) {
-        this.patientCard = {
+        this.patientCard.set({
           patientCode: response.patient.patientCode,
           name: response.patient.name,
           mobile: response.patient.mobile,
           email: response.patient.email,
           clinic: response.patient.homeClinicStore ?? null,
           issuedAt: new Date().toISOString()
-        };
+        });
       }
     } catch {
-      this.createPatientError = 'Could not create patient. Check email is not already used.';
+      this.createPatientError.set('Could not create patient. Check email is not already used.');
     } finally {
-      this.createPatientSaving = false;
+      this.createPatientSaving.set(false);
     }
   }
 
   async loadTrend() {
-    this.error = '';
-    this.message = '';
-    this.summary = null;
-    this.doseEvents = [];
-    this.labReferrals = [];
-    this.labReferralsError = '';
+    this.error.set('');
+    this.message.set('');
+    this.summary.set(null);
+    this.doseEvents.set([]);
+    this.labReferrals.set([]);
+    this.labReferralsError.set('');
     const id = this.patientId.trim();
     if (!id) {
-      this.error = 'Select or enter a patient.';
+      this.error.set('Select or enter a patient.');
       return;
     }
 
-    this.loading = true;
-    this.doseEventsLoading = true;
-    this.doseEventsError = '';
+    this.loading.set(true);
+    this.doseEventsLoading.set(true);
+    this.doseEventsError.set('');
     void this.loadPatientClinical(id);
 
     const params = { days: String(this.days) };
 
     const [trendResult, eventsResult] = await Promise.allSettled([
       firstValueFrom(
-        this.http.get<PatientsPage['summary']>(`${this.apiBase}${API_PATHS.PATIENTS.ADHERENCE_TREND(id)}`, { params })
+        this.http.get<AdherenceSummary>(`${this.apiBase}${API_PATHS.PATIENTS.ADHERENCE_TREND(id)}`, { params })
       ),
       firstValueFrom(
         this.http.get<{ events: DoseEvent[] }>(`${this.apiBase}${API_PATHS.PATIENTS.DOSE_EVENTS(id)}`, { params })
       )
     ]);
 
-    this.loading = false;
-    this.doseEventsLoading = false;
+    this.loading.set(false);
+    this.doseEventsLoading.set(false);
 
     if (trendResult.status === 'fulfilled') {
-      this.summary = trendResult.value;
-      this.message = `Loaded ${this.days}-day adherence trend.`;
+      this.summary.set(trendResult.value);
+      this.message.set(`Loaded ${this.days}-day adherence trend.`);
     } else {
-      this.error = 'Could not load adherence trend for this patient.';
+      this.error.set('Could not load adherence trend for this patient.');
     }
 
     if (eventsResult.status === 'fulfilled') {
-      this.doseEvents = eventsResult.value.events || [];
+      this.doseEvents.set(eventsResult.value.events || []);
     } else {
-      this.doseEventsError = 'Could not load dose notes.';
+      this.doseEventsError.set('Could not load dose notes.');
     }
 
     void this.loadLabReferrals(id);
   }
 
   private async loadLabReferrals(patientId: string) {
-    this.labReferralsLoading = true;
-    this.labReferralsError = '';
-    this.labReferrals = [];
+    this.labReferralsLoading.set(true);
+    this.labReferralsError.set('');
+    this.labReferrals.set([]);
     try {
       const response = await firstValueFrom(
         this.http.get<{ referrals: LabReferral[] }>(`${this.apiBase}${API_PATHS.PATIENTS.LAB_REFERRALS(patientId)}`)
       );
-      this.labReferrals = response.referrals || [];
+      this.labReferrals.set(response.referrals || []);
     } catch {
-      this.labReferralsError = 'Could not load lab referrals.';
+      this.labReferralsError.set('Could not load lab referrals.');
     } finally {
-      this.labReferralsLoading = false;
+      this.labReferralsLoading.set(false);
     }
   }
 

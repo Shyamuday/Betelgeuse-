@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../../../core/services/admin-api';
 import { CURRENCY_CODE, CURRENCY_LOCALE, PAISE_PER_RUPEE } from '../../../shared/constants/currency.constants';
@@ -20,20 +20,20 @@ type Disease = {
   styleUrl: './diseases-page.scss'
 })
 export class DiseasesPage {
-  diseases: Disease[] = [];
-  loading = false;
-  error = '';
+  readonly diseases = signal<Disease[]>([]);
+  readonly loading = signal(false);
+  readonly error = signal('');
 
   editingId = '';
   draft: { name: string; description: string; feeInPaise: number; isActive: boolean; intakeQuestions: string[] } = this.emptyDraft();
   draftNewQuestion = '';
-  saving = false;
+  readonly saving = signal(false);
   saveError = '';
 
   showCreateForm = false;
   newDisease: { name: string; description: string; feeInPaise: number; intakeQuestions: string[] } = this.emptyNew();
   newDiseaseQuestion = '';
-  creating = false;
+  readonly creating = signal(false);
   createError = '';
 
   constructor(private readonly api: AdminApi) {
@@ -49,15 +49,15 @@ export class DiseasesPage {
   }
 
   async load() {
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
     try {
       const res = await this.api.getDiseases();
-      this.diseases = res.diseases || [];
+      this.diseases.set(res.diseases || []);
     } catch {
-      this.error = 'Could not load diseases.';
+      this.error.set('Could not load diseases.');
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 
@@ -94,7 +94,7 @@ export class DiseasesPage {
 
   async saveEdit() {
     if (!this.editingId || !this.draft.name || !this.draft.description || !this.draft.feeInPaise) return;
-    this.saving = true;
+    this.saving.set(true);
     this.saveError = '';
     try {
       await this.api.updateDisease(this.editingId, {
@@ -106,7 +106,7 @@ export class DiseasesPage {
     } catch {
       this.saveError = 'Could not save. Please try again.';
     } finally {
-      this.saving = false;
+      this.saving.set(false);
     }
   }
 
@@ -126,7 +126,7 @@ export class DiseasesPage {
       this.createError = 'Fill all fields and add at least one intake question.';
       return;
     }
-    this.creating = true;
+    this.creating.set(true);
     this.createError = '';
     try {
       await this.api.createDisease({
@@ -140,7 +140,7 @@ export class DiseasesPage {
     } catch {
       this.createError = 'Could not create disease. Please try again.';
     } finally {
-      this.creating = false;
+      this.creating.set(false);
     }
   }
 

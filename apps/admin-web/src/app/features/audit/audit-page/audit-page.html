@@ -24,24 +24,24 @@
         <option [value]="option.value">{{ option.label }}</option>
       }
     </select>
-    <button type="button" (click)="applyFilters()" [disabled]="loading">Search</button>
-    <button type="button" class="ghost" (click)="clearFilters()" [disabled]="loading">Clear</button>
-    <button type="button" class="ghost" (click)="exportCsv()" [disabled]="exporting || loading">
-      {{ exporting ? 'Exporting…' : 'Export CSV' }}
+    <button type="button" (click)="applyFilters()" [disabled]="loading()">Search</button>
+    <button type="button" class="ghost" (click)="clearFilters()" [disabled]="loading()">Clear</button>
+    <button type="button" class="ghost" (click)="exportCsv()" [disabled]="exporting() || loading()">
+      {{ exporting() ? 'Exporting…' : 'Export CSV' }}
     </button>
   </div>
 
-  <small class="muted">{{ total }} entr{{ total === 1 ? 'y' : 'ies' }}</small>
+  <small class="muted">{{ total() }} entr{{ total() === 1 ? 'y' : 'ies' }}</small>
 
-  @if (loading) {
+  @if (loading()) {
     <p class="loading-text">Loading audit trail...</p>
-  } @else if (error) {
+  } @else if (error()) {
     <div class="error-row">
-      <p class="error">{{ error }}</p>
+      <p class="error">{{ error() }}</p>
       <button type="button" class="retry-btn" (click)="load()">Retry</button>
     </div>
   } @else {
-    @for (log of logs; track log.id) {
+    @for (log of logs(); track log.id) {
       <article class="card audit-card">
         <div class="card-head">
           <div>
@@ -67,13 +67,13 @@
       <p class="empty-state">No audit entries match your filters.</p>
     }
 
-    @if (totalPages > 1) {
+    @if (totalPages() > 1) {
       <div class="pagination">
-        <button type="button" class="ghost" [disabled]="page === 1 || loading" (click)="load(page - 1)">Previous</button>
+        <button type="button" class="ghost" [disabled]="page === 1 || loading()" (click)="load(page - 1)">Previous</button>
         @for (p of pages(); track p) {
           <button type="button" [class.active]="page === p" (click)="load(p)">{{ p }}</button>
         }
-        <button type="button" class="ghost" [disabled]="page === totalPages || loading" (click)="load(page + 1)">Next</button>
+        <button type="button" class="ghost" [disabled]="page === totalPages() || loading()" (click)="load(page + 1)">Next</button>
       </div>
     }
   }

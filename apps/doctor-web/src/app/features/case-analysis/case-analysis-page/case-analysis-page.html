@@ -14,11 +14,11 @@
     }
   </header>
 
-  @if (error) {
-    <div class="alert alert-error">{{ error }}</div>
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
   }
-  @if (message) {
-    <div class="alert alert-success">{{ message }}</div>
+  @if (message()) {
+    <div class="alert alert-success">{{ message() }}</div>
   }
 
   @if (!consultationId) {
@@ -27,12 +27,12 @@
       <p class="muted">Go to your worklist and choose <strong>Case analysis</strong> on a case.</p>
       <a class="btn-primary" [routerLink]="['/', worklistPath]">Go to worklist</a>
     </section>
-  } @else if (loading) {
+  } @else if (loading()) {
     <section class="panel loading-panel">
       <p>Loading case analysis…</p>
     </section>
-  } @else if (analysis) {
-    @if (consultation) {
+  } @else if (analysis(); as analysis) {
+    @if (consultation(); as consultation) {
       <section class="patient-banner">
         <div>
           <strong>{{ consultation.patient?.name || 'Patient' }}</strong>
@@ -48,7 +48,7 @@
     }
 
     <div class="steps">
-      <span class="step" [class.done]="selectedRubrics.length > 0">1. Symptoms</span>
+      <span class="step" [class.done]="selectedRubrics().length > 0">1. Symptoms</span>
       <span class="step" [class.done]="analysis.results.length > 0">2. Repertorize</span>
       <span class="step" [class.done]="!!analysis.selectedRemedy">3. Remedy</span>
     </div>
@@ -58,9 +58,9 @@
         <section class="panel">
           <div class="panel-title-row">
             <h3>Symptom search</h3>
-            @if (sources.length) {
+            @if (sources().length) {
               <select class="source-select" name="repertorySource" [(ngModel)]="selectedSourceId">
-                @for (source of sources; track source.id) {
+                @for (source of sources(); track source.id) {
                   <option [value]="source.id">
                     {{ source.name }}@if (source.rubricCount) { · {{ source.rubricCount | number }} rubrics }
                   </option>
@@ -76,20 +76,20 @@
               placeholder="e.g. anxiety morning, nausea, grief suppressed"
               (keyup.enter)="searchRubrics()"
             />
-            <button type="button" class="btn-primary" (click)="searchRubrics()" [disabled]="searching || rubricQuery.trim().length < 2">
-              {{ searching ? 'Searching…' : 'Search' }}
+            <button type="button" class="btn-primary" (click)="searchRubrics()" [disabled]="searching() || rubricQuery.trim().length < 2">
+              {{ searching() ? 'Searching…' : 'Search' }}
             </button>
           </div>
 
-          @if (searching) {
+          @if (searching()) {
             <p class="hint">Searching repertory…</p>
-          } @else if (rubricQuery.trim().length >= 2 && !searchResults.length && searchedOnce) {
+          } @else if (rubricQuery.trim().length >= 2 && !searchResults().length && searchedOnce()) {
             <p class="hint">No rubrics found. Try fewer or different keywords.</p>
           }
 
-          @if (searchResults.length) {
+          @if (searchResults().length) {
             <div class="result-list">
-              @for (rubric of searchResults; track rubric.id) {
+              @for (rubric of searchResults(); track rubric.id) {
                 <article class="rubric-result" [class.added]="hasRubric(rubric.id)">
                   <div class="rubric-body">
                     <nav class="rubric-path" aria-label="Rubric location">
@@ -128,15 +128,15 @@
 
         <section class="panel">
           <div class="panel-title-row">
-            <h3>Case rubrics <span class="count-pill">{{ selectedRubrics.length }}</span></h3>
-            <button type="button" class="btn-secondary btn-sm" (click)="saveRubrics()" [disabled]="saving || !selectedRubrics.length">
+            <h3>Case rubrics <span class="count-pill">{{ selectedRubrics().length }}</span></h3>
+            <button type="button" class="btn-secondary btn-sm" (click)="saveRubrics()" [disabled]="saving() || !selectedRubrics().length">
               Save
             </button>
           </div>
 
-          @if (selectedRubrics.length) {
+          @if (selectedRubrics().length) {
             <div class="selected-list">
-              @for (item of selectedRubrics; track item.rubricId) {
+              @for (item of selectedRubrics(); track item.rubricId) {
                 <article class="selected-item">
                   <div>
                     @if (item.rubric) {
@@ -173,9 +173,9 @@
               type="button"
               class="btn-primary btn-block"
               (click)="runRepertorization()"
-              [disabled]="repertorizing"
+              [disabled]="repertorizing()"
             >
-              {{ repertorizing ? 'Repertorizing…' : 'Repertorize case' }}
+              {{ repertorizing() ? 'Repertorizing…' : 'Repertorize case' }}
             </button>
           } @else {
             <p class="hint">Search and add symptoms that match the patient. Assign weight 1–4 by importance.</p>
@@ -190,7 +190,7 @@
             rows="4"
             placeholder="Key observations, modalities, mentals, or follow-up thoughts…"
           ></textarea>
-          <button type="button" class="btn-secondary btn-sm" (click)="saveNotes()" [disabled]="saving">Save notes</button>
+          <button type="button" class="btn-secondary btn-sm" (click)="saveNotes()" [disabled]="saving()">Save notes</button>
         </section>
       </div>
 
@@ -225,7 +225,7 @@
                     type="button"
                     class="btn-select"
                     (click)="chooseRemedy(result.remedy)"
-                    [disabled]="selectingRemedyId === result.remedy.id"
+                    [disabled]="selectingRemedyId() === result.remedy.id"
                   >
                     {{ analysis.selectedRemedy?.id === result.remedy.id ? 'Selected' : 'Select' }}
                   </button>
@@ -252,7 +252,7 @@
           }
         </section>
 
-        @if (focusedRemedy) {
+        @if (focusedRemedy(); as focusedRemedy) {
           <section class="panel mm-panel">
             <div class="panel-title-row">
               <div>
@@ -265,11 +265,11 @@
               <button type="button" class="btn-icon mm-close" (click)="clearFocusedRemedy()" title="Close panel">×</button>
             </div>
 
-            @if (loadingMateriaMedica) {
+            @if (loadingMateriaMedica()) {
               <p class="hint">Loading remedy profile…</p>
-            } @else if (materiaMedicaError) {
-              <p class="hint mm-error">{{ materiaMedicaError }}</p>
-            } @else if (materiaMedica) {
+            } @else if (materiaMedicaError()) {
+              <p class="hint mm-error">{{ materiaMedicaError() }}</p>
+            } @else if (materiaMedica(); as materiaMedica) {
               @if (materiaMedica.source) {
                 <p class="mm-source muted">
                   {{ materiaMedica.source.name }}

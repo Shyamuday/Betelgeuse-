@@ -37,6 +37,46 @@ export interface QueueConsultation {
   payment?: { status: string; amountInPaise: number } | null;
 }
 
+export interface QueueSummary {
+  total: number;
+  awaitingPayment: number;
+  awaitingDoctor: number;
+  inProgress: number;
+}
+
+export interface QueueData {
+  consultations: QueueConsultation[];
+  summary: QueueSummary;
+}
+
+export interface RosterRow {
+  id: string;
+  name: string;
+  shift: string;
+  employeeStatus: string;
+  attendance: string;
+}
+
+export interface RosterData {
+  summary: { total: number; onLeave: number; expected: number };
+  doctors: RosterRow[];
+  storeStaff: RosterRow[];
+}
+
+export interface CallCenterConsultation {
+  id: string;
+  status: string;
+  createdAt: string;
+  patient?: { id: string; name: string; mobile?: string; patientCode?: string };
+  disease?: { name: string };
+  assignedDoctor?: { name: string };
+  clinicStore?: { name: string; code?: string };
+}
+
+export interface RecentConsultationsData {
+  consultations: CallCenterConsultation[];
+}
+
 export interface Employee {
   id: string;
   empType: EmpType;

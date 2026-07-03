@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
 import { StoreApiService } from '../../../services/store-api.service';
 import {
@@ -11,7 +11,7 @@ import {
 
 @Component({
   selector: 'app-store-expenses-page',
-  imports: [FormsModule, DatePipe],
+  imports: [FormField, DatePipe],
   templateUrl: './store-expenses-page.html',
   styleUrl: './store-expenses-page.scss'
 })
@@ -22,9 +22,13 @@ export class StoreExpensesPage implements OnInit {
   loading = signal(true);
   saving = signal(false);
   showForm = signal(false);
-  categoryFilter = '';
-  form = { ...EMPTY_STORE_EXPENSE };
   toast = signal('');
+
+  readonly filterModel = signal({ categoryFilter: '' });
+  readonly filterForm = form(this.filterModel);
+
+  readonly expenseFormModel = signal({ ...EMPTY_STORE_EXPENSE });
+  readonly expenseForm = form(this.expenseFormModel);
 
   readonly categories = EXPENSE_CATEGORIES;
   readonly categoryLabels = EXPENSE_CATEGORY_LABELS;
@@ -36,7 +40,7 @@ export class StoreExpensesPage implements OnInit {
 
   load(): void {
     this.loading.set(true);
-    this.api.getStoreExpenses(this.categoryFilter || undefined).subscribe({
+    this.api.getStoreExpenses(this.filterModel().categoryFilter || undefined).subscribe({
       next: (res) => {
         this.expenses.set(res.expenses);
         this.loading.set(false);
@@ -46,15 +50,16 @@ export class StoreExpensesPage implements OnInit {
   }
 
   openForm(): void {
-    this.form = { ...EMPTY_STORE_EXPENSE };
+    this.expenseFormModel.set({ ...EMPTY_STORE_EXPENSE });
     this.showForm.set(true);
   }
 
   submit(): void {
-    const amountInPaise = Math.round(Number(this.form.amountInPaise));
-    if (!this.form.description || !amountInPaise) return;
+    const form = this.expenseFormModel();
+    const amountInPaise = Math.round(Number(form.amountInPaise));
+    if (!form.description || !amountInPaise) return;
     this.saving.set(true);
-    this.api.createStoreExpense({ ...this.form, amountInPaise }).subscribe({
+    this.api.createStoreExpense({ ...form, amountInPaise }).subscribe({
       next: () => {
         this.saving.set(false);
         this.showForm.set(false);

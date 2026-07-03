@@ -4,7 +4,7 @@
       <h2>Front desk queue</h2>
       <p>Walk-ins and bookings for your clinic branch</p>
     </div>
-    <button type="button" class="btn-refresh" (click)="load()" [disabled]="loading()">Refresh</button>
+    <button type="button" class="btn-refresh" (click)="reload()" [disabled]="loading()">Refresh</button>
   </div>
 
   <div class="summary">
@@ -16,12 +16,12 @@
 
   <div class="filters">
     @for (f of statusFilters; track f.value) {
-      <button type="button" class="ftab" [class.active]="statusFilter === f.value" (click)="statusFilter = f.value; load()">
+      <button type="button" class="ftab" [class.active]="statusFilter() === f.value" (click)="statusFilter.set(f.value)">
         {{ f.label }}
       </button>
     }
-    <input class="search" [(ngModel)]="q" (keyup.enter)="load()" placeholder="Search patient, mobile, ID…" />
-    <button type="button" class="btn-apply" (click)="load()">Search</button>
+    <input class="search" [(ngModel)]="searchInput" (keyup.enter)="applySearch()" placeholder="Search patient, mobile, ID…" />
+    <button type="button" class="btn-apply" (click)="applySearch()">Search</button>
   </div>
 
   @if (loading()) {
@@ -29,7 +29,7 @@
   } @else if (error()) {
     <div class="error-row">
       <p class="error">{{ error() }}</p>
-      <button type="button" class="retry-btn" (click)="load()">Retry</button>
+      <button type="button" class="retry-btn" (click)="reload()">Retry</button>
     </div>
   } @else if (!consultations().length) {
     <p class="empty-state">No consultations in this queue view.</p>

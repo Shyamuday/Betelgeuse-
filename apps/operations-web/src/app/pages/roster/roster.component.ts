@@ -1,6 +1,9 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ClinicManagerApiService } from '../../services/clinic-manager-api.service';
+import { httpResource } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { API_PATHS } from '../../core/constants/api-paths.constants';
+import { RosterData } from '../../models';
 
 @Component({
   selector: 'app-roster',
@@ -9,30 +12,20 @@ import { ClinicManagerApiService } from '../../services/clinic-manager-api.servi
   templateUrl: './roster.component.html',
   styleUrl: './roster.component.scss'
 })
-export class RosterComponent implements OnInit {
-  private api = inject(ClinicManagerApiService);
+export class RosterComponent {
+  readonly date = signal(new Date().toISOString().slice(0, 10));
 
-  loading = signal(true);
-  error = signal('');
-  roster = signal<any>(null);
-  date = new Date().toISOString().slice(0, 10);
+  readonly rosterResource = httpResource<RosterData>(() => ({
+    url: `${environment.apiUrl}${API_PATHS.CLINIC_MANAGER.ROSTER}`,
+    params: { date: this.date() }
+  }));
 
-  ngOnInit(): void {
-    this.load();
-  }
+  loading = () => this.rosterResource.isLoading();
+  error = () => (this.rosterResource.status() === 'error' ? 'Could not load roster.' : '');
+  roster = () => (this.rosterResource.hasValue() ? this.rosterResource.value() : null);
 
-  load(): void {
-    this.loading.set(true);
-    this.error.set('');
-    this.api.getRoster(this.date)
-      .then((res) => {
-        this.roster.set(res);
-        this.loading.set(false);
-      })
-      .catch(() => {
-        this.error.set('Could not load roster.');
-        this.loading.set(false);
-      });
+  reload(): void {
+    this.rosterResource.reload();
   }
 
   attendanceLabel(code: string): string {

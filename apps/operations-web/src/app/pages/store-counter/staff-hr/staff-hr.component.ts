@@ -1,14 +1,76 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { StoreApiService } from '../../../services/store-api.service';
-import { StaffHrProfile, JoiningLetterDoc, WorkShift, EmployeeStatus } from '../../../store-models';
+import { StaffHrProfile, JoiningLetterDoc } from '../../../models/store';
+import { WorkShift, EmployeeStatus } from '../../../models';
 import { STORE_STAFF_ROLES } from '../../../core/constants/store/auth.constants';
 import { EMPLOYEE_STATUS_STYLES, SHIFT_LABELS, WEEK_DAYS } from '../../../shared/store/constants/hr.constants';
 
+type ProfileFormFields = {
+  employeeId: string;
+  employeeStatus: EmployeeStatus;
+  designation: string;
+  department: string;
+  joiningDate: string;
+  probationEndDate: string;
+  salaryDisplay: number;
+  workShift: WorkShift;
+  shiftStart: string;
+  shiftEnd: string;
+  weeklyOffDays: string[];
+  phone: string;
+  email: string;
+  address: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+};
+
+function emptyProfileForm(): ProfileFormFields {
+  return {
+    employeeId: '',
+    employeeStatus: 'ACTIVE',
+    designation: '',
+    department: '',
+    joiningDate: '',
+    probationEndDate: '',
+    salaryDisplay: 0,
+    workShift: 'MORNING',
+    shiftStart: '',
+    shiftEnd: '',
+    weeklyOffDays: [],
+    phone: '',
+    email: '',
+    address: '',
+    emergencyContact: '',
+    emergencyPhone: ''
+  };
+}
+
+function profileFromStaff(s: StaffHrProfile): ProfileFormFields {
+  return {
+    employeeId: s.employeeId ?? '',
+    employeeStatus: s.employeeStatus,
+    designation: s.designation ?? '',
+    department: s.department ?? '',
+    joiningDate: s.joiningDate ?? '',
+    probationEndDate: s.probationEndDate ?? '',
+    salaryDisplay: s.salaryPerMonth ? s.salaryPerMonth / 100 : 0,
+    workShift: s.workShift,
+    shiftStart: s.shiftStart ?? '',
+    shiftEnd: s.shiftEnd ?? '',
+    weeklyOffDays: [...(s.weeklyOffDays ?? [])],
+    phone: s.phone ?? '',
+    email: s.email ?? '',
+    address: s.address ?? '',
+    emergencyContact: s.emergencyContact ?? '',
+    emergencyPhone: s.emergencyPhone ?? ''
+  };
+}
+
 @Component({
   selector: 'app-staff-hr',
-  imports: [FormsModule, DatePipe, NgTemplateOutlet],
+  imports: [FormField, DatePipe, NgTemplateOutlet],
   templateUrl: './staff-hr.component.html',
   styleUrl: './staff-hr.component.scss'
 })
@@ -26,8 +88,8 @@ export class StaffHrComponent implements OnInit {
   letter = signal<JoiningLetterDoc | null>(null);
   letterLoading = signal(false);
 
-  form: Partial<StaffHrProfile> & { salaryDisplay?: number } = {};
-  salaryDisplay = 0;
+  readonly profileFormModel = signal<ProfileFormFields>(emptyProfileForm());
+  readonly profileForm = form(this.profileFormModel);
 
   shifts = Object.entries(SHIFT_LABELS).map(([value, label]) => ({ value: value as WorkShift, label }));
   days = WEEK_DAYS;
@@ -46,8 +108,7 @@ export class StaffHrComponent implements OnInit {
     this.selected.set(s);
     this.letter.set(s.joiningLetter ?? null);
     this.tab.set('profile');
-    this.form = { ...s };
-    this.salaryDisplay = s.salaryPerMonth ? s.salaryPerMonth / 100 : 0;
+    this.profileFormModel.set(profileFromStaff(s));
     this.profileOpen.set(true);
   }
 
@@ -67,7 +128,12 @@ export class StaffHrComponent implements OnInit {
   saveProfile(): void {
     if (!this.selected()) return;
     this.saving.set(true);
-    const payload = { ...this.form, salaryPerMonth: this.salaryDisplay * 100 };
+    const form = this.profileFormModel();
+    const payload = {
+      ...form,
+      salaryPerMonth: form.salaryDisplay * 100
+    };
+    delete (payload as { salaryDisplay?: number }).salaryDisplay;
     this.api.updateHrStaff(this.selected()!.id, payload).subscribe({
       next: (r) => {
         this.staff.update(list => list.map(s => s.id === r.staff.id ? { ...s, ...r.staff } : s));
@@ -96,9 +162,22 @@ export class StaffHrComponent implements OnInit {
 
   shiftLabel(s: WorkShift): string { return SHIFT_LABELS[s] ?? s; }
   statusColor(s: EmployeeStatus): string { return EMPLOYEE_STATUS_STYLES[s]?.color ?? '#94a3b8'; }
-  isOffDay(d: string): boolean { return (this.form.weeklyOffDays ?? []).includes(d); }
+
+  isOffDay(d: string): boolean {
+    return (this.profileFormModel().weeklyOffDays ?? []).includes(d);
+  }
+
   toggleOffDay(d: string): void {
-    const current = this.form.weeklyOffDays ?? [];
-    this.form.weeklyOffDays = current.includes(d) ? current.filter(x => x !== d) : [...current, d];
+    this.profileFormModel.update((form) => {
+      const current = form.weeklyOffDays ?? [];
+      return {
+        ...form,
+        weeklyOffDays: current.includes(d) ? current.filter(x => x !== d) : [...current, d]
+      };
+    });
+  }
+
+  setWorkShift(value: WorkShift): void {
+    this.profileFormModel.update((form) => ({ ...form, workShift: value }));
   }
 }

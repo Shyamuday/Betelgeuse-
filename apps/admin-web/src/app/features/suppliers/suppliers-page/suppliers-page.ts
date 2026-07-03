@@ -1,11 +1,15 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { AdminApi } from '../../../core/services/admin-api';
 import { TOAST_DURATION_MS } from '../../../core/constants/timing.constants';
 
+function emptySupplierForm() {
+  return { code: '', name: '', email: '', phone: '', address: '', gstin: '', isActive: true };
+}
+
 @Component({
   selector: 'app-suppliers-page',
-  imports: [FormsModule],
+  imports: [FormField],
   templateUrl: './suppliers-page.html',
   styleUrl: './suppliers-page.scss'
 })
@@ -19,7 +23,9 @@ export class SuppliersPage implements OnInit {
   selected = signal<any>(null);
   error = signal('');
   toast = signal('');
-  form = { code: '', name: '', email: '', phone: '', address: '', gstin: '', isActive: true };
+
+  readonly draftModel = signal(emptySupplierForm());
+  readonly draftForm = form(this.draftModel);
 
   ngOnInit(): void { void this.load(); }
 
@@ -36,14 +42,14 @@ export class SuppliersPage implements OnInit {
   }
 
   openCreate() {
-    this.form = { code: '', name: '', email: '', phone: '', address: '', gstin: '', isActive: true };
+    this.draftModel.set(emptySupplierForm());
     this.error.set('');
     this.modal.set('create');
   }
 
   openEdit(supplier: any) {
     this.selected.set(supplier);
-    this.form = {
+    this.draftModel.set({
       code: supplier.code,
       name: supplier.name,
       email: supplier.email || '',
@@ -51,7 +57,7 @@ export class SuppliersPage implements OnInit {
       address: supplier.address || '',
       gstin: supplier.gstin || '',
       isActive: supplier.isActive !== false
-    };
+    });
     this.error.set('');
     this.modal.set('edit');
   }
@@ -59,23 +65,24 @@ export class SuppliersPage implements OnInit {
   closeModal() { this.modal.set(null); }
 
   async save() {
-    if (!this.form.name || (!this.form.code && this.modal() === 'create')) {
+    const form = this.draftModel();
+    if (!form.name || (!form.code && this.modal() === 'create')) {
       this.error.set('Code and name are required.');
       return;
     }
     this.saving.set(true);
     try {
       if (this.modal() === 'create') {
-        await this.api.createSupplier(this.form);
+        await this.api.createSupplier(form);
         this.showToast('Supplier created.');
       } else {
         await this.api.updateSupplier(this.selected()!.id, {
-          name: this.form.name,
-          email: this.form.email,
-          phone: this.form.phone,
-          address: this.form.address,
-          gstin: this.form.gstin,
-          isActive: this.form.isActive
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+          gstin: form.gstin,
+          isActive: form.isActive
         });
         this.showToast('Supplier updated.');
       }

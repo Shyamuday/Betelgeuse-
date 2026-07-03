@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AdminApi } from '../../../core/services/admin-api';
@@ -35,17 +35,17 @@ export class AuditPage {
   readonly formatAuditAction = formatAuditAction;
   readonly doctorsPath = adminNavPath(ROUTE_PATHS.DOCTORS);
 
-  logs: AuditLog[] = [];
+  readonly logs = signal<AuditLog[]>([]);
   page = 1;
-  totalPages = 1;
-  total = 0;
+  readonly totalPages = signal(1);
+  readonly total = signal(0);
   searchTerm = '';
   actionFilter = '';
   targetTypeFilter = '';
-  loading = false;
-  error = '';
+  readonly loading = signal(false);
+  readonly error = signal('');
   expandedLogId = '';
-  exporting = false;
+  readonly exporting = signal(false);
 
   constructor(private readonly api: AdminApi) {
     void this.load();
@@ -53,8 +53,8 @@ export class AuditPage {
 
   async load(page = this.page) {
     this.page = page;
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
     try {
       const response = await this.api.getAuditLogs({
         page,
@@ -63,14 +63,14 @@ export class AuditPage {
         action: this.actionFilter,
         targetType: this.targetTypeFilter
       });
-      this.logs = response.logs || [];
-      this.totalPages = response.pagination?.totalPages || 1;
-      this.total = response.pagination?.total || 0;
+      this.logs.set(response.logs || []);
+      this.totalPages.set(response.pagination?.totalPages || 1);
+      this.total.set(response.pagination?.total || 0);
     } catch {
-      this.error = 'Could not load audit trail.';
-      this.logs = [];
+      this.error.set('Could not load audit trail.');
+      this.logs.set([]);
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 
@@ -86,7 +86,7 @@ export class AuditPage {
   }
 
   pages() {
-    return Array.from({ length: this.totalPages }, (_, index) => index + 1);
+    return Array.from({ length: this.totalPages() }, (_, index) => index + 1);
   }
 
   actorLabel(log: AuditLog) {
@@ -112,7 +112,7 @@ export class AuditPage {
   }
 
   async exportCsv() {
-    this.exporting = true;
+    this.exporting.set(true);
     try {
       const csv = await this.api.exportAuditCsv({
         q: this.searchTerm,
@@ -127,9 +127,9 @@ export class AuditPage {
       link.click();
       URL.revokeObjectURL(url);
     } catch {
-      this.error = 'Could not export audit CSV.';
+      this.error.set('Could not export audit CSV.');
     } finally {
-      this.exporting = false;
+      this.exporting.set(false);
     }
   }
 }

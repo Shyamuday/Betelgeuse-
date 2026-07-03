@@ -1,12 +1,22 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { AdminApi } from '../../../core/services/admin-api';
 import { TOAST_DURATION_LONG_MS } from '../../../core/constants/timing.constants';
 import { HR_USER_DEFAULTS } from '../constants/hr-user-form.constants';
 
+function emptyCreateForm() {
+  return {
+    name: '',
+    email: '',
+    password: '',
+    designation: HR_USER_DEFAULTS.DESIGNATION,
+    department: HR_USER_DEFAULTS.DEPARTMENT
+  };
+}
+
 @Component({
   selector: 'app-hr-users',
-  imports: [FormsModule],
+  imports: [FormField],
   templateUrl: './hr-users.html',
   styleUrl: './hr-users.scss'
 })
@@ -25,13 +35,8 @@ export class HrUsersComponent implements OnInit {
   error = signal('');
   toast = signal('');
 
-  createForm = {
-    name: '',
-    email: '',
-    password: '',
-    designation: HR_USER_DEFAULTS.DESIGNATION,
-    department: HR_USER_DEFAULTS.DEPARTMENT
-  };
+  readonly createModel = signal(emptyCreateForm());
+  readonly createForm = form(this.createModel);
 
   ngOnInit(): void { this.load(); }
 
@@ -39,7 +44,6 @@ export class HrUsersComponent implements OnInit {
     this.loading.set(true);
     try {
       const r = await this.api.getHrUsers();
-      // Load store access for each HR user
       const hrWithAccess = await Promise.all(
         (r.hrUsers as any[]).map(async (u: any) => {
           try {
@@ -53,13 +57,7 @@ export class HrUsersComponent implements OnInit {
   }
 
   openCreate(): void {
-    this.createForm = {
-      name: '',
-      email: '',
-      password: '',
-      designation: HR_USER_DEFAULTS.DESIGNATION,
-      department: HR_USER_DEFAULTS.DEPARTMENT
-    };
+    this.createModel.set(emptyCreateForm());
     this.error.set('');
     this.modal.set('create');
   }
@@ -75,14 +73,15 @@ export class HrUsersComponent implements OnInit {
   closeModal(): void { this.modal.set(null); this.error.set(''); }
 
   async createHr() {
-    if (!this.createForm.name || !this.createForm.email || !this.createForm.password) {
+    const form = this.createModel();
+    if (!form.name || !form.email || !form.password) {
       this.error.set('Name, email and password are required'); return;
     }
     this.saving.set(true);
     try {
-      await this.api.createHrUser(this.createForm);
+      await this.api.createHrUser(form);
       this.modal.set(null);
-      this.showToast(`HR Manager "${this.createForm.name}" created`);
+      this.showToast(`HR Manager "${form.name}" created`);
       this.load();
     } catch (e: any) {
       this.error.set(e?.error?.error ?? 'Failed to create HR user');
@@ -94,7 +93,6 @@ export class HrUsersComponent implements OnInit {
     if (!hr) return;
     await this.api.grantHrStoreAccess(hr.id, storeId);
     this.assignedStoreIds.update(set => new Set([...set, storeId]));
-    // Update local list
     const store = this.allStores().find(s => s.id === storeId);
     this.hrUsers.update(list => list.map(u =>
       u.id === hr.id ? { ...u, storeAccess: [...(u.storeAccess ?? []), store] } : u

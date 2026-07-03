@@ -3,22 +3,22 @@
     <h2>Worklist</h2>
     <p class="muted">Your active cases — assigned, in progress, and follow-ups due.</p>
   </div>
-  <button type="button" (click)="load()" [disabled]="loading">
-    {{ loading ? 'Refreshing...' : 'Refresh' }}
+  <button type="button" (click)="load()" [disabled]="loading()">
+    {{ loading() ? 'Refreshing...' : 'Refresh' }}
   </button>
 </section>
 
 <section class="count-row">
   <button type="button" class="count-card" [class.active]="view === 'ALL'" (click)="setView('ALL')">
-    <span class="count">{{ counts.assigned + counts.inProgress + counts.followUpDue }}</span>
+    <span class="count">{{ counts().assigned + counts().inProgress + counts().followUpDue }}</span>
     <span class="label">All active</span>
   </button>
   <button type="button" class="count-card" [class.active]="view === 'ASSIGNED'" (click)="setView('ASSIGNED')">
-    <span class="count">{{ counts.assigned }}</span>
+    <span class="count">{{ counts().assigned }}</span>
     <span class="label">Assigned</span>
   </button>
   <button type="button" class="count-card" [class.active]="view === 'IN_PROGRESS'" (click)="setView('IN_PROGRESS')">
-    <span class="count">{{ counts.inProgress }}</span>
+    <span class="count">{{ counts().inProgress }}</span>
     <span class="label">In progress</span>
   </button>
   <button
@@ -27,7 +27,7 @@
     [class.active]="view === 'FOLLOW_UP_DUE'"
     (click)="setView('FOLLOW_UP_DUE')"
   >
-    <span class="count">{{ counts.followUpDue }}</span>
+    <span class="count">{{ counts().followUpDue }}</span>
     <span class="label">Follow-up due</span>
   </button>
 </section>
@@ -46,11 +46,11 @@
       <option value="IN_PROGRESS">In-progress only</option>
       <option value="FOLLOW_UP_DUE">Follow-up due only</option>
     </select>
-    <button type="button" (click)="load()" [disabled]="loading">Search</button>
+    <button type="button" (click)="load()" [disabled]="loading()">Search</button>
   </div>
-  @if (error) {
+  @if (error()) {
     <div class="error-row">
-      <p class="error">{{ error }}</p>
+      <p class="error">{{ error() }}</p>
       <button type="button" class="retry-btn" (click)="load()">Retry</button>
     </div>
   }
@@ -59,10 +59,10 @@
 @if (showSection('FOLLOW_UP_DUE')) {
 <section class="panel follow-up-panel">
   <h3>Follow-up due</h3>
-  @if (loading && !followUpDue.length) {
+  @if (loading() && !followUpDue().length) {
     <p class="loading-text">Loading worklist…</p>
   }
-  @for (item of followUpDue; track item.id) {
+  @for (item of followUpDue(); track item.id) {
     <article class="card follow-up-card" [class.urgent]="item.followUpUrgency === 'OVERDUE' || item.followUpUrgency === 'DUE_TODAY'">
       <div class="card-head">
         <strong>{{ item.patient?.name || 'Patient' }} — {{ item.disease?.name || 'Consultation' }}</strong>
@@ -88,7 +88,7 @@
       </div>
     </article>
   } @empty {
-    @if (!loading) {
+    @if (!loading()) {
       <p class="empty-state">No follow-ups due right now.</p>
     }
   }
@@ -98,7 +98,7 @@
 @if (showSection('ASSIGNED')) {
 <section class="panel">
   <h3>Assigned</h3>
-  @for (item of assigned; track item.id) {
+  @for (item of assigned(); track item.id) {
     <article class="card">
       <strong>{{ item.patient?.name || 'Patient' }} — {{ item.disease?.name || 'Consultation' }}</strong>
       <p>Status: {{ item.status }} · Created {{ item.createdAt | date: 'mediumDate' }}</p>
@@ -109,7 +109,7 @@
       </div>
     </article>
   } @empty {
-    @if (!loading) {
+    @if (!loading()) {
       <p class="empty-state">No newly assigned cases.</p>
     }
   }
@@ -119,7 +119,7 @@
 @if (showSection('IN_PROGRESS')) {
 <section class="panel">
   <h3>In progress</h3>
-  @for (item of inProgress; track item.id) {
+  @for (item of inProgress(); track item.id) {
     <article class="card">
       <strong>{{ item.patient?.name || 'Patient' }} — {{ item.disease?.name || 'Consultation' }}</strong>
       <p>Status: {{ item.status }} · Created {{ item.createdAt | date: 'mediumDate' }}</p>
@@ -133,7 +133,7 @@
       </div>
     </article>
   } @empty {
-    @if (!loading) {
+    @if (!loading()) {
       <p class="empty-state">No in-progress cases.</p>
     }
   }

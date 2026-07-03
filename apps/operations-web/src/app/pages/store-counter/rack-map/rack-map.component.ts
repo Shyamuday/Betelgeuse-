@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { StoreApiService } from '../../../services/store-api.service';
-import { StoreRack } from '../../../store-models';
+import { StoreRack } from '../../../models/store';
 
 type RackWithMedicines = StoreRack & {
   medicineCount: number;

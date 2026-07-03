@@ -1,8 +1,11 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { httpResource } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { API_PATHS } from '../../core/constants/api-paths.constants';
 import { ReceptionApiService } from '../../services/reception-api.service';
-import type { QueueConsultation } from '../../models';
+import type { QueueConsultation, QueueData } from '../../models';
 
 const STATUS_FILTERS = [
   { value: '', label: 'All' },
@@ -12,6 +15,8 @@ const STATUS_FILTERS = [
   { value: 'IN_PROGRESS', label: 'In progress' }
 ];
 
+const EMPTY_SUMMARY = { total: 0, awaitingPayment: 0, awaitingDoctor: 0, inProgress: 0 };
+
 @Component({
   selector: 'app-queue',
   standalone: true,
@@ -19,40 +24,48 @@ const STATUS_FILTERS = [
   templateUrl: './queue.component.html',
   styleUrl: './queue.component.scss'
 })
-export class QueueComponent implements OnInit {
+export class QueueComponent {
   private api = inject(ReceptionApiService);
 
-  loading = signal(true);
-  error = signal('');
-  consultations = signal<QueueConsultation[]>([]);
-  summary = signal({ total: 0, awaitingPayment: 0, awaitingDoctor: 0, inProgress: 0 });
-  doctors = signal<Array<{ id: string; name: string; specialty: string }>>([]);
-  statusFilter = '';
-  q = '';
+  readonly statusFilter = signal('');
+  readonly query = signal('');
+  searchInput = '';
   toast = signal('');
   assignTarget = signal<QueueConsultation | null>(null);
   selectedDoctorId = '';
 
   readonly statusFilters = STATUS_FILTERS;
 
-  ngOnInit(): void {
-    this.load();
-    this.api.getDoctors().then(r => this.doctors.set(r.doctors ?? [])).catch(() => {});
+  readonly queue = httpResource<QueueData>(() => {
+    const params: Record<string, string> = {};
+    const status = this.statusFilter();
+    const q = this.query();
+    if (status) params['status'] = status;
+    if (q) params['q'] = q;
+    return {
+      url: `${environment.apiUrl}${API_PATHS.RECEPTION.QUEUE}`,
+      params
+    };
+  });
+
+  readonly doctorsResource = httpResource<{ doctors: Array<{ id: string; name: string; specialty: string }> }>(
+    () => `${environment.apiUrl}${API_PATHS.RECEPTION.DOCTORS}`
+  );
+
+  data = () => (this.queue.hasValue() ? this.queue.value() : null);
+  loading = () => this.queue.isLoading();
+  error = () =>
+    this.queue.status() === 'error' ? 'Could not load the queue. Check your connection and try again.' : '';
+  consultations = () => this.data()?.consultations ?? [];
+  summary = () => this.data()?.summary ?? EMPTY_SUMMARY;
+  doctors = () => this.doctorsResource.value()?.doctors ?? [];
+
+  applySearch(): void {
+    this.query.set(this.searchInput.trim());
   }
 
-  load(): void {
-    this.loading.set(true);
-    this.error.set('');
-    this.api.getQueue({ status: this.statusFilter || undefined, q: this.q || undefined })
-      .then(r => {
-        this.consultations.set(r.consultations ?? []);
-        this.summary.set(r.summary ?? { total: 0, awaitingPayment: 0, awaitingDoctor: 0, inProgress: 0 });
-        this.loading.set(false);
-      })
-      .catch(() => {
-        this.error.set('Could not load the queue. Check your connection and try again.');
-        this.loading.set(false);
-      });
+  reload(): void {
+    this.queue.reload();
   }
 
   formatPaise(paise: number): string {
@@ -63,7 +76,7 @@ export class QueueComponent implements OnInit {
     try {
       await this.api.collectCash(item.id);
       this.showToast('Cash payment recorded');
-      this.load();
+      this.reload();
     } catch {
       this.showToast('Payment failed');
     }
@@ -86,7 +99,7 @@ export class QueueComponent implements OnInit {
       await this.api.assignDoctor(target.id, this.selectedDoctorId);
       this.showToast('Doctor assigned');
       this.closeAssign();
-      this.load();
+      this.reload();
     } catch {
       this.showToast('Assignment failed');
     }

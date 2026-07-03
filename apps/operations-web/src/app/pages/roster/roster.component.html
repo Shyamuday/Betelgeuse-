@@ -5,8 +5,8 @@
       <p>Attendance and shift visibility for your branch</p>
     </div>
     <div class="hdr-actions">
-      <input type="date" [(ngModel)]="date" (change)="load()" />
-      <button type="button" class="btn-refresh" (click)="load()" [disabled]="loading()">Refresh</button>
+      <input type="date" [ngModel]="date()" (ngModelChange)="date.set($event)" />
+      <button type="button" class="btn-refresh" (click)="reload()" [disabled]="loading()">Refresh</button>
     </div>
   </div>
 
@@ -15,7 +15,7 @@
   } @else if (error()) {
     <div class="error-row">
       <p class="error">{{ error() }}</p>
-      <button type="button" class="retry-btn" (click)="load()">Retry</button>
+      <button type="button" class="retry-btn" (click)="reload()">Retry</button>
     </div>
   } @else if (roster(); as r) {
     <div class="summary">

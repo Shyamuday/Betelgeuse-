@@ -15,8 +15,8 @@
           <div class="search-row">
             <input
               class="input"
-              [(ngModel)]="searchQuery"
-              (ngModelChange)="onSearch()"
+              [formField]="searchForm.q"
+              (input)="onSearch()"
               placeholder="Search medicine..."
               autocomplete="off"
             />
@@ -81,20 +81,20 @@
             <div class="form-group">
               <label>Quantity to Remove *</label>
               <div class="qty-row">
-                <button class="qty-btn" (click)="qty > 1 ? qty = qty - 1 : null">−</button>
-                <input class="input qty-input" type="number" [(ngModel)]="qty" min="1" [max]="selectedMedicine()!.currentQty" />
-                <button class="qty-btn" (click)="qty < selectedMedicine()!.currentQty ? qty = qty + 1 : null">+</button>
+                <button class="qty-btn" (click)="adjustQty(-1)">−</button>
+                <input class="input qty-input" type="number" [formField]="removeForm.qty" />
+                <button class="qty-btn" (click)="adjustQty(1)">+</button>
               </div>
               <p class="qty-hint">Max: {{ selectedMedicine()!.currentQty }} bottles</p>
             </div>
             <div class="form-group" style="margin-top: 14px;">
               <label>Note</label>
-              <input class="input" [(ngModel)]="note" [placeholder]="notePlaceholder()" />
+              <input class="input" [formField]="removeForm.note" [placeholder]="notePlaceholder()" />
             </div>
             @if (removeType() === 'SALE_OUT') {
               <div class="form-group" style="margin-top: 14px;">
                 <label>Sale Amount (paise)</label>
-                <input class="input" type="number" [(ngModel)]="saleAmountInPaise" min="0" placeholder="e.g. 25000 for ₹250" />
+                <input class="input" type="number" [formField]="removeForm.saleAmountInPaise" placeholder="e.g. 25000 for ₹250" />
               </div>
             }
           </div>
@@ -103,11 +103,11 @@
           <div class="confirm-bar">
             <div class="confirm-info">
               <span class="confirm-label">Removing</span>
-              <span class="confirm-qty">{{ qty }}</span>
+              <span class="confirm-qty">{{ removeFormModel().qty }}</span>
               <span class="confirm-label">bottles of</span>
               <span class="confirm-name">{{ selectedMedicine()!.name }} {{ selectedMedicine()!.potency }}</span>
             </div>
-            <button class="btn-remove" [disabled]="!qty || qty > selectedMedicine()!.currentQty || loading()" (click)="submit()">
+            <button class="btn-remove" [disabled]="!removeFormModel().qty || removeFormModel().qty > selectedMedicine()!.currentQty || loading()" (click)="submit()">
               @if (loading()) {
                 <span class="btn-spinner"></span>
               } @else {
@@ -121,4 +121,3 @@
         }
       </div>
     </div>
-  

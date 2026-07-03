@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
 import { AdminApi } from '../../../core/services/admin-api';
 import {
@@ -11,7 +11,7 @@ import {
 
 @Component({
   selector: 'app-payments-page',
-  imports: [FormsModule, DatePipe],
+  imports: [FormField, DatePipe],
   templateUrl: './payments-page.html',
   styleUrl: './payments-page.scss'
 })
@@ -26,10 +26,11 @@ export class PaymentsPage implements OnInit {
   pageSize = PAYMENTS_PAGE_SIZE;
   total = signal(0);
   statusFilter = signal('ALL');
-  from = '';
-  to = '';
   toast = signal('');
   exporting = signal(false);
+
+  readonly dateFilterModel = signal({ from: '', to: '' });
+  readonly dateFilterForm = form(this.dateFilterModel);
 
   readonly statusOptions = PAYMENT_STATUS_OPTIONS;
   readonly statusStyles = PAYMENT_STATUS_STYLES;
@@ -42,13 +43,14 @@ export class PaymentsPage implements OnInit {
   load(): void {
     this.loading.set(true);
     this.error.set('');
+    const dates = this.dateFilterModel();
     this.api
       .getPayments({
         page: this.page(),
         pageSize: this.pageSize,
         status: this.statusFilter() as any,
-        from: this.from || undefined,
-        to: this.to || undefined
+        from: dates.from || undefined,
+        to: dates.to || undefined
       })
       .then((r) => {
         this.payments.set(r.payments);
@@ -70,8 +72,7 @@ export class PaymentsPage implements OnInit {
 
   clearFilters(): void {
     this.statusFilter.set('ALL');
-    this.from = '';
-    this.to = '';
+    this.dateFilterModel.set({ from: '', to: '' });
     this.applyFilters();
   }
 
@@ -101,11 +102,12 @@ export class PaymentsPage implements OnInit {
   async exportCsv(): Promise<void> {
     this.exporting.set(true);
     this.toast.set('');
+    const dates = this.dateFilterModel();
     try {
       const csv = await this.api.exportPaymentsCsv({
         status: this.statusFilter() as any,
-        from: this.from || undefined,
-        to: this.to || undefined
+        from: dates.from || undefined,
+        to: dates.to || undefined
       });
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);

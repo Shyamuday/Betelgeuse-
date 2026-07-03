@@ -74,11 +74,11 @@
                 <div class="form-row">
                   <div class="form-group">
                     <label>Employee ID</label>
-                    <input type="text" [(ngModel)]="form.employeeId" placeholder="EMP-001" />
+                    <input type="text" [formField]="profileForm.employeeId" placeholder="EMP-001" />
                   </div>
                   <div class="form-group">
                     <label>Status</label>
-                    <select [(ngModel)]="form.employeeStatus">
+                    <select [formField]="profileForm.employeeStatus">
                       <option value="ACTIVE">Active</option>
                       <option value="ON_LEAVE">On Leave</option>
                       <option value="RESIGNED">Resigned</option>
@@ -89,27 +89,26 @@
                 <div class="form-row">
                   <div class="form-group">
                     <label>Designation</label>
-                    <input type="text" [(ngModel)]="form.designation" placeholder="Store Assistant" />
+                    <input type="text" [formField]="profileForm.designation" placeholder="Store Assistant" />
                   </div>
                   <div class="form-group">
                     <label>Department</label>
-                    <input type="text" [(ngModel)]="form.department" placeholder="Store Operations" />
+                    <input type="text" [formField]="profileForm.department" placeholder="Store Operations" />
                   </div>
                 </div>
                 <div class="form-row">
                   <div class="form-group">
                     <label>Joining Date</label>
-                    <input type="date" [(ngModel)]="form.joiningDate" />
+                    <input type="date" [formField]="profileForm.joiningDate" />
                   </div>
                   <div class="form-group">
                     <label>Probation End Date</label>
-                    <input type="date" [(ngModel)]="form.probationEndDate" />
+                    <input type="date" [formField]="profileForm.probationEndDate" />
                   </div>
                 </div>
                 <div class="form-group full">
                   <label>Monthly Salary (₹)</label>
-                  <input type="number" [(ngModel)]="salaryDisplay" placeholder="15000"
-                         (ngModelChange)="form.salaryPerMonth = $event * 100" />
+                  <input type="number" [formField]="profileForm.salaryDisplay" placeholder="15000" />
                 </div>
               </div>
 
@@ -119,8 +118,8 @@
                   <label>Work Shift</label>
                   <div class="shift-grid">
                     @for (s of shifts; track s.value) {
-                      <button class="shift-btn" [class.active]="form.workShift === s.value"
-                              (click)="form.workShift = s.value">
+                      <button class="shift-btn" [class.active]="profileFormModel().workShift === s.value"
+                              (click)="setWorkShift(s.value)">
                         {{ s.label }}
                       </button>
                     }
@@ -129,11 +128,11 @@
                 <div class="form-row">
                   <div class="form-group">
                     <label>Shift Start</label>
-                    <input type="time" [(ngModel)]="form.shiftStart" />
+                    <input type="time" [formField]="profileForm.shiftStart" />
                   </div>
                   <div class="form-group">
                     <label>Shift End</label>
-                    <input type="time" [(ngModel)]="form.shiftEnd" />
+                    <input type="time" [formField]="profileForm.shiftEnd" />
                   </div>
                 </div>
                 <div class="form-group full">
@@ -153,16 +152,16 @@
                 <div class="form-row">
                   <div class="form-group">
                     <label>Phone</label>
-                    <input type="tel" [(ngModel)]="form.phone" placeholder="+91 99999 00000" />
+                    <input type="tel" [formField]="profileForm.phone" placeholder="+91 99999 00000" />
                   </div>
                   <div class="form-group">
                     <label>Email</label>
-                    <input type="email" [(ngModel)]="form.email" placeholder="staff@example.com" />
+                    <input type="email" [formField]="profileForm.email" placeholder="staff@example.com" />
                   </div>
                 </div>
                 <div class="form-group full">
                   <label>Address</label>
-                  <textarea [(ngModel)]="form.address" rows="2" placeholder="Full address..."></textarea>
+                  <textarea [formField]="profileForm.address" rows="2" placeholder="Full address..."></textarea>
                 </div>
               </div>
 
@@ -171,11 +170,11 @@
                 <div class="form-row">
                   <div class="form-group">
                     <label>Name</label>
-                    <input type="text" [(ngModel)]="form.emergencyContact" placeholder="Contact name" />
+                    <input type="text" [formField]="profileForm.emergencyContact" placeholder="Contact name" />
                   </div>
                   <div class="form-group">
                     <label>Phone</label>
-                    <input type="tel" [(ngModel)]="form.emergencyPhone" placeholder="+91 99999 00000" />
+                    <input type="tel" [formField]="profileForm.emergencyPhone" placeholder="+91 99999 00000" />
                   </div>
                 </div>
               </div>

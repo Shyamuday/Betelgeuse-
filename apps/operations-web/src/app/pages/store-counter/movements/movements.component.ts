@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { StoreApiService } from '../../../services/store-api.service';
-import { StockMovement } from '../../../store-models';
+import { StockMovement } from '../../../models/store';
 import { DatePipe } from '@angular/common';
 import { PAGE_SIZES } from '../../../core/constants/store/pagination.constants';
 import { STOCK_MOVEMENT_DISPLAY, OUTBOUND_MOVEMENT_TYPES } from '../../../shared/store/constants/stock-movement.constants';

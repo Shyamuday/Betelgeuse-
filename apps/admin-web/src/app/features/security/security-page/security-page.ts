@@ -1,12 +1,12 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { AdminApi } from '../../../core/services/admin-api';
 import { TOAST_DURATION_MS } from '../../../core/constants/timing.constants';
 
 @Component({
   selector: 'app-security-page',
-  imports: [FormsModule, DatePipe],
+  imports: [FormField, DatePipe],
   templateUrl: './security-page.html',
   styleUrl: './security-page.scss'
 })
@@ -30,7 +30,9 @@ export class SecurityPage implements OnInit {
     olderThan365Days: number;
     oldestAt: string | null;
   } | null>(null);
-  purgeDays = 90;
+
+  readonly purgeModel = signal({ days: 90 });
+  readonly purgeForm = form(this.purgeModel);
 
   ngOnInit(): void {
     void this.load();
@@ -67,7 +69,10 @@ export class SecurityPage implements OnInit {
     this.saving.set(true);
     this.error.set('');
     try {
-      const result = await this.api.purgeAuditLogs({ olderThanDays: this.purgeDays, dryRun });
+      const result = await this.api.purgeAuditLogs({
+        olderThanDays: this.purgeModel().days,
+        dryRun
+      });
       const msg = dryRun
         ? `Dry run: ${result.deletedCount} logs would be deleted.`
         : `Purged ${result.deletedCount} logs.`;

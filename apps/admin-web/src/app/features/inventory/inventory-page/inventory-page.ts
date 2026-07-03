@@ -1,10 +1,10 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { AdminApi } from '../../../core/services/admin-api';
 
 @Component({
   selector: 'app-inventory-page',
-  imports: [FormsModule],
+  imports: [FormField],
   templateUrl: './inventory-page.html',
   styleUrl: './inventory-page.scss'
 })
@@ -18,8 +18,9 @@ export class InventoryPage implements OnInit {
   loading = signal(true);
   stockLoading = signal(false);
   error = signal('');
-  q = '';
-  statusFilter = '';
+
+  readonly filterModel = signal({ q: '', statusFilter: '' });
+  readonly filterForm = form(this.filterModel);
 
   ngOnInit(): void {
     void this.loadOverview();
@@ -50,10 +51,11 @@ export class InventoryPage implements OnInit {
     const storeId = this.selectedStoreId();
     if (!storeId) return;
     this.stockLoading.set(true);
+    const filters = this.filterModel();
     try {
       const response = await this.api.getStoreStock(storeId, {
-        q: this.q,
-        status: this.statusFilter,
+        q: filters.q,
+        status: filters.statusFilter,
         page
       });
       this.stocks.set(response.stocks);

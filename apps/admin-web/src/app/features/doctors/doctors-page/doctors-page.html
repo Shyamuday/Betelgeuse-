@@ -1,27 +1,27 @@
 <section class="panel">
   <h2>Create Doctor</h2>
   <div class="toolbar">
-    <input placeholder="Name" name="createName" [(ngModel)]="createName" [disabled]="mutating" />
-    <input placeholder="Email" name="createEmail" [(ngModel)]="createEmail" [disabled]="mutating" />
-    <input placeholder="Mobile" name="createMobile" [(ngModel)]="createMobile" [disabled]="mutating" />
-    <input placeholder="Password" name="createPassword" type="password" [(ngModel)]="createPassword" [disabled]="mutating" />
-    <select name="createDoctorType" [(ngModel)]="createDoctorType" [disabled]="mutating">
+    <input placeholder="Name" name="createName" [(ngModel)]="createName" [disabled]="mutating()" />
+    <input placeholder="Email" name="createEmail" [(ngModel)]="createEmail" [disabled]="mutating()" />
+    <input placeholder="Mobile" name="createMobile" [(ngModel)]="createMobile" [disabled]="mutating()" />
+    <input placeholder="Password" name="createPassword" type="password" [(ngModel)]="createPassword" [disabled]="mutating()" />
+    <select name="createDoctorType" [(ngModel)]="createDoctorType" [disabled]="mutating()">
       @for (option of doctorTypeOptions; track option.value) {
         <option [value]="option.value">{{ option.label }}</option>
       }
     </select>
     @if (isSpecialistType(createDoctorType)) {
-      <select name="createSpecialtyFocus" [(ngModel)]="createSpecialtyFocus" [disabled]="mutating">
+      <select name="createSpecialtyFocus" [(ngModel)]="createSpecialtyFocus" [disabled]="mutating()">
         <option value="">Select specialty focus</option>
         @for (option of specialtyFocusOptions; track option.value) {
           <option [value]="option.value">{{ option.label }}</option>
         }
       </select>
     }
-    <input placeholder="Specialty (optional override)" name="createSpecialty" [(ngModel)]="createSpecialty" [disabled]="mutating" />
-    <input placeholder="Registration No" name="createRegistrationNo" [(ngModel)]="createRegistrationNo" [disabled]="mutating" />
-    <button type="button" (click)="createDoctor()" [disabled]="mutating || loading">
-      {{ mutating ? 'Creating...' : 'Create' }}
+    <input placeholder="Specialty (optional override)" name="createSpecialty" [(ngModel)]="createSpecialty" [disabled]="mutating()" />
+    <input placeholder="Registration No" name="createRegistrationNo" [(ngModel)]="createRegistrationNo" [disabled]="mutating()" />
+    <button type="button" (click)="createDoctor()" [disabled]="mutating() || loading()">
+      {{ mutating() ? 'Creating...' : 'Create' }}
     </button>
   </div>
 </section>
@@ -29,7 +29,7 @@
 <section class="panel">
   <h2>Pending Doctor Approvals</h2>
 
-  @if (loading) {
+  @if (loading()) {
     <p class="loading-text">Loading...</p>
   }
 
@@ -39,26 +39,26 @@
       name="pendingSearchTerm"
       [(ngModel)]="pendingSearchTerm"
       (ngModelChange)="setPendingPage(1)"
-      [disabled]="loading"
+      [disabled]="loading()"
     />
     <label class="select-all">
       <input
         type="checkbox"
         [checked]="allVisiblePendingSelected()"
         (change)="toggleSelectAllVisiblePending($any($event.target).checked)"
-        [disabled]="loading || mutating"
+        [disabled]="loading() || mutating()"
       />
       Select visible
     </label>
-    <button type="button" (click)="bulkApproveSelected()" [disabled]="loading || mutating || !selectedPendingDoctorIds.length">
-      {{ mutating ? 'Working...' : 'Bulk Approve' }}
+    <button type="button" (click)="bulkApproveSelected()" [disabled]="loading() || mutating() || !selectedPendingDoctorIds.length">
+      {{ mutating() ? 'Working...' : 'Bulk Approve' }}
     </button>
-    <button type="button" (click)="bulkRejectSelected()" [disabled]="loading || mutating || !selectedPendingDoctorIds.length">
+    <button type="button" (click)="bulkRejectSelected()" [disabled]="loading() || mutating() || !selectedPendingDoctorIds.length">
       Bulk Keep Pending
     </button>
   </div>
 
-  @if (!loading) {
+  @if (!loading()) {
     @for (doctor of visiblePendingDoctors(); track doctor.id) {
       <article class="card">
         <label class="select-doctor">
@@ -66,7 +66,7 @@
             type="checkbox"
             [checked]="isPendingDoctorSelected(doctor.id)"
             (change)="togglePendingDoctorSelection(doctor.id, $any($event.target).checked)"
-            [disabled]="mutating"
+            [disabled]="mutating()"
           />
           Select
         </label>
@@ -74,10 +74,10 @@
         <p>{{ doctor.email }} | {{ doctor.mobile || 'No mobile' }}</p>
         <small>{{ doctorTypeLabel($safeNavigationMigration(doctor.doctorProfile?.doctorType)) }} | {{ doctor.doctorProfile?.specialty || 'Specialty not set' }} | {{ doctor.doctorProfile?.registrationNo || 'No registration no.' }}</small>
         <div class="actions">
-          <button type="button" (click)="approveDoctor(doctor.id)" [disabled]="mutating">
-            {{ mutating ? '...' : 'Approve' }}
+          <button type="button" (click)="approveDoctor(doctor.id)" [disabled]="mutating()">
+            {{ mutating() ? '...' : 'Approve' }}
           </button>
-          <button type="button" (click)="rejectDoctor(doctor.id)" [disabled]="mutating">Keep Pending</button>
+          <button type="button" (click)="rejectDoctor(doctor.id)" [disabled]="mutating()">Keep Pending</button>
         </div>
       </article>
     } @empty {
@@ -111,11 +111,11 @@
     </select>
   </div>
 
-  @if (!loading) {
+  @if (!loading()) {
     @for (doctor of visibleDoctors(); track doctor.id) {
       <article class="card">
         <strong>{{ doctor.name }}</strong>
-        <button type="button" class="link" (click)="setSelectedDoctor(doctor.id)" [disabled]="mutating">View details</button>
+        <button type="button" class="link" (click)="setSelectedDoctor(doctor.id)" [disabled]="mutating()">View details</button>
         <p>{{ doctor.email }} | {{ doctor.mobile || 'No mobile' }}</p>
         <small>{{ doctorTypeLabel($safeNavigationMigration(doctor.doctorProfile?.doctorType)) }} | {{ doctor.doctorProfile?.specialty || 'Specialty not set' }} | {{ doctor.isActive ? 'Active' : 'Inactive' }}</small>
       </article>
@@ -147,12 +147,12 @@
       <p>Available: {{ selectedDoctor.doctorProfile?.isAvailable ? 'Yes' : 'No' }}</p>
       <div class="actions">
         @if (selectedDoctor.isActive) {
-          <button type="button" (click)="toggleDoctorStatus(selectedDoctor.id, false)" [disabled]="mutating">
-            {{ mutating ? '...' : 'Deactivate' }}
+          <button type="button" (click)="toggleDoctorStatus(selectedDoctor.id, false)" [disabled]="mutating()">
+            {{ mutating() ? '...' : 'Deactivate' }}
           </button>
         } @else {
-          <button type="button" (click)="toggleDoctorStatus(selectedDoctor.id, true)" [disabled]="mutating">
-            {{ mutating ? '...' : 'Activate' }}
+          <button type="button" (click)="toggleDoctorStatus(selectedDoctor.id, true)" [disabled]="mutating()">
+            {{ mutating() ? '...' : 'Activate' }}
           </button>
         }
       </div>
@@ -160,30 +160,30 @@
     <article class="card">
       <h3>Edit Doctor</h3>
       <div class="toolbar">
-        <input placeholder="Name" name="editName" [(ngModel)]="editName" [disabled]="mutating" />
-        <input placeholder="Email" name="editEmail" [(ngModel)]="editEmail" [disabled]="mutating" />
-        <input placeholder="Mobile" name="editMobile" [(ngModel)]="editMobile" [disabled]="mutating" />
-        <select name="editDoctorType" [(ngModel)]="editDoctorType" [disabled]="mutating">
+        <input placeholder="Name" name="editName" [(ngModel)]="editName" [disabled]="mutating()" />
+        <input placeholder="Email" name="editEmail" [(ngModel)]="editEmail" [disabled]="mutating()" />
+        <input placeholder="Mobile" name="editMobile" [(ngModel)]="editMobile" [disabled]="mutating()" />
+        <select name="editDoctorType" [(ngModel)]="editDoctorType" [disabled]="mutating()">
           @for (option of doctorTypeOptions; track option.value) {
             <option [value]="option.value">{{ option.label }}</option>
           }
         </select>
         @if (isSpecialistType(editDoctorType)) {
-          <select name="editSpecialtyFocus" [(ngModel)]="editSpecialtyFocus" [disabled]="mutating">
+          <select name="editSpecialtyFocus" [(ngModel)]="editSpecialtyFocus" [disabled]="mutating()">
             <option value="">Select specialty focus</option>
             @for (option of specialtyFocusOptions; track option.value) {
               <option [value]="option.value">{{ option.label }}</option>
             }
           </select>
         }
-        <input placeholder="Specialty (optional override)" name="editSpecialty" [(ngModel)]="editSpecialty" [disabled]="mutating" />
-        <input placeholder="Registration No" name="editRegistrationNo" [(ngModel)]="editRegistrationNo" [disabled]="mutating" />
+        <input placeholder="Specialty (optional override)" name="editSpecialty" [(ngModel)]="editSpecialty" [disabled]="mutating()" />
+        <input placeholder="Registration No" name="editRegistrationNo" [(ngModel)]="editRegistrationNo" [disabled]="mutating()" />
         <label>
-          <input type="checkbox" name="editIsAvailable" [(ngModel)]="editIsAvailable" [disabled]="mutating" />
+          <input type="checkbox" name="editIsAvailable" [(ngModel)]="editIsAvailable" [disabled]="mutating()" />
           Available
         </label>
-        <button type="button" (click)="saveDoctorEdits()" [disabled]="mutating">
-          {{ mutating ? 'Saving...' : 'Save' }}
+        <button type="button" (click)="saveDoctorEdits()" [disabled]="mutating()">
+          {{ mutating() ? 'Saving...' : 'Save' }}
         </button>
       </div>
     </article>
@@ -192,12 +192,12 @@
   }
 </section>
 
-@if (message) {
-  <p class="success">{{ message }}</p>
+@if (message()) {
+  <p class="success">{{ message() }}</p>
 }
-@if (error) {
+@if (error()) {
   <div class="error-row">
-    <p class="error">{{ error }}</p>
-    <button type="button" class="retry-btn" (click)="load()" [disabled]="loading || mutating">Retry</button>
+    <p class="error">{{ error() }}</p>
+    <button type="button" class="retry-btn" (click)="load()" [disabled]="loading() || mutating()">Retry</button>
   </div>
 }

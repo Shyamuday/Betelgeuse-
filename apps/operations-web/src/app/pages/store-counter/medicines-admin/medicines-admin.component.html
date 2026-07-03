@@ -10,8 +10,8 @@
 
       <!-- Search & Filter -->
       <div class="filter-row">
-        <input class="input search-input" [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" placeholder="Search medicines..." />
-        <select class="input select-sm" [(ngModel)]="potencyFilter" (ngModelChange)="onSearch()">
+        <input class="input search-input" [formField]="filterForm.searchQuery" (input)="onSearch()" placeholder="Search medicines..." />
+        <select class="input select-sm" [formField]="filterForm.potencyFilter" (change)="onSearch()">
           <option value="">All Potencies</option>
           @for (p of potencies; track p) { <option [value]="p">{{ p }}</option> }
         </select>
@@ -23,7 +23,7 @@
         <div class="empty-state">
           <div class="empty-icon">💊</div>
           <h3>No medicines found</h3>
-          <p>{{ searchQuery ? 'Try a different search term' : 'Add your first medicine to get started' }}</p>
+          <p>{{ filterModel().searchQuery ? 'Try a different search term' : 'Add your first medicine to get started' }}</p>
         </div>
       } @else {
         <div class="medicine-table">
@@ -87,45 +87,45 @@
             <div class="form-grid">
               <div class="form-group span2">
                 <label>Medicine Name *</label>
-                <input class="input" [(ngModel)]="form.name" placeholder="e.g. Arsenicum Album" />
+                <input class="input" [formField]="medicineForm.name" placeholder="e.g. Arsenicum Album" />
               </div>
               <div class="form-group">
                 <label>Short Name</label>
-                <input class="input" [(ngModel)]="form.shortName" placeholder="e.g. Ars Alb" />
+                <input class="input" [formField]="medicineForm.shortName" placeholder="e.g. Ars Alb" />
               </div>
               <div class="form-group">
                 <label>Alternate Name</label>
-                <input class="input" [(ngModel)]="form.alternateName" placeholder="Other names" />
+                <input class="input" [formField]="medicineForm.alternateName" placeholder="Other names" />
               </div>
               <div class="form-group">
                 <label>Potency *</label>
-                <select class="input" [(ngModel)]="form.potency">
+                <select class="input" [formField]="medicineForm.potency">
                   <option value="">Select potency</option>
                   @for (p of potencies; track p) { <option [value]="p">{{ p }}</option> }
                   <option [value]="customPotencyValue">Custom...</option>
                 </select>
-                @if (form.potency === customPotencyValue) {
-                  <input class="input" style="margin-top: 8px;" [(ngModel)]="form.customPotency" placeholder="Enter custom potency" />
+                @if (medicineFormModel().potency === customPotencyValue) {
+                  <input class="input" style="margin-top: 8px;" [formField]="medicineForm.customPotency" placeholder="Enter custom potency" />
                 }
               </div>
               <div class="form-group">
                 <label>Category</label>
-                <select class="input" [(ngModel)]="form.category">
+                <select class="input" [formField]="medicineForm.category">
                   <option value="">Select category</option>
                   @for (c of categories; track c) { <option [value]="c">{{ c }}</option> }
                 </select>
               </div>
               <div class="form-group">
                 <label>Manufacturer</label>
-                <input class="input" [(ngModel)]="form.manufacturer" placeholder="e.g. SBL, Reckeweg" />
+                <input class="input" [formField]="medicineForm.manufacturer" placeholder="e.g. SBL, Reckeweg" />
               </div>
               <div class="form-group">
                 <label>Min Stock Level</label>
-                <input class="input" type="number" [(ngModel)]="form.minStockLevel" min="0" placeholder="10" />
+                <input class="input" type="number" [formField]="medicineForm.minStockLevel" min="0" placeholder="10" />
               </div>
               <div class="form-group span2">
                 <label>Description</label>
-                <input class="input" [(ngModel)]="form.description" placeholder="Optional notes about this medicine" />
+                <input class="input" [formField]="medicineForm.description" placeholder="Optional notes about this medicine" />
               </div>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { StoreApiService } from '../../../services/store-api.service';
@@ -16,9 +16,13 @@ type PatientResult = {
   homeClinicStore?: { id: string; name: string; code: string } | null;
 };
 
+function emptyRegisterForm() {
+  return { name: '', mobile: '', email: '' };
+}
+
 @Component({
   selector: 'app-patients-page',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormField],
   templateUrl: './patients-page.html',
   styleUrl: './patients-page.scss'
 })
@@ -29,6 +33,9 @@ export class PatientsPage {
   readonly storeRoutes = inject(StoreRouteContext);
   private readonly search$ = new Subject<string>();
 
+  readonly searchModel = signal({ q: '' });
+  readonly searchForm = form(this.searchModel);
+
   readonly query = signal('');
   readonly patients = signal<PatientResult[]>([]);
   readonly scopeUsed = signal<'clinic' | 'global' | 'none'>('none');
@@ -38,11 +45,8 @@ export class PatientsPage {
   readonly registerSaving = signal(false);
   readonly registerError = signal('');
 
-  registerForm = {
-    name: '',
-    mobile: '',
-    email: ''
-  };
+  readonly registerFormModel = signal(emptyRegisterForm());
+  readonly registerForm = form(this.registerFormModel);
 
   constructor() {
     this.search$.pipe(
@@ -71,7 +75,8 @@ export class PatientsPage {
     return this.auth.isManager();
   }
 
-  onSearch(value: string): void {
+  onSearchFromField(): void {
+    const value = this.searchModel().q;
     this.query.set(value);
     if (value.trim().length < 2) {
       this.patients.set([]);
@@ -88,20 +93,21 @@ export class PatientsPage {
 
   closeRegister(): void {
     this.registerOpen.set(false);
-    this.registerForm = { name: '', mobile: '', email: '' };
+    this.registerFormModel.set(emptyRegisterForm());
   }
 
   createPatient(): void {
-    if (!this.registerForm.name.trim()) {
+    const form = this.registerFormModel();
+    if (!form.name.trim()) {
       this.registerError.set('Name is required.');
       return;
     }
     this.registerSaving.set(true);
     this.registerError.set('');
     this.api.createPatient({
-      name: this.registerForm.name.trim(),
-      mobile: this.registerForm.mobile.trim() || undefined,
-      email: this.registerForm.email.trim() || undefined
+      name: form.name.trim(),
+      mobile: form.mobile.trim() || undefined,
+      email: form.email.trim() || undefined
     }).subscribe({
       next: (res) => {
         this.registerSaving.set(false);

@@ -3,7 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { StoreApiService } from '../../../services/store-api.service';
 import { StoreRouteContext } from '../../../services/store-route-context.service';
-import { MedicineDetailResponse, StockBatch } from '../../../store-models';
+import { MedicineDetailResponse, StockBatch } from '../../../models/store';
 
 @Component({
   selector: 'app-medicine-detail',

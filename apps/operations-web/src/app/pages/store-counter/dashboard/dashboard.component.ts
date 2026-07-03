@@ -4,7 +4,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { StoreApiService } from '../../../services/store-api.service';
 import { StoreAuthService } from '../../../services/store-auth.service';
 import { StoreRouteContext } from '../../../services/store-route-context.service';
-import { DashboardStats, MedicineWithStock, StockMovement } from '../../../store-models';
+import { DashboardStats, MedicineWithStock, StockMovement } from '../../../models/store';
 
 @Component({
   selector: 'app-dashboard',

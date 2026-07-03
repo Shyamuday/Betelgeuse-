@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { AuthResponse, HrUser, SessionResponse } from '../models';
-import { StoreStaff } from '../store-models';
+import { StorePortalStaff } from '../models/store';
 import { ROUTE_PATHS } from '../core/constants/app-routes.constants';
 import {
   AUTH_TOKEN_KEY,
@@ -16,7 +16,7 @@ import {
 } from '../core/constants/auth.constants';
 import { OPERATIONS_NAV_ITEMS, navItemsForCapabilities } from '@vitalis/platform-nav';
 
-export type StaffLoginResponse = AuthResponse & Partial<SessionResponse> & { storeStaff?: StoreStaff };
+export type StaffLoginResponse = AuthResponse & Partial<SessionResponse> & { storeStaff?: StorePortalStaff };
 
 @Service()
 export class PlatformAuthService {
@@ -26,7 +26,7 @@ export class PlatformAuthService {
   currentUser = signal<HrUser | null>(this.loadUser());
   capabilities = signal<string[]>(this.loadCapabilities());
   defaultRoute = signal<string>(this.loadDefaultRoute());
-  storeStaff = signal<StoreStaff | null>(this.loadStoreStaff());
+  storeStaff = signal<StorePortalStaff | null>(this.loadStoreStaff());
 
   readonly isStoreSession = computed(() => !!this.storeStaff());
 
@@ -54,7 +54,7 @@ export class PlatformAuthService {
     return localStorage.getItem(AUTH_DEFAULT_ROUTE_KEY) ?? ROUTE_PATHS.DASHBOARD;
   }
 
-  private loadStoreStaff(): StoreStaff | null {
+  private loadStoreStaff(): StorePortalStaff | null {
     try {
       const raw = localStorage.getItem(AUTH_STORE_STAFF_KEY);
       return raw ? JSON.parse(raw) : null;
@@ -75,7 +75,7 @@ export class PlatformAuthService {
     return this.capabilities().includes(capability);
   }
 
-  private persistSession(session: SessionResponse, storeStaff?: StoreStaff | null) {
+  private persistSession(session: SessionResponse, storeStaff?: StorePortalStaff | null) {
     localStorage.setItem(AUTH_USER_KEY, JSON.stringify(session.user));
     localStorage.setItem(AUTH_CAPABILITIES_KEY, JSON.stringify(session.capabilities));
     localStorage.setItem(AUTH_DEFAULT_ROUTE_KEY, session.defaultRoute);

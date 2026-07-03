@@ -1,6 +1,9 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { CallCenterApiService } from '../../services/callcenter-api.service';
+import { httpResource } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { API_PATHS } from '../../core/constants/api-paths.constants';
+import { RecentConsultationsData } from '../../models';
 
 @Component({
   selector: 'app-consultations',
@@ -9,28 +12,17 @@ import { CallCenterApiService } from '../../services/callcenter-api.service';
   templateUrl: './consultations.component.html',
   styleUrl: './consultations.component.scss'
 })
-export class ConsultationsComponent implements OnInit {
-  private api = inject(CallCenterApiService);
+export class ConsultationsComponent {
+  readonly consultationsResource = httpResource<RecentConsultationsData>(
+    () => `${environment.apiUrl}${API_PATHS.CALL_CENTER.RECENT_CONSULTATIONS}`
+  );
 
-  loading = signal(true);
-  error = signal('');
-  consultations = signal<any[]>([]);
+  loading = () => this.consultationsResource.isLoading();
+  error = () =>
+    this.consultationsResource.status() === 'error' ? 'Could not load consultations.' : '';
+  consultations = () => this.consultationsResource.value()?.consultations ?? [];
 
-  ngOnInit(): void {
-    this.load();
-  }
-
-  load(): void {
-    this.loading.set(true);
-    this.error.set('');
-    this.api.getRecentConsultations()
-      .then((res) => {
-        this.consultations.set(res.consultations ?? []);
-        this.loading.set(false);
-      })
-      .catch(() => {
-        this.error.set('Could not load consultations.');
-        this.loading.set(false);
-      });
+  reload(): void {
+    this.consultationsResource.reload();
   }
 }

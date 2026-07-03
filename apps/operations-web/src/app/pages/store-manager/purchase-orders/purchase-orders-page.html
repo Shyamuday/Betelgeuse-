@@ -38,19 +38,19 @@
     <div class="modal-backdrop" (click)="closeReceive()">
       <div class="modal" (click)="$event.stopPropagation()">
         <h3>Goods receipt</h3>
-        @for (line of receiveLines(); track line.purchaseOrderLineId) {
+        @for (line of receiveFormModel().lines; track line.purchaseOrderLineId; let i = $index) {
           <div class="recv-line">
             <div class="recv-title">{{ line.label }} (max {{ line.qtyRemaining }})</div>
             <div class="recv-grid">
-              <label>Qty <input type="number" [(ngModel)]="line.qtyReceived" min="1" [max]="line.qtyRemaining" /></label>
-              <label>Batch <input [(ngModel)]="line.batchNumber" /></label>
-              <label>Expiry <input type="date" [(ngModel)]="line.expiryDate" /></label>
-              <label>Buy ₹ <input type="number" [(ngModel)]="line.purchasePricePerUnit" /></label>
-              <label>Sell ₹ <input type="number" [(ngModel)]="line.sellingPricePerUnit" /></label>
+              <label>Qty <input type="number" [formField]="receiveForm.lines[i].qtyReceived" min="1" [max]="line.qtyRemaining" /></label>
+              <label>Batch <input [formField]="receiveForm.lines[i].batchNumber" /></label>
+              <label>Expiry <input type="date" [formField]="receiveForm.lines[i].expiryDate" /></label>
+              <label>Buy ₹ <input type="number" [formField]="receiveForm.lines[i].purchasePricePerUnit" /></label>
+              <label>Sell ₹ <input type="number" [formField]="receiveForm.lines[i].sellingPricePerUnit" /></label>
             </div>
           </div>
         }
-        <label>Note <input [(ngModel)]="note" placeholder="Optional receipt note" /></label>
+        <label>Note <input [formField]="receiveForm.note" placeholder="Optional receipt note" /></label>
         <div class="actions">
           <button type="button" class="btn" (click)="closeReceive()">Cancel</button>
           <button type="button" class="btn primary" (click)="submitReceive()">Post GRN</button>

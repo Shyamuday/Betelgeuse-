@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { AdminApi } from '../../../core/services/admin-api';
 import {
   EMPLOYEE_STATUS_COLORS,
@@ -17,7 +17,7 @@ interface PayrollRow {
 
 @Component({
   selector: 'app-payroll-page',
-  imports: [FormsModule],
+  imports: [FormField],
   templateUrl: './payroll-page.html',
   styleUrl: './payroll-page.scss'
 })
@@ -28,10 +28,12 @@ export class PayrollPage implements OnInit {
   loading = signal(true);
   summary = signal({ totalGross: 0, totalNet: 0, totalLeave: 0, headcount: 0 });
   typeFilter = signal<string>('ALL');
-  q = '';
   toast = signal('');
 
-  selectedMonth = new Date().toISOString().slice(0, 7);
+  readonly monthModel = signal({ selectedMonth: new Date().toISOString().slice(0, 7) });
+  readonly monthForm = form(this.monthModel);
+  readonly searchModel = signal({ q: '' });
+  readonly searchForm = form(this.searchModel);
 
   typeFilters = PAYROLL_TYPE_FILTERS;
 
@@ -39,15 +41,16 @@ export class PayrollPage implements OnInit {
 
   load(): void {
     this.loading.set(true);
-    this.api.getPayroll(this.selectedMonth)
+    this.api.getPayroll(this.monthModel().selectedMonth)
       .then(r => { this.rows.set(r.rows); this.summary.set(r.summary); this.loading.set(false); })
       .catch(() => this.loading.set(false));
   }
 
   filtered(): PayrollRow[] {
+    const q = this.searchModel().q.toLowerCase();
     return this.rows().filter(r => {
       if (this.typeFilter() !== 'ALL' && r.empType !== this.typeFilter()) return false;
-      if (this.q && !r.name.toLowerCase().includes(this.q.toLowerCase())) return false;
+      if (q && !r.name.toLowerCase().includes(q)) return false;
       return true;
     });
   }
@@ -75,7 +78,7 @@ export class PayrollPage implements OnInit {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `payroll-${this.selectedMonth}.csv`;
+    a.download = `payroll-${this.monthModel().selectedMonth}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     this.showToast('CSV exported ✓');

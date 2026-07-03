@@ -44,21 +44,21 @@
       @if (createError) {
         <p class="error">{{ createError }}</p>
       }
-      <button type="button" class="btn-save" (click)="createDisease()" [disabled]="creating">
-        {{ creating ? 'Creating…' : 'Create Disease' }}
+      <button type="button" class="btn-save" (click)="createDisease()" [disabled]="creating()">
+        {{ creating() ? 'Creating…' : 'Create Disease' }}
       </button>
     </div>
   }
 
-  @if (loading) {
+  @if (loading()) {
     <p class="loading-text">Loading diseases...</p>
-  } @else if (error) {
+  } @else if (error()) {
     <div class="error-row">
-      <p class="error">{{ error }}</p>
+      <p class="error">{{ error() }}</p>
       <button type="button" class="retry-btn" (click)="load()">Retry</button>
     </div>
   } @else {
-    @for (disease of diseases; track disease.id) {
+    @for (disease of diseases(); track disease.id) {
       <article class="disease-card" [class.editing]="editingId === disease.id">
 
         @if (editingId !== disease.id) {
@@ -121,10 +121,10 @@
             <p class="error">{{ saveError }}</p>
           }
           <div class="edit-actions">
-            <button type="button" class="btn-save" (click)="saveEdit()" [disabled]="saving || !draft.name || !draft.intakeQuestions.length">
-              {{ saving ? 'Saving…' : 'Save Changes' }}
+            <button type="button" class="btn-save" (click)="saveEdit()" [disabled]="saving() || !draft.name || !draft.intakeQuestions.length">
+              {{ saving() ? 'Saving…' : 'Save Changes' }}
             </button>
-            <button type="button" class="btn-cancel" (click)="cancelEdit()" [disabled]="saving">Cancel</button>
+            <button type="button" class="btn-cancel" (click)="cancelEdit()" [disabled]="saving()">Cancel</button>
           </div>
         }
       </article>

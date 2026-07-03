@@ -22,17 +22,21 @@ import {
   StockMovement,
   StaffActivityResponse,
   StaffDetailResponse
-} from '../store-models';
-import { API_BASE, STORE_API_PATHS } from '../core/constants/store/api-paths.constants';
+} from '../models/store';
+import { API_PATHS } from '../core/constants/api-paths.constants';
 import { ACTIVITY_PERIODS, DEFAULT_PAGE, EXPIRING_ALERTS_DEFAULT_DAYS, PAGE_SIZES } from '../core/constants/store/pagination.constants';
 
 @Service()
 export class StoreApiService {
   private http = inject(HttpClient);
-  private base = `${environment.apiUrl}${API_BASE.STORE}`;
+  private readonly store = API_PATHS.STORE;
+
+  private url(path: string): string {
+    return `${environment.apiUrl}${path}`;
+  }
 
   getDashboard(): Observable<DashboardStats> {
-    return this.http.get<DashboardStats>(`${this.base}${STORE_API_PATHS.DASHBOARD}`);
+    return this.http.get<DashboardStats>(this.url(this.store.DASHBOARD));
   }
 
   getMedicines(query?: { q?: string; potency?: string; page?: number; pageSize?: number }): Observable<MedicinesResponse> {
@@ -41,86 +45,86 @@ export class StoreApiService {
     if (query?.potency) params = params.set('potency', query.potency);
     if (query?.page) params = params.set('page', query.page.toString());
     if (query?.pageSize) params = params.set('pageSize', query.pageSize.toString());
-    return this.http.get<MedicinesResponse>(`${this.base}${STORE_API_PATHS.MEDICINES}`, { params });
+    return this.http.get<MedicinesResponse>(this.url(this.store.MEDICINES), { params });
   }
 
   getMedicine(id: string): Observable<MedicineDetailResponse> {
-    return this.http.get<MedicineDetailResponse>(`${this.base}${STORE_API_PATHS.MEDICINES}/${id}`);
+    return this.http.get<MedicineDetailResponse>(`${this.url(this.store.MEDICINES)}/${id}`);
   }
 
   createMedicine(data: MedicineCreateRequest): Observable<{ medicine: Medicine }> {
-    return this.http.post<{ medicine: Medicine }>(`${this.base}${STORE_API_PATHS.MEDICINES}`, data);
+    return this.http.post<{ medicine: Medicine }>(this.url(this.store.MEDICINES), data);
   }
 
   updateMedicine(id: string, data: Partial<MedicineCreateRequest>): Observable<{ medicine: Medicine }> {
-    return this.http.put<{ medicine: Medicine }>(`${this.base}${STORE_API_PATHS.MEDICINES}/${id}`, data);
+    return this.http.put<{ medicine: Medicine }>(`${this.url(this.store.MEDICINES)}/${id}`, data);
   }
 
   getRacks(): Observable<{ racks: StoreRack[] }> {
-    return this.http.get<{ racks: StoreRack[] }>(`${this.base}${STORE_API_PATHS.RACKS}`);
+    return this.http.get<{ racks: StoreRack[] }>(this.url(this.store.RACKS));
   }
 
   createRack(data: RackCreateRequest): Observable<{ rack: StoreRack }> {
-    return this.http.post<{ rack: StoreRack }>(`${this.base}${STORE_API_PATHS.RACKS}`, data);
+    return this.http.post<{ rack: StoreRack }>(this.url(this.store.RACKS), data);
   }
 
   addStock(data: StockAddRequest): Observable<{ stock: StockBatch }> {
-    return this.http.post<{ stock: StockBatch }>(`${this.base}${STORE_API_PATHS.STOCK.ADD}`, data);
+    return this.http.post<{ stock: StockBatch }>(this.url(this.store.STOCK.ADD), data);
   }
 
   removeStock(data: StockRemoveRequest): Observable<{ movement: StockMovement }> {
-    return this.http.post<{ movement: StockMovement }>(`${this.base}${STORE_API_PATHS.STOCK.REMOVE}`, data);
+    return this.http.post<{ movement: StockMovement }>(this.url(this.store.STOCK.REMOVE), data);
   }
 
   getLowStockAlerts(): Observable<AlertsLowStockResponse> {
-    return this.http.get<AlertsLowStockResponse>(`${this.base}${STORE_API_PATHS.ALERTS.LOW_STOCK}`);
+    return this.http.get<AlertsLowStockResponse>(this.url(this.store.ALERTS.LOW_STOCK));
   }
 
   getExpiringAlerts(days = EXPIRING_ALERTS_DEFAULT_DAYS): Observable<AlertsExpiringResponse> {
     const params = new HttpParams().set('days', days.toString());
-    return this.http.get<AlertsExpiringResponse>(`${this.base}${STORE_API_PATHS.ALERTS.EXPIRING}`, { params });
+    return this.http.get<AlertsExpiringResponse>(this.url(this.store.ALERTS.EXPIRING), { params });
   }
 
   getMovements(page = DEFAULT_PAGE, pageSize = PAGE_SIZES.MOVEMENTS): Observable<MovementsResponse> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
-    return this.http.get<MovementsResponse>(`${this.base}${STORE_API_PATHS.MOVEMENTS}`, { params });
+    return this.http.get<MovementsResponse>(this.url(this.store.MOVEMENTS), { params });
   }
 
   getStaffActivity(period = ACTIVITY_PERIODS.TODAY): Observable<StaffActivityResponse> {
     const params = new HttpParams().set('period', period);
-    return this.http.get<StaffActivityResponse>(`${this.base}${STORE_API_PATHS.STAFF.ACTIVITY}`, { params });
+    return this.http.get<StaffActivityResponse>(this.url(this.store.STAFF.ACTIVITY), { params });
   }
 
   getStaffDetail(staffId: string, period = ACTIVITY_PERIODS.WEEK): Observable<StaffDetailResponse> {
     const params = new HttpParams().set('period', period);
-    return this.http.get<StaffDetailResponse>(`${this.base}${STORE_API_PATHS.STAFF.DETAIL_ACTIVITY(staffId)}`, { params });
+    return this.http.get<StaffDetailResponse>(this.url(this.store.STAFF.DETAIL_ACTIVITY(staffId)), { params });
   }
 
   getHrStaffList(): Observable<{ staff: StaffHrProfile[] }> {
-    return this.http.get<{ staff: StaffHrProfile[] }>(`${this.base}${STORE_API_PATHS.HR.STAFF}`);
+    return this.http.get<{ staff: StaffHrProfile[] }>(this.url(this.store.HR.STAFF));
   }
 
   getHrStaff(id: string): Observable<{ staff: StaffHrProfile }> {
-    return this.http.get<{ staff: StaffHrProfile }>(`${this.base}${STORE_API_PATHS.HR.STAFF_DETAIL(id)}`);
+    return this.http.get<{ staff: StaffHrProfile }>(this.url(this.store.HR.STAFF_DETAIL(id)));
   }
 
   updateHrStaff(id: string, data: Partial<StaffHrProfile>): Observable<{ staff: StaffHrProfile }> {
-    return this.http.put<{ staff: StaffHrProfile }>(`${this.base}${STORE_API_PATHS.HR.STAFF_DETAIL(id)}`, data);
+    return this.http.put<{ staff: StaffHrProfile }>(this.url(this.store.HR.STAFF_DETAIL(id)), data);
   }
 
   generateStaffLetter(id: string): Observable<{ letter: JoiningLetterDoc }> {
-    return this.http.post<{ letter: JoiningLetterDoc }>(`${this.base}${STORE_API_PATHS.HR.STAFF_LETTER(id)}`, {});
+    return this.http.post<{ letter: JoiningLetterDoc }>(this.url(this.store.HR.STAFF_LETTER(id)), {});
   }
 
   getStaffLetter(id: string): Observable<{ letter: JoiningLetterDoc }> {
-    return this.http.get<{ letter: JoiningLetterDoc }>(`${this.base}${STORE_API_PATHS.HR.STAFF_LETTER(id)}`);
+    return this.http.get<{ letter: JoiningLetterDoc }>(this.url(this.store.HR.STAFF_LETTER(id)));
   }
 
   getMyPayslip(month: string): Observable<{ payslip: any; history: any[] }> {
     const params = new HttpParams().set('month', month);
-    return this.http.get<{ payslip: any; history: any[] }>(`${this.base}${STORE_API_PATHS.STAFF.MY_PAYSLIP}`, { params });
+    return this.http.get<{ payslip: any; history: any[] }>(this.url(this.store.STAFF.MY_PAYSLIP), { params });
   }
 
   scanPatient(patientCode: string): Observable<{
@@ -149,12 +153,12 @@ export class StoreApiService {
       }>;
     } | null;
   }> {
-    return this.http.get<any>(`${this.base}${STORE_API_PATHS.SCAN_PATIENT(patientCode)}`);
+    return this.http.get<any>(this.url(this.store.SCAN_PATIENT(patientCode)));
   }
 
   markDoseGiven(doseId: string): Observable<{ doseEvent: { id: string; status: string }; message: string }> {
     return this.http.post<{ doseEvent: { id: string; status: string }; message: string }>(
-      `${this.base}${STORE_API_PATHS.SCAN_DOSE_GIVE(doseId)}`,
+      this.url(this.store.SCAN_DOSE_GIVE(doseId)),
       {}
     );
   }
@@ -162,7 +166,7 @@ export class StoreApiService {
   getStoreExpenses(category?: string): Observable<{ expenses: any[] }> {
     let params = new HttpParams();
     if (category) params = params.set('category', category);
-    return this.http.get<{ expenses: any[] }>(`${this.base}${STORE_API_PATHS.EXPENSES}`, { params });
+    return this.http.get<{ expenses: any[] }>(this.url(this.store.EXPENSES), { params });
   }
 
   createStoreExpense(data: {
@@ -173,7 +177,7 @@ export class StoreApiService {
     amountInPaise: number;
     expenseDate: string;
   }): Observable<{ expense: any }> {
-    return this.http.post<{ expense: any }>(`${this.base}${STORE_API_PATHS.EXPENSES}`, data);
+    return this.http.post<{ expense: any }>(this.url(this.store.EXPENSES), data);
   }
 
   searchPatients(q: string, scope: 'auto' | 'clinic' | 'global' = 'auto') {
@@ -188,7 +192,7 @@ export class StoreApiService {
         homeClinicStore?: { id: string; name: string; code: string } | null;
       }>;
       scopeUsed: 'clinic' | 'global' | 'none';
-    }>(`${this.base}${STORE_API_PATHS.PATIENTS.SEARCH}`, { params });
+    }>(this.url(this.store.PATIENTS.SEARCH), { params });
   }
 
   createPatient(payload: { name: string; mobile?: string; email?: string }) {
@@ -199,12 +203,12 @@ export class StoreApiService {
         patientCode?: string | null;
         mobile?: string | null;
       };
-    }>(`${this.base}${STORE_API_PATHS.PATIENTS.CREATE}`, payload);
+    }>(this.url(this.store.PATIENTS.CREATE), payload);
   }
 
   getPurchaseOrders(status?: string) {
     const params = status ? new HttpParams().set('status', status) : undefined;
-    return this.http.get<{ orders: any[] }>(`${this.base}${STORE_API_PATHS.PURCHASE_ORDERS}`, { params });
+    return this.http.get<{ orders: any[] }>(this.url(this.store.PURCHASE_ORDERS), { params });
   }
 
   postPurchaseOrderGrn(
@@ -222,21 +226,21 @@ export class StoreApiService {
       }>;
     }
   ) {
-    return this.http.post<any>(`${this.base}${STORE_API_PATHS.PURCHASE_ORDER_GRN(orderId)}`, payload);
+    return this.http.post<any>(this.url(this.store.PURCHASE_ORDER_GRN(orderId)), payload);
   }
 
   getStockTransfers(status?: string) {
     const params = status ? new HttpParams().set('status', status) : undefined;
-    return this.http.get<{ transfers: any[] }>(`${this.base}${STORE_API_PATHS.STOCK_TRANSFERS}`, { params });
+    return this.http.get<{ transfers: any[] }>(this.url(this.store.STOCK_TRANSFERS), { params });
   }
 
   postStockTransferReceive(transferId: string) {
-    return this.http.post<any>(`${this.base}${STORE_API_PATHS.STOCK_TRANSFER_RECEIVE(transferId)}`, {});
+    return this.http.post<any>(this.url(this.store.STOCK_TRANSFER_RECEIVE(transferId)), {});
   }
 
   getDeliveries(status?: string) {
     const params = status ? new HttpParams().set('status', status) : undefined;
-    return this.http.get<{ deliveries: any[] }>(`${this.base}${STORE_API_PATHS.DELIVERIES}`, { params });
+    return this.http.get<{ deliveries: any[] }>(this.url(this.store.DELIVERIES), { params });
   }
 
   postDelivery(payload: {
@@ -246,6 +250,6 @@ export class StoreApiService {
     notes?: string;
     lines: Array<{ medicineId?: string; label: string; qty: number }>;
   }) {
-    return this.http.post<any>(`${this.base}${STORE_API_PATHS.DELIVERIES}`, payload);
+    return this.http.post<any>(this.url(this.store.DELIVERIES), payload);
   }
 }

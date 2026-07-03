@@ -1,5 +1,5 @@
 import { DecimalPipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
@@ -27,29 +27,29 @@ export class CaseAnalysisPage {
   readonly weightOptions = [1, 2, 3, 4] as const;
 
   consultationId = '';
-  consultation: ConsultationSummary | null = null;
-  analysis: CaseAnalysis | null = null;
-  sources: RepertorySource[] = [];
+  readonly consultation = signal<ConsultationSummary | null>(null);
+  readonly analysis = signal<CaseAnalysis | null>(null);
+  readonly sources = signal<RepertorySource[]>([]);
   selectedSourceId = '';
-  selectedRubrics: SelectedRubric[] = [];
+  readonly selectedRubrics = signal<SelectedRubric[]>([]);
   notes = '';
 
   rubricQuery = '';
-  searchResults: RubricSearchResult[] = [];
-  searchedOnce = false;
-  maxResultScore = 0;
+  readonly searchResults = signal<RubricSearchResult[]>([]);
+  readonly searchedOnce = signal(false);
+  readonly maxResultScore = signal(0);
 
-  loading = false;
-  searching = false;
-  saving = false;
-  repertorizing = false;
-  selectingRemedyId = '';
-  focusedRemedy: RepertoryRemedyRef | null = null;
-  materiaMedica: MateriaMedicaResponse | null = null;
-  loadingMateriaMedica = false;
-  materiaMedicaError = '';
-  error = '';
-  message = '';
+  readonly loading = signal(false);
+  readonly searching = signal(false);
+  readonly saving = signal(false);
+  readonly repertorizing = signal(false);
+  readonly selectingRemedyId = signal('');
+  readonly focusedRemedy = signal<RepertoryRemedyRef | null>(null);
+  readonly materiaMedica = signal<MateriaMedicaResponse | null>(null);
+  readonly loadingMateriaMedica = signal(false);
+  readonly materiaMedicaError = signal('');
+  readonly error = signal('');
+  readonly message = signal('');
 
   readonly formatRubricPath = formatRubricPath;
   readonly rubricPathSegments = rubricPathSegments;
@@ -68,10 +68,11 @@ export class CaseAnalysisPage {
 
   async loadSources() {
     try {
-      this.sources = await this.api.loadSources();
-      this.selectedSourceId = this.sources[0]?.id || '';
+      const nextSources = await this.api.loadSources();
+      this.sources.set(nextSources);
+      this.selectedSourceId = nextSources[0]?.id || '';
     } catch {
-      this.sources = [];
+      this.sources.set([]);
     }
   }
 
@@ -79,97 +80,105 @@ export class CaseAnalysisPage {
     const id = this.consultationId.trim();
     if (!id) return;
 
-    this.loading = true;
-    this.error = '';
-    this.message = '';
+    this.loading.set(true);
+    this.error.set('');
+    this.message.set('');
     try {
       const response = await this.api.loadConsultationAnalyses(id);
-      this.consultation = response.consultation;
-      this.analysis =
+      this.consultation.set(response.consultation);
+      const nextAnalysis =
         response.analyses[0] ||
         (await this.api.createAnalysis(id, { sourceId: this.selectedSourceId || undefined }));
-      this.selectedSourceId = this.analysis.source?.id || this.selectedSourceId;
-      this.hydrateFromAnalysis(this.analysis);
+      this.analysis.set(nextAnalysis);
+      this.selectedSourceId = nextAnalysis.source?.id || this.selectedSourceId;
+      this.hydrateFromAnalysis(nextAnalysis);
     } catch {
-      this.error = 'Could not load case analysis for this consultation.';
-      this.consultation = null;
-      this.analysis = null;
+      this.error.set('Could not load case analysis for this consultation.');
+      this.consultation.set(null);
+      this.analysis.set(null);
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 
-  private hydrateFromAnalysis(analysis: CaseAnalysis) {
-    this.notes = analysis.notes || '';
-    this.selectedRubrics = analysis.rubrics.map((item) => ({
-      rubricId: item.rubricId,
-      weight: item.weight,
-      rubric: item.rubric || undefined
-    }));
-    this.maxResultScore = analysis.results[0]?.totalScore || 0;
-    if (analysis.selectedRemedy && this.focusedRemedy?.id !== analysis.selectedRemedy.id) {
-      void this.focusRemedy(analysis.selectedRemedy);
+  private hydrateFromAnalysis(nextAnalysis: CaseAnalysis) {
+    this.notes = nextAnalysis.notes || '';
+    this.selectedRubrics.set(
+      nextAnalysis.rubrics.map((item) => ({
+        rubricId: item.rubricId,
+        weight: item.weight,
+        rubric: item.rubric || undefined
+      }))
+    );
+    this.maxResultScore.set(nextAnalysis.results[0]?.totalScore || 0);
+    if (nextAnalysis.selectedRemedy && this.focusedRemedy()?.id !== nextAnalysis.selectedRemedy.id) {
+      void this.focusRemedy(nextAnalysis.selectedRemedy);
     }
   }
 
   async focusRemedy(remedy: RepertoryRemedyRef) {
-    this.focusedRemedy = remedy;
-    this.materiaMedica = null;
-    this.materiaMedicaError = '';
-    this.loadingMateriaMedica = true;
+    this.focusedRemedy.set(remedy);
+    this.materiaMedica.set(null);
+    this.materiaMedicaError.set('');
+    this.loadingMateriaMedica.set(true);
 
     try {
-      this.materiaMedica = await this.api.loadMateriaMedica(remedy.id, {
-        analysisId: this.analysis?.id,
-        repertorySourceId: this.analysis?.source?.id
-      });
+      this.materiaMedica.set(
+        await this.api.loadMateriaMedica(remedy.id, {
+          analysisId: this.analysis()?.id,
+          repertorySourceId: this.analysis()?.source?.id
+        })
+      );
     } catch {
-      this.materiaMedicaError = 'Could not load materia medica for this remedy.';
+      this.materiaMedicaError.set('Could not load materia medica for this remedy.');
     } finally {
-      this.loadingMateriaMedica = false;
+      this.loadingMateriaMedica.set(false);
     }
   }
 
   clearFocusedRemedy() {
-    this.focusedRemedy = null;
-    this.materiaMedica = null;
-    this.materiaMedicaError = '';
+    this.focusedRemedy.set(null);
+    this.materiaMedica.set(null);
+    this.materiaMedicaError.set('');
   }
 
   isFocusedRemedy(remedyId: string) {
-    return this.focusedRemedy?.id === remedyId;
+    return this.focusedRemedy()?.id === remedyId;
   }
 
   scorePercent(score: number) {
-    if (!this.maxResultScore) return 0;
-    return Math.max(8, Math.round((score / this.maxResultScore) * 100));
+    const max = this.maxResultScore();
+    if (!max) return 0;
+    return Math.max(8, Math.round((score / max) * 100));
   }
 
   async searchRubrics() {
     const q = this.rubricQuery.trim();
     if (q.length < 2) return;
 
-    this.searching = true;
-    this.error = '';
-    this.searchedOnce = true;
+    this.searching.set(true);
+    this.error.set('');
+    this.searchedOnce.set(true);
     try {
-      this.searchResults = await this.api.searchRubrics(q, this.selectedSourceId || this.analysis?.source?.id);
+      this.searchResults.set(
+        await this.api.searchRubrics(q, this.selectedSourceId || this.analysis()?.source?.id)
+      );
     } catch {
-      this.error = 'Rubric search failed.';
-      this.searchResults = [];
+      this.error.set('Rubric search failed.');
+      this.searchResults.set([]);
     } finally {
-      this.searching = false;
+      this.searching.set(false);
     }
   }
 
   hasRubric(rubricId: string) {
-    return this.selectedRubrics.some((item) => item.rubricId === rubricId);
+    return this.selectedRubrics().some((item) => item.rubricId === rubricId);
   }
 
   addRubric(rubric: RubricSearchResult) {
     if (this.hasRubric(rubric.id)) return;
-    this.selectedRubrics = [
-      ...this.selectedRubrics,
+    this.selectedRubrics.set([
+      ...this.selectedRubrics(),
       {
         rubricId: rubric.id,
         weight: 2,
@@ -181,91 +190,100 @@ export class CaseAnalysisPage {
           parentPath: rubric.parentPath
         }
       }
-    ];
-    this.message = 'Symptom added to case.';
+    ]);
+    this.message.set('Symptom added to case.');
   }
 
   removeRubric(rubricId: string) {
-    this.selectedRubrics = this.selectedRubrics.filter((item) => item.rubricId !== rubricId);
+    this.selectedRubrics.set(this.selectedRubrics().filter((item) => item.rubricId !== rubricId));
   }
 
   private rubricPayload() {
-    return this.selectedRubrics.map((item) => ({
+    return this.selectedRubrics().map((item) => ({
       rubricId: item.rubricId,
       weight: item.weight
     }));
   }
 
   async saveRubrics() {
-    if (!this.analysis) return;
-    this.saving = true;
-    this.error = '';
-    this.message = '';
+    const currentAnalysis = this.analysis();
+    if (!currentAnalysis) return;
+    this.saving.set(true);
+    this.error.set('');
+    this.message.set('');
     try {
-      this.analysis = await this.api.updateAnalysis(this.analysis.id, { rubrics: this.rubricPayload() });
-      this.hydrateFromAnalysis(this.analysis);
-      this.message = 'Case rubrics saved.';
+      const updated = await this.api.updateAnalysis(currentAnalysis.id, { rubrics: this.rubricPayload() });
+      this.analysis.set(updated);
+      this.hydrateFromAnalysis(updated);
+      this.message.set('Case rubrics saved.');
     } catch {
-      this.error = 'Could not save rubrics.';
+      this.error.set('Could not save rubrics.');
     } finally {
-      this.saving = false;
+      this.saving.set(false);
     }
   }
 
   async saveNotes() {
-    if (!this.analysis) return;
-    this.saving = true;
-    this.error = '';
-    this.message = '';
+    const currentAnalysis = this.analysis();
+    if (!currentAnalysis) return;
+    this.saving.set(true);
+    this.error.set('');
+    this.message.set('');
     try {
-      this.analysis = await this.api.updateAnalysis(this.analysis.id, { notes: this.notes });
-      this.message = 'Notes saved.';
+      const updated = await this.api.updateAnalysis(currentAnalysis.id, { notes: this.notes });
+      this.analysis.set(updated);
+      this.message.set('Notes saved.');
     } catch {
-      this.error = 'Could not save notes.';
+      this.error.set('Could not save notes.');
     } finally {
-      this.saving = false;
+      this.saving.set(false);
     }
   }
 
   async runRepertorization() {
-    if (!this.analysis) return;
-    this.repertorizing = true;
-    this.error = '';
-    this.message = '';
+    const currentAnalysis = this.analysis();
+    if (!currentAnalysis) return;
+    this.repertorizing.set(true);
+    this.error.set('');
+    this.message.set('');
     try {
       await this.saveRubrics();
-      this.analysis = await this.api.repertorize(this.analysis.id);
-      this.hydrateFromAnalysis(this.analysis);
-      this.message = 'Repertorization complete. Review ranked remedies on the right.';
+      const updated = await this.api.repertorize(currentAnalysis.id);
+      this.analysis.set(updated);
+      this.hydrateFromAnalysis(updated);
+      this.message.set('Repertorization complete. Review ranked remedies on the right.');
     } catch {
-      this.error = 'Repertorization failed. Add rubrics and try again.';
+      this.error.set('Repertorization failed. Add rubrics and try again.');
     } finally {
-      this.repertorizing = false;
+      this.repertorizing.set(false);
     }
   }
 
   async chooseRemedy(remedy: { id: string; name: string; abbreviation: string }) {
-    if (!this.analysis) return;
-    this.selectingRemedyId = remedy.id;
-    this.error = '';
-    this.message = '';
+    const currentAnalysis = this.analysis();
+    if (!currentAnalysis) return;
+    this.selectingRemedyId.set(remedy.id);
+    this.error.set('');
+    this.message.set('');
     try {
-      this.analysis = await this.api.selectRemedy(this.analysis.id, remedy.id);
+      const updated = await this.api.selectRemedy(currentAnalysis.id, remedy.id);
+      this.analysis.set(updated);
       await this.focusRemedy(remedy);
-      this.message = `${remedy.name} selected as the case remedy.`;
+      this.message.set(`${remedy.name} selected as the case remedy.`);
     } catch {
-      this.error = 'Could not select remedy.';
+      this.error.set('Could not select remedy.');
     } finally {
-      this.selectingRemedyId = '';
+      this.selectingRemedyId.set('');
     }
   }
 
   openPrescriptionWithRemedy() {
-    if (!this.analysis?.selectedRemedy || !this.consultationId) return;
+    const currentAnalysis = this.analysis();
+    if (!currentAnalysis?.selectedRemedy || !this.consultationId) return;
     void this.router.navigate(['/', ROUTE_PATHS.APPOINTMENTS], {
       queryParams: {
         consultationId: this.consultationId,
-        remedy: this.analysis.selectedRemedy.name
+        remedy: currentAnalysis.selectedRemedy.name
       }
     });
   }

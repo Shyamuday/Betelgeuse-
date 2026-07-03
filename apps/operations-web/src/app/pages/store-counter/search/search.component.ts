@@ -1,15 +1,15 @@
 import { Component, inject, signal, OnDestroy } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, takeUntil } from 'rxjs';
 import { StoreApiService } from '../../../services/store-api.service';
 import { StoreRouteContext } from '../../../services/store-route-context.service';
-import { MedicineWithStock } from '../../../store-models';
+import { MedicineWithStock } from '../../../models/store';
 import { DEFAULT_PAGE, PAGE_SIZES } from '../../../core/constants/store/pagination.constants';
 
 @Component({
   selector: 'app-search',
-  imports: [FormsModule, RouterLink],
+  imports: [FormField, RouterLink],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss'
 })
@@ -17,7 +17,9 @@ export class SearchComponent implements OnDestroy {
   private api = inject(StoreApiService);
   readonly storeRoutes = inject(StoreRouteContext);
 
-  query = signal('');
+  readonly searchModel = signal({ q: '' });
+  readonly searchForm = form(this.searchModel);
+
   selectedPotency = signal('');
   medicines = signal<MedicineWithStock[]>([]);
   loading = signal(false);
@@ -60,25 +62,25 @@ export class SearchComponent implements OnDestroy {
     });
   }
 
-  onSearch(val: string): void {
-    this.query.set(val);
+  onSearch(): void {
+    const val = this.searchModel().q;
     this.searchSubject.next({ q: val, potency: this.selectedPotency() });
   }
 
   setPotency(p: string): void {
     this.selectedPotency.set(p);
-    this.searchSubject.next({ q: this.query(), potency: p });
+    this.searchSubject.next({ q: this.searchModel().q, potency: p });
   }
 
   clearSearch(): void {
-    this.query.set('');
+    this.searchModel.set({ q: '' });
     this.medicines.set([]);
     this.total.set(0);
   }
 
   loadMore(): void {
     const next = this.page() + 1;
-    this.api.getMedicines({ q: this.query(), potency: this.selectedPotency(), page: next, pageSize: PAGE_SIZES.SEARCH }).subscribe({
+    this.api.getMedicines({ q: this.searchModel().q, potency: this.selectedPotency(), page: next, pageSize: PAGE_SIZES.SEARCH }).subscribe({
       next: (res) => {
         this.medicines.update(list => [...list, ...res.medicines]);
         this.page.set(next);
@@ -104,7 +106,8 @@ export class SearchComponent implements OnDestroy {
     this.recognition.interimResults = false;
     this.recognition.onresult = (e: any) => {
       const text = e.results[0][0].transcript;
-      this.onSearch(text);
+      this.searchModel.set({ q: text });
+      this.onSearch();
       this.isListening.set(false);
     };
     this.recognition.onend = () => this.isListening.set(false);

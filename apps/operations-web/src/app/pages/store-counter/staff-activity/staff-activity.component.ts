@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { StoreApiService } from '../../../services/store-api.service';
-import { StaffActivity, StaffDetailResponse } from '../../../store-models';
+import { StaffActivity, StaffDetailResponse } from '../../../models/store';
 import { ACTIVITY_PERIODS } from '../../../core/constants/store/pagination.constants';
 import { STORE_STAFF_ROLES } from '../../../core/constants/store/auth.constants';
 import { STAFF_ACTIVITY_DISPLAY, OUTBOUND_MOVEMENT_TYPES } from '../../../shared/store/constants/stock-movement.constants';

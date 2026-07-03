@@ -12,17 +12,17 @@
         <option [ngValue]="opt.value">{{ opt.label }}</option>
       }
     </select>
-    <button type="button" (click)="applyFilters()" [disabled]="loading">Refresh</button>
+    <button type="button" (click)="applyFilters()" [disabled]="loading()">Refresh</button>
   </div>
 
-  @if (loading) {
+  @if (loading()) {
     <p class="loading-text">Loading analytics…</p>
-  } @else if (error) {
+  } @else if (error()) {
     <div class="error-row">
-      <p class="error">{{ error }}</p>
+      <p class="error">{{ error() }}</p>
       <button type="button" class="retry-btn" (click)="load()">Retry</button>
     </div>
-  } @else if (report) {
+  } @else if (report(); as report) {
     <div class="summary-cards">
       <div class="card">
         <div class="val">{{ report.summary.patientLogins }}</div>

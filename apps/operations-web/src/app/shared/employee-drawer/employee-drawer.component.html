@@ -40,16 +40,16 @@
               <div class="form-grid">
                 <div class="form-group">
                   <label class="form-label">Employee ID</label>
-                  <input class="form-input" [(ngModel)]="form.employeeId" placeholder="EMP001" />
+                  <input class="form-input" [formField]="employeeForm.employeeId" placeholder="EMP001" />
                 </div>
                 <div class="form-group">
                   <label class="form-label">Designation</label>
-                  <input class="form-input" [(ngModel)]="form.designation" placeholder="Senior Doctor" />
+                  <input class="form-input" [formField]="employeeForm.designation" placeholder="Senior Doctor" />
                 </div>
                 @if (isDoctor()) {
                   <div class="form-group full-width">
                     <label class="form-label">Doctor type</label>
-                    <select class="form-input" [(ngModel)]="form.doctorType">
+                    <select class="form-input" [formField]="employeeForm.doctorType">
                       @for (option of doctorTypeOptions; track option.value) {
                         <option [value]="option.value">{{ option.label }}</option>
                       }
@@ -58,7 +58,7 @@
                   @if (isSpecialistType()) {
                     <div class="form-group full-width">
                       <label class="form-label">Specialty focus</label>
-                      <select class="form-input" [(ngModel)]="form.specialtyFocus">
+                      <select class="form-input" [formField]="employeeForm.specialtyFocus">
                         <option value="">Select focus</option>
                         @for (option of specialtyFocusOptions; track option.value) {
                           <option [value]="option.value">{{ option.label }}</option>
@@ -68,38 +68,38 @@
                   }
                   <div class="form-group full-width">
                     <label class="form-label">Clinical specialty (display)</label>
-                    <input class="form-input" [(ngModel)]="form.specialty" placeholder="Homeopathy" />
+                    <input class="form-input" [formField]="employeeForm.specialty" placeholder="Homeopathy" />
                   </div>
                 }
                 <div class="form-group">
                   <label class="form-label">Department</label>
-                  <input class="form-input" [(ngModel)]="form.department" placeholder="Homeopathy" />
+                  <input class="form-input" [formField]="employeeForm.department" placeholder="Homeopathy" />
                 </div>
                 <div class="form-group">
                   <label class="form-label">Joining Date</label>
-                  <input class="form-input" type="date" [(ngModel)]="form.joiningDate" />
+                  <input class="form-input" type="date" [formField]="employeeForm.joiningDate" />
                 </div>
                 <div class="form-group">
                   <label class="form-label">Probation End Date</label>
-                  <input class="form-input" type="date" [(ngModel)]="form.probationEndDate" />
+                  <input class="form-input" type="date" [formField]="employeeForm.probationEndDate" />
                 </div>
                 <div class="form-group">
                   <label class="form-label">Salary (₹)</label>
-                  <input class="form-input" type="number" [(ngModel)]="form.salary" placeholder="50000" />
+                  <input class="form-input" type="number" [formField]="employeeForm.salary" placeholder="50000" />
                 </div>
                 @if (isDoctor()) {
                   <div class="form-group">
                     <label class="form-label">Consultation fee (₹)</label>
-                    <input class="form-input" type="number" [(ngModel)]="form.consultationFee" placeholder="500" />
+                    <input class="form-input" type="number" [formField]="employeeForm.consultationFee" placeholder="500" />
                   </div>
                 }
                 <div class="form-group full-width">
                   <label class="form-label">Emergency Contact</label>
-                  <input class="form-input" [(ngModel)]="form.emergencyContact" placeholder="+91 98765 43210" />
+                  <input class="form-input" [formField]="employeeForm.emergencyContact" placeholder="+91 98765 43210" />
                 </div>
                 <div class="form-group full-width">
                   <label class="form-label">Employee Status</label>
-                  <select class="form-input" [(ngModel)]="form.employeeStatus">
+                  <select class="form-input" [formField]="employeeForm.employeeStatus">
                     <option value="ACTIVE">Active</option>
                     <option value="ON_LEAVE">On Leave</option>
                     <option value="RESIGNED">Resigned</option>
@@ -119,8 +119,8 @@
                   @for (s of shifts; track s.value) {
                     <button
                       class="shift-btn"
-                      [class.active]="form.workShift === s.value"
-                      (click)="form.workShift = s.value"
+                      [class.active]="employeeFormModel().workShift === s.value"
+                      (click)="setWorkShift(s.value)"
                     >{{ s.label }}</button>
                   }
                 </div>
@@ -129,11 +129,11 @@
               <div class="form-grid mt-16">
                 <div class="form-group">
                   <label class="form-label">Shift Start</label>
-                  <input class="form-input" type="time" [(ngModel)]="form.shiftStart" />
+                  <input class="form-input" type="time" [formField]="employeeForm.shiftStart" />
                 </div>
                 <div class="form-group">
                   <label class="form-label">Shift End</label>
-                  <input class="form-input" type="time" [(ngModel)]="form.shiftEnd" />
+                  <input class="form-input" type="time" [formField]="employeeForm.shiftEnd" />
                 </div>
               </div>
 
@@ -143,7 +143,7 @@
                   @for (day of weekdays; track day) {
                     <button
                       class="day-btn"
-                      [class.active]="form.weeklyOffDays.includes(day)"
+                      [class.active]="employeeFormModel().weeklyOffDays.includes(day)"
                       (click)="toggleDay(day)"
                     >{{ day.slice(0, 3) }}</button>
                   }
@@ -253,11 +253,11 @@
                     <div class="clinic-form">
                       <div class="form-group">
                         <label class="form-label">Clinic Name (optional)</label>
-                        <input class="form-input" [(ngModel)]="clinicName" placeholder="City Medical Center" />
+                        <input class="form-input" [formField]="letterForm.clinicName" placeholder="City Medical Center" />
                       </div>
                       <div class="form-group">
                         <label class="form-label">Clinic Address (optional)</label>
-                        <input class="form-input" [(ngModel)]="clinicAddress" placeholder="123 Main St, City" />
+                        <input class="form-input" [formField]="letterForm.clinicAddress" placeholder="123 Main St, City" />
                       </div>
                     </div>
                   }

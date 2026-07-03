@@ -1,11 +1,23 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { AdminApi } from '../../../core/services/admin-api';
 import { TOAST_DURATION_MS } from '../../../core/constants/timing.constants';
 
+function emptyMedicineForm() {
+  return {
+    name: '',
+    potency: '30C',
+    shortName: '',
+    manufacturer: '',
+    category: '',
+    minStockLevel: 10,
+    isActive: true
+  };
+}
+
 @Component({
   selector: 'app-medicines-page',
-  imports: [FormsModule],
+  imports: [FormField],
   templateUrl: './medicines-page.html',
   styleUrl: './medicines-page.scss'
 })
@@ -19,23 +31,21 @@ export class MedicinesPage implements OnInit {
   selected = signal<any>(null);
   error = signal('');
   toast = signal('');
-  q = '';
-  form = {
-    name: '',
-    potency: '30C',
-    shortName: '',
-    manufacturer: '',
-    category: '',
-    minStockLevel: 10,
-    isActive: true
-  };
+
+  readonly searchModel = signal({ q: '' });
+  readonly searchForm = form(this.searchModel);
+  readonly draftModel = signal(emptyMedicineForm());
+  readonly draftForm = form(this.draftModel);
 
   ngOnInit(): void { void this.load(); }
 
   async load() {
     this.loading.set(true);
     try {
-      const response = await this.api.listMedicines({ q: this.q, includeInactive: true });
+      const response = await this.api.listMedicines({
+        q: this.searchModel().q,
+        includeInactive: true
+      });
       this.medicines.set(response.medicines);
     } catch {
       this.error.set('Could not load medicines.');
@@ -45,14 +55,14 @@ export class MedicinesPage implements OnInit {
   }
 
   openCreate() {
-    this.form = { name: '', potency: '30C', shortName: '', manufacturer: '', category: '', minStockLevel: 10, isActive: true };
+    this.draftModel.set(emptyMedicineForm());
     this.error.set('');
     this.modal.set('create');
   }
 
   openEdit(medicine: any) {
     this.selected.set(medicine);
-    this.form = {
+    this.draftModel.set({
       name: medicine.name,
       potency: medicine.potency,
       shortName: medicine.shortName || '',
@@ -60,7 +70,7 @@ export class MedicinesPage implements OnInit {
       category: medicine.category || '',
       minStockLevel: medicine.minStockLevel ?? 10,
       isActive: medicine.isActive !== false
-    };
+    });
     this.error.set('');
     this.modal.set('edit');
   }
@@ -68,17 +78,18 @@ export class MedicinesPage implements OnInit {
   closeModal() { this.modal.set(null); }
 
   async save() {
-    if (!this.form.name || !this.form.potency) {
+    const form = this.draftModel();
+    if (!form.name || !form.potency) {
       this.error.set('Name and potency are required.');
       return;
     }
     this.saving.set(true);
     try {
       if (this.modal() === 'create') {
-        await this.api.createMedicine(this.form);
+        await this.api.createMedicine(form);
         this.showToast('Medicine created.');
       } else {
-        await this.api.updateMedicine(this.selected()!.id, this.form);
+        await this.api.updateMedicine(this.selected()!.id, form);
         this.showToast('Medicine updated.');
       }
       this.modal.set(null);

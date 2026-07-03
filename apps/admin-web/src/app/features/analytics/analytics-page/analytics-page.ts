@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../../../core/services/admin-api';
 import { ANALYTICS_WINDOW_OPTIONS } from '../constants/analytics.constants';
@@ -43,24 +43,24 @@ export class AnalyticsPage {
   readonly windowOptions = ANALYTICS_WINDOW_OPTIONS;
 
   windowDays = 30;
-  report: AnalyticsReport | null = null;
-  loading = false;
-  error = '';
+  readonly report = signal<AnalyticsReport | null>(null);
+  readonly loading = signal(false);
+  readonly error = signal('');
 
   constructor(private readonly api: AdminApi) {
     void this.load();
   }
 
   async load() {
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
     try {
-      this.report = (await this.api.getAnalyticsFunnels({ days: this.windowDays })) as AnalyticsReport;
+      this.report.set((await this.api.getAnalyticsFunnels({ days: this.windowDays })) as AnalyticsReport);
     } catch {
-      this.error = 'Could not load product analytics.';
-      this.report = null;
+      this.error.set('Could not load product analytics.');
+      this.report.set(null);
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 

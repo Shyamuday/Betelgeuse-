@@ -1,5 +1,5 @@
 import { computed, inject, Service } from '@angular/core';
-import { StoreStaff } from '../store-models';
+import { StorePortalStaff } from '../models/store';
 import { STORE_STAFF_ROLES } from '../core/constants/store/auth.constants';
 import { PlatformAuthService } from './platform-auth.service';
 
@@ -16,7 +16,7 @@ export class StoreAuthService {
     return this.platform.getToken();
   }
 
-  setAuth(_token: string, _staff: StoreStaff): void {
+  setAuth(_token: string, _staff: StorePortalStaff): void {
     // No-op — session is owned by PlatformAuthService after unified login.
   }
 

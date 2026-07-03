@@ -1,15 +1,25 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
 import { StoreApiService } from '../../../services/store-api.service';
 
 type DeliveryLine = { label: string; qty: number };
 type PatientHit = { id: string; name: string; patientCode?: string | null; mobile?: string | null };
 
+function emptyCreateForm() {
+  return {
+    patientQuery: '',
+    deliveryAddress: '',
+    deliveryPhone: '',
+    notes: '',
+    lines: [{ label: '', qty: 1 }] as DeliveryLine[]
+  };
+}
+
 @Component({
   selector: 'app-deliveries-page',
   standalone: true,
-  imports: [FormsModule, DatePipe],
+  imports: [FormField, DatePipe],
   templateUrl: './deliveries-page.html',
   styleUrl: './deliveries-page.scss'
 })
@@ -23,13 +33,11 @@ export class DeliveriesPage implements OnInit {
   toast = signal('');
   createdOtp = signal('');
 
-  patientQuery = '';
   patientHits = signal<PatientHit[]>([]);
   selectedPatient = signal<PatientHit | null>(null);
-  deliveryAddress = '';
-  deliveryPhone = '';
-  notes = '';
-  lines = signal<DeliveryLine[]>([{ label: '', qty: 1 }]);
+
+  readonly createFormModel = signal(emptyCreateForm());
+  readonly createForm = form(this.createFormModel);
 
   ngOnInit(): void {
     this.load();
@@ -54,12 +62,11 @@ export class DeliveriesPage implements OnInit {
     this.creating.set(true);
     this.createdOtp.set('');
     this.selectedPatient.set(null);
-    this.patientQuery = '';
     this.patientHits.set([]);
-    this.deliveryAddress = '';
-    this.deliveryPhone = '';
-    this.notes = '';
-    this.lines.set([{ label: 'Arnica Montana 30C', qty: 1 }]);
+    this.createFormModel.set({
+      ...emptyCreateForm(),
+      lines: [{ label: 'Arnica Montana 30C', qty: 1 }]
+    });
   }
 
   closeCreate(): void {
@@ -68,7 +75,7 @@ export class DeliveriesPage implements OnInit {
   }
 
   searchPatients(): void {
-    const q = this.patientQuery.trim();
+    const q = this.createFormModel().patientQuery.trim();
     if (q.length < 2) {
       this.patientHits.set([]);
       return;
@@ -81,26 +88,33 @@ export class DeliveriesPage implements OnInit {
 
   pickPatient(p: PatientHit): void {
     this.selectedPatient.set(p);
-    this.deliveryPhone = p.mobile ?? '';
     this.patientHits.set([]);
-    this.patientQuery = `${p.name} (${p.patientCode ?? p.id})`;
+    this.createFormModel.update((form) => ({
+      ...form,
+      patientQuery: `${p.name} (${p.patientCode ?? p.id})`,
+      deliveryPhone: p.mobile ?? form.deliveryPhone
+    }));
   }
 
   addLine(): void {
-    this.lines.update((rows) => [...rows, { label: '', qty: 1 }]);
+    this.createFormModel.update((form) => ({
+      ...form,
+      lines: [...form.lines, { label: '', qty: 1 }]
+    }));
   }
 
   submitCreate(): void {
     const patient = this.selectedPatient();
     if (!patient) return;
-    const lines = this.lines().filter((line) => line.label.trim() && line.qty > 0);
-    if (!lines.length || !this.deliveryAddress.trim() || !this.deliveryPhone.trim()) return;
+    const form = this.createFormModel();
+    const lines = form.lines.filter((line) => line.label.trim() && line.qty > 0);
+    if (!lines.length || !form.deliveryAddress.trim() || !form.deliveryPhone.trim()) return;
 
     this.api.postDelivery({
       patientId: patient.id,
-      deliveryAddress: this.deliveryAddress.trim(),
-      deliveryPhone: this.deliveryPhone.trim(),
-      notes: this.notes.trim() || undefined,
+      deliveryAddress: form.deliveryAddress.trim(),
+      deliveryPhone: form.deliveryPhone.trim(),
+      notes: form.notes.trim() || undefined,
       lines: lines.map((line) => ({ label: line.label.trim(), qty: line.qty }))
     }).subscribe({
       next: (res) => {

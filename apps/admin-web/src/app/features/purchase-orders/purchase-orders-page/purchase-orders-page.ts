@@ -1,14 +1,22 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
 import { AdminApi } from '../../../core/services/admin-api';
 import { TOAST_DURATION_MS } from '../../../core/constants/timing.constants';
 
 type PoLine = { medicineId: string; label: string; qtyOrdered: number; unitPriceInPaise: number };
 
+function emptyPoForm() {
+  return { supplierId: '', storeId: '', notes: '', send: true };
+}
+
+function emptyListFilters() {
+  return { statusFilter: '', storeFilter: '' };
+}
+
 @Component({
   selector: 'app-purchase-orders-page',
-  imports: [FormsModule, DatePipe],
+  imports: [FormField, DatePipe],
   templateUrl: './purchase-orders-page.html',
   styleUrl: './purchase-orders-page.scss'
 })
@@ -25,12 +33,15 @@ export class PurchaseOrdersPage implements OnInit {
   modal = signal(false);
   detail = signal<any | null>(null);
 
-  statusFilter = '';
-  storeFilter = '';
+  readonly listFilterModel = signal(emptyListFilters());
+  readonly listFilterForm = form(this.listFilterModel);
 
-  poForm = { supplierId: '', storeId: '', notes: '', send: true };
+  readonly poModel = signal(emptyPoForm());
+  readonly poForm = form(this.poModel);
+
   lines = signal<PoLine[]>([]);
-  medicineQuery = '';
+  readonly medicineSearchModel = signal({ q: '' });
+  readonly medicineSearchForm = form(this.medicineSearchModel);
   medicineResults = signal<any[]>([]);
   medicineSearching = signal(false);
 
@@ -58,10 +69,11 @@ export class PurchaseOrdersPage implements OnInit {
   async load() {
     this.loading.set(true);
     this.error.set('');
+    const filters = this.listFilterModel();
     try {
       const response = await this.api.getPurchaseOrders({
-        status: this.statusFilter || undefined,
-        storeId: this.storeFilter || undefined
+        status: filters.statusFilter || undefined,
+        storeId: filters.storeFilter || undefined
       });
       this.orders.set(response.orders);
     } catch {
@@ -72,9 +84,14 @@ export class PurchaseOrdersPage implements OnInit {
   }
 
   openCreate() {
-    this.poForm = { supplierId: '', storeId: this.stores()[0]?.id || '', notes: '', send: true };
+    this.poModel.set({
+      supplierId: '',
+      storeId: this.stores()[0]?.id || '',
+      notes: '',
+      send: true
+    });
     this.lines.set([]);
-    this.medicineQuery = '';
+    this.medicineSearchModel.set({ q: '' });
     this.medicineResults.set([]);
     this.modal.set(true);
   }
@@ -85,7 +102,7 @@ export class PurchaseOrdersPage implements OnInit {
   }
 
   async searchMedicines() {
-    const q = this.medicineQuery.trim();
+    const q = this.medicineSearchModel().q.trim();
     if (q.length < 2) return;
     this.medicineSearching.set(true);
     try {
@@ -115,8 +132,15 @@ export class PurchaseOrdersPage implements OnInit {
     this.lines.update((rows) => rows.filter((line) => line.medicineId !== medicineId));
   }
 
+  updateLineField(medicineId: string, field: 'qtyOrdered' | 'unitPriceInPaise', value: number) {
+    this.lines.update((rows) =>
+      rows.map((line) => line.medicineId === medicineId ? { ...line, [field]: value } : line)
+    );
+  }
+
   async saveOrder() {
-    if (!this.poForm.supplierId || !this.poForm.storeId) {
+    const po = this.poModel();
+    if (!po.supplierId || !po.storeId) {
       this.showToast('Select supplier and store.');
       return;
     }
@@ -127,10 +151,10 @@ export class PurchaseOrdersPage implements OnInit {
     this.saving.set(true);
     try {
       await this.api.createPurchaseOrder({
-        supplierId: this.poForm.supplierId,
-        storeId: this.poForm.storeId,
-        notes: this.poForm.notes || undefined,
-        send: this.poForm.send,
+        supplierId: po.supplierId,
+        storeId: po.storeId,
+        notes: po.notes || undefined,
+        send: po.send,
         lines: this.lines().map((line) => ({
           medicineId: line.medicineId,
           qtyOrdered: line.qtyOrdered,

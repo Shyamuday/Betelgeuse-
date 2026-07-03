@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
 import { AdminApi } from '../../../core/services/admin-api';
 import {
@@ -10,7 +10,7 @@ import {
 
 @Component({
   selector: 'app-consultations-page',
-  imports: [FormsModule, DatePipe],
+  imports: [FormField, DatePipe],
   templateUrl: './consultations-page.html',
   styleUrl: './consultations-page.scss'
 })
@@ -26,17 +26,25 @@ export class ConsultationsPage implements OnInit {
 
   statusFilter = signal('');
   assignedFilter = signal('no');
-  q = '';
+
+  readonly searchModel = signal({ q: '' });
+  readonly searchForm = form(this.searchModel);
 
   modal = signal(false);
   statusModal = signal(false);
   selectedConsult = signal<any>(null);
-  statusValue = 'ASSIGNED';
+
+  readonly statusModel = signal({ value: 'ASSIGNED' });
+  readonly statusForm = form(this.statusModel);
+
   doctors = signal<any[]>([]);
   filteredDoctors = signal<any[]>([]);
   doctorsLoading = signal(false);
   selectedDoctorId = signal<string>('');
-  doctorQ = '';
+
+  readonly doctorSearchModel = signal({ q: '' });
+  readonly doctorSearchForm = form(this.doctorSearchModel);
+
   saving = signal(false);
   err = signal('');
   toast = signal('');
@@ -71,7 +79,13 @@ export class ConsultationsPage implements OnInit {
 
   load(): void {
     this.loading.set(true);
-    this.api.getAdminConsultations({ status: this.statusFilter(), assigned: this.assignedFilter(), q: this.q, page: this.page(), pageSize: this.pageSize })
+    this.api.getAdminConsultations({
+      status: this.statusFilter(),
+      assigned: this.assignedFilter(),
+      q: this.searchModel().q,
+      page: this.page(),
+      pageSize: this.pageSize
+    })
       .then(r => { this.consultations.set(r.consultations); this.total.set(r.total); this.loading.set(false); })
       .catch(() => this.loading.set(false));
   }
@@ -103,7 +117,7 @@ export class ConsultationsPage implements OnInit {
   openAssign(c: any): void {
     this.selectedConsult.set(c);
     this.selectedDoctorId.set(c.assignedDoctor?.id ?? '');
-    this.doctorQ = '';
+    this.doctorSearchModel.set({ q: '' });
     this.err.set('');
     this.modal.set(true);
     if (this.doctors().length === 0) {
@@ -121,7 +135,7 @@ export class ConsultationsPage implements OnInit {
   }
 
   filterDoctors(): void {
-    const q = this.doctorQ.toLowerCase();
+    const q = this.doctorSearchModel().q.toLowerCase();
     this.filteredDoctors.set(
       q ? this.doctors().filter(d => d.name.toLowerCase().includes(q)) : this.doctors()
     );
@@ -131,7 +145,7 @@ export class ConsultationsPage implements OnInit {
 
   openStatus(c: any): void {
     this.selectedConsult.set(c);
-    this.statusValue = c.status;
+    this.statusModel.set({ value: c.status });
     this.err.set('');
     this.statusModal.set(true);
   }
@@ -141,7 +155,10 @@ export class ConsultationsPage implements OnInit {
     this.saving.set(true);
     this.err.set('');
     try {
-      const r = await this.api.updateConsultationStatus(this.selectedConsult()!.id, this.statusValue);
+      const r = await this.api.updateConsultationStatus(
+        this.selectedConsult()!.id,
+        this.statusModel().value
+      );
       this.consultations.update(list =>
         list.map(c => c.id === this.selectedConsult()!.id ? { ...c, status: r.consultation.status } : c)
       );

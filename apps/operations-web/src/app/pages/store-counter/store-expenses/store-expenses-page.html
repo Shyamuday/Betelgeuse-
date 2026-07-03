@@ -8,7 +8,7 @@
   </div>
 
   <div class="filters">
-    <select [(ngModel)]="categoryFilter" (change)="load()">
+    <select [formField]="filterForm.categoryFilter" (change)="load()">
       <option value="">All Categories</option>
       @for (c of categories; track c) {
         <option [value]="c">{{ categoryLabels[c] }}</option>
@@ -50,17 +50,17 @@
       <div class="modal" (click)="$event.stopPropagation()">
         <h3>Log Store Expense</h3>
         <label>Category
-          <select [(ngModel)]="form.category">
+          <select [formField]="expenseForm.category">
             @for (c of categories; track c) {
               <option [value]="c">{{ categoryLabels[c] }}</option>
             }
           </select>
         </label>
-        <label>Description <input [(ngModel)]="form.description" /></label>
-        <label>Vendor <input [(ngModel)]="form.vendor" /></label>
-        <label>Bill No <input [(ngModel)]="form.billNo" /></label>
-        <label>Amount (paise) <input type="number" [(ngModel)]="form.amountInPaise" /></label>
-        <label>Date <input type="date" [(ngModel)]="form.expenseDate" /></label>
+        <label>Description <input [formField]="expenseForm.description" /></label>
+        <label>Vendor <input [formField]="expenseForm.vendor" /></label>
+        <label>Bill No <input [formField]="expenseForm.billNo" /></label>
+        <label>Amount (paise) <input type="number" [formField]="expenseForm.amountInPaise" /></label>
+        <label>Date <input type="date" [formField]="expenseForm.expenseDate" /></label>
         <div class="actions">
           <button (click)="showForm.set(false)">Cancel</button>
           <button class="btn-primary" [disabled]="saving()" (click)="submit()">{{ saving() ? 'Saving…' : 'Save' }}</button>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AdminApi } from '../../../core/services/admin-api';
@@ -75,34 +75,35 @@ export class AdherencePage {
   windowDays = 7;
   minDoses = 5;
   activeTier: 'HIGH_RISK' | 'MEDIUM_RISK' | 'ON_TRACK' = 'HIGH_RISK';
-  report: AdherenceReport | null = null;
-  loading = false;
-  error = '';
+  readonly report = signal<AdherenceReport | null>(null);
+  readonly loading = signal(false);
+  readonly error = signal('');
 
   constructor(private readonly api: AdminApi) {
     void this.load();
   }
 
   async load() {
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
     try {
-      this.report = (await this.api.getAdherenceRisk({
+      const nextReport = (await this.api.getAdherenceRisk({
         days: this.windowDays,
         minDoses: this.minDoses
       })) as AdherenceReport;
-      if (this.report.cohorts.HIGH_RISK.length) {
+      this.report.set(nextReport);
+      if (nextReport.cohorts.HIGH_RISK.length) {
         this.activeTier = 'HIGH_RISK';
-      } else if (this.report.cohorts.MEDIUM_RISK.length) {
+      } else if (nextReport.cohorts.MEDIUM_RISK.length) {
         this.activeTier = 'MEDIUM_RISK';
       } else {
         this.activeTier = 'ON_TRACK';
       }
     } catch {
-      this.error = 'Could not load adherence risk report.';
-      this.report = null;
+      this.error.set('Could not load adherence risk report.');
+      this.report.set(null);
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 
@@ -115,7 +116,7 @@ export class AdherencePage {
   }
 
   activeCohort(): CohortPatient[] {
-    return this.report?.cohorts[this.activeTier] ?? [];
+    return this.report()?.cohorts[this.activeTier] ?? [];
   }
 
   consumerLink(_patientId: string) {

@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
@@ -12,14 +12,14 @@ import { WorklistApiService, type WorklistItem, type WorklistView } from '../wor
   styleUrl: './worklist-page.scss'
 })
 export class WorklistPage {
-  loading = false;
-  error = '';
+  readonly loading = signal(false);
+  readonly error = signal('');
   search = '';
   view: WorklistView = 'ALL';
-  counts = { assigned: 0, inProgress: 0, followUpDue: 0 };
-  assigned: WorklistItem[] = [];
-  inProgress: WorklistItem[] = [];
-  followUpDue: WorklistItem[] = [];
+  readonly counts = signal({ assigned: 0, inProgress: 0, followUpDue: 0 });
+  readonly assigned = signal<WorklistItem[]>([]);
+  readonly inProgress = signal<WorklistItem[]>([]);
+  readonly followUpDue = signal<WorklistItem[]>([]);
 
   constructor(
     private readonly worklistApi: WorklistApiService,
@@ -34,18 +34,18 @@ export class WorklistPage {
   }
 
   async load() {
-    this.error = '';
-    this.loading = true;
+    this.error.set('');
+    this.loading.set(true);
     try {
       const response = await this.worklistApi.loadWorklist(this.view, this.search);
-      this.counts = response.counts;
-      this.assigned = response.sections.assigned;
-      this.inProgress = response.sections.inProgress;
-      this.followUpDue = response.sections.followUpDue;
+      this.counts.set(response.counts);
+      this.assigned.set(response.sections.assigned);
+      this.inProgress.set(response.sections.inProgress);
+      this.followUpDue.set(response.sections.followUpDue);
     } catch {
-      this.error = 'Could not load your worklist.';
+      this.error.set('Could not load your worklist.');
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 
