@@ -6,7 +6,7 @@ import { prisma } from '../../db.js';
 import { getMailTransporter, smtpFrom } from '../../services/mail.js';
 import { asyncRoute, publicUserSelect, toAuthResponse, logAuthEvent, hashToken, randomToken } from '../../utils/helpers.js';
 import { PRODUCT_EVENTS, trackProductEvent } from '../../services/product-analytics.js';
-import { sessionPayloadForStoreStaff } from '../../constants/rbac-helpers.js';
+import { sessionPayloadForStoreStaff, sessionPayloadForUser } from '../../constants/rbac-helpers.js';
 import { signStoreToken } from '../store/shared.js';
 import { STORE_ROLES } from '../../constants/store-api-routes.constants.js';
 import { webOrigin } from './shared.js';
@@ -87,7 +87,7 @@ router.post(
         properties: { method: 'password' }
       });
     }
-    res.json(toAuthResponse(safeUser));
+    res.json({ ...toAuthResponse(safeUser), ...sessionPayloadForUser(safeUser) });
   })
 );
 

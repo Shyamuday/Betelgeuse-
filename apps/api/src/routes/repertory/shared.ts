@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { Role } from '@prisma/client';
-import { prisma } from '../db.js';
-import { routeParam } from '../utils/helpers.js';
+import { prisma } from '../../db.js';
+import { routeParam } from '../../utils/helpers.js';
 
 export async function assertDoctorConsultationAccess(req: Request, res: Response, consultationId: string) {
   const consultation = await prisma.consultation.findUnique({

@@ -3,8 +3,8 @@
       <div class="login-card">
         <div class="login-header">
           <div class="login-logo">🏥</div>
-          <h1 class="login-title">HR Portal</h1>
-          <p class="login-subtitle">Sign in to continue</p>
+          <h1 class="login-title">Operations Portal</h1>
+          <p class="login-subtitle">Sign in with your staff account</p>
         </div>
 
         @if (error()) {
@@ -13,7 +13,7 @@
           </div>
         }
 
-        <form class="login-form" (ngSubmit)="onSubmit()">
+        <form class="login-form" novalidate (ngSubmit)="onSubmit()">
           <div class="form-group">
             <label class="form-label" for="login-email">Email Address</label>
             <input
@@ -21,7 +21,7 @@
               class="form-input"
               type="email"
               [formField]="loginForm.email"
-              placeholder="hr@hospital.com"
+              placeholder="staff@company.com"
               autocomplete="email"
             />
             @if (loginForm.email().invalid() && loginForm.email().touched()) {
@@ -72,6 +72,11 @@
           </button>
         </form>
 
-        <app-dev-login-panel (loggedIn)="onDevLoggedIn()" (fillAccount)="applyDevFill($event)" />
+        <app-dev-login-panel
+          note="Pick a role below, then Fill or Instant. Any staff email works in dev."
+          [autoFillFirst]="false"
+          (loggedIn)="onDevLoggedIn()"
+          (fillAccount)="applyDevFill($event)"
+        />
       </div>
     </div>

@@ -15,6 +15,7 @@ export class DevLoginPanelComponent implements OnInit {
   @Input() note =
     'Click Fill then Sign In. Any other email also works in dev.';
   @Input() showPatientCreds = false;
+  @Input() autoFillFirst = true;
 
   @Output() loggedIn = new EventEmitter<void>();
   @Output() fillAccount = new EventEmitter<DevFillCredentials>();
@@ -37,7 +38,7 @@ export class DevLoginPanelComponent implements OnInit {
       this.password.set(guide.password);
       this.otp.set(guide.otp ?? '');
       this.patientMobile.set(guide.patientMobile ?? '');
-      if (guide.personas[0]) this.emitFill(guide.personas[0]);
+      if (this.autoFillFirst && guide.personas[0]) this.emitFill(guide.personas[0]);
     });
   }
 

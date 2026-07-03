@@ -137,7 +137,7 @@ export const DEV_DEMO_APPS = [
   { id: 'api', label: 'API + demo guide', port: 4000, url: SERVER_CONFIG.API_PUBLIC_URL }
 ] as const;
 
-export type DevDemoAuthKind = 'platform' | 'hr';
+export type DevDemoAuthKind = 'platform';
 
 export type DevDemoPersona = {
   id: string;
@@ -184,9 +184,9 @@ export const DEV_DEMO_PERSONAS: DevDemoPersona[] = [
   {
     id: 'hr',
     label: 'HR Manager',
-    app: 'hr-web',
-    authKind: 'hr',
-    description: 'HR portal for employees, leaves, and payroll.',
+    app: 'operations-web',
+    authKind: 'platform',
+    description: 'HR — employees, leaves, and payroll.',
     testHints: ['Employee roster', 'Leave approvals', 'Doctor HR records']
   },
   {
@@ -365,7 +365,7 @@ export type DevDemoPersonaWithCredentials = DevDemoPersona & {
 export const DEV_DEMO_ALL_ACCOUNTS = [
   { role: 'Admin', app: 'admin-web', login: DEV_DEMO_ACCOUNTS.admin.email, password: DEV_DEMO_PASSWORD },
   { role: 'Doctor', app: 'doctor-web', login: DEV_DEMO_ACCOUNTS.doctor.email, password: DEV_DEMO_PASSWORD },
-  { role: 'HR', app: 'hr-web', login: DEV_DEMO_ACCOUNTS.hr.email, password: DEV_DEMO_PASSWORD },
+  { role: 'HR', app: 'operations-web', login: DEV_DEMO_ACCOUNTS.hr.email, password: DEV_DEMO_PASSWORD },
   {
     role: 'Receptionist',
     app: 'receptionist-web',

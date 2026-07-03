@@ -506,6 +506,7 @@ export function registerAdminEcosystemUserRoutes(router: Router) {
   );
 
   router.post(
+    '/admin/ecosystem-users/corporates/:id/enrollments',
     authRequired,
     allowRoles(Role.ADMIN),
     asyncRoute(async (req, res) => {

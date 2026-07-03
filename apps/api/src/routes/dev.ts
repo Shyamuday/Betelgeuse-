@@ -1,11 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
 import { z } from 'zod';
-import { DEFAULT_JWT_SECRET, HR_JWT_EXPIRY } from '../constants/auth.constants.js';
-import { HR_ROLES } from '../constants/hr-api-routes.constants.js';
 import { STORE_ROLES } from '../constants/store-api-routes.constants.js';
 import {
-  DEV_DEMO_ACCOUNTS,
   DEV_DEMO_ALL_ACCOUNTS,
   DEV_DEMO_APPS,
   DEV_DEMO_OTP,
@@ -24,10 +20,8 @@ import {
 } from '../dev/demo-manifest.js';
 import { prisma } from '../db.js';
 import { asyncRoute, publicUserSelect, toAuthResponse } from '../utils/helpers.js';
-import { sessionPayloadForStoreStaff } from '../constants/rbac-helpers.js';
+import { sessionPayloadForStoreStaff, sessionPayloadForUser } from '../constants/rbac-helpers.js';
 import { signStoreToken } from './store/shared.js';
-
-const JWT_SECRET = process.env.JWT_SECRET || DEFAULT_JWT_SECRET;
 
 function devOnly(_req: Request, res: Response, next: NextFunction) {
   if (!isDevDemoEnabled()) {
@@ -112,7 +106,7 @@ devRouter.post(
           select: publicUserSelect
         });
         if (user) {
-          return res.json(toAuthResponse(user));
+          return res.json({ ...toAuthResponse(user), ...sessionPayloadForUser(user) });
         }
 
         const staff = await prisma.storeStaff.findFirst({
@@ -141,29 +135,6 @@ devRouter.post(
           storeName: staff.store.name
         });
         return res.json({ token, ...session });
-      }
-
-      case 'hr': {
-        const user = await prisma.user.findUnique({
-          where: { email: DEV_DEMO_ACCOUNTS.hr.email },
-          include: { hrProfile: true }
-        });
-        if (!user || user.role !== HR_ROLES.HR) {
-          return res.status(404).json({
-            message: 'Demo HR user not found. Run: npm run seed --prefix apps/api'
-          });
-        }
-        const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: HR_JWT_EXPIRY });
-        return res.json({
-          token,
-          user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            hrProfile: user.hrProfile
-          }
-        });
       }
 
       default:
