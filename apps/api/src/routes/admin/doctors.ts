@@ -20,6 +20,7 @@ import {
   specialtyFocusLabel,
   toDoctorProfilePayload
 } from '../../constants/homeopathic-doctor-types.js';
+import { applyDoctorHrProfileFields, suggestedProbationEndDate } from '../../constants/doctor-hr-defaults.js';
 
 export function registerAdminDoctorRoutes(router: Router) {
   // ─── Doctors ──────────────────────────────────────────────────────────────────
@@ -199,6 +200,11 @@ export function registerAdminDoctorRoutes(router: Router) {
 
       const passwordHash = await bcrypt.hash(body.password, 10);
       const profilePayload = toDoctorProfilePayload(body);
+      const hrFields = applyDoctorHrProfileFields({
+        doctorType: profilePayload.doctorType,
+        specialtyFocus: profilePayload.specialtyFocus,
+        specialty: profilePayload.specialty
+      });
       const doctor = await prisma.user.create({
         data: {
           name: body.name,
@@ -206,7 +212,13 @@ export function registerAdminDoctorRoutes(router: Router) {
           mobile: body.mobile,
           passwordHash,
           role: Role.DOCTOR,
-          doctorProfile: { create: profilePayload }
+          doctorProfile: {
+            create: {
+              ...profilePayload,
+              designation: hrFields.designation,
+              department: hrFields.department
+            }
+          }
         },
         select: { ...publicUserSelect, doctorProfile: { select: doctorProfileSelect } }
       });
@@ -237,7 +249,7 @@ export function registerAdminDoctorRoutes(router: Router) {
           email: true,
           mobile: true,
           isActive: true,
-          doctorProfile: { select: { specialty: true, registrationNo: true, isAvailable: true, doctorType: true, specialtyFocus: true } }
+          doctorProfile: { select: { specialty: true, registrationNo: true, isAvailable: true, doctorType: true, specialtyFocus: true, designation: true, department: true } }
         }
       });
       if (!existing) return res.status(404).json({ message: 'Doctor not found' });
@@ -255,6 +267,13 @@ export function registerAdminDoctorRoutes(router: Router) {
         .parse(req.body);
 
       const profilePayload = toDoctorProfilePayload(body);
+      const hrFields = applyDoctorHrProfileFields({
+        doctorType: profilePayload.doctorType,
+        specialtyFocus: profilePayload.specialtyFocus,
+        specialty: profilePayload.specialty,
+        designation: existing.doctorProfile?.designation,
+        department: existing.doctorProfile?.department
+      });
 
       const doctor = await prisma.user.update({
         where: { id: doctorId },
@@ -264,8 +283,18 @@ export function registerAdminDoctorRoutes(router: Router) {
           mobile: body.mobile || null,
           doctorProfile: {
             upsert: {
-              create: profilePayload,
-              update: profilePayload
+              create: {
+                ...profilePayload,
+                designation: hrFields.designation,
+                department: hrFields.department,
+                isAvailable: profilePayload.isAvailable
+              },
+              update: {
+                ...profilePayload,
+                designation: hrFields.designation,
+                department: hrFields.department,
+                isAvailable: profilePayload.isAvailable
+              }
             }
           }
         },

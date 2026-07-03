@@ -104,13 +104,34 @@ Self-enrollment (`POST /doctor/enroll`) defaults new applicants to **Junior Home
 
 ---
 
+## HR & joining letters
+
+When HR saves a doctor profile or generates a joining letter, the system uses **type-specific defaults** from `apps/api/src/constants/doctor-hr-defaults.ts`:
+
+| Doctor type | Letter subject style | Salary on letter | Consultation fee | Default probation |
+|-------------|---------------------|------------------|------------------|-------------------|
+| Chief Consultant | Appointment as Chief Consultant | Yes | Yes | None |
+| Junior Doctor | Junior appointment | Yes | Yes | 6 months |
+| Specialist | Specialist + focus area | Yes | Yes | 3 months |
+| Visiting | Engagement letter | No (visit-based) | Yes | None |
+| Telemedicine | Telemedicine appointment | Yes | Yes | 3 months |
+| Medical Intern | Internship appointment | Yes (stipend) | No | 12 months |
+| RMO | RMO appointment | Yes | Yes | 6 months |
+
+Letters include role-specific **terms & conditions** (e.g. supervision for interns, telemedicine consent for remote doctors).
+
+**HR apps:** `hr-web` → Doctors / Employee directory; `admin-web` → Doctor HR Records.
+
+---
+
 ## Related files
 
 | Area | Path |
 |------|------|
 | Schema | `apps/api/prisma/schema/hr.prisma` |
 | Labels & validation | `apps/api/src/constants/homeopathic-doctor-types.ts` |
-| Doctor profile API | `apps/api/src/routes/auth/doctor.ts` |
+| HR defaults & letters | `apps/api/src/constants/doctor-hr-defaults.ts` |
+| HR doctor API | `apps/api/src/routes/hr/doctors.ts` |
 | Admin doctors API | `apps/api/src/routes/admin/doctors.ts` |
 | Doctor shell | `apps/doctor-web/src/app/layout/doctor-shell/` |
 | Doctor type constants | `apps/doctor-web/src/app/core/constants/doctor-types.constants.ts` |

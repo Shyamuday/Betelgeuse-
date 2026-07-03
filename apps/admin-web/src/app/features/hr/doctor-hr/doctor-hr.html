@@ -11,10 +11,13 @@
         <div class="doctor-grid">
           @for (d of doctors(); track d.id) {
             <div class="doctor-card" (click)="openProfile(d)">
-              <div class="doc-avatar">{{ d.user?.name?.charAt(0)?.toUpperCase() ?? 'D' }}</div>
+              <div class="doc-avatar">{{ doctorName(d).charAt(0).toUpperCase() }}</div>
               <div class="doc-body">
-                <div class="doc-name">{{ d.user?.name }}</div>
+                <div class="doc-name">{{ doctorName(d) }}</div>
                 <div class="doc-meta">
+                  @if (d.doctorTypeLabel) {
+                    <span class="type-chip">{{ d.doctorTypeLabel }}</span>
+                  }
                   <span class="specialty">{{ d.specialty }}</span>
                   <span class="status-dot" [style.color]="statusColor(d.employeeStatus)">●</span>
                   <span class="status-lbl">{{ d.employeeStatus }}</span>
@@ -27,7 +30,7 @@
                   <div class="joining-chip">Joined {{ d.joiningDate | date:'dd MMM yyyy' }}</div>
                 }
               </div>
-              @if (d.joiningLetter) { <div class="letter-icon">📄</div> }
+              @if (d.hasLetter || d.joiningLetter) { <div class="letter-icon">📄</div> }
             </div>
           }
         </div>
@@ -45,10 +48,10 @@
       <div class="overlay" (click)="close()">
         <div class="drawer" (click)="$event.stopPropagation()">
           <div class="dh">
-            <div class="dh-avatar">{{ selected()?.user?.name?.charAt(0)?.toUpperCase() ?? 'D' }}</div>
+            <div class="dh-avatar">{{ doctorName(selected()).charAt(0).toUpperCase() }}</div>
             <div class="dh-info">
-              <div class="dh-name">{{ selected()?.user?.name }}</div>
-              <div class="dh-sub">{{ selected()?.specialty }}</div>
+              <div class="dh-name">{{ doctorName(selected()) }}</div>
+              <div class="dh-sub">{{ selected()?.doctorTypeLabel || selected()?.specialty }}</div>
             </div>
             <div class="dh-tabs">
               <button [class.active]="tab() === 'profile'" (click)="tab.set('profile')">Profile</button>
@@ -63,10 +66,45 @@
               <div class="fsect">
                 <div class="ftitle">Employment</div>
                 <div class="frow">
-                  <div class="fg">
-                    <label>Employee ID</label>
-                    <input [(ngModel)]="form.employeeId" placeholder="DOC-001" />
+                  <div class="fg full">
+                    <label>Doctor type</label>
+                    <select [(ngModel)]="form.doctorType">
+                      @for (option of doctorTypeOptions; track option.value) {
+                        <option [value]="option.value">{{ option.label }}</option>
+                      }
+                    </select>
                   </div>
+                </div>
+                @if (isSpecialistType()) {
+                  <div class="frow">
+                    <div class="fg full">
+                      <label>Specialty focus</label>
+                      <select [(ngModel)]="form.specialtyFocus">
+                        <option value="">Select focus</option>
+                        @for (option of specialtyFocusOptions; track option.value) {
+                          <option [value]="option.value">{{ option.label }}</option>
+                        }
+                      </select>
+                    </div>
+                  </div>
+                }
+                <div class="frow">
+                  <div class="fg">
+                    <label>Designation</label>
+                    <input [(ngModel)]="form.designation" placeholder="Chief Consultant" />
+                  </div>
+                  <div class="fg">
+                    <label>Department</label>
+                    <input [(ngModel)]="form.department" placeholder="Homeopathy" />
+                  </div>
+                </div>
+                <div class="frow">
+                  <div class="fg full">
+                    <label>Clinical specialty (display)</label>
+                    <input [(ngModel)]="form.specialty" placeholder="Homeopathy" />
+                  </div>
+                </div>
+                <div class="frow">
                   <div class="fg">
                     <label>Status</label>
                     <select [(ngModel)]="form.employeeStatus">
@@ -76,15 +114,9 @@
                       <option value="TERMINATED">Terminated</option>
                     </select>
                   </div>
-                </div>
-                <div class="frow">
                   <div class="fg">
-                    <label>Designation</label>
-                    <input [(ngModel)]="form.designation" placeholder="Senior Doctor" />
-                  </div>
-                  <div class="fg">
-                    <label>Department</label>
-                    <input [(ngModel)]="form.department" placeholder="Homeopathy" />
+                    <label>Employee ID</label>
+                    <input [(ngModel)]="form.employeeId" placeholder="DOC-001" />
                   </div>
                 </div>
                 <div class="frow">
@@ -184,24 +216,46 @@
                       <span><strong>Letter No:</strong> {{ letter()!.content['letterNumber'] }}</span>
                       <span><strong>Date:</strong> {{ letter()!.content['issuedDate'] | date:'dd MMMM yyyy' }}</span>
                     </div>
-                    <div class="lsubject"><strong>APPOINTMENT / JOINING LETTER</strong></div>
+                    <div class="lsubject"><strong>{{ letter()!.content['letterSubject'] || 'APPOINTMENT / JOINING LETTER' }}</strong></div>
                     <p class="lsalut">Dear Dr. {{ letter()!.content['employeeName'] }},</p>
-                    <p>We are pleased to appoint you as <strong>{{ letter()!.content['designation'] }}</strong> in the <strong>{{ letter()!.content['department'] }}</strong> department effective from <strong>{{ letter()!.content['joiningDate'] | date:'dd MMMM yyyy' }}</strong>.</p>
+                    <p>
+                      We are pleased to appoint you as <strong>{{ letter()!.content['designation'] }}</strong>
+                      ({{ letter()!.content['doctorType'] }}) in the
+                      <strong>{{ letter()!.content['department'] }}</strong> department effective from
+                      <strong>{{ letter()!.content['joiningDate'] | date:'dd MMMM yyyy' }}</strong>.
+                    </p>
                     <table class="ltable">
                       <tr><td>Employee Code</td><td>{{ letter()!.content['employeeCode'] }}</td></tr>
+                      <tr><td>Employment Type</td><td>{{ letter()!.content['employmentType'] }}</td></tr>
                       <tr><td>Designation</td><td>{{ letter()!.content['designation'] }}</td></tr>
                       <tr><td>Specialty</td><td>{{ letter()!.content['specialty'] }}</td></tr>
+                      @if (letter()!.content['specialtyFocus']) {
+                        <tr><td>Specialty Focus</td><td>{{ letter()!.content['specialtyFocus'] }}</td></tr>
+                      }
                       <tr><td>Registration No.</td><td>{{ letter()!.content['registrationNo'] }}</td></tr>
                       <tr><td>Date of Joining</td><td>{{ letter()!.content['joiningDate'] | date:'dd MMMM yyyy' }}</td></tr>
                       @if (letter()!.content['probationEndDate']) {
                         <tr><td>Probation Until</td><td>{{ letter()!.content['probationEndDate'] | date:'dd MMMM yyyy' }}</td></tr>
                       }
-                      <tr><td>Salary</td><td>{{ letter()!.content['salary'] }}</td></tr>
-                      <tr><td>Consultation Fee</td><td>{{ letter()!.content['consultationFee'] }}</td></tr>
+                      @if (letter()!.content['showSalary'] !== false) {
+                        <tr><td>Salary</td><td>{{ letter()!.content['salary'] }}</td></tr>
+                      }
+                      @if (letter()!.content['showConsultationFee'] !== false) {
+                        <tr><td>Consultation Fee</td><td>{{ letter()!.content['consultationFee'] }}</td></tr>
+                      }
                       <tr><td>Working Hours</td><td>{{ letter()!.content['shift'] }}</td></tr>
                       <tr><td>Weekly Off</td><td>{{ letter()!.content['weeklyOff'] }}</td></tr>
                     </table>
-                    <p>You are expected to maintain professional conduct and comply with all clinic policies.</p>
+                    @if (letter()!.content['requiresSupervision']) {
+                      <p><strong>Supervision:</strong> This role requires consultant supervision for prescriptions and independent clinical decisions.</p>
+                    }
+                    @if (letter()!.content['terms']; as terms) {
+                      <ul>
+                        @for (term of terms; track term) {
+                          <li>{{ term }}</li>
+                        }
+                      </ul>
+                    }
                     <div class="lsign">
                       <div><div class="sline"></div><div class="slbl">Authorised Signatory</div></div>
                       <div><div class="sline"></div><div class="slbl">Doctor's Acceptance & Date</div></div>

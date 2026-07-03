@@ -27,6 +27,9 @@
               </div>
 
               <div class="doc-name">{{ doc.name }}</div>
+              @if (doc.doctorTypeLabel) {
+                <div class="doc-type">{{ doc.doctorTypeLabel }}</div>
+              }
               @if (doc.specialty) {
                 <div class="doc-specialty">🔬 {{ doc.specialty }}</div>
               }

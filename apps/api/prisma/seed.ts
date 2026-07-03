@@ -107,14 +107,34 @@ async function main() {
       specialty: 'Homeopathy',
       registrationNo: DEV_DEMO_ACCOUNTS.doctor.registrationNo,
       doctorType: HomeopathicDoctorType.CHIEF_CONSULTANT,
-      designation: 'Chief Consultant'
+      designation: 'Homeopathic Doctor (Chief Consultant)',
+      department: 'Homeopathy',
+      joiningDate: new Date('2024-01-15'),
+      employeeId: 'DOC-001',
+      employeeStatus: 'ACTIVE',
+      workShift: 'FULL_DAY',
+      shiftStart: '09:00',
+      shiftEnd: '17:00',
+      weeklyOffDays: ['Sunday'],
+      salaryPerMonth: 8000000,
+      consultationFee: 50000
     },
     create: {
       userId: doctorUser.id,
       specialty: 'Homeopathy',
       registrationNo: DEV_DEMO_ACCOUNTS.doctor.registrationNo,
       doctorType: HomeopathicDoctorType.CHIEF_CONSULTANT,
-      designation: 'Chief Consultant'
+      designation: 'Homeopathic Doctor (Chief Consultant)',
+      department: 'Homeopathy',
+      joiningDate: new Date('2024-01-15'),
+      employeeId: 'DOC-001',
+      employeeStatus: 'ACTIVE',
+      workShift: 'FULL_DAY',
+      shiftStart: '09:00',
+      shiftEnd: '17:00',
+      weeklyOffDays: ['Sunday'],
+      salaryPerMonth: 8000000,
+      consultationFee: 50000
     }
   });
 

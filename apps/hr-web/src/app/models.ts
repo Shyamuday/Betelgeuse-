@@ -29,6 +29,9 @@ export interface Employee {
   designation?: string;
   department?: string;
   specialty?: string;
+  doctorType?: string;
+  doctorTypeLabel?: string;
+  specialtyFocus?: string | null;
   storeName?: string;
   joiningDate?: string;
   employeeStatus: EmployeeStatus;
@@ -40,12 +43,16 @@ export interface Employee {
   hasLetter?: boolean;
   probationEndDate?: string;
   salary?: number;
+  consultationFee?: number;
   emergencyContact?: string;
 }
 
 export interface Doctor extends Employee {
   empType: 'DOCTOR';
   specialty?: string;
+  doctorType?: string;
+  doctorTypeLabel?: string;
+  specialtyFocus?: string | null;
 }
 
 export interface StoreStaff extends Employee {
@@ -86,7 +93,9 @@ export interface DashboardData {
 
 export interface Letter {
   id?: string;
-  content?: string;
+  letterNumber?: string;
+  issuedDate?: string;
+  content?: Record<string, unknown>;
   generatedAt?: string;
   clinicName?: string;
   clinicAddress?: string;

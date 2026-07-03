@@ -17,6 +17,9 @@
               <span class="badge" [class]="employee!.empType === 'DOCTOR' ? 'badge-blue' : 'badge-purple'">
                 {{ employee!.empType === 'DOCTOR' ? '🩺 Doctor' : '🏪 Staff' }}
               </span>
+              @if (isDoctor() && employee!.doctorTypeLabel) {
+                <span class="badge badge-type">{{ employee!.doctorTypeLabel }}</span>
+              }
             </div>
           </div>
           <button class="close-btn" (click)="close()">✕</button>
@@ -43,9 +46,34 @@
                   <label class="form-label">Designation</label>
                   <input class="form-input" [(ngModel)]="form.designation" placeholder="Senior Doctor" />
                 </div>
+                @if (isDoctor()) {
+                  <div class="form-group full-width">
+                    <label class="form-label">Doctor type</label>
+                    <select class="form-input" [(ngModel)]="form.doctorType">
+                      @for (option of doctorTypeOptions; track option.value) {
+                        <option [value]="option.value">{{ option.label }}</option>
+                      }
+                    </select>
+                  </div>
+                  @if (isSpecialistType()) {
+                    <div class="form-group full-width">
+                      <label class="form-label">Specialty focus</label>
+                      <select class="form-input" [(ngModel)]="form.specialtyFocus">
+                        <option value="">Select focus</option>
+                        @for (option of specialtyFocusOptions; track option.value) {
+                          <option [value]="option.value">{{ option.label }}</option>
+                        }
+                      </select>
+                    </div>
+                  }
+                  <div class="form-group full-width">
+                    <label class="form-label">Clinical specialty (display)</label>
+                    <input class="form-input" [(ngModel)]="form.specialty" placeholder="Homeopathy" />
+                  </div>
+                }
                 <div class="form-group">
                   <label class="form-label">Department</label>
-                  <input class="form-input" [(ngModel)]="form.department" placeholder="Cardiology" />
+                  <input class="form-input" [(ngModel)]="form.department" placeholder="Homeopathy" />
                 </div>
                 <div class="form-group">
                   <label class="form-label">Joining Date</label>
@@ -59,6 +87,12 @@
                   <label class="form-label">Salary (₹)</label>
                   <input class="form-input" type="number" [(ngModel)]="form.salary" placeholder="50000" />
                 </div>
+                @if (isDoctor()) {
+                  <div class="form-group">
+                    <label class="form-label">Consultation fee (₹)</label>
+                    <input class="form-input" type="number" [(ngModel)]="form.consultationFee" placeholder="500" />
+                  </div>
+                }
                 <div class="form-group full-width">
                   <label class="form-label">Emergency Contact</label>
                   <input class="form-input" [(ngModel)]="form.emergencyContact" placeholder="+91 98765 43210" />
@@ -131,44 +165,86 @@
                   <button class="btn-outline" (click)="printLetter()">🖨️ Print / PDF</button>
                   <button class="btn-outline" (click)="letter.set(null)">↺ Regenerate</button>
                 </div>
-                <div class="print-area letter-preview">
-                  <div class="letter-head">
-                    <h2>{{ letter()!.clinicName ?? 'Medical Center' }}</h2>
-                    @if (letter()!.clinicAddress) {
-                      <p>{{ letter()!.clinicAddress }}</p>
-                    }
-                    <hr />
-                  </div>
-                  <div class="letter-date">Date: {{ today | date:'dd MMMM yyyy' }}</div>
-                  <div class="letter-subject">
-                    <strong>Subject: Employment Verification Letter</strong>
-                  </div>
-                  <div class="letter-body">
-                    <p>To Whom It May Concern,</p>
-                    <p>
-                      This is to certify that <strong>{{ employee!.name }}</strong>
-                      @if (employee!.employeeId) {
-                        (Employee ID: {{ employee!.employeeId }})
+                @if (isDoctor()) {
+                  <div class="print-area letter-preview">
+                    <div class="letter-head">
+                      <h2>{{ letterContent()['organizationName'] || 'Vitalis Homeopathic Clinic' }}</h2>
+                      @if (letterContent()['organizationAddress']) {
+                        <p>{{ letterContent()['organizationAddress'] }}</p>
                       }
-                      is currently employed with us as
-                      <strong>{{ employee!.designation ?? 'Employee' }}</strong>
-                      @if (employee!.department) {
-                        in the {{ employee!.department }} department
-                      }.
-                    </p>
-                    @if (employee!.joiningDate) {
+                      <hr />
+                    </div>
+                    <div class="letter-meta">
+                      <span><strong>Letter No:</strong> {{ letterContent()['letterNumber'] }}</span>
+                      <span><strong>Date:</strong> {{ letterContent()['issuedDate'] | date:'dd MMMM yyyy' }}</span>
+                    </div>
+                    <div class="letter-subject">
+                      <strong>{{ letterContent()['letterSubject'] || 'APPOINTMENT / JOINING LETTER' }}</strong>
+                    </div>
+                    <div class="letter-body">
+                      <p>Dear Dr. {{ letterContent()['employeeName'] }},</p>
                       <p>
-                        The employee has been with our organization since
-                        <strong>{{ employee!.joiningDate | date:'dd MMMM yyyy' }}</strong>.
+                        We are pleased to appoint you as
+                        <strong>{{ letterContent()['designation'] }}</strong>
+                        ({{ letterContent()['doctorType'] }}) in the
+                        <strong>{{ letterContent()['department'] }}</strong> department,
+                        effective from <strong>{{ letterContent()['joiningDate'] | date:'dd MMMM yyyy' }}</strong>.
                       </p>
-                    }
-                    <p>This letter is issued upon request for official purposes.</p>
-                    <br />
-                    <p>Yours sincerely,</p>
-                    <br />
-                    <p><strong>HR Department</strong></p>
+                      <table class="letter-table">
+                        <tr><td>Employee Code</td><td>{{ letterContent()['employeeCode'] }}</td></tr>
+                        <tr><td>Employment Type</td><td>{{ letterContent()['employmentType'] }}</td></tr>
+                        <tr><td>Specialty</td><td>{{ letterContent()['specialty'] }}</td></tr>
+                        @if (letterContent()['specialtyFocus']) {
+                          <tr><td>Specialty Focus</td><td>{{ letterContent()['specialtyFocus'] }}</td></tr>
+                        }
+                        <tr><td>Registration No.</td><td>{{ letterContent()['registrationNo'] }}</td></tr>
+                        @if (letterContent()['probationEndDate']) {
+                          <tr><td>Probation Until</td><td>{{ letterContent()['probationEndDate'] | date:'dd MMMM yyyy' }}</td></tr>
+                        }
+                        @if (letterContent()['showSalary'] !== false) {
+                          <tr><td>Salary</td><td>{{ letterContent()['salary'] }}</td></tr>
+                        }
+                        @if (letterContent()['showConsultationFee'] !== false) {
+                          <tr><td>Consultation Fee</td><td>{{ letterContent()['consultationFee'] }}</td></tr>
+                        }
+                        <tr><td>Working Hours</td><td>{{ letterContent()['shift'] }}</td></tr>
+                        <tr><td>Weekly Off</td><td>{{ letterContent()['weeklyOff'] }}</td></tr>
+                      </table>
+                      @if (letterContent()['requiresSupervision']) {
+                        <p><strong>Supervision:</strong> This role requires consultant supervision for prescriptions and independent clinical decisions.</p>
+                      }
+                      @if (letterContent()['terms']; as terms) {
+                        <ul>
+                          @for (term of $any(terms); track term) {
+                            <li>{{ term }}</li>
+                          }
+                        </ul>
+                      }
+                      <p>We welcome you to the Vitalis homeopathic care team.</p>
+                    </div>
                   </div>
-                </div>
+                } @else {
+                  <div class="print-area letter-preview">
+                    <div class="letter-head">
+                      <h2>{{ letter()!.clinicName ?? 'Medical Center' }}</h2>
+                      @if (letter()!.clinicAddress) {
+                        <p>{{ letter()!.clinicAddress }}</p>
+                      }
+                      <hr />
+                    </div>
+                    <div class="letter-date">Date: {{ today | date:'dd MMMM yyyy' }}</div>
+                    <div class="letter-subject">
+                      <strong>Subject: Employment Verification Letter</strong>
+                    </div>
+                    <div class="letter-body">
+                      <p>To Whom It May Concern,</p>
+                      <p>
+                        This is to certify that <strong>{{ employee!.name }}</strong>
+                        is employed with us as <strong>{{ employee!.designation ?? 'Employee' }}</strong>.
+                      </p>
+                    </div>
+                  </div>
+                }
               } @else {
                 <div class="letter-empty">
                   <div class="letter-empty-icon">📄</div>

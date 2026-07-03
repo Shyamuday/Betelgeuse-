@@ -4,6 +4,7 @@ import { HR_API_ROUTES } from '../../constants/hr-api-routes.constants.js';
 import { prisma } from '../../db.js';
 import { asyncRoute } from '../../utils/helpers.js';
 import { getAccess, hrAuthMiddleware } from './shared.js';
+import { doctorTypeLabel } from '../../constants/homeopathic-doctor-types.js';
 
 export function registerHrEmployeeRoutes(router: Router) {
 // ─── Employee Directory ────────────────────────────────────────────────────────
@@ -39,9 +40,14 @@ router.get(
       });
       results.push(...doctors.map(d => ({
         id: d.id, empType: 'DOCTOR', name: d.user.name, email: d.user.email,
-        phone: d.phone ?? d.user.mobile, designation: d.designation ?? 'Doctor',
+        phone: d.phone ?? d.user.mobile,
+        doctorType: d.doctorType,
+        doctorTypeLabel: doctorTypeLabel(d.doctorType),
+        specialtyFocus: d.specialtyFocus,
+        designation: d.designation ?? doctorTypeLabel(d.doctorType),
         department: d.department ?? d.specialty, specialty: d.specialty,
-        joiningDate: d.joiningDate, employeeStatus: d.employeeStatus,
+        joiningDate: d.joiningDate, probationEndDate: d.probationEndDate,
+        employeeStatus: d.employeeStatus,
         workShift: d.workShift, shiftStart: d.shiftStart, shiftEnd: d.shiftEnd,
         weeklyOffDays: d.weeklyOffDays, employeeId: d.employeeId,
         hasLetter: !!d.joiningLetter,

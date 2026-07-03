@@ -2,8 +2,14 @@ import { Component, inject, signal, Input, Output, EventEmitter, OnChanges, Simp
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { HrApiService } from '../../services/hr-api.service';
-import { Employee, Letter, WorkShift, EmployeeStatus } from '../../models';
+import { Doctor, Employee, Letter, WorkShift, EmployeeStatus } from '../../models';
 import { employeeStatusBadgeClass } from '../constants/employee-status.constants';
+import {
+  DOCTOR_TYPE_OPTIONS,
+  SPECIALTY_FOCUS_OPTIONS,
+  type HomeopathicDoctorType,
+  type HomeopathicSpecialtyFocus
+} from '../constants/doctor-types.constants';
 import { WEEK_DAYS, WORK_SHIFT_OPTIONS } from '../constants/shift.constants';
 import { SAVE_SUCCESS_DURATION_MS } from '../../core/constants/timing.constants';
 
@@ -14,12 +20,16 @@ interface EmployeeForm {
   joiningDate: string;
   probationEndDate: string;
   salary: number | null;
+  consultationFee: number | null;
   emergencyContact: string;
   employeeStatus: EmployeeStatus;
   workShift: WorkShift | null;
   shiftStart: string;
   shiftEnd: string;
   weeklyOffDays: string[];
+  doctorType: HomeopathicDoctorType;
+  specialtyFocus: HomeopathicSpecialtyFocus | '';
+  specialty: string;
 }
 
 @Component({
@@ -31,6 +41,9 @@ interface EmployeeForm {
 })
 export class EmployeeDrawerComponent implements OnChanges {
   private api = inject(HrApiService);
+
+  readonly doctorTypeOptions = DOCTOR_TYPE_OPTIONS;
+  readonly specialtyFocusOptions = SPECIALTY_FOCUS_OPTIONS;
 
   @Input() employee: Employee | null = null;
   @Input() visible = false;
@@ -62,37 +75,58 @@ export class EmployeeDrawerComponent implements OnChanges {
       joiningDate: '',
       probationEndDate: '',
       salary: null,
+      consultationFee: null,
       emergencyContact: '',
       employeeStatus: 'ACTIVE',
       workShift: null,
       shiftStart: '',
       shiftEnd: '',
-      weeklyOffDays: []
+      weeklyOffDays: [],
+      doctorType: 'JUNIOR_DOCTOR',
+      specialtyFocus: '',
+      specialty: ''
     };
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['employee'] && this.employee) {
       const emp = this.employee;
+      const doctor = emp as Doctor;
       this.form = {
         employeeId: emp.employeeId ?? '',
         designation: emp.designation ?? '',
         department: emp.department ?? '',
-        joiningDate: emp.joiningDate ?? '',
-        probationEndDate: (emp as any).probationEndDate ?? '',
-        salary: (emp as any).salary ?? null,
-        emergencyContact: (emp as any).emergencyContact ?? '',
+        joiningDate: emp.joiningDate ? String(emp.joiningDate).slice(0, 10) : '',
+        probationEndDate: emp.probationEndDate ? String(emp.probationEndDate).slice(0, 10) : '',
+        salary: doctor.salary != null ? Math.round(doctor.salary / 100) : null,
+        consultationFee: doctor.consultationFee != null ? Math.round(doctor.consultationFee / 100) : null,
+        emergencyContact: emp.emergencyContact ?? '',
         employeeStatus: emp.employeeStatus,
         workShift: emp.workShift ?? null,
         shiftStart: emp.shiftStart ?? '',
         shiftEnd: emp.shiftEnd ?? '',
-        weeklyOffDays: emp.weeklyOffDays ? [...emp.weeklyOffDays] : []
+        weeklyOffDays: emp.weeklyOffDays ? [...emp.weeklyOffDays] : [],
+        doctorType: (doctor.doctorType as HomeopathicDoctorType) || 'JUNIOR_DOCTOR',
+        specialtyFocus: (doctor.specialtyFocus as HomeopathicSpecialtyFocus) || '',
+        specialty: doctor.specialty ?? ''
       };
       this.activeTab.set('profile');
       this.letter.set(null);
       this.saveError.set('');
       this.saveSuccess.set(false);
     }
+  }
+
+  isDoctor() {
+    return this.employee?.empType === 'DOCTOR';
+  }
+
+  isSpecialistType() {
+    return this.form.doctorType === 'SPECIALIST_CONSULTANT';
+  }
+
+  letterContent() {
+    return (this.letter()?.content || {}) as Record<string, unknown>;
   }
 
   close() { this.closed.emit(); }
@@ -119,34 +153,43 @@ export class EmployeeDrawerComponent implements OnChanges {
     this.saveError.set('');
     this.saveSuccess.set(false);
 
-    const payload: Partial<Employee> = {
+    const payload: Record<string, unknown> = {
       employeeId: this.form.employeeId || undefined,
       designation: this.form.designation || undefined,
       department: this.form.department || undefined,
       joiningDate: this.form.joiningDate || undefined,
+      probationEndDate: this.form.probationEndDate || undefined,
       employeeStatus: this.form.employeeStatus,
       workShift: this.form.workShift ?? undefined,
       shiftStart: this.form.shiftStart || undefined,
       shiftEnd: this.form.shiftEnd || undefined,
       weeklyOffDays: this.form.weeklyOffDays.length ? this.form.weeklyOffDays : undefined,
-      ...(this.form.salary !== null ? { salary: this.form.salary } as any : {}),
-      ...(this.form.emergencyContact ? { emergencyContact: this.form.emergencyContact } as any : {}),
-      ...(this.form.probationEndDate ? { probationEndDate: this.form.probationEndDate } as any : {})
+      emergencyContact: this.form.emergencyContact || undefined
     };
+
+    if (emp.empType === 'DOCTOR') {
+      payload['doctorType'] = this.form.doctorType;
+      payload['specialtyFocus'] = this.isSpecialistType() ? this.form.specialtyFocus || null : null;
+      payload['specialty'] = this.form.specialty || undefined;
+      if (this.form.salary !== null) payload['salaryPerMonth'] = Math.round(this.form.salary * 100);
+      if (this.form.consultationFee !== null) payload['consultationFee'] = Math.round(this.form.consultationFee * 100);
+    } else if (this.form.salary !== null) {
+      payload['salary'] = this.form.salary;
+    }
 
     const obs$ = emp.empType === 'DOCTOR'
       ? this.api.updateDoctor(emp.id, payload)
       : this.api.updateStoreStaff(emp.id, payload);
 
-    (obs$ as any).subscribe({
-      next: (res: any) => {
+    obs$.subscribe({
+      next: (res) => {
         this.saving.set(false);
         this.saveSuccess.set(true);
         const updated: Employee = res.doctor ?? res.staff;
         if (updated) this.saved.emit(updated);
         setTimeout(() => this.saveSuccess.set(false), SAVE_SUCCESS_DURATION_MS);
       },
-      error: (err: any) => {
+      error: (err: { error?: { message?: string } }) => {
         this.saving.set(false);
         this.saveError.set(err?.error?.message ?? 'Failed to save. Please try again.');
       }

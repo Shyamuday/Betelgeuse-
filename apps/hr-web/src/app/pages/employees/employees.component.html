@@ -64,6 +64,9 @@
                 </div>
               </div>
               <div class="emp-name">{{ emp.name }}</div>
+              @if (emp.doctorTypeLabel) {
+                <div class="emp-type">{{ emp.doctorTypeLabel }}</div>
+              }
               <div class="emp-role">{{ emp.designation ?? '—' }}</div>
               <div class="emp-dept text-muted">{{ emp.department ?? emp.storeName ?? '—' }}</div>
 

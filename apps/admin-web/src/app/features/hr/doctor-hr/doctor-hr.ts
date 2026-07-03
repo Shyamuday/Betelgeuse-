@@ -15,6 +15,12 @@ import {
   WORK_SHIFT_LABELS,
   type WorkShift
 } from '../constants/shift.constants';
+import {
+  DOCTOR_TYPE_OPTIONS,
+  SPECIALTY_FOCUS_OPTIONS,
+  type HomeopathicDoctorType,
+  type HomeopathicSpecialtyFocus
+} from '../../doctors/constants/doctor-types.constants';
 
 @Component({
   selector: 'app-doctor-hr',
@@ -24,6 +30,9 @@ import {
 })
 export class DoctorHrComponent implements OnInit {
   private api = inject(AdminApi);
+
+  readonly doctorTypeOptions = DOCTOR_TYPE_OPTIONS;
+  readonly specialtyFocusOptions = SPECIALTY_FOCUS_OPTIONS;
 
   doctors = signal<any[]>([]);
   loading = signal(true);
@@ -43,6 +52,10 @@ export class DoctorHrComponent implements OnInit {
 
   ngOnInit(): void { this.load(); }
 
+  doctorName(d: { name?: string; user?: { name?: string } }) {
+    return d.name || d.user?.name || 'Doctor';
+  }
+
   async load() {
     this.loading.set(true);
     try {
@@ -55,13 +68,26 @@ export class DoctorHrComponent implements OnInit {
     this.selected.set(d);
     this.letter.set(d.joiningLetter ?? null);
     this.tab.set('profile');
-    this.form = { ...d, workShift: d.workShift ?? DEFAULT_WORK_SHIFT, weeklyOffDays: d.weeklyOffDays ?? [] };
-    this.salaryDisplay = d.salaryPerMonth ? d.salaryPerMonth / PAISE_PER_RUPEE : 0;
-    this.feeDisplay = d.consultationFee ? d.consultationFee / PAISE_PER_RUPEE : 0;
+    this.form = {
+      ...d,
+      doctorType: d.doctorType ?? 'JUNIOR_DOCTOR',
+      specialtyFocus: d.specialtyFocus ?? '',
+      specialty: d.specialty ?? '',
+      workShift: d.workShift ?? DEFAULT_WORK_SHIFT,
+      weeklyOffDays: d.weeklyOffDays ?? [],
+      joiningDate: d.joiningDate ? String(d.joiningDate).slice(0, 10) : '',
+      probationEndDate: d.probationEndDate ? String(d.probationEndDate).slice(0, 10) : ''
+    };
+    this.salaryDisplay = d.salary != null ? d.salary / PAISE_PER_RUPEE : (d.salaryPerMonth ? d.salaryPerMonth / PAISE_PER_RUPEE : 0);
+    this.feeDisplay = d.consultationFee != null ? d.consultationFee / PAISE_PER_RUPEE : 0;
     this.profileOpen.set(true);
   }
 
   close(): void { this.profileOpen.set(false); }
+
+  isSpecialistType(): boolean {
+    return this.form.doctorType === 'SPECIALIST_CONSULTANT';
+  }
 
   async save() {
     if (!this.selected()) return;
@@ -69,6 +95,8 @@ export class DoctorHrComponent implements OnInit {
     try {
       const r = await this.api.updateHrDoctor(this.selected().id, {
         ...this.form,
+        doctorType: this.form.doctorType as HomeopathicDoctorType,
+        specialtyFocus: this.isSpecialistType() ? (this.form.specialtyFocus as HomeopathicSpecialtyFocus) || null : null,
         salaryPerMonth: Math.round(this.salaryDisplay * PAISE_PER_RUPEE),
         consultationFee: Math.round(this.feeDisplay * PAISE_PER_RUPEE)
       });

@@ -3,6 +3,7 @@ import { HR_API_ROUTES } from '../../constants/hr-api-routes.constants.js';
 import { prisma } from '../../db.js';
 import { asyncRoute } from '../../utils/helpers.js';
 import { getAccess, hrAuthMiddleware } from './shared.js';
+import { doctorTypeLabel } from '../../constants/homeopathic-doctor-types.js';
 
 export function registerHrDashboardRoutes(router: Router) {
 // ─── HR Dashboard ─────────────────────────────────────────────────────────────
@@ -51,7 +52,13 @@ router.get(
       totalEmployees: totalDoctors + totalStoreStaff,
       pendingLeaves, leaveStats: leaveByStatus,
       accessibleStores,
-      recentJoins: recentJoins.map(d => ({ id: d.id, name: d.user.name, designation: d.designation, joiningDate: d.joiningDate }))
+      recentJoins: recentJoins.map(d => ({
+        id: d.id,
+        name: d.user.name,
+        designation: d.designation ?? doctorTypeLabel(d.doctorType),
+        doctorTypeLabel: doctorTypeLabel(d.doctorType),
+        joiningDate: d.joiningDate
+      }))
     });
   })
 );
