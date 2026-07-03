@@ -14,6 +14,7 @@ import { registerStorePurchaseOrderRoutes } from './purchase-orders.js';
 import { registerStoreStockTransferRoutes } from './stock-transfers.js';
 import { registerStoreDeliveryRoutes } from './deliveries.js';
 import { registerStoreStockRoutes } from './stock.js';
+import { registerStoreNotificationRoutes } from './notifications.js';
 
 export const storeRouter = Router();
 
@@ -32,3 +33,4 @@ registerStoreExpenseRoutes(storeRouter);
 registerStorePatientRoutes(storeRouter);
 registerStoreScanRoutes(storeRouter);
 registerStoreHrRoutes(storeRouter);
+registerStoreNotificationRoutes(storeRouter);

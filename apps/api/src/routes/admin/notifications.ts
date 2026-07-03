@@ -146,7 +146,7 @@ export function registerAdminNotificationRoutes(router: Router) {
       const channel = body.channel as NotificationChannel;
       await notificationService.sendBatch(
         recipients.map((recipient) => ({
-          eventType: 'BOOKING_CONFIRMED' as const,
+          eventType: 'PLATFORM_BROADCAST' as const,
           channel,
           recipientId: recipient.id,
           recipientName: recipient.name,

@@ -43,6 +43,7 @@ import { createWarehouseRouter } from './routes/warehouse/router.js';
 import { createDeliveryRouter } from './routes/delivery/router.js';
 import { createDiagnosticRouter } from './routes/diagnostic/router.js';
 import { labReferralsRouter } from './routes/lab-referrals.js';
+import { notificationsRouter } from './routes/notifications.js';
 import { devRouter } from './routes/dev.js';
 import { createRepertoryRouter } from './routes/repertory/index.js';
 import { roleGuidesRouter } from './routes/role-guides.js';
@@ -63,6 +64,7 @@ import {
   doseReminderWindowMinutes
 } from './schedulers.js';
 import { enabledNotificationChannels } from './services/notification-service.js';
+import { setNotificationSocket } from './services/in-app-notifications.js';
 
 // ── App & HTTP server ──────────────────────────────────────────────────────────
 
@@ -88,9 +90,27 @@ const {
 
 // ── Socket.IO ──────────────────────────────────────────────────────────────────
 
+const socketOrigins = [
+  webOrigin,
+  adminOrigin,
+  doctorOrigin,
+  storeOrigin,
+  storeManagerOrigin,
+  hrOrigin,
+  receptionistOrigin,
+  clinicManagerOrigin,
+  accountantOrigin,
+  supplierOrigin,
+  warehouseOrigin,
+  deliveryOrigin,
+  diagnosticOrigin
+];
+
 const io = new SocketIoServer(httpServer, {
-  cors: { origin: webOrigin, credentials: true }
+  cors: { origin: socketOrigins, credentials: true }
 });
+
+setNotificationSocket(io);
 
 io.use((socket, next) => {
   const token = socket.handshake.auth['token'] as string | undefined;
@@ -98,10 +118,23 @@ io.use((socket, next) => {
 
   const socketJwtSecret = process.env.JWT_SECRET || DEFAULT_JWT_SECRET;
   try {
-    const decoded = jwt.verify(token, socketJwtSecret) as AuthUser;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (socket as any).userId = decoded.id;
-    next();
+    const decoded = jwt.verify(token, socketJwtSecret) as {
+      id?: string;
+      userId?: string;
+      staffId?: string;
+    };
+    const userId = decoded.id ?? decoded.userId;
+    if (userId) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (socket as any).userId = userId;
+      return next();
+    }
+    if (decoded.staffId) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (socket as any).storeStaffId = decoded.staffId;
+      return next();
+    }
+    return next(new Error('Unauthorized'));
   } catch {
     next(new Error('Unauthorized'));
   }
@@ -109,8 +142,15 @@ io.use((socket, next) => {
 
 io.on('connection', (socket) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const userId = (socket as any).userId as string;
-  void socket.join(`${SOCKET_ROOM_PREFIXES.USER}${userId}`);
+  const userId = (socket as any).userId as string | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const storeStaffId = (socket as any).storeStaffId as string | undefined;
+  if (userId) {
+    void socket.join(`${SOCKET_ROOM_PREFIXES.USER}${userId}`);
+  }
+  if (storeStaffId) {
+    void socket.join(`${SOCKET_ROOM_PREFIXES.STORE_STAFF}${storeStaffId}`);
+  }
   socket.on(SOCKET_EVENTS.SUBSCRIBE_CONSULTATION, (consultationId: unknown) => {
     if (typeof consultationId === 'string') {
       void socket.join(`${SOCKET_ROOM_PREFIXES.CONSULTATION}${consultationId}`);
@@ -186,6 +226,7 @@ app.use(createWarehouseRouter());
 app.use(createDeliveryRouter());
 app.use(createDiagnosticRouter());
 app.use(labReferralsRouter);
+app.use(notificationsRouter);
 
 // ── Global error handler ───────────────────────────────────────────────────────
 

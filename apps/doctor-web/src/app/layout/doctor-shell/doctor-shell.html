@@ -12,7 +12,10 @@
         }
       </div>
     </div>
-    <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+    <div class="topbar-end">
+      <app-notification-bell-host />
+      <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+    </div>
   </header>
 
   <nav class="tabs desktop-nav" aria-label="Main navigation">

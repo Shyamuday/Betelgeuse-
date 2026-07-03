@@ -94,6 +94,7 @@ model StoreStaff {
   joiningLetter    JoiningLetter?
   leaveRequests    LeaveRequest[]
   goodsReceipts    GoodsReceiptNote[]
+  inAppNotifications InAppNotification[] @relation("StoreStaffInAppNotifications")
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 }

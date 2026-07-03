@@ -45,9 +45,13 @@ export async function authRequired(req: Request, res: Response, next: NextFuncti
   }
 
   try {
-    const decoded = jwt.verify(token, jwtSecret) as AuthUser;
+    const decoded = jwt.verify(token, jwtSecret) as AuthUser & { userId?: string };
+    const userId = decoded.id ?? decoded.userId;
+    if (!userId) {
+      return res.status(401).json({ message: AUTH_MESSAGES.INVALID_TOKEN });
+    }
     const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
+      where: { id: userId },
       select: { id: true, name: true, role: true, email: true, mobile: true, patientCode: true, isActive: true }
     });
 

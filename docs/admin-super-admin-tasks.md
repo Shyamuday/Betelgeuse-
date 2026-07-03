@@ -48,8 +48,9 @@ Operational checklist for giving `admin-web` full platform control. Work through
 
 | # | Task | Notes |
 |---|------|-------|
-| F1 | Patient in-app notification inbox | Broadcast currently uses SMS/email/console channels |
+| F1 | ~~Patient in-app notification inbox~~ | ✅ Done — all apps have bell + inbox API |
 | F2 | Admin inventory adjustments | Read-only overview; store managers adjust stock locally |
+| F3 | Real-time socket push in bell UI | API emits `notification:new`; UI polls every 30s for now |
 
 ---
 
@@ -65,4 +66,4 @@ Operational checklist for giving `admin-web` full platform control. Work through
 | Date | Change |
 |------|--------|
 | 2026-07-03 | Phase B complete (B1–B5) |
-| 2026-07-03 | Phase C complete (C3–C5); C1/C2 remain skipped |
+| 2026-07-03 | Platform in-app notifications (inbox API + bell in all 13 web apps) |

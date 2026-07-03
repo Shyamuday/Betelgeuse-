@@ -27,3 +27,21 @@ model NotificationBroadcast {
 
   @@index([createdAt])
 }
+
+model InAppNotification {
+  id                   String   @id @default(cuid())
+  recipientUserId      String?
+  recipientStoreStaffId String?
+  eventType            String
+  title                String
+  body                 String
+  metadata             Json?
+  readAt               DateTime?
+  createdAt            DateTime @default(now())
+
+  recipientUser        User?       @relation("UserInAppNotifications", fields: [recipientUserId], references: [id], onDelete: Cascade)
+  recipientStoreStaff  StoreStaff? @relation("StoreStaffInAppNotifications", fields: [recipientStoreStaffId], references: [id], onDelete: Cascade)
+
+  @@index([recipientUserId, readAt, createdAt])
+  @@index([recipientStoreStaffId, readAt, createdAt])
+}

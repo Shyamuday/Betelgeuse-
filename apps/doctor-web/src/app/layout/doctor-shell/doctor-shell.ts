@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { RoleTaskGuideComponent } from '../../shared/role-task-guide/role-task-guide.component';
+import { NotificationBellHost } from '../../shared/notification-bell-host/notification-bell-host';
 import { Auth } from '../../core/services/auth';
 import { DoctorSessionService } from '../../core/services/doctor-session';
 
@@ -24,7 +25,7 @@ const NAV_ICONS: Record<string, { icon: string; shortLabel: string }> = {
 
 @Component({
   selector: 'app-doctor-shell',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, RoleTaskGuideComponent],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, RoleTaskGuideComponent, NotificationBellHost],
   templateUrl: './doctor-shell.html',
   styleUrl: './doctor-shell.scss',
 })

@@ -3,10 +3,11 @@ import { Component, effect, EventEmitter, HostListener, inject, Input, OnDestroy
 import { AuthFormOverlayComponent } from './auth/auth-form-overlay.component';
 import { User } from './models';
 import { AppOverlayService } from './overlay.service';
+import { NotificationBellHost } from './shared/notification-bell-host/notification-bell-host';
 
 @Component({
   selector: 'app-header',
-  imports: [CommonModule],
+  imports: [CommonModule, NotificationBellHost],
   templateUrl: './app-header.component.html'
 })
 export class AppHeaderComponent implements OnDestroy {

@@ -57,6 +57,7 @@ model User {
   leaveApprovals     LeaveRequest[]  @relation("LeaveApprovals")
   caseAnalyses       CaseAnalysis[]  @relation("DoctorCaseAnalyses")
   notificationBroadcasts NotificationBroadcast[] @relation("NotificationBroadcasts")
+  inAppNotifications   InAppNotification[]   @relation("UserInAppNotifications")
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
 

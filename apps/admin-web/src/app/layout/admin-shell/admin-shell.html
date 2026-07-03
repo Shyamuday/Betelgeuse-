@@ -1,7 +1,10 @@
 <main class="admin-shell">
   <header class="topbar">
     <h1>Admin Console</h1>
-    <button type="button" (click)="logout()">Logout</button>
+    <div class="topbar-actions">
+      <app-notification-bell-host />
+      <button type="button" (click)="logout()">Logout</button>
+    </div>
   </header>
 
   <nav class="tabs">
