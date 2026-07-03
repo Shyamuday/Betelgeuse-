@@ -37,6 +37,7 @@ import { doctorWorklistRouter } from './routes/doctor-worklist.js';
 import { analyticsRouter } from './routes/analytics.js';
 import { createReceptionRouter } from './routes/reception/router.js';
 import { createClinicManagerRouter } from './routes/clinic-manager/router.js';
+import { createAccountantRouter } from './routes/accountant/router.js';
 import { devRouter } from './routes/dev.js';
 import { createRepertoryRouter } from './routes/repertory/index.js';
 import { ReceptionScopeError } from './routes/reception/shared.js';
@@ -67,7 +68,8 @@ const {
   STORE_MANAGER: storeManagerOrigin,
   HR: hrOrigin,
   RECEPTIONIST: receptionistOrigin,
-  CLINIC_MANAGER: clinicManagerOrigin
+  CLINIC_MANAGER: clinicManagerOrigin,
+  ACCOUNTANT: accountantOrigin
 } = SERVER_CONFIG.ORIGINS;
 
 // ── Socket.IO ──────────────────────────────────────────────────────────────────
@@ -105,7 +107,7 @@ io.on('connection', (socket) => {
 // ── Middleware ─────────────────────────────────────────────────────────────────
 
 app.use(cors({
-  origin: [webOrigin, adminOrigin, doctorOrigin, storeOrigin, storeManagerOrigin, hrOrigin, receptionistOrigin, clinicManagerOrigin],
+  origin: [webOrigin, adminOrigin, doctorOrigin, storeOrigin, storeManagerOrigin, hrOrigin, receptionistOrigin, clinicManagerOrigin, accountantOrigin],
   credentials: true
 }));
 app.use('/payments/razorpay-webhook', express.raw({ type: 'application/json' }));
@@ -163,6 +165,7 @@ app.use('/store', storeRouter);
 app.use('/hr', hrRouter);
 app.use(createReceptionRouter(io));
 app.use(createClinicManagerRouter(io));
+app.use(createAccountantRouter());
 
 // ── Global error handler ───────────────────────────────────────────────────────
 

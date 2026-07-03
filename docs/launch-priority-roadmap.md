@@ -206,6 +206,22 @@ Minimum acceptance:
 - Day-to-day branch operations console
 - Staff attendance and schedule visibility
 
+## Phase 4 (Money & Supply Chain)
+
+### 1) Accountant Web App (Platform Phase 3)
+
+**Status: Done** — `ACCOUNTANT` role + `AccountantProfile`; accountant API (`/accountant/summary`, `/branches`, `/export-bundle`); `accountant-web` on port 4700 with month summary, branch P&L table, and CSV export; demo persona `accountant@vitalisclinic.local`.
+
+- Dedicated finance/compliance console for accountants
+- GST-ready export bundles without full admin access
+
+### 2) Supplier Portal (Platform Phase 3)
+
+**Status: Next** — purchase orders and goods receipt (GRN) linked to store inventory (see `docs/platform-ecosystem-architecture.md`).
+
+- Supplier-facing PO and delivery confirmation
+- GRN updates store stock on receipt
+
 ## Recommended Implementation Order
 
 1. Doctor worklist + follow-up due

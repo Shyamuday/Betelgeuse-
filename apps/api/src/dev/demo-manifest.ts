@@ -31,6 +31,11 @@ export const DEV_DEMO_ACCOUNTS = {
     name: 'Branch Manager Demo',
     employeeId: 'CM-001'
   },
+  accountant: {
+    email: 'accountant@vitalisclinic.local',
+    name: 'Finance Accountant Demo',
+    employeeId: 'ACC-001'
+  },
   patientRahul: {
     email: 'patient1@vitalisclinic.local',
     name: 'Rahul Verma',
@@ -72,6 +77,7 @@ export const DEV_DEMO_APPS = [
   { id: 'hr-web', label: 'HR portal', port: 4400, url: SERVER_CONFIG.ORIGINS.HR },
   { id: 'receptionist-web', label: 'Reception desk', port: 4500, url: SERVER_CONFIG.ORIGINS.RECEPTIONIST },
   { id: 'clinic-manager-web', label: 'Clinic manager', port: 4600, url: SERVER_CONFIG.ORIGINS.CLINIC_MANAGER },
+  { id: 'accountant-web', label: 'Accountant', port: 4700, url: SERVER_CONFIG.ORIGINS.ACCOUNTANT },
   { id: 'api', label: 'API + demo guide', port: 4000, url: SERVER_CONFIG.API_PUBLIC_URL }
 ] as const;
 
@@ -142,6 +148,14 @@ export const DEV_DEMO_PERSONAS: DevDemoPersona[] = [
     authKind: 'platform',
     description: 'Branch operations dashboard — KPIs, staff roster, doctor schedules.',
     testHints: ['Today KPIs', 'Queue snapshot', 'Staff attendance', 'Doctor slots']
+  },
+  {
+    id: 'accountant',
+    label: 'Finance Accountant',
+    app: 'accountant-web',
+    authKind: 'platform',
+    description: 'GST-ready branch P&L, month summary, and accountant CSV export bundle.',
+    testHints: ['Month summary', 'Branch P&L table', 'Export bundle CSV']
   },
   {
     id: 'store-staff',
@@ -229,6 +243,12 @@ export const DEV_DEMO_ALL_ACCOUNTS = [
     password: DEV_DEMO_PASSWORD
   },
   {
+    role: 'Accountant',
+    app: 'accountant-web',
+    login: DEV_DEMO_ACCOUNTS.accountant.email,
+    password: DEV_DEMO_PASSWORD
+  },
+  {
     role: 'Patient — Rahul',
     app: 'user-web',
     login: DEV_DEMO_ACCOUNTS.patientRahul.email,
@@ -266,7 +286,8 @@ const PERSONA_EMAIL: Record<string, string> = {
   'patient-priya': DEV_DEMO_ACCOUNTS.patientPriya.email,
   hr: DEV_DEMO_ACCOUNTS.hr.email,
   receptionist: DEV_DEMO_ACCOUNTS.receptionist.email,
-  'clinic-manager': DEV_DEMO_ACCOUNTS.clinicManager.email
+  'clinic-manager': DEV_DEMO_ACCOUNTS.clinicManager.email,
+  accountant: DEV_DEMO_ACCOUNTS.accountant.email
 };
 
 export function getPersonaCredentials(personaId: string): DevDemoPersonaCredentials {
@@ -302,6 +323,8 @@ export function getPersonaCredentials(personaId: string): DevDemoPersonaCredenti
       return { email: DEV_DEMO_ACCOUNTS.receptionist.email, password };
     case 'clinic-manager':
       return { email: DEV_DEMO_ACCOUNTS.clinicManager.email, password };
+    case 'accountant':
+      return { email: DEV_DEMO_ACCOUNTS.accountant.email, password };
     case 'store-staff':
       return { staffCode: DEV_DEMO_ACCOUNTS.storeStaff.staffCode, pin: password, password };
     case 'store-manager':

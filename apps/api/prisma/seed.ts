@@ -149,6 +149,28 @@ async function main() {
     }
   });
 
+  const accountantUser = await prisma.user.upsert({
+    where: { email: DEV_DEMO_ACCOUNTS.accountant.email },
+    update: { isActive: true, passwordHash, role: Role.ACCOUNTANT },
+    create: {
+      name: DEV_DEMO_ACCOUNTS.accountant.name,
+      email: DEV_DEMO_ACCOUNTS.accountant.email,
+      passwordHash,
+      role: Role.ACCOUNTANT,
+      isActive: true
+    }
+  });
+
+  await prisma.accountantProfile.upsert({
+    where: { userId: accountantUser.id },
+    update: { employeeId: DEV_DEMO_ACCOUNTS.accountant.employeeId },
+    create: {
+      userId: accountantUser.id,
+      employeeId: DEV_DEMO_ACCOUNTS.accountant.employeeId,
+      designation: 'Accountant'
+    }
+  });
+
   const managerPinHash = await bcrypt.hash(DEV_DEMO_PASSWORD, 10);
   await prisma.storeStaff.upsert({
     where: { staffCode: DEV_DEMO_ACCOUNTS.storeManager.staffCode },
