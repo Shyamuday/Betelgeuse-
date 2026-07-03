@@ -61,9 +61,9 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     });
 
     this.socket.on('notification:new', (payload: InAppNotificationItem) => {
-      this.unreadCount.update((count: number) => count + 1);
+      this.unreadCount.update((count) => count + 1);
       if (this.notificationMenu()?.visible()) {
-        this.items.update((list: InAppNotificationItem[]) => [payload, ...list].slice(0, 20));
+        this.items.update((list) => [payload, ...list].slice(0, 20));
       }
     });
   }
@@ -112,10 +112,10 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     if (item.readAt) return;
     try {
       await this.apiFetch(`${this.config.apiPath}/${item.id}/read`, { method: 'PATCH' });
-      this.items.update((list: InAppNotificationItem[]) =>
+      this.items.update((list) =>
         list.map((row) => (row.id === item.id ? { ...row, readAt: new Date().toISOString() } : row))
       );
-      this.unreadCount.update((count: number) => Math.max(0, count - 1));
+      this.unreadCount.update((count) => Math.max(0, count - 1));
     } catch {
       this.error.set('Could not mark notification read.');
     }
@@ -124,7 +124,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   async markAllRead(): Promise<void> {
     try {
       await this.apiFetch(`${this.config.apiPath}/read-all`, { method: 'POST', body: '{}' });
-      this.items.update((list: InAppNotificationItem[]) =>
+      this.items.update((list) =>
         list.map((row) => ({ ...row, readAt: row.readAt ?? new Date().toISOString() }))
       );
       this.unreadCount.set(0);

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { StoreApiService } from '../../../services/store-api.service';
+import { StoreRouteContext } from '../../../services/store-route-context.service';
 import { StoreAuthService } from '../../../services/store-auth.service';
 
 type PatientResult = {
@@ -25,6 +26,7 @@ export class PatientsPage {
   private readonly api = inject(StoreApiService);
   private readonly auth = inject(StoreAuthService);
   private readonly router = inject(Router);
+  readonly storeRoutes = inject(StoreRouteContext);
   private readonly search$ = new Subject<string>();
 
   readonly query = signal('');
@@ -105,7 +107,7 @@ export class PatientsPage {
         this.registerSaving.set(false);
         this.closeRegister();
         if (res.patient.patientCode) {
-          void this.router.navigate(['/store/', 'scan', 'patient', res.patient.patientCode]);
+          void this.router.navigate(this.storeRoutes.link('scan', 'patient', res.patient.patientCode));
         }
       },
       error: (err) => {
@@ -117,6 +119,6 @@ export class PatientsPage {
 
   openScan(patientCode: string | null | undefined): void {
     if (!patientCode) return;
-    void this.router.navigate(['/store/', 'scan', 'patient', patientCode]);
+    void this.router.navigate(this.storeRoutes.link('scan', 'patient', patientCode));
   }
 }

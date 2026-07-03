@@ -12,6 +12,11 @@
       "@vitalis/platform-nav/*": ["../../libs/platform-nav/src/*"],
       "@vitalis/platform-ui": ["../../libs/platform-ui/src/index.ts"],
       "@vitalis/platform-ui/*": ["../../libs/platform-ui/src/*"],
+      "@vitalis/app-notifications/*": ["../../libs/platform-ui/src/notification-bell/*"],
+      "@vitalis/app-notifications/notification-bell.component": [
+        "../../shared/app-notifications/notification-bell.component.ts"
+      ],
+      "@vitalis/app-notifications/types": ["../../libs/platform-ui/src/notification-bell/types.ts"],
       "@vitalis/role-task-guides": ["../../shared/role-task-guides/index.ts"],
       "@vitalis/role-task-guides/*": ["../../shared/role-task-guides/*"]
     },

@@ -1,6 +1,6 @@
 <section class="scan-page">
   <header class="scan-header">
-    <a routerLink="/store/dashboard" class="back-link">← Dashboard</a>
+    <a [routerLink]="storeRoutes.link('dashboard')" class="back-link">← Dashboard</a>
     <h1>Medicines to give</h1>
     <p class="code">{{ patientCode() }}</p>
   </header>

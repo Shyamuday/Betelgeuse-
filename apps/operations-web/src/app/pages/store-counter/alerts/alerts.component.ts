@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { StoreApiService } from '../../../services/store-api.service';
+import { StoreRouteContext } from '../../../services/store-route-context.service';
 import { MedicineWithStock, StockBatch } from '../../../store-models';
 
 @Component({
@@ -12,6 +13,7 @@ import { MedicineWithStock, StockBatch } from '../../../store-models';
 })
 export class AlertsComponent implements OnInit {
   private api = inject(StoreApiService);
+  readonly storeRoutes = inject(StoreRouteContext);
 
   tab = signal<'low' | 'expiring'>('low');
   lowStock = signal<MedicineWithStock[]>([]);

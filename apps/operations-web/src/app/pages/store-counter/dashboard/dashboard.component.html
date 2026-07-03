@@ -46,31 +46,54 @@
 
         <!-- Quick actions -->
         <div class="quick-actions">
-          <a class="quick-btn" routerLink="/store/stock-in">
-            <span class="qb-icon">📦</span>
-            <span>Add Stock</span>
-          </a>
-          <a class="quick-btn" routerLink="/store/stock-out">
-            <span class="qb-icon">📤</span>
-            <span>Remove</span>
-          </a>
-          <a class="quick-btn" routerLink="/store/search">
-            <span class="qb-icon">🔍</span>
-            <span>Search</span>
-          </a>
-          <a class="quick-btn" routerLink="/store/patients">
-            <span class="qb-icon">🪪</span>
-            <span>Patients</span>
-          </a>
-          <a class="quick-btn" routerLink="/store/rack-map">
-            <span class="qb-icon">🗺️</span>
-            <span>Rack Map</span>
-          </a>
+          @if (storeRoutes.isManager()) {
+            <a class="quick-btn" [routerLink]="storeRoutes.link('patients')">
+              <span class="qb-icon">🪪</span>
+              <span>Patients</span>
+            </a>
+            <a class="quick-btn" [routerLink]="storeRoutes.link('medicines')">
+              <span class="qb-icon">💊</span>
+              <span>Medicines</span>
+            </a>
+            <a class="quick-btn" [routerLink]="storeRoutes.link('staff-activity')">
+              <span class="qb-icon">👥</span>
+              <span>Staff</span>
+            </a>
+            <a class="quick-btn" [routerLink]="storeRoutes.link('search')">
+              <span class="qb-icon">🔍</span>
+              <span>Inventory</span>
+            </a>
+            <a class="quick-btn" [routerLink]="storeRoutes.link('store-expenses')">
+              <span class="qb-icon">🧾</span>
+              <span>Expenses</span>
+            </a>
+          } @else {
+            <a class="quick-btn" [routerLink]="storeRoutes.link('stock-in')">
+              <span class="qb-icon">📦</span>
+              <span>Add Stock</span>
+            </a>
+            <a class="quick-btn" [routerLink]="storeRoutes.link('stock-out')">
+              <span class="qb-icon">📤</span>
+              <span>Remove</span>
+            </a>
+            <a class="quick-btn" [routerLink]="storeRoutes.link('search')">
+              <span class="qb-icon">🔍</span>
+              <span>Search</span>
+            </a>
+            <a class="quick-btn" [routerLink]="storeRoutes.link('patients')">
+              <span class="qb-icon">🪪</span>
+              <span>Patients</span>
+            </a>
+            <a class="quick-btn" [routerLink]="storeRoutes.link('rack-map')">
+              <span class="qb-icon">🗺️</span>
+              <span>Rack Map</span>
+            </a>
+          }
         </div>
 
         <!-- Alerts banner -->
         @if (s.lowStockCount > 0 || s.expiringCount > 0) {
-          <a class="alerts-banner" routerLink="/store/alerts">
+          <a class="alerts-banner" [routerLink]="storeRoutes.link('alerts')">
             <div class="alerts-content">
               <span class="alerts-icon">🔔</span>
               <div>
@@ -90,11 +113,11 @@
           <div class="section">
             <div class="section-header">
               <h2>⚠️ Low Stock</h2>
-              <a routerLink="/store/alerts" class="see-all">See all</a>
+              <a [routerLink]="storeRoutes.link('alerts')" class="see-all">See all</a>
             </div>
             <div class="list">
               @for (med of s.topLowStock; track med.id) {
-                <a class="medicine-item" [routerLink]="['/store/medicines', med.id]">
+                <a class="medicine-item" [routerLink]="storeRoutes.link('medicines', med.id)">
                   <div class="med-status-dot" [class]="getStatusClass(med)"></div>
                   <div class="med-info">
                     <div class="med-name">{{ med.name }}</div>
@@ -118,7 +141,7 @@
           <div class="section">
             <div class="section-header">
               <h2>📋 Recent Activity</h2>
-              <a routerLink="/store/movements" class="see-all">See all</a>
+              <a [routerLink]="storeRoutes.link('movements')" class="see-all">See all</a>
             </div>
             <div class="list">
               @for (m of s.recentMovements.slice(0, 5); track m.id) {

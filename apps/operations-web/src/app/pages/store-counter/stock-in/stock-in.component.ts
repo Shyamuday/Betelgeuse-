@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StoreApiService } from '../../../services/store-api.service';
+import { StoreRouteContext } from '../../../services/store-route-context.service';
 import { MedicineWithStock, StoreRack } from '../../../store-models';
 import { ROUTE_PATHS } from '../../../core/constants/store/app-routes.constants';
 import { PAGE_SIZES } from '../../../core/constants/store/pagination.constants';
@@ -16,6 +17,7 @@ export class StockInComponent implements OnInit {
   private api = inject(StoreApiService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  readonly storeRoutes = inject(StoreRouteContext);
 
   medicineSearch = '';
   searchResults = signal<MedicineWithStock[]>([]);
@@ -124,5 +126,5 @@ export class StockInComponent implements OnInit {
     });
   }
 
-  goBack(): void { this.router.navigate(['/store/', ROUTE_PATHS.DASHBOARD]); }
+  goBack(): void { void this.router.navigate(this.storeRoutes.link(ROUTE_PATHS.DASHBOARD)); }
 }

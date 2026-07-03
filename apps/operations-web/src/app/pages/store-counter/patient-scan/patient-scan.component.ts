@@ -2,6 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { StoreApiService } from '../../../services/store-api.service';
+import { StoreRouteContext } from '../../../services/store-route-context.service';
 
 type TodayDose = {
   id: string;
@@ -46,6 +47,7 @@ type ScanResponse = {
 export class PatientScanComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly api = inject(StoreApiService);
+  readonly storeRoutes = inject(StoreRouteContext);
 
   readonly loading = signal(true);
   readonly error = signal('');

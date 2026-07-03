@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { StoreApiService } from '../../../services/store-api.service';
+import { StoreRouteContext } from '../../../services/store-route-context.service';
 import { MedicineDetailResponse, StockBatch } from '../../../store-models';
 
 @Component({
@@ -14,6 +15,7 @@ export class MedicineDetailComponent implements OnInit {
   private api = inject(StoreApiService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  readonly storeRoutes = inject(StoreRouteContext);
 
   detail = signal<MedicineDetailResponse | null>(null);
   loading = signal(true);
@@ -37,7 +39,7 @@ export class MedicineDetailComponent implements OnInit {
   }
 
   goBack(): void {
-    window.history.length > 1 ? window.history.back() : this.router.navigate(['/store/search']);
+    window.history.length > 1 ? window.history.back() : void this.router.navigate(this.storeRoutes.link('search'));
   }
 
   getPotencyClass(potency: string): string {

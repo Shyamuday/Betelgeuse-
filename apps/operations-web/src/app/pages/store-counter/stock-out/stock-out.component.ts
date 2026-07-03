@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { StoreApiService } from '../../../services/store-api.service';
+import { StoreRouteContext } from '../../../services/store-route-context.service';
 import { MedicineWithStock } from '../../../store-models';
 import { ROUTE_PATHS } from '../../../core/constants/store/app-routes.constants';
 import { PAGE_SIZES } from '../../../core/constants/store/pagination.constants';
@@ -17,6 +18,7 @@ type RemoveType = 'SALE_OUT' | 'ADJUSTMENT_OUT' | 'EXPIRED_REMOVAL';
 export class StockOutComponent {
   private api = inject(StoreApiService);
   router = inject(Router);
+  readonly storeRoutes = inject(StoreRouteContext);
 
   readonly routePaths = ROUTE_PATHS;
 

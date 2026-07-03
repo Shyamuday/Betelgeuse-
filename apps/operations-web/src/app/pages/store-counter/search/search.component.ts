@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, takeUntil } from 'rxjs';
 import { StoreApiService } from '../../../services/store-api.service';
+import { StoreRouteContext } from '../../../services/store-route-context.service';
 import { MedicineWithStock } from '../../../store-models';
 import { DEFAULT_PAGE, PAGE_SIZES } from '../../../core/constants/store/pagination.constants';
 
@@ -14,6 +15,7 @@ import { DEFAULT_PAGE, PAGE_SIZES } from '../../../core/constants/store/paginati
 })
 export class SearchComponent implements OnDestroy {
   private api = inject(StoreApiService);
+  readonly storeRoutes = inject(StoreRouteContext);
 
   query = signal('');
   selectedPotency = signal('');

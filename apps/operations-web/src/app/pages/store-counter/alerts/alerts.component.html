@@ -50,7 +50,7 @@
                     <a class="btn btn-sm btn-primary" [routerLink]="['/stock-in']" [queryParams]="{medicineId: med.id}">
                       + Add Stock
                     </a>
-                    <a class="btn btn-sm btn-secondary" [routerLink]="['/store/medicines', med.id]">
+                    <a class="btn btn-sm btn-secondary" [routerLink]="storeRoutes.link('medicines', med.id)">
                       View
                     </a>
                   </div>

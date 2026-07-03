@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { StoreApiService } from '../../../services/store-api.service';
 import { StoreAuthService } from '../../../services/store-auth.service';
+import { StoreRouteContext } from '../../../services/store-route-context.service';
 import { DashboardStats, MedicineWithStock, StockMovement } from '../../../store-models';
 
 @Component({
@@ -14,6 +15,7 @@ import { DashboardStats, MedicineWithStock, StockMovement } from '../../../store
 export class DashboardComponent implements OnInit {
   private api = inject(StoreApiService);
   auth = inject(StoreAuthService);
+  readonly storeRoutes = inject(StoreRouteContext);
 
   stats = signal<DashboardStats | null>(null);
   loading = signal(true);

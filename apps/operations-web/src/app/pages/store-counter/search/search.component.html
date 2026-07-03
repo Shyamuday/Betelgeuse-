@@ -61,7 +61,7 @@
         </div>
         <div class="results-list">
           @for (med of medicines(); track med.id) {
-            <a class="med-result" [routerLink]="['/store/medicines', med.id]">
+            <a class="med-result" [routerLink]="storeRoutes.link('medicines', med.id)">
               <div class="med-status-indicator" [class]="getStatusClass(med)"></div>
               <div class="med-main">
                 <div class="med-top">
