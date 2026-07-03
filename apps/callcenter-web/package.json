@@ -17,6 +17,7 @@
     "@angular/router": "^22.0.5",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "vitalis-clinic-platform": "file:../..",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {

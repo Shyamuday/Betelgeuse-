@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { StoreApiService } from '../../services/store-api.service';
@@ -17,6 +17,7 @@ type PatientResult = {
   selector: 'app-patients-page',
   imports: [CommonModule, FormsModule],
   templateUrl: './patients-page.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './patients-page.scss'
 })
 export class PatientsPage {

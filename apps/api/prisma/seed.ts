@@ -381,6 +381,153 @@ async function main() {
     create: { userId: diagnosticUser.id, diagnosticCenterId: diagnosticEntity.id }
   });
 
+  const branchOwnerUser = await prisma.user.upsert({
+    where: { email: DEV_DEMO_ACCOUNTS.branchOwner.email },
+    update: { isActive: true, passwordHash, role: Role.BRANCH_OWNER },
+    create: {
+      name: DEV_DEMO_ACCOUNTS.branchOwner.name,
+      email: DEV_DEMO_ACCOUNTS.branchOwner.email,
+      passwordHash,
+      role: Role.BRANCH_OWNER,
+      isActive: true
+    }
+  });
+
+  await prisma.branchOwnerProfile.upsert({
+    where: { userId: branchOwnerUser.id },
+    update: { storeId: ranchiStore.id, employeeId: DEV_DEMO_ACCOUNTS.branchOwner.employeeId },
+    create: {
+      userId: branchOwnerUser.id,
+      storeId: ranchiStore.id,
+      employeeId: DEV_DEMO_ACCOUNTS.branchOwner.employeeId,
+      designation: 'Branch Owner'
+    }
+  });
+
+  const coordinatorUser = await prisma.user.upsert({
+    where: { email: DEV_DEMO_ACCOUNTS.coordinator.email },
+    update: { isActive: true, passwordHash, role: Role.PATIENT_COORDINATOR },
+    create: {
+      name: DEV_DEMO_ACCOUNTS.coordinator.name,
+      email: DEV_DEMO_ACCOUNTS.coordinator.email,
+      passwordHash,
+      role: Role.PATIENT_COORDINATOR,
+      isActive: true
+    }
+  });
+
+  await prisma.patientCoordinatorProfile.upsert({
+    where: { userId: coordinatorUser.id },
+    update: { storeId: ranchiStore.id, employeeId: DEV_DEMO_ACCOUNTS.coordinator.employeeId },
+    create: {
+      userId: coordinatorUser.id,
+      storeId: ranchiStore.id,
+      employeeId: DEV_DEMO_ACCOUNTS.coordinator.employeeId,
+      designation: 'Patient Coordinator'
+    }
+  });
+
+  const callCenterUser = await prisma.user.upsert({
+    where: { email: DEV_DEMO_ACCOUNTS.callCenter.email },
+    update: { isActive: true, passwordHash, role: Role.CALL_CENTER },
+    create: {
+      name: DEV_DEMO_ACCOUNTS.callCenter.name,
+      email: DEV_DEMO_ACCOUNTS.callCenter.email,
+      passwordHash,
+      role: Role.CALL_CENTER,
+      isActive: true
+    }
+  });
+
+  await prisma.callCenterProfile.upsert({
+    where: { userId: callCenterUser.id },
+    update: { employeeId: DEV_DEMO_ACCOUNTS.callCenter.employeeId },
+    create: {
+      userId: callCenterUser.id,
+      employeeId: DEV_DEMO_ACCOUNTS.callCenter.employeeId,
+      designation: 'Call Center Agent'
+    }
+  });
+
+  const marketingUser = await prisma.user.upsert({
+    where: { email: DEV_DEMO_ACCOUNTS.marketing.email },
+    update: { isActive: true, passwordHash, role: Role.MARKETING },
+    create: {
+      name: DEV_DEMO_ACCOUNTS.marketing.name,
+      email: DEV_DEMO_ACCOUNTS.marketing.email,
+      passwordHash,
+      role: Role.MARKETING,
+      isActive: true
+    }
+  });
+
+  await prisma.marketingProfile.upsert({
+    where: { userId: marketingUser.id },
+    update: { employeeId: DEV_DEMO_ACCOUNTS.marketing.employeeId },
+    create: {
+      userId: marketingUser.id,
+      employeeId: DEV_DEMO_ACCOUNTS.marketing.employeeId,
+      designation: 'Marketing Manager'
+    }
+  });
+
+  const corporateAccount = await prisma.corporateAccount.upsert({
+    where: { code: DEV_DEMO_ACCOUNTS.corporate.code },
+    update: {
+      name: DEV_DEMO_ACCOUNTS.corporate.name,
+      contactEmail: DEV_DEMO_ACCOUNTS.corporate.email,
+      isActive: true
+    },
+    create: {
+      code: DEV_DEMO_ACCOUNTS.corporate.code,
+      name: DEV_DEMO_ACCOUNTS.corporate.name,
+      contactEmail: DEV_DEMO_ACCOUNTS.corporate.email
+    }
+  });
+
+  const corporateUser = await prisma.user.upsert({
+    where: { email: DEV_DEMO_ACCOUNTS.corporate.email },
+    update: { isActive: true, passwordHash, role: Role.CORPORATE_WELLNESS },
+    create: {
+      name: DEV_DEMO_ACCOUNTS.corporate.name,
+      email: DEV_DEMO_ACCOUNTS.corporate.email,
+      passwordHash,
+      role: Role.CORPORATE_WELLNESS,
+      isActive: true
+    }
+  });
+
+  await prisma.corporateWellnessProfile.upsert({
+    where: { userId: corporateUser.id },
+    update: { corporateId: corporateAccount.id },
+    create: { userId: corporateUser.id, corporateId: corporateAccount.id }
+  });
+
+  const insuranceUser = await prisma.user.upsert({
+    where: { email: DEV_DEMO_ACCOUNTS.insurance.email },
+    update: { isActive: true, passwordHash, role: Role.INSURANCE_PARTNER },
+    create: {
+      name: DEV_DEMO_ACCOUNTS.insurance.name,
+      email: DEV_DEMO_ACCOUNTS.insurance.email,
+      passwordHash,
+      role: Role.INSURANCE_PARTNER,
+      isActive: true
+    }
+  });
+
+  const insuranceProfile = await prisma.insurancePartnerProfile.upsert({
+    where: { userId: insuranceUser.id },
+    update: {
+      companyName: DEV_DEMO_ACCOUNTS.insurance.companyName,
+      companyCode: DEV_DEMO_ACCOUNTS.insurance.companyCode
+    },
+    create: {
+      userId: insuranceUser.id,
+      companyName: DEV_DEMO_ACCOUNTS.insurance.companyName,
+      companyCode: DEV_DEMO_ACCOUNTS.insurance.companyCode
+    }
+  });
+
   const demoMedicineArnica = await prisma.storeMedicine.upsert({
     where: { id: 'seed-store-med-arnica-30' },
     update: { isActive: true },
@@ -517,6 +664,31 @@ async function main() {
       role: Role.PATIENT,
       patientCode: DEV_DEMO_ACCOUNTS.patientPriya.patientCode,
       homeClinicStoreId: ranchiStore.id
+    }
+  });
+
+  await prisma.corporateEnrollment.upsert({
+    where: { corporateId_patientId: { corporateId: corporateAccount.id, patientId: patientOne.id } },
+    update: {},
+    create: { corporateId: corporateAccount.id, patientId: patientOne.id }
+  });
+
+  await prisma.corporateEnrollment.upsert({
+    where: { corporateId_patientId: { corporateId: corporateAccount.id, patientId: patientTwo.id } },
+    update: {},
+    create: { corporateId: corporateAccount.id, patientId: patientTwo.id }
+  });
+
+  await prisma.insuranceClaim.upsert({
+    where: { claimNumber: 'CLM-DEMO-RAHUL' },
+    update: { status: 'SUBMITTED' },
+    create: {
+      claimNumber: 'CLM-DEMO-RAHUL',
+      partnerId: insuranceProfile.id,
+      patientId: patientOne.id,
+      claimAmountInPaise: 250000,
+      description: 'Demo consultation reimbursement — Rahul Verma',
+      status: 'SUBMITTED'
     }
   });
 

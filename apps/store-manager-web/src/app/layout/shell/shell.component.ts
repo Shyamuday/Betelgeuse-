@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { RoleTaskGuideComponent } from '../../shared/role-task-guide/role-task-guide.component';
 import { NotificationBellHost } from '../../shared/notification-bell-host/notification-bell-host';
@@ -9,6 +9,7 @@ import { StoreAuthService } from '../../services/store-auth.service';
   selector: 'app-shell',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, RoleTaskGuideComponent, NotificationBellHost],
   templateUrl: './shell.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './shell.component.scss'
 })
 export class ShellComponent {

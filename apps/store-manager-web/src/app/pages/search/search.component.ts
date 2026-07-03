@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, takeUntil } from 'rxjs';
@@ -10,6 +10,7 @@ import { DEFAULT_PAGE, PAGE_SIZES } from '../../core/constants/pagination.consta
   selector: 'app-search',
   imports: [FormsModule, RouterLink],
   templateUrl: './search.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './search.component.scss'
 })
 export class SearchComponent implements OnDestroy {

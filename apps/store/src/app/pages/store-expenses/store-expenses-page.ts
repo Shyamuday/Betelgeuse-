@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { StoreApiService } from '../../services/store-api.service';
@@ -13,6 +13,7 @@ import {
   selector: 'app-store-expenses-page',
   imports: [FormsModule, DatePipe],
   templateUrl: './store-expenses-page.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './store-expenses-page.scss'
 })
 export class StoreExpensesPage implements OnInit {

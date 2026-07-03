@@ -49,7 +49,8 @@ Scaffold-App 'clinic-manager-web' 'coordinator-web' @(
 
 Scaffold-App 'receptionist-web' 'callcenter-web' @(
   @('receptionist-web', 'callcenter-web'),
-  @('Reception', 'Call Center'),
+  @('Reception Desk', 'Call Center Desk'),
+  @('Reception', 'CallCenter'),
   @('reception_token', 'callcenter_token'),
   @('/reception/', '/call-center/'),
   @('/reception', '/call-center'),

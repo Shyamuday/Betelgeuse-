@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { StoreApiService } from '../../services/store-api.service';
@@ -9,6 +9,7 @@ import { DashboardStats, MedicineWithStock, StockMovement } from '../../models';
   selector: 'app-dashboard',
   imports: [RouterLink, DatePipe, DecimalPipe],
   templateUrl: './dashboard.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {

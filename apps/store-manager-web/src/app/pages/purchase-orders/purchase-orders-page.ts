@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { StoreApiService } from '../../services/store-api.service';
@@ -19,6 +19,7 @@ type ReceiveLine = {
   standalone: true,
   imports: [FormsModule, DatePipe],
   templateUrl: './purchase-orders-page.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './purchase-orders-page.scss'
 })
 export class PurchaseOrdersPage implements OnInit {

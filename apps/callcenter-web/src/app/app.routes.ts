@@ -14,12 +14,12 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: DEFAULT_AUTHED_ROUTE },
       {
-        path: ROUTE_PATHS.QUEUE,
-        loadComponent: () => import('./pages/queue/queue.component').then(m => m.QueueComponent)
+        path: ROUTE_PATHS.PATIENTS,
+        loadComponent: () => import('./pages/patient-search/patient-search.component').then(m => m.PatientSearchComponent)
       },
       {
-        path: ROUTE_PATHS.WALK_IN,
-        loadComponent: () => import('./pages/walk-in/walk-in.component').then(m => m.WalkInComponent)
+        path: ROUTE_PATHS.CONSULTATIONS,
+        loadComponent: () => import('./pages/consultations/consultations.component').then(m => m.ConsultationsComponent)
       }
     ]
   },

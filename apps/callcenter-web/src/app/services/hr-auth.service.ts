@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { AuthResponse, Call CenterUser } from '../models';
+import { AuthResponse, CallCenterUser } from '../models';
 import { ROUTE_PATHS } from '../core/constants/app-routes.constants';
 import { AUTH_TOKEN_KEY, AUTH_USER_KEY, AUTH_PATHS } from '../core/constants/auth.constants';
 
@@ -12,9 +12,9 @@ export class HrAuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
 
-  currentUser = signal<Call CenterUser | null>(this.loadUser());
+  currentUser = signal<CallCenterUser | null>(this.loadUser());
 
-  private loadUser(): Call CenterUser | null {
+  private loadUser(): CallCenterUser | null {
     try {
       const raw = localStorage.getItem(AUTH_USER_KEY);
       return raw ? JSON.parse(raw) : null;
@@ -55,7 +55,7 @@ export class HrAuthService {
   }
 
   fetchMe() {
-    return this.http.get<{ user: Call CenterUser; store: { name: string; code: string } | null }>(`${environment.apiUrl}${AUTH_PATHS.ME}`).pipe(
+    return this.http.get<{ user: CallCenterUser; store: { name: string; code: string } | null }>(`${environment.apiUrl}${AUTH_PATHS.ME}`).pipe(
       tap(res => {
         localStorage.setItem(AUTH_USER_KEY, JSON.stringify(res.user));
         this.currentUser.set(res.user);

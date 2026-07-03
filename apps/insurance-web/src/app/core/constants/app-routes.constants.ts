@@ -1,10 +1,10 @@
 export const ROUTE_PATHS = {
   LOGIN: 'login',
-  ORDERS: 'orders'
+  CLAIMS: 'claims'
 } as const;
 
-export const DEFAULT_AUTHED_ROUTE = ROUTE_PATHS.ORDERS;
+export const DEFAULT_AUTHED_ROUTE = ROUTE_PATHS.CLAIMS;
 
 export const NAV_ITEMS = [
-  { path: ROUTE_PATHS.ORDERS, label: 'Purchase orders', icon: '📦' }
+  { path: ROUTE_PATHS.CLAIMS, label: 'Insurance claims', icon: '📄' }
 ] as const;

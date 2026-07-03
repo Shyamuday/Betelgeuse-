@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { WarehouseApiService } from '../../services/warehouse-api.service';
@@ -18,6 +18,7 @@ type DispatchLine = {
   standalone: true,
   imports: [FormsModule, DatePipe],
   templateUrl: './transfers.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './transfers.component.scss'
 })
 export class TransfersComponent implements OnInit {

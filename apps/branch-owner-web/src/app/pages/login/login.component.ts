@@ -18,7 +18,7 @@ export class LoginComponent {
   private auth = inject(HrAuthService);
   private router = inject(Router);
 
-  email = DEV_DEMO_ACCOUNTS.accountant.email;
+  email = DEV_DEMO_ACCOUNTS.branchOwner.email;
   password = DEV_DEMO_ACCOUNTS.password;
   loading = signal(false);
   error = signal('');

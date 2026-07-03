@@ -1,14 +1,10 @@
 export const ROUTE_PATHS = {
   LOGIN: 'login',
-  DASHBOARD: 'dashboard',
-  ROSTER: 'roster',
-  SCHEDULES: 'schedules'
+  FUNNELS: 'funnels'
 } as const;
 
-export const DEFAULT_AUTHED_ROUTE = ROUTE_PATHS.DASHBOARD;
+export const DEFAULT_AUTHED_ROUTE = ROUTE_PATHS.FUNNELS;
 
 export const NAV_ITEMS = [
-  { path: ROUTE_PATHS.DASHBOARD, label: 'Dashboard', icon: '📊' },
-  { path: ROUTE_PATHS.ROSTER, label: 'Roster', icon: '👥' },
-  { path: ROUTE_PATHS.SCHEDULES, label: 'Schedules', icon: '🗓️' }
+  { path: ROUTE_PATHS.FUNNELS, label: 'Product funnels', icon: '📈' }
 ] as const;

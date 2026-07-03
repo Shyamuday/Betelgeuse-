@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { StoreApiService } from '../../services/store-api.service';
 
@@ -41,6 +41,7 @@ type ScanResponse = {
   selector: 'app-patient-scan',
   imports: [CommonModule, DatePipe, RouterLink],
   templateUrl: './patient-scan.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './patient-scan.component.scss'
 })
 export class PatientScanComponent implements OnInit {

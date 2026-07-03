@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { StoreApiService } from '../../services/store-api.service';
 import { StoreRack } from '../../models';
@@ -12,6 +12,7 @@ type RackWithMedicines = StoreRack & {
   selector: 'app-rack-map',
   imports: [RouterLink],
   templateUrl: './rack-map.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './rack-map.component.scss'
 })
 export class RackMapComponent implements OnInit {

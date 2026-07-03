@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { StoreApiService } from '../../services/store-api.service';
@@ -12,6 +12,7 @@ type RemoveType = 'SALE_OUT' | 'ADJUSTMENT_OUT' | 'EXPIRED_REMOVAL';
   selector: 'app-stock-out',
   imports: [FormsModule],
   templateUrl: './stock-out.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './stock-out.component.scss'
 })
 export class StockOutComponent {

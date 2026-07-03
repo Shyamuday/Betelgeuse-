@@ -1,12 +1,12 @@
 export const ROUTE_PATHS = {
   LOGIN: 'login',
-  QUEUE: 'queue',
-  WALK_IN: 'walk-in'
+  PATIENTS: 'patients',
+  CONSULTATIONS: 'consultations'
 } as const;
 
-export const DEFAULT_AUTHED_ROUTE = ROUTE_PATHS.QUEUE;
+export const DEFAULT_AUTHED_ROUTE = ROUTE_PATHS.PATIENTS;
 
 export const NAV_ITEMS = [
-  { path: ROUTE_PATHS.QUEUE, label: 'Queue', icon: '📋' },
-  { path: ROUTE_PATHS.WALK_IN, label: 'Walk-in', icon: '🚶' }
+  { path: ROUTE_PATHS.PATIENTS, label: 'Patient search', icon: '🔍' },
+  { path: ROUTE_PATHS.CONSULTATIONS, label: 'Recent consults', icon: '📋' }
 ] as const;

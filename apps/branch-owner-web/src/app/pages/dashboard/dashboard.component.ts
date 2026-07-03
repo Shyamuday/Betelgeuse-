@@ -1,36 +1,43 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { DatePipe } from '@angular/common';
-import { HrApiService } from '../../services/hr-api.service';
-import { DashboardData } from '../../models';
+import { FormsModule } from '@angular/forms';
+import { BranchOwnerApiService } from '../../services/branch-owner-api.service';
+
+function formatPaise(paise: number): string {
+  return (paise / 100).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [DatePipe],
+  imports: [FormsModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {
-  private api = inject(HrApiService);
-  data = signal<DashboardData | null>(null);
+  private api = inject(BranchOwnerApiService);
+
   loading = signal(true);
+  error = signal('');
+  selectedMonth = new Date().toISOString().slice(0, 7);
+  data = signal<any>(null);
 
-  ngOnInit() {
-    this.api.getDashboard().subscribe({
-      next: (d) => { this.data.set(d); this.loading.set(false); },
-      error: () => this.loading.set(false)
-    });
+  readonly formatPaise = formatPaise;
+
+  ngOnInit(): void {
+    this.load();
   }
 
-  totalLeaves() {
-    const stats = this.data()?.leaveStats;
-    if (!stats) return 0;
-    return (stats.PENDING || 0) + (stats.APPROVED || 0) + (stats.REJECTED || 0);
-  }
-
-  leavePercent(type: 'PENDING' | 'APPROVED' | 'REJECTED') {
-    const total = this.totalLeaves();
-    if (!total) return 0;
-    return Math.round(((this.data()?.leaveStats[type] ?? 0) / total) * 100);
+  load(): void {
+    this.loading.set(true);
+    this.error.set('');
+    this.api.getDashboard(this.selectedMonth)
+      .then((res) => {
+        this.data.set(res);
+        this.loading.set(false);
+      })
+      .catch(() => {
+        this.error.set('Could not load branch dashboard. Check your connection and try again.');
+        this.loading.set(false);
+      });
   }
 }

@@ -1,4 +1,4 @@
 export const DEV_DEMO_ACCOUNTS = {
-  clinicManager: { email: 'clinic@vitalisclinic.local' },
+  coordinator: { email: 'coordinator@vitalisclinic.local' },
   password: 'Password@123'
 };

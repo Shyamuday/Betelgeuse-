@@ -1,8 +1,6 @@
 export const API_PATHS = {
-  CLINIC_MANAGER: {
+  COORDINATOR: {
     ME: '/coordinator/me',
-    DASHBOARD: '/coordinator/dashboard',
-    ROSTER: '/coordinator/roster',
-    SCHEDULES: '/coordinator/schedules'
+    FOLLOW_UPS: '/coordinator/follow-ups'
   }
 } as const;

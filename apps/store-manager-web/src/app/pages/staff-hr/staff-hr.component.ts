@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { StoreApiService } from '../../services/store-api.service';
@@ -10,6 +10,7 @@ import { EMPLOYEE_STATUS_STYLES, SHIFT_LABELS, WEEK_DAYS } from '../../shared/co
   selector: 'app-staff-hr',
   imports: [FormsModule, DatePipe, NgTemplateOutlet],
   templateUrl: './staff-hr.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './staff-hr.component.scss'
 })
 export class StaffHrComponent implements OnInit {

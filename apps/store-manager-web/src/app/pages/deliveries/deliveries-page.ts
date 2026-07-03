@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { StoreApiService } from '../../services/store-api.service';
@@ -11,6 +11,7 @@ type PatientHit = { id: string; name: string; patientCode?: string | null; mobil
   standalone: true,
   imports: [FormsModule, DatePipe],
   templateUrl: './deliveries-page.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './deliveries-page.scss'
 })
 export class DeliveriesPage implements OnInit {

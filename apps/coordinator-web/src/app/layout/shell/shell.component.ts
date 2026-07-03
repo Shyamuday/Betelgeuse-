@@ -25,6 +25,6 @@ export class ShellComponent {
   }
 
   pageTitle() {
-    return 'Patient Coordinator Hub';
+    return 'Patient Coordinator';
   }
 }

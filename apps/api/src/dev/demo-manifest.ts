@@ -60,6 +60,37 @@ export const DEV_DEMO_ACCOUNTS = {
     code: 'VDL',
     employeeId: 'LAB-001'
   },
+  branchOwner: {
+    email: 'owner@vitalisclinic.local',
+    name: 'Ranchi Branch Owner',
+    employeeId: 'OWN-001'
+  },
+  coordinator: {
+    email: 'coordinator@vitalisclinic.local',
+    name: 'Patient Coordinator Demo',
+    employeeId: 'PCO-001'
+  },
+  callCenter: {
+    email: 'callcenter@vitalisclinic.local',
+    name: 'Call Center Agent Demo',
+    employeeId: 'CC-001'
+  },
+  marketing: {
+    email: 'marketing@vitalisclinic.local',
+    name: 'Marketing Manager Demo',
+    employeeId: 'MKT-001'
+  },
+  corporate: {
+    email: 'corporate@vitalisclinic.local',
+    name: 'Acme Corp Wellness',
+    code: 'ACME'
+  },
+  insurance: {
+    email: 'insurance@vitalisclinic.local',
+    name: 'Vitalis Insurance Desk',
+    companyName: 'Vitalis Health Insurance',
+    companyCode: 'VHI'
+  },
   patientRahul: {
     email: 'patient1@vitalisclinic.local',
     name: 'Rahul Verma',
@@ -111,6 +142,12 @@ export const DEV_DEMO_APPS = [
   { id: 'warehouse-web', label: 'Warehouse hub', port: 4900, url: SERVER_CONFIG.ORIGINS.WAREHOUSE },
   { id: 'delivery-web', label: 'Delivery executive', port: 5000, url: SERVER_CONFIG.ORIGINS.DELIVERY },
   { id: 'diagnostic-web', label: 'Diagnostic center', port: 5100, url: SERVER_CONFIG.ORIGINS.DIAGNOSTIC },
+  { id: 'branch-owner-web', label: 'Branch owner', port: 5200, url: SERVER_CONFIG.ORIGINS.BRANCH_OWNER },
+  { id: 'coordinator-web', label: 'Patient coordinator', port: 5300, url: SERVER_CONFIG.ORIGINS.COORDINATOR },
+  { id: 'callcenter-web', label: 'Call center', port: 5400, url: SERVER_CONFIG.ORIGINS.CALL_CENTER },
+  { id: 'marketing-web', label: 'Marketing', port: 5500, url: SERVER_CONFIG.ORIGINS.MARKETING },
+  { id: 'corporate-wellness-web', label: 'Corporate wellness', port: 5600, url: SERVER_CONFIG.ORIGINS.CORPORATE_WELLNESS },
+  { id: 'insurance-web', label: 'Insurance partner', port: 5700, url: SERVER_CONFIG.ORIGINS.INSURANCE },
   { id: 'api', label: 'API + demo guide', port: 4000, url: SERVER_CONFIG.API_PUBLIC_URL }
 ] as const;
 
@@ -221,6 +258,54 @@ export const DEV_DEMO_PERSONAS: DevDemoPersona[] = [
     authKind: 'platform',
     description: 'External lab partner — accept referrals and publish test results.',
     testHints: ['Open sent referral', 'Accept & schedule', 'Submit CBC/thyroid results']
+  },
+  {
+    id: 'branch-owner',
+    label: 'Ranchi Branch Owner',
+    app: 'branch-owner-web',
+    authKind: 'platform',
+    description: 'Branch P&L and operations dashboard for franchise owners.',
+    testHints: ['Month P&L', 'Today KPIs', 'Queue snapshot']
+  },
+  {
+    id: 'coordinator',
+    label: 'Patient Coordinator (Ranchi)',
+    app: 'coordinator-web',
+    authKind: 'platform',
+    description: 'Adherence follow-up cohorts scoped to home-clinic patients.',
+    testHints: ['High-risk cohort', 'Alerts tab', '7-day window']
+  },
+  {
+    id: 'call-center',
+    label: 'Call Center Agent',
+    app: 'callcenter-web',
+    authKind: 'platform',
+    description: 'Patient lookup and recent consultation context for phone support.',
+    testHints: ['Search Rahul by mobile', 'Recent consults list']
+  },
+  {
+    id: 'marketing',
+    label: 'Marketing Manager',
+    app: 'marketing-web',
+    authKind: 'platform',
+    description: 'Read-only product funnel analytics.',
+    testHints: ['30-day funnel', 'Conversion columns', 'Summary KPIs']
+  },
+  {
+    id: 'corporate',
+    label: 'Acme Corp Wellness',
+    app: 'corporate-wellness-web',
+    authKind: 'platform',
+    description: 'Corporate wellness enrollments for employer clients.',
+    testHints: ['ACME account', 'View Rahul enrollment']
+  },
+  {
+    id: 'insurance',
+    label: 'Vitalis Health Insurance',
+    app: 'insurance-web',
+    authKind: 'platform',
+    description: 'Insurance partner claims desk — list and submit claims.',
+    testHints: ['Demo Rahul claim', 'Submit new claim']
   },
   {
     id: 'store-staff',
@@ -338,6 +423,42 @@ export const DEV_DEMO_ALL_ACCOUNTS = [
     password: DEV_DEMO_PASSWORD
   },
   {
+    role: 'Branch owner',
+    app: 'branch-owner-web',
+    login: DEV_DEMO_ACCOUNTS.branchOwner.email,
+    password: DEV_DEMO_PASSWORD
+  },
+  {
+    role: 'Patient coordinator',
+    app: 'coordinator-web',
+    login: DEV_DEMO_ACCOUNTS.coordinator.email,
+    password: DEV_DEMO_PASSWORD
+  },
+  {
+    role: 'Call center',
+    app: 'callcenter-web',
+    login: DEV_DEMO_ACCOUNTS.callCenter.email,
+    password: DEV_DEMO_PASSWORD
+  },
+  {
+    role: 'Marketing',
+    app: 'marketing-web',
+    login: DEV_DEMO_ACCOUNTS.marketing.email,
+    password: DEV_DEMO_PASSWORD
+  },
+  {
+    role: 'Corporate wellness',
+    app: 'corporate-wellness-web',
+    login: DEV_DEMO_ACCOUNTS.corporate.email,
+    password: DEV_DEMO_PASSWORD
+  },
+  {
+    role: 'Insurance partner',
+    app: 'insurance-web',
+    login: DEV_DEMO_ACCOUNTS.insurance.email,
+    password: DEV_DEMO_PASSWORD
+  },
+  {
     role: 'Patient — Rahul',
     app: 'user-web',
     login: DEV_DEMO_ACCOUNTS.patientRahul.email,
@@ -380,7 +501,13 @@ const PERSONA_EMAIL: Record<string, string> = {
   supplier: DEV_DEMO_ACCOUNTS.supplier.email,
   warehouse: DEV_DEMO_ACCOUNTS.warehouse.email,
   delivery: DEV_DEMO_ACCOUNTS.delivery.email,
-  diagnostic: DEV_DEMO_ACCOUNTS.diagnostic.email
+  diagnostic: DEV_DEMO_ACCOUNTS.diagnostic.email,
+  'branch-owner': DEV_DEMO_ACCOUNTS.branchOwner.email,
+  coordinator: DEV_DEMO_ACCOUNTS.coordinator.email,
+  'call-center': DEV_DEMO_ACCOUNTS.callCenter.email,
+  marketing: DEV_DEMO_ACCOUNTS.marketing.email,
+  corporate: DEV_DEMO_ACCOUNTS.corporate.email,
+  insurance: DEV_DEMO_ACCOUNTS.insurance.email
 };
 
 export function getPersonaCredentials(personaId: string): DevDemoPersonaCredentials {
@@ -426,6 +553,18 @@ export function getPersonaCredentials(personaId: string): DevDemoPersonaCredenti
       return { email: DEV_DEMO_ACCOUNTS.delivery.email, password };
     case 'diagnostic':
       return { email: DEV_DEMO_ACCOUNTS.diagnostic.email, password };
+    case 'branch-owner':
+      return { email: DEV_DEMO_ACCOUNTS.branchOwner.email, password };
+    case 'coordinator':
+      return { email: DEV_DEMO_ACCOUNTS.coordinator.email, password };
+    case 'call-center':
+      return { email: DEV_DEMO_ACCOUNTS.callCenter.email, password };
+    case 'marketing':
+      return { email: DEV_DEMO_ACCOUNTS.marketing.email, password };
+    case 'corporate':
+      return { email: DEV_DEMO_ACCOUNTS.corporate.email, password };
+    case 'insurance':
+      return { email: DEV_DEMO_ACCOUNTS.insurance.email, password };
     case 'store-staff':
       return { staffCode: DEV_DEMO_ACCOUNTS.storeStaff.staffCode, pin: password, password };
     case 'store-manager':

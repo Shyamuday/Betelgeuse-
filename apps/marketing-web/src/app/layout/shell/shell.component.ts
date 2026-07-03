@@ -25,6 +25,6 @@ export class ShellComponent {
   }
 
   pageTitle() {
-    return 'Marketing Hub';
+    return 'Marketing Portal';
   }
 }

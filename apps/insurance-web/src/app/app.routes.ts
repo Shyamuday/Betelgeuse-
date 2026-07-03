@@ -14,8 +14,8 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: DEFAULT_AUTHED_ROUTE },
       {
-        path: ROUTE_PATHS.ORDERS,
-        loadComponent: () => import('./pages/orders/orders.component').then(m => m.OrdersComponent)
+        path: ROUTE_PATHS.CLAIMS,
+        loadComponent: () => import('./pages/claims/claims.component').then(m => m.ClaimsComponent)
       }
     ]
   },

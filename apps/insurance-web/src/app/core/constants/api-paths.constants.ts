@@ -1,8 +1,7 @@
 export const API_PATHS = {
-  SUPPLIER: {
+  INSURANCE: {
     ME: '/insurance/me',
-    ORDERS: '/insurance/purchase-orders',
-    ORDER: (id: string) => `/insurance/purchase-orders/${id}`,
-    CONFIRM: (id: string) => `/insurance/purchase-orders/${id}/confirm`
+    CLAIMS: '/insurance/claims',
+    CLAIM_STATUS: (id: string) => `/insurance/claims/${id}/status`
   }
 } as const;

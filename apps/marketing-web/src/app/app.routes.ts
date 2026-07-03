@@ -14,16 +14,8 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: DEFAULT_AUTHED_ROUTE },
       {
-        path: ROUTE_PATHS.DASHBOARD,
-        loadComponent: () => import('./pages/hub-dashboard/hub-dashboard.component').then(m => m.HubDashboardComponent)
-      },
-      {
-        path: ROUTE_PATHS.ROSTER,
-        loadComponent: () => import('./pages/roster/roster.component').then(m => m.RosterComponent)
-      },
-      {
-        path: ROUTE_PATHS.SCHEDULES,
-        loadComponent: () => import('./pages/schedules/schedules.component').then(m => m.SchedulesComponent)
+        path: ROUTE_PATHS.FUNNELS,
+        loadComponent: () => import('./pages/funnels/funnels.component').then(m => m.FunnelsComponent)
       }
     ]
   },
