@@ -202,4 +202,50 @@ export class AdminOpsApi extends AdminApiBase {
       )
     );
   }
+
+  getEcosystemUsersMeta() {
+    return firstValueFrom(
+      this.http.get<{ roles: string[]; stores: any[]; corporates: any[] }>(
+        `${this.apiBase}${API_PATHS.ADMIN.ECOSYSTEM_USERS_META}`
+      )
+    );
+  }
+
+  getEcosystemUsers(role?: string) {
+    return firstValueFrom(
+      this.http.get<{ users: any[] }>(`${this.apiBase}${API_PATHS.ADMIN.ECOSYSTEM_USERS}`, {
+        params: role ? { role } : {}
+      })
+    );
+  }
+
+  createEcosystemUser(payload: Record<string, unknown>) {
+    return firstValueFrom(
+      this.http.post<{ user: any }>(`${this.apiBase}${API_PATHS.ADMIN.ECOSYSTEM_USERS}`, payload)
+    );
+  }
+
+  updateEcosystemUser(id: string, payload: Record<string, unknown>) {
+    return firstValueFrom(
+      this.http.patch<{ user: any }>(`${this.apiBase}${API_PATHS.ADMIN.ECOSYSTEM_USERS}/${id}`, payload)
+    );
+  }
+
+  setEcosystemUserStatus(id: string, isActive: boolean) {
+    return firstValueFrom(
+      this.http.patch<{ user: any }>(`${this.apiBase}${API_PATHS.ADMIN.ECOSYSTEM_USERS_STATUS(id)}`, { isActive })
+    );
+  }
+
+  getEcosystemCorporates() {
+    return firstValueFrom(
+      this.http.get<{ accounts: any[] }>(`${this.apiBase}${API_PATHS.ADMIN.ECOSYSTEM_CORPORATES}`)
+    );
+  }
+
+  createEcosystemCorporate(payload: { code: string; name: string; contactEmail?: string }) {
+    return firstValueFrom(
+      this.http.post<{ account: any }>(`${this.apiBase}${API_PATHS.ADMIN.ECOSYSTEM_CORPORATES}`, payload)
+    );
+  }
 }

@@ -3,6 +3,7 @@ import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@ang
 import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../../../core/services/admin-api';
 import { TOAST_DURATION_MS } from '../../../core/constants/timing.constants';
+import { PLATFORM_BROADCAST_ROLES } from '../../../core/constants/platform-roles.constants';
 
 @Component({
   selector: 'app-notifications-page',
@@ -40,10 +41,7 @@ export class NotificationsPage implements OnInit {
     { value: 'ALL_DOCTORS', label: 'All doctors' },
     { value: 'ROLE', label: 'Specific role' }
   ];
-  readonly roles = [
-    'PATIENT', 'DOCTOR', 'ADMIN', 'HR', 'RECEPTIONIST', 'CLINIC_MANAGER',
-    'ACCOUNTANT', 'SUPPLIER', 'WAREHOUSE_MANAGER', 'DELIVERY_EXECUTIVE', 'DIAGNOSTIC_PARTNER'
-  ];
+  readonly roles = [...PLATFORM_BROADCAST_ROLES];
 
   ngOnInit(): void { void this.load(); }
 

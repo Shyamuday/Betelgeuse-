@@ -1,0 +1,51 @@
+.page { padding: 24px; max-width: 1100px; margin: 0 auto; color: white; }
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.page-title { font-size: 20px; font-weight: 800; margin: 0 0 4px; }
+.page-sub { font-size: 13px; color: #64748b; margin: 0; }
+.header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.role-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.role-tabs button { padding: 7px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: #94a3b8; cursor: pointer; font-size: 12px; font-weight: 600; }
+.role-tabs button.active { background: rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.45); color: #c7d2fe; }
+
+.loading { text-align: center; padding: 60px; }
+.spinner { width: 32px; height: 32px; border: 3px solid rgba(99,102,241,0.2); border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.user-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 18px; }
+.user-top { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
+.user-avatar { width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg,#0f766e,#115e59); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; flex-shrink: 0; }
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+.user-email { font-size: 12px; color: #64748b; margin-bottom: 2px; word-break: break-all; }
+.user-role { font-size: 11px; color: #06b6d4; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.user-status { font-size: 11px; font-weight: 700; white-space: nowrap; color: #4ade80; }
+.user-status.inactive { color: #f87171; }
+.user-meta { font-size: 12px; color: #94a3b8; margin-bottom: 14px; min-height: 18px; }
+.user-actions { display: flex; gap: 8px; }
+.btn-edit { flex: 2; padding: 9px; border-radius: 9px; border: 1px solid rgba(99,102,241,0.25); background: transparent; color: #a5b4fc; font-size: 13px; font-weight: 700; cursor: pointer; }
+.btn-toggle { flex: 1; padding: 9px; border-radius: 9px; border: 1px solid rgba(248,113,113,0.25); background: transparent; color: #f87171; font-size: 12px; cursor: pointer; }
+.btn-toggle.deact { border-color: rgba(74,222,128,0.25); color: #4ade80; }
+
+.empty { text-align: center; padding: 60px; }
+.empty > div:first-child { font-size: 48px; margin-bottom: 12px; }
+.empty h3 { margin: 0 0 8px; }
+.empty p { color: #64748b; margin: 0 0 20px; font-size: 14px; }
+
+.btn-primary { padding: 10px 18px; border-radius: 10px; border: none; background: linear-gradient(135deg,#6366f1,#4f46e5); color: white; font-size: 13px; font-weight: 700; cursor: pointer; }
+.btn-primary:disabled { opacity: 0.5; }
+.btn-ghost { padding: 10px 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: transparent; color: #cbd5e1; font-size: 13px; cursor: pointer; }
+
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.modal { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; width: min(480px, 100%); max-height: 90vh; overflow-y: auto; }
+.modal-hdr { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.modal-hdr h3 { margin: 0; font-size: 16px; }
+.close-btn { border: none; background: transparent; color: #94a3b8; cursor: pointer; font-size: 18px; }
+.modal-body { padding: 18px; display: grid; gap: 12px; }
+.modal-footer { padding: 14px 18px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: flex-end; gap: 8px; }
+.fg { display: grid; gap: 6px; }
+.fg label { font-size: 12px; color: #94a3b8; font-weight: 600; }
+.fg input, .fg select { padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: white; }
+.err { padding: 10px 18px 16px; color: #fca5a5; font-size: 13px; }
+.toast { position: fixed; bottom: 20px; right: 20px; background: #1e293b; color: white; padding: 12px 16px; border-radius: 10px; z-index: 200; border: 1px solid rgba(255,255,255,0.1); }

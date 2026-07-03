@@ -81,6 +81,48 @@ export const RBAC_CAPABILITIES: RbacCapability[] = [
     roles: [Role.ADMIN]
   },
   {
+    id: 'admin.ecosystem_users',
+    label: 'Ecosystem portal users',
+    description: 'Create and manage branch owner, coordinator, call center, marketing, corporate, and insurance accounts',
+    roles: [Role.ADMIN]
+  },
+  {
+    id: 'branch_owner.portal',
+    label: 'Branch owner portal',
+    description: 'Branch P&L and operations dashboard',
+    roles: [Role.BRANCH_OWNER, Role.ADMIN]
+  },
+  {
+    id: 'coordinator.portal',
+    label: 'Patient coordinator portal',
+    description: 'Adherence follow-ups for assigned branch patients',
+    roles: [Role.PATIENT_COORDINATOR, Role.ADMIN]
+  },
+  {
+    id: 'call_center.portal',
+    label: 'Call center portal',
+    description: 'Patient lookup and recent consultation context',
+    roles: [Role.CALL_CENTER, Role.ADMIN]
+  },
+  {
+    id: 'marketing.portal',
+    label: 'Marketing portal',
+    description: 'Read-only product funnel analytics',
+    roles: [Role.MARKETING, Role.ADMIN]
+  },
+  {
+    id: 'corporate_wellness.portal',
+    label: 'Corporate wellness portal',
+    description: 'Corporate accounts and employee enrollments',
+    roles: [Role.CORPORATE_WELLNESS, Role.ADMIN]
+  },
+  {
+    id: 'insurance.portal',
+    label: 'Insurance partner portal',
+    description: 'Insurance claims submission and tracking',
+    roles: [Role.INSURANCE_PARTNER, Role.ADMIN]
+  },
+  {
     id: 'store.stock',
     label: 'Branch stock operations',
     description: 'Add, remove, and adjust medicine stock at a store',

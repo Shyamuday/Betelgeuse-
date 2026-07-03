@@ -1,0 +1,193 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">🌐 Ecosystem portal users</h2>
+      <p class="page-sub">Manage branch owners, coordinators, call center, marketing, corporate wellness, and insurance partners</p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn-ghost" (click)="openCorporate()">+ Corporate account</button>
+      <button type="button" class="btn-primary" (click)="openCreate()">+ Add portal user</button>
+    </div>
+  </div>
+
+  <div class="role-tabs">
+    <button type="button" [class.active]="activeRole() === 'ALL'" (click)="setRoleFilter('ALL')">All</button>
+    @for (opt of roleOptions; track opt.value) {
+      <button type="button" [class.active]="activeRole() === opt.value" (click)="setRoleFilter(opt.value)">
+        {{ opt.label }}
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="loading"><div class="spinner"></div></div>
+  } @else if (error() && !modal()) {
+    <p class="err">{{ error() }}</p>
+  } @else {
+    <div class="user-grid">
+      @for (u of filteredUsers(); track u.id) {
+        <div class="user-card">
+          <div class="user-top">
+            <div class="user-avatar">{{ u.name.charAt(0).toUpperCase() }}</div>
+            <div class="user-info">
+              <div class="user-name">{{ u.name }}</div>
+              <div class="user-email">{{ u.email }}</div>
+              <div class="user-role">{{ roleLabel(u.role) }}</div>
+            </div>
+            <div class="user-status" [class.inactive]="!u.isActive">
+              {{ u.isActive ? '● Active' : '● Inactive' }}
+            </div>
+          </div>
+          <div class="user-meta">{{ profileSummary(u) }}</div>
+          <div class="user-actions">
+            <button type="button" class="btn-edit" (click)="openEdit(u)">Edit profile</button>
+            <button type="button" class="btn-toggle" [class.deact]="u.isActive" (click)="toggleStatus(u)">
+              {{ u.isActive ? 'Deactivate' : 'Activate' }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (!filteredUsers().length) {
+      <div class="empty">
+        <div>🌐</div>
+        <h3>No portal users</h3>
+        <p>Create accounts for the Phase D/E ecosystem apps.</p>
+        <button type="button" class="btn-primary" (click)="openCreate()">Add first user</button>
+      </div>
+    }
+  }
+</div>
+
+@if (modal() === 'create') {
+  <div class="overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-hdr">
+        <h3>➕ New portal user</h3>
+        <button type="button" class="close-btn" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="fg">
+          <label>Role *</label>
+          <select [(ngModel)]="createForm.role">
+            @for (opt of roleOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="fg"><label>Full name *</label><input [(ngModel)]="createForm.name" /></div>
+        <div class="fg"><label>Email *</label><input type="email" [(ngModel)]="createForm.email" /></div>
+        <div class="fg"><label>Password *</label><input type="password" [(ngModel)]="createForm.password" /></div>
+        @if (needsStore(createForm.role)) {
+          <div class="fg">
+            <label>Branch store *</label>
+            <select [(ngModel)]="createForm.storeId">
+              @for (s of stores(); track s.id) {
+                <option [value]="s.id">{{ s.name }} ({{ s.code }})</option>
+              }
+            </select>
+          </div>
+        }
+        @if (createForm.role === 'CORPORATE_WELLNESS') {
+          <div class="fg">
+            <label>Corporate account *</label>
+            <select [(ngModel)]="createForm.corporateId">
+              @for (c of corporates(); track c.id) {
+                <option [value]="c.id">{{ c.name }} ({{ c.code }})</option>
+              }
+            </select>
+          </div>
+        }
+        @if (createForm.role === 'INSURANCE_PARTNER') {
+          <div class="fg"><label>Company name *</label><input [(ngModel)]="createForm.companyName" /></div>
+          <div class="fg"><label>Company code *</label><input [(ngModel)]="createForm.companyCode" style="text-transform:uppercase" /></div>
+        }
+        @if (createForm.role !== 'CORPORATE_WELLNESS' && createForm.role !== 'INSURANCE_PARTNER') {
+          <div class="fg"><label>Employee ID</label><input [(ngModel)]="createForm.employeeId" /></div>
+          <div class="fg"><label>Designation</label><input [(ngModel)]="createForm.designation" /></div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-ghost" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn-primary" [disabled]="saving()" (click)="createUser()">
+          {{ saving() ? 'Creating…' : 'Create user' }}
+        </button>
+      </div>
+      @if (error()) { <div class="err">⚠️ {{ error() }}</div> }
+    </div>
+  </div>
+}
+
+@if (modal() === 'edit' && selected()) {
+  <div class="overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-hdr">
+        <h3>Edit — {{ selected()!.name }}</h3>
+        <button type="button" class="close-btn" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        @if (needsStore(selected()!.role)) {
+          <div class="fg">
+            <label>Branch store</label>
+            <select [(ngModel)]="editForm.storeId">
+              @for (s of stores(); track s.id) {
+                <option [value]="s.id">{{ s.name }} ({{ s.code }})</option>
+              }
+            </select>
+          </div>
+        }
+        @if (selected()!.role === 'CORPORATE_WELLNESS') {
+          <div class="fg">
+            <label>Corporate account</label>
+            <select [(ngModel)]="editForm.corporateId">
+              @for (c of corporates(); track c.id) {
+                <option [value]="c.id">{{ c.name }} ({{ c.code }})</option>
+              }
+            </select>
+          </div>
+        }
+        @if (selected()!.role === 'INSURANCE_PARTNER') {
+          <div class="fg"><label>Company name</label><input [(ngModel)]="editForm.companyName" /></div>
+          <div class="fg"><label>Company code</label><input [(ngModel)]="editForm.companyCode" style="text-transform:uppercase" /></div>
+        }
+        @if (selected()!.role !== 'CORPORATE_WELLNESS' && selected()!.role !== 'INSURANCE_PARTNER') {
+          <div class="fg"><label>Employee ID</label><input [(ngModel)]="editForm.employeeId" /></div>
+          <div class="fg"><label>Designation</label><input [(ngModel)]="editForm.designation" /></div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-ghost" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn-primary" [disabled]="saving()" (click)="saveEdit()">
+          {{ saving() ? 'Saving…' : 'Save changes' }}
+        </button>
+      </div>
+      @if (error()) { <div class="err">⚠️ {{ error() }}</div> }
+    </div>
+  </div>
+}
+
+@if (modal() === 'corporate') {
+  <div class="overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-hdr">
+        <h3>🏢 New corporate account</h3>
+        <button type="button" class="close-btn" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="fg"><label>Code *</label><input [(ngModel)]="corporateForm.code" style="text-transform:uppercase" placeholder="ACME" /></div>
+        <div class="fg"><label>Company name *</label><input [(ngModel)]="corporateForm.name" /></div>
+        <div class="fg"><label>Contact email</label><input type="email" [(ngModel)]="corporateForm.contactEmail" /></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-ghost" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn-primary" [disabled]="saving()" (click)="createCorporate()">
+          {{ saving() ? 'Creating…' : 'Create account' }}
+        </button>
+      </div>
+      @if (error()) { <div class="err">⚠️ {{ error() }}</div> }
+    </div>
+  </div>
+}
+
+@if (toast()) { <div class="toast">{{ toast() }}</div> }

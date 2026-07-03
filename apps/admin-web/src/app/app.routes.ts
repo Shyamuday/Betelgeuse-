@@ -26,6 +26,7 @@ import { MedicinesPage } from './features/medicines/medicines-page/medicines-pag
 import { InventoryPage } from './features/inventory/inventory-page/inventory-page';
 import { NotificationsPage } from './features/notifications/notifications-page/notifications-page';
 import { SecurityPage } from './features/security/security-page/security-page';
+import { EcosystemUsersPage } from './features/ecosystem-users/ecosystem-users-page/ecosystem-users-page';
 
 export const routes: Routes = [
   { path: ROUTE_PATHS.LOGIN, component: AdminLogin },
@@ -50,6 +51,7 @@ export const routes: Routes = [
       { path: ROUTE_PATHS.INVENTORY, component: InventoryPage },
       { path: ROUTE_PATHS.NOTIFICATIONS, component: NotificationsPage },
       { path: ROUTE_PATHS.ADMIN_USERS, component: AdminUsersPage },
+      { path: ROUTE_PATHS.ECOSYSTEM_USERS, component: EcosystemUsersPage },
       { path: ROUTE_PATHS.CONSULTATIONS, component: ConsultationsPage },
       { path: ROUTE_PATHS.PAYMENTS, component: PaymentsPage },
       { path: ROUTE_PATHS.AUDIT, component: AuditPage },

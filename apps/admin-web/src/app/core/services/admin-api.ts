@@ -295,6 +295,27 @@ export class AdminApi {
   sendNotificationBroadcast(...args: Parameters<AdminOpsApi['sendNotificationBroadcast']>) {
     return this.ops.sendNotificationBroadcast(...(args as Parameters<AdminOpsApi['sendNotificationBroadcast']>));
   }
+  getEcosystemUsersMeta(...args: Parameters<AdminOpsApi['getEcosystemUsersMeta']>) {
+    return this.ops.getEcosystemUsersMeta(...(args as Parameters<AdminOpsApi['getEcosystemUsersMeta']>));
+  }
+  getEcosystemUsers(...args: Parameters<AdminOpsApi['getEcosystemUsers']>) {
+    return this.ops.getEcosystemUsers(...(args as Parameters<AdminOpsApi['getEcosystemUsers']>));
+  }
+  createEcosystemUser(...args: Parameters<AdminOpsApi['createEcosystemUser']>) {
+    return this.ops.createEcosystemUser(...(args as Parameters<AdminOpsApi['createEcosystemUser']>));
+  }
+  updateEcosystemUser(...args: Parameters<AdminOpsApi['updateEcosystemUser']>) {
+    return this.ops.updateEcosystemUser(...(args as Parameters<AdminOpsApi['updateEcosystemUser']>));
+  }
+  setEcosystemUserStatus(...args: Parameters<AdminOpsApi['setEcosystemUserStatus']>) {
+    return this.ops.setEcosystemUserStatus(...(args as Parameters<AdminOpsApi['setEcosystemUserStatus']>));
+  }
+  getEcosystemCorporates(...args: Parameters<AdminOpsApi['getEcosystemCorporates']>) {
+    return this.ops.getEcosystemCorporates(...(args as Parameters<AdminOpsApi['getEcosystemCorporates']>));
+  }
+  createEcosystemCorporate(...args: Parameters<AdminOpsApi['createEcosystemCorporate']>) {
+    return this.ops.createEcosystemCorporate(...(args as Parameters<AdminOpsApi['createEcosystemCorporate']>));
+  }
   getAuditRetentionStats(...args: Parameters<AdminReportsApi['getAuditRetentionStats']>) {
     return this.reports.getAuditRetentionStats(...(args as Parameters<AdminReportsApi['getAuditRetentionStats']>));
   }

@@ -22,7 +22,8 @@ export const ROUTE_PATHS = {
   MEDICINES: 'medicines',
   INVENTORY: 'inventory',
   NOTIFICATIONS: 'notifications',
-  SECURITY: 'security'
+  SECURITY: 'security',
+  ECOSYSTEM_USERS: 'ecosystem-users'
 } as const;
 
 export const DEFAULT_AUTHED_ROUTE = ROUTE_PATHS.DASHBOARD;
@@ -43,6 +44,7 @@ export const NAV_ITEMS = [
   { path: `/${ROUTE_PATHS.INVENTORY}`, label: '📦 Inventory' },
   { path: `/${ROUTE_PATHS.NOTIFICATIONS}`, label: '🔔 Notifications' },
   { path: `/${ROUTE_PATHS.ADMIN_USERS}`, label: '🔐 Admin Users' },
+  { path: `/${ROUTE_PATHS.ECOSYSTEM_USERS}`, label: '🌐 Ecosystem Users' },
   { path: `/${ROUTE_PATHS.CONSULTATIONS}`, label: '🩺 Consultations' },
   { path: `/${ROUTE_PATHS.PAYMENTS}`, label: '💳 Payments' },
   { path: `/${ROUTE_PATHS.AUDIT}`, label: '📋 Audit Trail' },
