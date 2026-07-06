@@ -7,6 +7,7 @@ import { RouterLink } from '@angular/router';
 import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
 import { AppointmentsPrescriptionsService } from './appointments-prescriptions.service';
 import { PrescriptionPdfService } from '../../../core/services/prescription-pdf.service';
+import { DoctorSessionService } from '../../../core/services/doctor-session';
 import type {
   LoadedPrescription,
   MedicineRow,
@@ -56,7 +57,10 @@ function emptyPrescriptionModel() {
 export class AppointmentsPage {
   private readonly prescriptions = inject(AppointmentsPrescriptionsService);
   private readonly prescriptionPdf = inject(PrescriptionPdfService);
+  private readonly session = inject(DoctorSessionService);
   private readonly route = inject(ActivatedRoute);
+
+  defaultMethodOptionId = '';
 
   readonly caseAnalysisPath = ROUTE_PATHS.CASE_ANALYSIS;
   readonly prescriptionModel = signal(this.createInitialPrescriptionModel());
@@ -92,6 +96,7 @@ export class AppointmentsPage {
   constructor() {
     void this.loadOptions();
     void this.loadTemplates();
+    void this.loadDoctorDefaultApproach();
     if (this.prescriptionModel().consultationId) {
       void this.loadConsultationPrescriptions();
     }
@@ -100,11 +105,29 @@ export class AppointmentsPage {
   private createInitialPrescriptionModel() {
     const consultationId = this.route.snapshot.queryParamMap.get('consultationId') || '';
     const remedySuggestion = this.route.snapshot.queryParamMap.get('remedy') || '';
+    const methodFromCase = this.route.snapshot.queryParamMap.get('methodOptionId') || '';
     const medicineRows = [newMedicineRow()];
     if (remedySuggestion) {
       medicineRows[0].medicineName = remedySuggestion;
     }
-    return { ...emptyPrescriptionModel(), consultationId, medicineRows };
+    return { ...emptyPrescriptionModel(), consultationId, methodOptionId: methodFromCase, medicineRows };
+  }
+
+  async loadDoctorDefaultApproach() {
+    try {
+      const session = await this.session.load();
+      this.defaultMethodOptionId = session.doctorProfile?.defaultMethodOptionId || '';
+      this.applyDefaultMethodIfEmpty();
+    } catch {
+      // ignore — doctor can still pick manually
+    }
+  }
+
+  private applyDefaultMethodIfEmpty() {
+    if (!this.defaultMethodOptionId) return;
+    this.prescriptionModel.update((model) =>
+      model.methodOptionId ? model : { ...model, methodOptionId: this.defaultMethodOptionId }
+    );
   }
 
   async loadOptions() {
@@ -195,6 +218,7 @@ export class AppointmentsPage {
         this.selectPrescription(this.loadedPrescriptions[0]);
       } else {
         this.resetEditorForFollowUp();
+        this.applyDefaultMethodIfEmpty();
         this.message = 'No prescription history found for this consultation.';
       }
     } catch {

@@ -2,6 +2,43 @@
   <vitalis-detail-rows variant="stat" [rows]="dashboardStatRows()" />
 </section>
 
+<section class="panel visitor-leads-panel">
+  <div class="panel-header">
+    <h3>Visitor leads</h3>
+    <a [routerLink]="visitorLeadsPath" class="panel-link">View all →</a>
+  </div>
+  <div class="summary-stats">
+    <div class="summary-stat">
+      <span class="summary-label">Total</span>
+      <span class="summary-value">{{ visitorLeadStats.total }}</span>
+    </div>
+    <div class="summary-stat warn">
+      <span class="summary-label">Needs callback</span>
+      <span class="summary-value">{{ visitorLeadStats.needsCallback }}</span>
+    </div>
+    <div class="summary-stat">
+      <span class="summary-label">New</span>
+      <span class="summary-value">{{ visitorLeadStats.newLeads }}</span>
+    </div>
+    <div class="summary-stat">
+      <span class="summary-label">Called</span>
+      <span class="summary-value">{{ visitorLeadStats.called }}</span>
+    </div>
+    <div class="summary-stat ok">
+      <span class="summary-label">Registered</span>
+      <span class="summary-value">{{ visitorLeadStats.registered }}</span>
+    </div>
+    <div class="summary-stat ok">
+      <span class="summary-label">Booked</span>
+      <span class="summary-value">{{ visitorLeadStats.booked }}</span>
+    </div>
+    <div class="summary-stat">
+      <span class="summary-label">Not interested</span>
+      <span class="summary-value">{{ visitorLeadStats.notInterested }}</span>
+    </div>
+  </div>
+</section>
+
 <section class="panel">
   <div class="panel-header">
     <h3>Finance Operations</h3>

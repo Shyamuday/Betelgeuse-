@@ -44,6 +44,29 @@
     }
   }
 
+  .approach-panel {
+    margin-bottom: 0.75rem;
+
+    .hint {
+      margin: 0 0 0.75rem;
+    }
+  }
+
+  .approach-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .approach-select {
+    min-width: min(100%, 22rem);
+    padding: 0.55rem 0.75rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font: inherit;
+  }
+
   .patient-banner {
     display: flex;
     justify-content: space-between;

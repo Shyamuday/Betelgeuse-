@@ -39,6 +39,7 @@
     { key: 'CALLED', label: 'Called' },
     { key: 'REGISTERED', label: 'Registered' },
     { key: 'BOOKED', label: 'Booked' },
+    { key: 'NOT_INTERESTED', label: 'Not interested' },
     { key: 'CLOSED', label: 'Closed' },
     { key: 'ALL', label: 'All' }
   ]; track f.key) {
@@ -49,6 +50,28 @@
     >{{ f.label }}</button>
   }
 </div>
+
+<div class="advanced-filters">
+  <label>Source
+    <select [ngModel]="sourceFilter()" (ngModelChange)="sourceFilter.set($event)">
+      <option value="ALL">All sources</option>
+      <option value="CHAT_BOT">Chat</option>
+      <option value="HOME_BOOKING">Home booking</option>
+      <option value="PROMO_POPUP">Promo popup</option>
+    </select>
+  </label>
+  <label>From <input type="date" [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event)" /></label>
+  <label>To <input type="date" [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event)" /></label>
+  <label class="check">
+    <input type="checkbox" [ngModel]="notInterestedOnly()" (ngModelChange)="notInterestedOnly.set($event)" />
+    Not interested only
+  </label>
+  <button type="button" class="btn-apply" (click)="applyAdvancedFilters()" [disabled]="loading()">Apply</button>
+  <button type="button" class="btn-export" (click)="exportCsv()" [disabled]="csvExporting() || loading()">
+    {{ csvExporting() ? 'Exporting…' : 'Export CSV' }}
+  </button>
+</div>
+@if (csvError()) { <p class="error-msg">{{ csvError() }}</p> }
 
 <div class="inbox-layout">
   <div class="session-list panel">
@@ -94,7 +117,7 @@
 
       <div class="detail-header">
         <div>
-          <h2>{{ lead.concern ?? 'Website inquiry' }}</h2>
+          <h2>{{ lead.visitorIssue ?? lead.concern ?? 'Website inquiry' }}</h2>
           <div class="detail-meta">
             @if (lead.visitorName) { <span>👤 {{ lead.visitorName }}</span> }
             @if (lead.visitorPhone) { <span>📞 {{ lead.visitorPhone }}</span> }

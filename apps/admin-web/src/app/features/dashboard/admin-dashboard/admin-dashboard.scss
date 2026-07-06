@@ -185,6 +185,25 @@ button {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+
+  &.warn .summary-value { color: #b45309; }
+  &.ok .summary-value { color: #047857; }
+}
+
+.visitor-leads-panel .panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.panel-link {
+  font-size: 0.85rem;
+  color: #174ea6;
+  text-decoration: none;
+  font-weight: 600;
+
+  &:hover { text-decoration: underline; }
 }
 
 .summary-label {

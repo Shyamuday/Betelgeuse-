@@ -39,6 +39,7 @@ model Prescription {
   items          PrescriptionItem[]
   doseEvents     MedicineDoseEvent[]
   medicineDeliveries MedicineDelivery[]
+  stockMovements StockMovement[]
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
 

@@ -187,6 +187,7 @@ model StockMovement {
   storeId       String
   batchId       String?
   staffId       String?
+  prescriptionId String?
   type          StockMovementType
   qty           Int
   amountInPaise Int?
@@ -195,8 +196,10 @@ model StockMovement {
   store         Store             @relation(fields: [storeId], references: [id])
   batch         StockBatch?       @relation(fields: [batchId], references: [id])
   staff         StoreStaff?       @relation(fields: [staffId], references: [id])
+  prescription  Prescription?     @relation(fields: [prescriptionId], references: [id])
   createdAt     DateTime          @default(now())
 
   @@index([storeId, createdAt])
   @@index([stockId])
+  @@index([prescriptionId])
 }

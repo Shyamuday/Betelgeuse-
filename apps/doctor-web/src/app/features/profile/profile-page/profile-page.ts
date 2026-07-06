@@ -17,7 +17,8 @@ function emptyProfileModel() {
     isAvailable: true,
     bio: '',
     yearsOfExperience: '' as number | '',
-    focusAreasText: ''
+    focusAreasText: '',
+    defaultMethodOptionId: ''
   };
 }
 
@@ -35,6 +36,7 @@ export class ProfilePage {
   readonly profileModel = signal(emptyProfileModel());
   readonly profileForm = form(this.profileModel);
 
+  methodOptions: Array<{ id: string; label: string }> = [];
   doctorTypeLabel = '';
   specialtyFocusLabel = '';
   showOnWebsite = false;
@@ -51,17 +53,26 @@ export class ProfilePage {
     this.isLoading = true;
     this.error = '';
     try {
-      const response = await firstValueFrom(
-        this.http.get<{
-          profile: {
-            name: string;
-            email?: string | null;
-            mobile?: string | null;
-            doctorProfile?: DoctorProfileSummary | null;
-          };
-        }>(`${this.apiBase}${API_PATHS.DOCTOR.PROFILE}`)
-      );
+      const [response, methodsRes] = await Promise.all([
+        firstValueFrom(
+          this.http.get<{
+            profile: {
+              name: string;
+              email?: string | null;
+              mobile?: string | null;
+              doctorProfile?: DoctorProfileSummary | null;
+            };
+          }>(`${this.apiBase}${API_PATHS.DOCTOR.PROFILE}`)
+        ),
+        firstValueFrom(
+          this.http.get<{ options: Array<{ id: string; label: string }> }>(
+            `${this.apiBase}${API_PATHS.DOCTOR.PRESCRIPTION_OPTIONS}`,
+            { params: { type: 'METHOD' } }
+          )
+        )
+      ]);
 
+      this.methodOptions = methodsRes.options;
       const profile = response.profile;
       this.profileModel.set({
         name: profile.name || '',
@@ -72,7 +83,8 @@ export class ProfilePage {
         isAvailable: profile.doctorProfile?.isAvailable ?? true,
         bio: profile.doctorProfile?.bio || '',
         yearsOfExperience: profile.doctorProfile?.yearsOfExperience ?? '',
-        focusAreasText: (profile.doctorProfile?.focusAreas ?? []).join('\n')
+        focusAreasText: (profile.doctorProfile?.focusAreas ?? []).join('\n'),
+        defaultMethodOptionId: profile.doctorProfile?.defaultMethodOptionId || ''
       });
       this.doctorTypeLabel = profile.doctorProfile?.doctorTypeLabel || 'Doctor';
       this.specialtyFocusLabel = profile.doctorProfile?.specialtyFocusLabel || '';
@@ -102,7 +114,8 @@ export class ProfilePage {
           focusAreas: form.focusAreasText
             .split('\n')
             .map((s) => s.trim())
-            .filter(Boolean)
+            .filter(Boolean),
+          defaultMethodOptionId: form.defaultMethodOptionId || null
         })
       );
       await this.session.load(true);

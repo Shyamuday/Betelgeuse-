@@ -23,6 +23,7 @@ import {
 export class AdminDashboard {
   readonly auditPath = adminNavPath(ROUTE_PATHS.AUDIT);
   readonly adherencePath = adminNavPath(ROUTE_PATHS.ADHERENCE);
+  readonly visitorLeadsPath = adminNavPath(ROUTE_PATHS.CHAT_INBOX);
   readonly formatAuditAction = formatAuditAction;
   revenueInPaise = 0;
   activeDoctors = 0;
@@ -48,6 +49,15 @@ export class AdminDashboard {
   error = '';
   adherenceSummary = { highRiskCount: 0, mediumRiskCount: 0, alertCount: 0, platformAdherencePercent: 0 };
   adherenceAlerts: Array<{ patientName: string; message: string; severity: string }> = [];
+  visitorLeadStats = {
+    total: 0,
+    needsCallback: 0,
+    newLeads: 0,
+    called: 0,
+    registered: 0,
+    booked: 0,
+    notInterested: 0
+  };
 
   readonly paymentFilterModel = signal({
     paymentStatus: PAYMENTS_DEFAULTS.STATUS as PaymentStatus,
@@ -73,7 +83,7 @@ export class AdminDashboard {
       this.consultationsCount = report.consultations?.length || 0;
       const audit = await this.api.getAuditLogs({ page: 1, pageSize: AUDIT_LOGS_PAGE_SIZE });
       this.auditLogs = audit.logs || [];
-      await Promise.all([this.loadPayments(), this.loadAdherenceSummary()]);
+      await Promise.all([this.loadPayments(), this.loadAdherenceSummary(), this.loadVisitorLeadStats()]);
     } catch {
       this.error = 'Could not load admin dashboard summary.';
     }
@@ -155,6 +165,23 @@ export class AdminDashboard {
       this.adherenceAlerts = (report.alerts ?? []).slice(0, 3);
     } catch {
       this.adherenceAlerts = [];
+    }
+  }
+
+  private async loadVisitorLeadStats() {
+    try {
+      const res = await this.api.getVisitorLeadStats();
+      this.visitorLeadStats = {
+        total: res.stats.total ?? 0,
+        needsCallback: res.stats.needsCallback ?? 0,
+        newLeads: res.stats.newLeads ?? 0,
+        called: res.stats.called ?? 0,
+        registered: res.stats.registered ?? 0,
+        booked: (res.stats as { booked?: number }).booked ?? 0,
+        notInterested: (res.stats as { notInterested?: number }).notInterested ?? 0
+      };
+    } catch {
+      // optional dashboard block
     }
   }
 

@@ -97,6 +97,7 @@
       <option [value]="item.id">{{ item.label }}</option>
     }
   </select>
+  <p class="hint">Set your default in Profile → Default prescribing approach.</p>
   <div class="inline">
     <input [formField]="optionDraftForm.newMethod" placeholder="Add new method" />
     <button type="button" (click)="addOption('METHOD')">Add</button>

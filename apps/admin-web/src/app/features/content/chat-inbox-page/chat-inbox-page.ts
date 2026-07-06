@@ -47,6 +47,7 @@ type FollowUpFilter =
   | 'CALLED'
   | 'REGISTERED'
   | 'BOOKED'
+  | 'NOT_INTERESTED'
   | 'CLOSED';
 
 @Component({
@@ -84,13 +85,23 @@ export class ChatInboxPage {
     void this.load();
   }
 
+  private listFilters() {
+    const filter = this.followUpFilter();
+    return {
+      followUpStatus: filter === 'ALL' ? undefined : filter,
+      source: this.sourceFilter() === 'ALL' ? undefined : this.sourceFilter(),
+      dateFrom: this.dateFrom() || undefined,
+      dateTo: this.dateTo() || undefined,
+      notInterestedOnly: this.notInterestedOnly() || undefined
+    };
+  }
+
   async load() {
     this.loading.set(true);
     this.error.set('');
     try {
-      const filter = this.followUpFilter();
       const [res, statsRes] = await Promise.all([
-        this.api.listVisitorLeads(filter === 'ALL' ? undefined : filter),
+        this.api.listVisitorLeads(this.listFilters()),
         this.api.getVisitorLeadStats()
       ]);
       this.leads.set(res.leads);
@@ -99,6 +110,30 @@ export class ChatInboxPage {
       this.error.set('Could not load visitor leads.');
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  async applyAdvancedFilters() {
+    this.selected.set(null);
+    await this.load();
+  }
+
+  async exportCsv() {
+    this.csvExporting.set(true);
+    this.csvError.set('');
+    try {
+      const csv = await this.api.exportVisitorLeadsCsv(this.listFilters());
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `visitor-leads-${new Date().toISOString().substring(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      this.csvError.set('CSV export failed.');
+    } finally {
+      this.csvExporting.set(false);
     }
   }
 
@@ -167,7 +202,7 @@ export class ChatInboxPage {
   }
 
   leadPreview(lead: WebsiteLead): string {
-    return lead.concern ?? lead.visitorName ?? lead.visitorPhone ?? 'Website inquiry';
+    return lead.visitorIssue ?? lead.concern ?? lead.visitorName ?? lead.visitorPhone ?? 'Website inquiry';
   }
 
   visitorLabel(lead: WebsiteLead): string {

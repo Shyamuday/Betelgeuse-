@@ -69,10 +69,34 @@
     }
 
     <div class="steps">
+      <span class="step" [class.done]="selectedMethodOptionId()">0. Approach</span>
       <span class="step" [class.done]="selectedRubrics().length > 0">1. Symptoms</span>
       <span class="step" [class.done]="analysis.results.length > 0">2. Repertorize</span>
       <span class="step" [class.done]="!!analysis.selectedRemedy">3. Remedy</span>
     </div>
+
+    <section class="panel approach-panel">
+      <div class="panel-title-row">
+        <h3>Prescribing approach</h3>
+        @if (analysis.methodOption?.label && !selectedMethodOptionId()) {
+          <span class="badge badge-soft">{{ analysis.methodOption?.label }}</span>
+        }
+      </div>
+      <p class="hint">Choose the homeopathic method for this case. Your profile default is pre-selected when you open a new case.</p>
+      <div class="approach-row">
+        <select
+          class="approach-select"
+          [value]="selectedMethodOptionId()"
+          (change)="saveApproach(($any($event.target)).value)"
+          [disabled]="saving()"
+        >
+          <option value="">Select approach</option>
+          @for (method of methods(); track method.id) {
+            <option [value]="method.id">{{ method.label }}</option>
+          }
+        </select>
+      </div>
+    </section>
 
     <div class="workspace">
       <div class="column">

@@ -38,6 +38,59 @@
   flex-shrink: 0;
 }
 
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.advanced-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.78rem;
+    color: #64748b;
+  }
+
+  select, input[type='date'] {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .check {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    color: #334155;
+  }
+
+  .btn-apply, .btn-export {
+    border: none;
+    border-radius: 6px;
+    padding: 0.45rem 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .btn-apply { background: #174ea6; color: #fff; }
+  .btn-export { background: #065f46; color: #fff; }
+}
+
 .source-tag {
   background: #f1f5f9;
   color: #475569;

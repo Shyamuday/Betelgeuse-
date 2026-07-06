@@ -119,6 +119,9 @@
           <div class="card"><div class="val">{{ leads.summary.called }}</div><div class="lbl">Called</div></div>
           <div class="card"><div class="val">{{ leads.summary.registered }}</div><div class="lbl">Registered</div></div>
           <div class="card ok"><div class="val">{{ leads.summary.booked }}</div><div class="lbl">Booked</div></div>
+          @if (leads.summary.notInterested != null) {
+            <div class="card"><div class="val">{{ leads.summary.notInterested }}</div><div class="lbl">Not interested</div></div>
+          }
         </div>
         <div class="table-wrap">
           <table>
@@ -161,6 +164,48 @@
                     <td class="num">{{ row.total }}</td>
                     <td class="num">{{ row.booked }}</td>
                     <td class="num">{{ row.conversionRate }}%</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+        @if (leads.notInterestedByReason?.length) {
+          <h4>Not interested — top reasons</h4>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Reason</th>
+                  <th class="num">Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of leads.notInterestedByReason!; track row.reason) {
+                  <tr>
+                    <td>{{ row.reason }}</td>
+                    <td class="num">{{ row.count }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+        @if (leads.topVisitorIssues?.length) {
+          <h4>Top issues shared on calls</h4>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Issue</th>
+                  <th class="num">Mentions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of leads.topVisitorIssues!; track row.issue) {
+                  <tr>
+                    <td>{{ row.issue }}</td>
+                    <td class="num">{{ row.count }}</td>
                   </tr>
                 }
               </tbody>

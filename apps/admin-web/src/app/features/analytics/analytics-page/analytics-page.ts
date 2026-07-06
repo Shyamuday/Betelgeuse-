@@ -41,9 +41,12 @@ type LeadFunnelReport = {
     called: number;
     registered: number;
     booked: number;
+    notInterested?: number;
   };
   funnel: FunnelStep[];
   bySource: Array<{ source: string; total: number; booked: number; conversionRate: number }>;
+  notInterestedByReason?: Array<{ reason: string; count: number }>;
+  topVisitorIssues?: Array<{ issue: string; count: number }>;
 };
 
 @Component({
