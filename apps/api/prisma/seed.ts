@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { PrismaClient, PrescriptionOptionType, Role, ConsultationStatus, PrescriptionStatus, DoseEventStatus, SupportNoteCategory, ProductEventCategory, PaymentStatus, StoreKind, StockStatus, HomeopathicDoctorType } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import bcrypt from 'bcryptjs';
