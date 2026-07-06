@@ -69,7 +69,7 @@
     <!-- Edit Store -->
     @if (modal() === modalTypes.EDIT) {
       <div class="overlay" (click)="closeModal()">
-        <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal form-surface-dark" (click)="$event.stopPropagation()">
           <div class="mhdr"><h3>Edit — {{ selectedStore()?.name }}</h3><button class="close-btn" (click)="closeModal()">✕</button></div>
           <div class="mbody">
             <div class="fg"><label>Store Name</label><input [formField]="editForm.name" /></div>
@@ -89,7 +89,7 @@
     <!-- Staff roster -->
     @if (modal() === modalTypes.ROSTER) {
       <div class="overlay" (click)="closeModal()">
-        <div class="modal wide" (click)="$event.stopPropagation()">
+        <div class="modal wide form-surface-dark" (click)="$event.stopPropagation()">
           <div class="mhdr"><h3>Staff — {{ selectedStore()?.name }}</h3><button class="close-btn" (click)="closeModal()">✕</button></div>
           <div class="mbody">
             @if (rosterLoading()) {
@@ -117,7 +117,7 @@
     <!-- Create Store -->
     @if (modal() === 'store') {
       <div class="overlay" (click)="closeModal()">
-        <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal form-surface-dark" (click)="$event.stopPropagation()">
           <div class="mhdr"><h3>🏪 New Store</h3><button class="close-btn" (click)="closeModal()">✕</button></div>
           <div class="mbody">
             <div class="fg"><label>Store Name *</label><input [formField]="storeForm.name" attr.placeholder="e.g. Main Branch" /></div>
@@ -137,7 +137,7 @@
     <!-- Add Manager -->
     @if (modal() === 'manager') {
       <div class="overlay" (click)="closeModal()">
-        <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal form-surface-dark" (click)="$event.stopPropagation()">
           <div class="mhdr"><h3>👔 Add Manager — {{ selectedStore()?.name }}</h3><button class="close-btn" (click)="closeModal()">✕</button></div>
           <div class="mbody">
             <div class="info-box">Managers log in with <strong>email + password</strong> on the Store App (port {{ storeAppPort }})</div>
@@ -159,7 +159,7 @@
     <!-- Add Staff -->
     @if (modal() === 'staff') {
       <div class="overlay" (click)="closeModal()">
-        <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal form-surface-dark" (click)="$event.stopPropagation()">
           <div class="mhdr"><h3>🧑‍💼 Add Staff — {{ selectedStore()?.name }}</h3><button class="close-btn" (click)="closeModal()">✕</button></div>
           <div class="mbody">
             <div class="info-box">Staff log in at the <strong>Operations portal</strong> (port 5800) with email and password</div>

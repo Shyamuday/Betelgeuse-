@@ -1,0 +1,41 @@
+// Auto-apply readable form colors inside containers that have fields.
+// Use .form-surface-dark on dark modals/drawers to opt out.
+@import 'form-fields';
+
+@mixin vitalis-auto-light-form-surfaces() {
+  :is(
+    .form-surface,
+    .register-box,
+    .create-form,
+    .edit-form,
+    .advanced-filters,
+    .period-filters,
+    .register-grid,
+    .assign-panel,
+    .card-panel,
+    .health-profile-panel,
+    .create-doctor-form,
+    .edit-doctor-form,
+    .form-grid,
+    .search-field
+  ):not(.form-surface-dark),
+  .filters:not(.form-surface-dark):has(:is(input, select, textarea)),
+  :is(
+    .modal,
+    .panel,
+    .form,
+    .form-card,
+    .modal-body,
+    .fee-form,
+    .toolbar
+  ):not(.form-surface-dark):has(
+      :is(input:not([type='hidden']), select, textarea)
+    ) {
+    @include vitalis-form-surface-light();
+  }
+
+  .drawer .form-body.form-surface-dark,
+  .form-surface-dark {
+    @include vitalis-form-surface-dark();
+  }
+}

@@ -77,7 +77,7 @@
     <!-- Add/Edit Modal -->
     @if (showModal()) {
       <div class="modal-overlay" (click)="closeModal()">
-        <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal form-surface-dark" (click)="$event.stopPropagation()">
           <div class="modal-header">
             <h2>{{ editingId() ? 'Edit Medicine' : 'Add Medicine' }}</h2>
             <button class="close-btn" (click)="closeModal()">✕</button>

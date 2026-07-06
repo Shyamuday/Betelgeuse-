@@ -22,6 +22,15 @@
     color: var(--form-hint-color, #64748b);
   }
 
+  // Wrapping field label (e.g. diseases-page `label.field`)
+  label.field {
+    display: grid;
+    gap: 0.35rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--form-label-color, #334155);
+  }
+
   // Wrapping labels: text above control
   label:has(> input:not([type='checkbox']):not([type='radio'])),
   label:has(> select),
@@ -82,6 +91,7 @@
   // Dark global themes set light text; force readable labels on white panels
   .field-label,
   label.field-label,
+  label.field,
   .form-group > label,
   .fg > label:first-child:not(:has(input)),
   label:has(> input:not([type='checkbox']):not([type='radio'])),
@@ -123,11 +133,27 @@
 }
 
 @mixin vitalis-form-surface-dark() {
+  color: #e2e8f0;
   --form-label-color: #94a3b8;
   --form-hint-color: #64748b;
   --form-placeholder-color: #64748b;
 
-  input,
+  .field-label,
+  label.field-label,
+  label.field,
+  .form-group > label,
+  .fg > label:first-child:not(:has(input)),
+  label:has(> input:not([type='checkbox']):not([type='radio'])),
+  label:has(> select),
+  label:has(> textarea) {
+    color: #94a3b8;
+  }
+
+  .field-hint {
+    color: #64748b;
+  }
+
+  input:not([type='checkbox']):not([type='radio']),
   select,
   textarea {
     background: rgba(255, 255, 255, 0.05);
@@ -135,6 +161,12 @@
     color: #f8fafc;
     border-radius: 8px;
     padding: 0.5rem 0.65rem;
+    font: inherit;
+
+    &::placeholder {
+      color: #64748b;
+      opacity: 1;
+    }
 
     &:focus {
       outline: none;
@@ -145,6 +177,13 @@
       background: #1e293b;
       color: #f8fafc;
     }
+  }
+
+  label.check,
+  label.checkbox-label,
+  label:has(> input[type='checkbox']),
+  label:has(> input[type='radio']) {
+    color: #94a3b8;
   }
 }
 

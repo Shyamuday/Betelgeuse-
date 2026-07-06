@@ -83,7 +83,7 @@
     <!-- Add Leave Modal -->
     @if (modal() === 'add') {
       <div class="overlay" (click)="closeModal()">
-        <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal form-surface-dark" (click)="$event.stopPropagation()">
           <div class="mhdr"><h3>➕ Add Leave Record</h3><button class="close-btn" (click)="closeModal()">✕</button></div>
           <div class="mbody">
             <div class="fg">
@@ -133,7 +133,7 @@
     <!-- Reject Modal -->
     @if (modal() === 'reject') {
       <div class="overlay" (click)="closeModal()">
-        <div class="modal sm" (click)="$event.stopPropagation()">
+        <div class="modal sm form-surface-dark" (click)="$event.stopPropagation()">
           <div class="mhdr"><h3>✕ Reject Leave — {{ empName(rejectTarget()!) }}</h3><button class="close-btn" (click)="closeModal()">✕</button></div>
           <div class="mbody">
             <div class="fg"><label>Reason / HR Note (optional)</label><textarea [formField]="rejectNoteForm.note" rows="3" attr.placeholder="Reason for rejection…"></textarea></div>

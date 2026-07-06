@@ -159,7 +159,7 @@
 
 @if (modal() === 'create') {
   <div class="overlay" (click)="closeModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal form-surface-dark" (click)="$event.stopPropagation()">
       <div class="modal-hdr">
         <h3>➕ New portal user</h3>
         <button type="button" class="close-btn" (click)="closeModal()">✕</button>
@@ -248,7 +248,7 @@
 
 @if (modal() === 'edit' && selected()) {
   <div class="overlay" (click)="closeModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal form-surface-dark" (click)="$event.stopPropagation()">
       <div class="modal-hdr">
         <h3>Edit — {{ selected()!.name }}</h3>
         <button type="button" class="close-btn" (click)="closeModal()">✕</button>
@@ -326,7 +326,7 @@
 
 @if (modal() === 'corporate') {
   <div class="overlay" (click)="closeModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal form-surface-dark" (click)="$event.stopPropagation()">
       <div class="modal-hdr">
         <h3>🏢 New corporate account</h3>
         <button type="button" class="close-btn" (click)="closeModal()">✕</button>
@@ -349,7 +349,7 @@
 
 @if (modal() === 'enroll') {
   <div class="overlay" (click)="closeModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal form-surface-dark" (click)="$event.stopPropagation()">
       <div class="modal-hdr">
         <h3>Enroll patient — {{ selectedCorporate()?.name }}</h3>
         <button type="button" class="close-btn" (click)="closeModal()">✕</button>

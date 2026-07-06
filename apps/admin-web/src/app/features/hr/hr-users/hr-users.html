@@ -67,7 +67,7 @@
     <!-- Create HR Modal -->
     @if (modal() === 'create') {
       <div class="overlay" (click)="closeModal()">
-        <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal form-surface-dark" (click)="$event.stopPropagation()">
           <div class="modal-hdr">
             <h3>➕ New HR Manager</h3>
             <button class="close-btn" (click)="closeModal()">✕</button>
@@ -108,7 +108,7 @@
     <!-- Assign Stores Modal -->
     @if (modal() === 'assign' && selectedHr()) {
       <div class="overlay" (click)="closeModal()">
-        <div class="modal wide" (click)="$event.stopPropagation()">
+        <div class="modal wide form-surface-dark" (click)="$event.stopPropagation()">
           <div class="modal-hdr">
             <h3>🏪 Store Access — {{ selectedHr()!.name }}</h3>
             <button class="close-btn" (click)="closeModal()">✕</button>

@@ -84,7 +84,7 @@
     <!-- Create Store Modal -->
     @if (modal() === 'store') {
       <div class="modal-overlay" (click)="closeModal()">
-        <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal form-surface-dark" (click)="$event.stopPropagation()">
           <div class="modal-header">
             <h2>🏪 Create New Store</h2>
             <button class="close-btn" (click)="closeModal()">✕</button>
@@ -121,7 +121,7 @@
     <!-- Create Manager Modal -->
     @if (modal() === 'manager') {
       <div class="modal-overlay" (click)="closeModal()">
-        <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal form-surface-dark" (click)="$event.stopPropagation()">
           <div class="modal-header">
             <h2>👔 Add Manager — {{ selectedStore()?.name }}</h2>
             <button class="close-btn" (click)="closeModal()">✕</button>
@@ -165,7 +165,7 @@
     <!-- Create Staff Modal -->
     @if (modal() === 'staff') {
       <div class="modal-overlay" (click)="closeModal()">
-        <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal form-surface-dark" (click)="$event.stopPropagation()">
           <div class="modal-header">
             <h2>🧑‍💼 Add Staff — {{ selectedStore()?.name }}</h2>
             <button class="close-btn" (click)="closeModal()">✕</button>

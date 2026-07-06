@@ -1,18 +1,6 @@
-@import '../../../../libs/platform-ui/src/styles/form-fields';
+@import '../../../../libs/platform-ui/src/styles/form-light-islands';
 
-// White panels — keep labels/inputs dark even when a parent sets color: white
-.panel,
-.modal,
-.form-grid,
-.create-doctor-form,
-.edit-doctor-form,
-.advanced-filters.form-surface {
-  @include vitalis-form-surface-light();
-}
-
-.drawer .form-body.form-surface-dark {
-  @include vitalis-form-surface-dark();
-}
+@include vitalis-auto-light-form-surfaces();
 
 .create-doctor-form {
   max-width: 520px;
