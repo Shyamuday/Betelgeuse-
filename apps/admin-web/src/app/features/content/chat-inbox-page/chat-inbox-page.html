@@ -51,17 +51,24 @@
   }
 </div>
 
-<div class="advanced-filters">
-  <label>Source
-    <select [ngModel]="sourceFilter()" (ngModelChange)="sourceFilter.set($event)">
+<div class="advanced-filters form-surface">
+  <div class="field">
+    <label class="field-label" for="lead-filter-source">Source</label>
+    <select id="lead-filter-source" [ngModel]="sourceFilter()" (ngModelChange)="sourceFilter.set($event)">
       <option value="ALL">All sources</option>
       <option value="CHAT_BOT">Chat</option>
       <option value="HOME_BOOKING">Home booking</option>
       <option value="PROMO_POPUP">Promo popup</option>
     </select>
-  </label>
-  <label>From <input type="date" [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event)" /></label>
-  <label>To <input type="date" [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event)" /></label>
+  </div>
+  <div class="field">
+    <label class="field-label" for="lead-filter-from">From</label>
+    <input id="lead-filter-from" type="date" [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event)" />
+  </div>
+  <div class="field">
+    <label class="field-label" for="lead-filter-to">To</label>
+    <input id="lead-filter-to" type="date" [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event)" />
+  </div>
   <label class="check">
     <input type="checkbox" [ngModel]="notInterestedOnly()" (ngModelChange)="notInterestedOnly.set($event)" />
     Not interested only

@@ -5,8 +5,8 @@
 
   .hdr {
     margin-bottom: 1rem;
-    h2 { margin: 0 0 0.25rem; }
-    p { margin: 0; color: #64748b; font-size: 0.9rem; }
+    h2 { margin: 0 0 0.25rem; color: var(--text-primary); }
+    p { margin: 0; color: var(--text-secondary); font-size: 0.9rem; }
   }
 
   .error { color: #b91c1c; }
@@ -100,6 +100,8 @@
   }
 
   .detail { padding: 1rem; }
+  .detail h3,
+  .detail h4 { color: #0f172a; }
   .meta { color: #64748b; font-size: 0.85rem; }
   .concern { margin: 0.75rem 0; }
   .reg-banner {
@@ -163,18 +165,6 @@
     margin: 1rem 0;
     display: grid;
     gap: 0.75rem;
-    label {
-      display: grid;
-      gap: 0.35rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-    select, textarea {
-      font: inherit;
-      padding: 0.5rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-    }
   }
 
   .actions {
@@ -224,14 +214,6 @@
 
   .chat-reply {
     margin-top: 0.75rem;
-    label { display: block; font-size: 0.85rem; margin-bottom: 0.35rem; }
-    textarea {
-      width: 100%;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
   }
 
   @media (max-width: 768px) {

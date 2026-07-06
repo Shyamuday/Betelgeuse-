@@ -14,27 +14,32 @@
   </div>
 
   @if (mode() === 'new') {
-    <form class="form" (ngSubmit)="submitNew()">
-      <label>Name
-        <input [formField]="walkInForm.name" />
-      </label>
-      <label>Mobile
-        <input [formField]="walkInForm.mobile" />
-      </label>
-      <label>Email (optional)
-        <input [formField]="walkInForm.email" type="email" />
-      </label>
-      <label>Concern / disease
-        <select [formField]="walkInForm.diseaseId">
-          <option value="">Select…</option>
+    <form class="form form-surface" (ngSubmit)="submitNew()">
+      <div class="field">
+        <label class="field-label" for="walkin-name">Full name</label>
+        <input id="walkin-name" [formField]="walkInForm.name" placeholder="e.g. Priya Sharma" />
+      </div>
+      <div class="field">
+        <label class="field-label" for="walkin-mobile">Mobile number</label>
+        <input id="walkin-mobile" [formField]="walkInForm.mobile" placeholder="10-digit mobile" inputmode="tel" />
+      </div>
+      <div class="field">
+        <label class="field-label" for="walkin-email">Email (optional)</label>
+        <input id="walkin-email" [formField]="walkInForm.email" type="email" placeholder="patient@email.com" />
+      </div>
+      <div class="field">
+        <label class="field-label" for="walkin-disease">Concern / disease</label>
+        <select id="walkin-disease" [formField]="walkInForm.diseaseId">
+          <option value="">Select concern…</option>
           @for (d of diseases(); track d.id) {
             <option [value]="d.id">{{ d.name }} — ₹{{ formatPaise(d.feeInPaise) }}</option>
           }
         </select>
-      </label>
-      <label>Notes (optional)
-        <textarea [formField]="walkInForm.notes" rows="2"></textarea>
-      </label>
+      </div>
+      <div class="field">
+        <label class="field-label" for="walkin-notes">Notes (optional)</label>
+        <textarea id="walkin-notes" [formField]="walkInForm.notes" rows="2" placeholder="Walk-in context, referral, symptoms…"></textarea>
+      </div>
       <label class="check">
         <input type="checkbox" [formField]="walkInForm.collectCash" />
         Cash collected at desk
@@ -49,10 +54,12 @@
       </button>
     </form>
   } @else {
-    <div class="form">
-      <label>Patient ID, mobile, name, or QR
+    <div class="form form-surface">
+      <div class="field">
+        <label class="field-label" for="walkin-lookup">Patient ID, mobile, name, or QR</label>
         <div class="lookup-row">
           <input
+            id="walkin-lookup"
             [formField]="existingForm.lookup"
             placeholder="e.g. RNC-000001 or scan QR"
             (keydown.enter)="$event.preventDefault(); lookupPatient()"
@@ -61,12 +68,12 @@
             {{ searchLoading() ? 'Searching…' : 'Find' }}
           </button>
         </div>
-      </label>
-      <p class="hint">Scan the patient card QR or paste the code from the link (…/go/p/RNC-000001).</p>
+        <p class="field-hint">Scan the patient card QR or paste the code from the link (…/go/p/RNC-000001).</p>
+      </div>
 
       @if (patientHits().length > 1) {
         <div class="hits">
-          <p class="hits-label">Select patient</p>
+          <p class="field-label">Select patient</p>
           @for (p of patientHits(); track p.id) {
             <button
               type="button"
@@ -89,14 +96,15 @@
         </div>
       }
 
-      <label>Concern / disease
-        <select [formField]="existingForm.diseaseId">
-          <option value="">Select…</option>
+      <div class="field">
+        <label class="field-label" for="walkin-existing-disease">Concern / disease</label>
+        <select id="walkin-existing-disease" [formField]="existingForm.diseaseId">
+          <option value="">Select concern…</option>
           @for (d of diseases(); track d.id) {
             <option [value]="d.id">{{ d.name }} — ₹{{ formatPaise(d.feeInPaise) }}</option>
           }
         </select>
-      </label>
+      </div>
       <label class="check">
         <input type="checkbox" [formField]="existingForm.collectCash" />
         Cash collected at desk

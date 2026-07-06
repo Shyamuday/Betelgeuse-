@@ -77,15 +77,18 @@
 
 @if (assignTarget()) {
   <div class="modal-backdrop" (click)="closeAssign()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal form-surface" (click)="$event.stopPropagation()">
       <h3>Assign doctor</h3>
       <p>{{ assignTarget()!.patient?.name }} — {{ assignTarget()!.disease?.name }}</p>
-      <select [formField]="assignForm.doctorId">
-        <option value="">Select doctor</option>
-        @for (d of doctors(); track d.id) {
-          <option [value]="d.id">{{ d.name }} ({{ d.specialty }})</option>
-        }
-      </select>
+      <div class="field">
+        <label class="field-label" for="queue-assign-doctor">Doctor</label>
+        <select id="queue-assign-doctor" [formField]="assignForm.doctorId">
+          <option value="">Select doctor…</option>
+          @for (d of doctors(); track d.id) {
+            <option [value]="d.id">{{ d.name }} ({{ d.specialty }})</option>
+          }
+        </select>
+      </div>
       <div class="modal-actions">
         <button type="button" (click)="closeAssign()">Cancel</button>
         <button type="button" class="btn-primary" [disabled]="!assignFormModel().doctorId" (click)="submitAssign()">Assign</button>

@@ -56,12 +56,15 @@
   border: 1px solid #e2e8f0;
   border-radius: 8px;
 
-  label {
-    display: flex;
-    flex-direction: column;
+  .field {
+    display: grid;
     gap: 0.25rem;
+  }
+
+  .field-label {
     font-size: 0.78rem;
-    color: #64748b;
+    color: #374151;
+    font-weight: 600;
   }
 
   select, input[type='date'] {
@@ -69,6 +72,8 @@
     border-radius: 6px;
     padding: 0.35rem 0.5rem;
     font-size: 0.85rem;
+    background: #fff;
+    color: #0f172a;
   }
 
   .check {
@@ -77,6 +82,7 @@
     gap: 0.35rem;
     font-size: 0.85rem;
     color: #334155;
+    display: flex;
   }
 
   .btn-apply, .btn-export {

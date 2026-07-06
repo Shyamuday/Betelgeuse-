@@ -63,7 +63,7 @@
       }
     </div>
 
-    <div class="detail panel">
+    <div class="detail panel form-surface">
       @if (!selected()) {
         <p class="muted">Select a lead to update follow-up.</p>
       } @else if (detailLoading()) {
@@ -128,52 +128,65 @@
           }
         </div>
 
-        <div class="follow-up-form">
-          <label>Issue they are facing
+        <div class="follow-up-form form-surface">
+          <div class="field">
+            <label class="field-label" for="lead-visitor-issue">Issue they are facing</label>
             <textarea
+              id="lead-visitor-issue"
               [(ngModel)]="visitorIssue"
               rows="3"
               placeholder="What health problem or concern did they mention on the call? e.g. chronic skin rash, child fever…"
             ></textarea>
-          </label>
-          <label>Follow-up status
-            <select [(ngModel)]="selectedStatus">
+          </div>
+          <div class="field">
+            <label class="field-label" for="lead-follow-up-status">Follow-up status</label>
+            <select id="lead-follow-up-status" [(ngModel)]="selectedStatus">
               @for (opt of followUpOptions; track opt.value) {
                 <option [value]="opt.value">{{ opt.label }}</option>
               }
             </select>
-          </label>
+          </div>
 
           @if (showNotInterestedForm()) {
-            <div class="not-interested-block">
-              <label>Why not interested? <span class="req">*</span>
-                <select [(ngModel)]="notInterestedPreset">
+            <div class="not-interested-block form-surface">
+              <div class="field">
+                <label class="field-label" for="lead-not-interested">Why not interested? <span class="req">*</span></label>
+                <select id="lead-not-interested" [(ngModel)]="notInterestedPreset">
                   <option value="">Select reason…</option>
                   @for (reason of notInterestedReasons(); track reason) {
                     <option [value]="reason">{{ reason }}</option>
                   }
                 </select>
-              </label>
-              <label>
-                @if (notInterestedPreset === 'Other') {
-                  Please describe <span class="req">*</span>
-                } @else {
-                  Additional detail (optional)
-                }
+              </div>
+              <div class="field">
+                <label class="field-label" for="lead-not-interested-detail">
+                  @if (notInterestedPreset === 'Other') {
+                    Please describe <span class="req">*</span>
+                  } @else {
+                    Additional detail (optional)
+                  }
+                </label>
                 <textarea
+                  id="lead-not-interested-detail"
                   [(ngModel)]="notInterestedDetail"
                   rows="2"
                   [placeholder]="notInterestedPreset === 'Other'
                     ? 'Enter the reason they gave…'
                     : 'Any extra context they shared…'"
                 ></textarea>
-              </label>
+              </div>
             </div>
           }
 
-          <label>Internal note
-            <textarea [(ngModel)]="operatorNote" rows="2" placeholder="Call outcome, callback time, staff notes…"></textarea>
-          </label>
+          <div class="field">
+            <label class="field-label" for="lead-operator-note">Internal note</label>
+            <textarea
+              id="lead-operator-note"
+              [(ngModel)]="operatorNote"
+              rows="2"
+              placeholder="Call outcome, callback time, staff notes…"
+            ></textarea>
+          </div>
           <div class="actions">
             <button type="button" class="btn-secondary" [disabled]="mutating()" (click)="markCalled()">
               ✓ Mark as called
@@ -185,15 +198,16 @@
         </div>
 
         @if (!lead.consultationId && lead.visitorPhone && diseases().length) {
-          <div class="book-block">
+          <div class="book-block form-surface">
             <h4>Book consultation</h4>
-            <label>Concern / disease
-              <select [(ngModel)]="bookDiseaseId">
+            <div class="field">
+              <label class="field-label" for="lead-book-disease">Concern / disease</label>
+              <select id="lead-book-disease" [(ngModel)]="bookDiseaseId">
                 @for (d of diseases(); track d.id) {
                   <option [value]="d.id">{{ d.name }} — ₹{{ formatPaise(d.feeInPaise) }}</option>
                 }
               </select>
-            </label>
+            </div>
             <label class="check">
               <input type="checkbox" [(ngModel)]="collectCash" />
               Cash collected at desk
@@ -219,14 +233,16 @@
             }
           </div>
           @if (lead.chatSessionId) {
-            <div class="chat-reply">
-              <label>Reply in chat
+            <div class="chat-reply form-surface">
+              <div class="field">
+                <label class="field-label" for="lead-chat-reply">Reply in chat</label>
                 <textarea
+                  id="lead-chat-reply"
                   [(ngModel)]="chatReply"
                   rows="2"
                   placeholder="Type a message the visitor will see in the chat widget…"
                 ></textarea>
-              </label>
+              </div>
               <button
                 type="button"
                 class="btn-primary"
