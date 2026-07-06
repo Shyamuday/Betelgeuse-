@@ -143,6 +143,13 @@
       <p>Registration No: {{ selectedDoctor.doctorProfile?.registrationNo || 'N/A' }}</p>
       <p>Status: {{ selectedDoctor.isActive ? 'Active' : 'Inactive' }}</p>
       <p>Available: {{ selectedDoctor.doctorProfile?.isAvailable ? 'Yes' : 'No' }}</p>
+      <p>On website: {{ selectedDoctor.doctorProfile?.showOnWebsite ? 'Yes' : 'No' }}</p>
+      @if (selectedDoctor.doctorProfile?.bio) {
+        <p>Bio: {{ selectedDoctor.doctorProfile?.bio }}</p>
+      }
+      @if ((selectedDoctor.doctorProfile?.focusAreas ?? []).length) {
+        <p>Focus areas: {{ (selectedDoctor.doctorProfile?.focusAreas ?? []).join(', ') }}</p>
+      }
       <div class="actions">
         @if (selectedDoctor.isActive) {
           <button type="button" (click)="toggleDoctorStatus(selectedDoctor.id, false)" [disabled]="mutating()">
@@ -180,6 +187,24 @@
           <input type="checkbox" [formField]="editForm.isAvailable" />
           Available
         </label>
+        <hr />
+        <p class="form-section-label">Public Website Profile</p>
+        <label class="website-toggle">
+          <input type="checkbox" [formField]="editForm.showOnWebsite" />
+          Show on website (Our Doctors page)
+        </label>
+        <input type="number" attr.placeholder="Years of experience" min="0" max="60" [formField]="editForm.yearsOfExperience" />
+        <textarea
+          attr.placeholder="Short bio shown on the website (max 1200 chars)"
+          rows="4"
+          maxlength="1200"
+          [formField]="editForm.bio"
+        ></textarea>
+        <textarea
+          attr.placeholder="Focus areas — one per line (e.g. Skin Care, Paediatrics)"
+          rows="3"
+          [formField]="editForm.focusAreasText"
+        ></textarea>
         <button type="button" (click)="saveDoctorEdits()" [disabled]="mutating()">
           {{ mutating() ? 'Saving...' : 'Save' }}
         </button>

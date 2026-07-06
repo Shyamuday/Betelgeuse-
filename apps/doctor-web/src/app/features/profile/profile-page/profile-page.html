@@ -37,6 +37,51 @@
     Available for consultations
   </label>
 
+  <hr class="profile-divider" />
+
+  <div class="public-profile-section">
+    <h3>Public Profile</h3>
+    <p class="section-hint">
+      This information may appear on our website under <em>Our Doctors</em>.
+      @if (showOnWebsite) {
+        <span class="visibility-badge visible">Currently visible on website</span>
+      } @else {
+        <span class="visibility-badge hidden">Not shown on website — contact admin to publish</span>
+      }
+    </p>
+
+    <label for="yearsOfExperience">Years of experience</label>
+    <input
+      id="yearsOfExperience"
+      type="number"
+      min="0"
+      max="60"
+      placeholder="e.g. 8"
+      [formField]="profileForm.yearsOfExperience"
+    />
+
+    <label for="bio">Short bio</label>
+    <textarea
+      id="bio"
+      rows="5"
+      maxlength="1200"
+      placeholder="Write a short professional bio that will appear on the website (max 1200 characters)…"
+      [formField]="profileForm.bio"
+    ></textarea>
+    <p class="char-hint">{{ profileModel().bio.length }} / 1200</p>
+
+    <label for="focusAreas">Focus areas <span class="hint">(one per line)</span></label>
+    <textarea
+      id="focusAreas"
+      rows="4"
+      placeholder="e.g.
+Chronic kidney disease
+Diabetes management
+Hypertension"
+      [formField]="profileForm.focusAreasText"
+    ></textarea>
+  </div>
+
   <div class="actions">
     <button type="button" (click)="loadProfile()" [disabled]="isLoading || saving">
       {{ isLoading ? 'Loading...' : 'Reload' }}

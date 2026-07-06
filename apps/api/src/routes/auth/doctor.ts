@@ -95,7 +95,10 @@ router.put(
         mobile: z.string().min(8).optional().or(z.literal('')),
         specialty: z.string().min(2),
         registrationNo: z.string().optional().or(z.literal('')),
-        isAvailable: z.boolean().optional().default(true)
+        isAvailable: z.boolean().optional().default(true),
+        bio: z.string().max(1200).optional().nullable(),
+        yearsOfExperience: z.number().int().min(0).max(60).optional().nullable(),
+        focusAreas: z.array(z.string().min(1)).optional()
       })
       .parse(req.body);
 
@@ -112,6 +115,12 @@ router.put(
       isAvailable: body.isAvailable
     });
 
+    const publicFields = {
+      bio: body.bio ?? null,
+      yearsOfExperience: body.yearsOfExperience ?? null,
+      focusAreas: (body.focusAreas ?? []).map((f) => f.trim()).filter(Boolean)
+    };
+
     const updated = await prisma.user.update({
       where: { id: req.user!.id },
       data: {
@@ -119,11 +128,12 @@ router.put(
         mobile: body.mobile || null,
         doctorProfile: {
           upsert: {
-            create: profilePayload,
+            create: { ...profilePayload, ...publicFields },
             update: {
               specialty: profilePayload.specialty,
               registrationNo: profilePayload.registrationNo,
-              isAvailable: profilePayload.isAvailable
+              isAvailable: profilePayload.isAvailable,
+              ...publicFields
             }
           }
         }

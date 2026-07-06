@@ -261,7 +261,11 @@ export function registerAdminDoctorRoutes(router: Router) {
           mobile: z.string().min(8).optional().or(z.literal('')),
           specialty: z.string().min(2).optional(),
           registrationNo: z.string().optional().or(z.literal('')),
-          isAvailable: z.boolean().optional().default(true)
+          isAvailable: z.boolean().optional().default(true),
+          bio: z.string().max(1200).optional().nullable(),
+          showOnWebsite: z.boolean().optional(),
+          yearsOfExperience: z.number().int().min(0).max(60).optional().nullable(),
+          focusAreas: z.array(z.string().min(1)).optional()
         })
         .merge(doctorProfileSchema())
         .parse(req.body);
@@ -275,6 +279,13 @@ export function registerAdminDoctorRoutes(router: Router) {
         department: existing.doctorProfile?.department
       });
 
+      const publicProfileFields = {
+        bio: body.bio ?? null,
+        showOnWebsite: body.showOnWebsite ?? false,
+        yearsOfExperience: body.yearsOfExperience ?? null,
+        focusAreas: (body.focusAreas ?? []).map((f) => f.trim()).filter(Boolean)
+      };
+
       const doctor = await prisma.user.update({
         where: { id: doctorId },
         data: {
@@ -287,13 +298,15 @@ export function registerAdminDoctorRoutes(router: Router) {
                 ...profilePayload,
                 designation: hrFields.designation,
                 department: hrFields.department,
-                isAvailable: profilePayload.isAvailable
+                isAvailable: profilePayload.isAvailable,
+                ...publicProfileFields
               },
               update: {
                 ...profilePayload,
                 designation: hrFields.designation,
                 department: hrFields.department,
-                isAvailable: profilePayload.isAvailable
+                isAvailable: profilePayload.isAvailable,
+                ...publicProfileFields
               }
             }
           }

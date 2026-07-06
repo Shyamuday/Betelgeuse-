@@ -27,5 +27,6 @@ export const API_PATHS = {
   ANALYTICS: {
     EVENTS: '/analytics/events'
   },
-  VACANCIES: '/vacancies'
+  VACANCIES: '/vacancies',
+  DOCTORS: '/doctors'
 } as const;

@@ -73,6 +73,7 @@ model User {
   caseAnalyses       CaseAnalysis[]  @relation("DoctorCaseAnalyses")
   notificationBroadcasts NotificationBroadcast[] @relation("NotificationBroadcasts")
   inAppNotifications   InAppNotification[]   @relation("UserInAppNotifications")
+  createdVacancies     JobVacancy[]           @relation("VacancyCreator")
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
 

@@ -44,7 +44,11 @@ export const doctorProfileSelect = {
   isAvailable: true,
   doctorType: true,
   specialtyFocus: true,
-  designation: true
+  designation: true,
+  bio: true,
+  showOnWebsite: true,
+  yearsOfExperience: true,
+  focusAreas: true
 } as const;
 
 export function specialtyFocusLabel(focus: HomeopathicSpecialtyFocus | null | undefined) {

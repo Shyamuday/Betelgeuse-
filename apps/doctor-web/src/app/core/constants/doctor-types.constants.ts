@@ -42,6 +42,10 @@ export type DoctorProfileSummary = {
   doctorTypeLabel?: string;
   specialtyFocusLabel?: string | null;
   designation?: string | null;
+  bio?: string | null;
+  yearsOfExperience?: number | null;
+  focusAreas?: string[];
+  showOnWebsite?: boolean;
 };
 
 export type DoctorCapabilities = {

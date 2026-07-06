@@ -14,7 +14,10 @@ function emptyProfileModel() {
     mobile: '',
     specialty: '',
     registrationNo: '',
-    isAvailable: true
+    isAvailable: true,
+    bio: '',
+    yearsOfExperience: '' as number | '',
+    focusAreasText: ''
   };
 }
 
@@ -34,6 +37,7 @@ export class ProfilePage {
 
   doctorTypeLabel = '';
   specialtyFocusLabel = '';
+  showOnWebsite = false;
   message = '';
   error = '';
   isLoading = false;
@@ -65,10 +69,14 @@ export class ProfilePage {
         mobile: profile.mobile || '',
         specialty: profile.doctorProfile?.specialty || '',
         registrationNo: profile.doctorProfile?.registrationNo || '',
-        isAvailable: profile.doctorProfile?.isAvailable ?? true
+        isAvailable: profile.doctorProfile?.isAvailable ?? true,
+        bio: profile.doctorProfile?.bio || '',
+        yearsOfExperience: profile.doctorProfile?.yearsOfExperience ?? '',
+        focusAreasText: (profile.doctorProfile?.focusAreas ?? []).join('\n')
       });
       this.doctorTypeLabel = profile.doctorProfile?.doctorTypeLabel || 'Doctor';
       this.specialtyFocusLabel = profile.doctorProfile?.specialtyFocusLabel || '';
+      this.showOnWebsite = profile.doctorProfile?.showOnWebsite ?? false;
     } catch {
       this.error = 'Could not load profile.';
     } finally {
@@ -88,7 +96,13 @@ export class ProfilePage {
           mobile: form.mobile,
           specialty: form.specialty,
           registrationNo: form.registrationNo,
-          isAvailable: form.isAvailable
+          isAvailable: form.isAvailable,
+          bio: form.bio.trim() || null,
+          yearsOfExperience: form.yearsOfExperience !== '' ? Number(form.yearsOfExperience) : null,
+          focusAreas: form.focusAreasText
+            .split('\n')
+            .map((s) => s.trim())
+            .filter(Boolean)
         })
       );
       await this.session.load(true);

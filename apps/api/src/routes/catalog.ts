@@ -108,3 +108,27 @@ router.put(
     res.json({ disease });
   })
 );
+
+/** Public endpoint — returns doctors marked for website display. No auth required. */
+router.get(
+  '/doctors',
+  asyncRoute(async (_req, res) => {
+    const doctors = await prisma.doctor.findMany({
+      where: { showOnWebsite: true, user: { isActive: true } },
+      select: {
+        id: true,
+        specialty: true,
+        doctorType: true,
+        specialtyFocus: true,
+        bio: true,
+        yearsOfExperience: true,
+        focusAreas: true,
+        designation: true,
+        user: { select: { id: true, name: true } }
+      },
+      orderBy: [{ doctorType: 'asc' }, { user: { name: 'asc' } }]
+    });
+
+    res.json({ doctors });
+  })
+);

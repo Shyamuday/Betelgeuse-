@@ -82,6 +82,12 @@ model Doctor {
   emergencyContact String?
   emergencyPhone   String?
 
+  /// Public-facing fields shown on the clinic website
+  bio              String?        @db.Text
+  showOnWebsite    Boolean        @default(false)
+  yearsOfExperience Int?
+  focusAreas       String[]       @default([])
+
   joiningLetter    JoiningLetter?
   leaveRequests    LeaveRequest[]
   slots            DoctorSlot[]
