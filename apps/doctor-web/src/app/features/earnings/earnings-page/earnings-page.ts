@@ -1,4 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { form, FormField } from '@angular/forms/signals';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -8,7 +9,7 @@ import { formatPaise, paiseToK } from '../constants/earnings.constants';
 
 @Component({
   selector: 'app-earnings-page',
-  imports: [FormField],
+  imports: [FormField, DatePipe],
   templateUrl: './earnings-page.html',
   styleUrl: './earnings-page.scss'
 })
@@ -38,7 +39,9 @@ export class EarningsPage implements OnInit {
     try {
       const [payslipRes, summary] = await Promise.all([
         firstValueFrom(this.http.get<any>(`${this.apiBase}${API_PATHS.DOCTOR.MY_PAYSLIP}`, { params: { month: this.monthModel().selectedMonth } })),
-        firstValueFrom(this.http.get<any>(`${this.apiBase}${API_PATHS.DOCTOR.PAYMENTS_SUMMARY}`))
+        firstValueFrom(this.http.get<any>(`${this.apiBase}${API_PATHS.DOCTOR.PAYMENTS_SUMMARY}`, {
+          params: { month: this.monthModel().selectedMonth }
+        }))
       ]);
       this.payslip.set(payslipRes.payslip);
       this.history.set(payslipRes.history ?? []);

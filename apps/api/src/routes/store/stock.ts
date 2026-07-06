@@ -103,6 +103,7 @@ router.post(
         type: z.enum(['SALE_OUT', 'ADJUSTMENT_OUT', 'EXPIRED_REMOVAL']).default('SALE_OUT'),
         batchId: z.string().optional(),
         note: z.string().optional(),
+        prescriptionId: z.string().optional(),
         saleAmountInPaise: z.number().int().min(0).optional()
       })
       .parse(req.body);
@@ -143,6 +144,7 @@ router.post(
           staffId,
           type: body.type as StockMovementType,
           qty: body.qty,
+          prescriptionId: body.prescriptionId ?? null,
           amountInPaise: body.type === 'SALE_OUT' ? (body.saleAmountInPaise ?? null) : null,
           note: body.note
         }

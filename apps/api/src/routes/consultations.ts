@@ -65,9 +65,12 @@ export function createConsultationsRouter(io: SocketIoServer) {
               lineItems: {
                 purchaseType: body.purchaseType,
                 diseaseName: disease.name,
+                consultationFeeInPaise: amountInPaise,
                 diseaseFeeInPaise: disease.feeInPaise,
+                medicineFeeInPaise: 0,
                 planCode: selectedPlan.code,
                 planName: selectedPlan.name,
+                selectedPlanPriceInPaise: selectedPlan.priceInPaise,
                 consultationsLimit: selectedPlan.consultationsLimit
               },
               status: PaymentStatus.CREATED

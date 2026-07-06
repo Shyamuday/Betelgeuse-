@@ -14,8 +14,10 @@ type PaymentSummary = {
   doctorSharePercent: number;
   totals: {
     paidConsultations: number;
+    pendingConsultations?: number;
     grossInPaise: number;
     estimatedDoctorEarningsInPaise: number;
+    pendingEarningsInPaise?: number;
   };
   payments: Array<any>;
 };
@@ -77,8 +79,10 @@ export class DashboardHome {
     return buildDetailRows(
       {
         paidConsultations: data.totals.paidConsultations,
+        pendingConsultations: data.totals.pendingConsultations,
         grossInPaise: data.totals.grossInPaise,
         estimatedDoctorEarningsInPaise: data.totals.estimatedDoctorEarningsInPaise,
+        pendingEarningsInPaise: data.totals.pendingEarningsInPaise,
         doctorSharePercent: data.doctorSharePercent
       },
       PAYMENT_SUMMARY_STAT_FIELDS

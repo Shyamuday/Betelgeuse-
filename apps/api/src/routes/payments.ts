@@ -8,8 +8,9 @@ import { prisma } from '../db.js';
 import { asyncRoute, routeParam } from '../utils/helpers.js';
 import { getRazorpayClient, verifyRazorpaySignature, razorpayKeyId, razorpayWebhookSecret } from '../services/razorpay.js';
 import { enabledNotificationChannels, notificationService } from '../services/notification-service.js';
-import { buildDoctorPayslip, buildPayslipHistory } from '../services/payroll.js';
+import { buildDoctorPayslip, buildPayslipHistory, parseMonth } from '../services/payroll.js';
 import { doctorReceivesConsultationShare, resolveDoctorSharePercent } from '../services/doctor-compensation.js';
+import { buildDoctorEarningsReport } from '../services/doctor-earnings.js';
 import { PRODUCT_EVENTS, trackProductEvent } from '../services/product-analytics.js';
 
 export function createPaymentsRouter(io: SocketIoServer) {
@@ -236,8 +237,36 @@ export function createPaymentsRouter(io: SocketIoServer) {
       const doctorSharePercent = doctorReceivesConsultationShare(doctor)
         ? resolveDoctorSharePercent(doctor)
         : 0;
+
+      const monthQuery = typeof req.query['month'] === 'string' ? req.query['month'] : undefined;
+      const range = monthQuery ? parseMonth(monthQuery) : undefined;
+      const earnings = await buildDoctorEarningsReport(
+        req.user!.id,
+        doctorSharePercent,
+        range?.monthStart,
+        range?.monthEnd
+      );
+
       const payments = await prisma.payment.findMany({
-        where: { status: PaymentStatus.PAID, consultation: { assignedDoctorId: req.user!.id } },
+        where: {
+          consultation: { assignedDoctorId: req.user!.id },
+          ...(range
+            ? {
+                createdAt: {
+                  gte: range.monthStart,
+                  lte: new Date(
+                    range.monthEnd.getFullYear(),
+                    range.monthEnd.getMonth(),
+                    range.monthEnd.getDate(),
+                    23,
+                    59,
+                    59,
+                    999
+                  )
+                }
+              }
+            : {})
+        },
         include: {
           consultation: {
             select: {
@@ -252,23 +281,25 @@ export function createPaymentsRouter(io: SocketIoServer) {
         take: 50
       });
 
-      const totals = payments.reduce(
-        (acc, p) => {
-          acc.gross += p.amountInPaise;
-          acc.estimatedDoctorEarnings += Math.round((p.amountInPaise * doctorSharePercent) / 100);
-          return acc;
-        },
-        { gross: 0, estimatedDoctorEarnings: 0 }
-      );
-
       res.json({
         doctorSharePercent,
+        month: range?.month ?? null,
         totals: {
-          paidConsultations: payments.length,
-          grossInPaise: totals.gross,
-          estimatedDoctorEarningsInPaise: totals.estimatedDoctorEarnings
+          paidConsultations: earnings.consultation.paid.count,
+          pendingConsultations: earnings.consultation.pending.count,
+          failedConsultations: earnings.consultation.failed.count,
+          medicineSales: earnings.medicineSales.count,
+          consultationFeeGrossInPaise: earnings.consultation.paid.consultationGrossInPaise,
+          medicineFeeGrossInPaise:
+            earnings.consultation.paid.medicineGrossInPaise + earnings.medicineSales.medicineGrossInPaise,
+          grossInPaise: earnings.totals.totalGrossInPaise,
+          estimatedDoctorEarningsInPaise: earnings.totals.earnedInPaise,
+          pendingEarningsInPaise: earnings.totals.pendingInPaise,
+          failedGrossInPaise: earnings.totals.failedGrossInPaise
         },
-        payments
+        earnings,
+        payments,
+        lineItems: earnings.lineItems.slice(0, 50)
       });
     })
   );

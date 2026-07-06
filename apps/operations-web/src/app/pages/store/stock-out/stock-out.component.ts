@@ -10,7 +10,7 @@ import { PAGE_SIZES } from '../../../core/constants/store/pagination.constants';
 type RemoveType = 'SALE_OUT' | 'ADJUSTMENT_OUT' | 'EXPIRED_REMOVAL';
 
 function emptyRemoveForm() {
-  return { qty: 1, note: '', saleAmountInPaise: 0 };
+  return { qty: 1, note: '', saleAmountInPaise: 0, prescriptionId: '' };
 }
 
 @Component({
@@ -100,6 +100,7 @@ export class StockOutComponent {
       qty: form.qty,
       type: this.removeType(),
       note: form.note || undefined,
+      prescriptionId: this.removeType() === 'SALE_OUT' && form.prescriptionId.trim() ? form.prescriptionId.trim() : undefined,
       saleAmountInPaise: this.removeType() === 'SALE_OUT' && form.saleAmountInPaise > 0 ? form.saleAmountInPaise : undefined
     }).subscribe({
       next: () => {

@@ -1,4 +1,4 @@
-import { DoctorCompensationModel, PaymentStatus } from '@prisma/client';
+import { DoctorCompensationModel, PaymentStatus, StockMovementType } from '@prisma/client';
 import { prisma } from '../db.js';
 import {
   DEFAULT_DOCTOR_SHARE_PERCENT,
@@ -6,6 +6,11 @@ import {
   doctorReceivesSalary,
   resolveDoctorSharePercent
 } from './doctor-compensation.js';
+import {
+  buildDoctorEarningsReport,
+  computeDoctorShareAmount,
+  parsePaymentFeeBreakdown
+} from './doctor-earnings.js';
 
 export const DOCTOR_SHARE_PERCENT = DEFAULT_DOCTOR_SHARE_PERCENT;
 
@@ -72,22 +77,21 @@ export async function getDoctorConsultationEarnings(
   monthEnd: Date,
   sharePercent = DEFAULT_DOCTOR_SHARE_PERCENT
 ) {
-  const payments = await prisma.payment.findMany({
-    where: {
-      status: PaymentStatus.PAID,
-      createdAt: { gte: monthStart, lte: monthEndInclusive(monthEnd) },
-      consultation: { assignedDoctorId: doctorUserId }
-    },
-    select: { amountInPaise: true }
-  });
-
-  const grossInPaise = payments.reduce((sum, p) => sum + p.amountInPaise, 0);
-  const consultationEarningsInPaise = Math.round((grossInPaise * sharePercent) / 100);
+  const report = await buildDoctorEarningsReport(doctorUserId, sharePercent, monthStart, monthEnd);
+  const paid = report.consultation.paid;
+  const medicine = report.medicineSales;
   return {
     doctorSharePercent: sharePercent,
-    paidConsultations: payments.length,
-    consultationGrossInPaise: grossInPaise,
-    consultationEarningsInPaise
+    paidConsultations: paid.count,
+    pendingConsultations: report.consultation.pending.count,
+    failedConsultations: report.consultation.failed.count,
+    consultationFeeGrossInPaise: paid.consultationGrossInPaise,
+    medicineFeeGrossInPaise: paid.medicineGrossInPaise + medicine.medicineGrossInPaise,
+    consultationGrossInPaise: paid.totalGrossInPaise,
+    consultationEarningsInPaise: paid.doctorEarningsInPaise,
+    medicineEarningsInPaise: medicine.doctorEarningsInPaise,
+    pendingEarningsInPaise: report.totals.pendingInPaise,
+    totalEarningsInPaise: report.totals.earnedInPaise
   };
 }
 
@@ -104,6 +108,8 @@ export type AdminPayrollRow = {
   compensationModel?: DoctorCompensationModel;
   consultationSharePercent?: number;
   consultationEarningsPaise?: number;
+  medicineEarningsPaise?: number;
+  pendingEarningsPaise?: number;
   consultationGrossPaise?: number;
   paidConsultations?: number;
   totalEstimatedPayPaise?: number;
@@ -153,7 +159,13 @@ export async function buildAdminPayrollMonth(monthStr?: string, storeIds?: strin
 
   const consultTotals = new Map<
     string,
-    { grossInPaise: number; earningsInPaise: number; paidConsultations: number; sharePercent: number }
+    {
+      grossInPaise: number;
+      earningsInPaise: number;
+      medicineEarningsInPaise: number;
+      paidConsultations: number;
+      sharePercent: number;
+    }
   >();
   if (consultDoctorIds.length) {
     const payments = await prisma.payment.findMany({
@@ -164,6 +176,7 @@ export async function buildAdminPayrollMonth(monthStr?: string, storeIds?: strin
       },
       select: {
         amountInPaise: true,
+        lineItems: true,
         consultation: { select: { assignedDoctorId: true } }
       }
     });
@@ -172,15 +185,52 @@ export async function buildAdminPayrollMonth(monthStr?: string, storeIds?: strin
       const userId = payment.consultation?.assignedDoctorId;
       if (!userId) continue;
       const sharePercent = shareByUserId.get(userId) ?? DEFAULT_DOCTOR_SHARE_PERCENT;
+      const fees = parsePaymentFeeBreakdown(payment.lineItems, payment.amountInPaise);
       const existing = consultTotals.get(userId) ?? {
         grossInPaise: 0,
         earningsInPaise: 0,
+        medicineEarningsInPaise: 0,
         paidConsultations: 0,
         sharePercent
       };
       existing.grossInPaise += payment.amountInPaise;
-      existing.earningsInPaise += Math.round((payment.amountInPaise * sharePercent) / 100);
+      existing.earningsInPaise += computeDoctorShareAmount(
+        fees.consultationFeeInPaise + fees.medicineFeeInPaise,
+        sharePercent
+      );
       existing.paidConsultations += 1;
+      consultTotals.set(userId, existing);
+    }
+
+    const medicineMovements = await prisma.stockMovement.findMany({
+      where: {
+        type: StockMovementType.SALE_OUT,
+        amountInPaise: { not: null },
+        createdAt: { gte: range.monthStart, lte: monthEndInclusive(range.monthEnd) },
+        prescription: { uploadedById: { in: consultDoctorIds } }
+      },
+      select: {
+        amountInPaise: true,
+        prescription: { select: { uploadedById: true } }
+      }
+    });
+
+    for (const movement of medicineMovements) {
+      const userId = movement.prescription?.uploadedById;
+      if (!userId) continue;
+      const sharePercent = shareByUserId.get(userId) ?? DEFAULT_DOCTOR_SHARE_PERCENT;
+      const gross = movement.amountInPaise ?? 0;
+      const existing = consultTotals.get(userId) ?? {
+        grossInPaise: 0,
+        earningsInPaise: 0,
+        medicineEarningsInPaise: 0,
+        paidConsultations: 0,
+        sharePercent
+      };
+      const medicineEarning = computeDoctorShareAmount(gross, sharePercent);
+      existing.medicineEarningsInPaise += medicineEarning;
+      existing.earningsInPaise += medicineEarning;
+      existing.grossInPaise += gross;
       consultTotals.set(userId, existing);
     }
   }
@@ -197,6 +247,7 @@ export async function buildAdminPayrollMonth(monthStr?: string, storeIds?: strin
       : 0;
     const consult = consultTotals.get(d.userId);
     const consultationEarningsPaise = doctorReceivesConsultationShare(d) ? (consult?.earningsInPaise ?? 0) : 0;
+    const medicineEarningsPaise = doctorReceivesConsultationShare(d) ? (consult?.medicineEarningsInPaise ?? 0) : 0;
 
     return {
       id: d.id,
@@ -211,6 +262,7 @@ export async function buildAdminPayrollMonth(monthStr?: string, storeIds?: strin
       compensationModel: d.compensationModel,
       consultationSharePercent: resolveDoctorSharePercent(d),
       consultationEarningsPaise,
+      medicineEarningsPaise,
       consultationGrossPaise: consult?.grossInPaise ?? 0,
       paidConsultations: consult?.paidConsultations ?? 0,
       totalEstimatedPayPaise: netPaise + consultationEarningsPaise
@@ -281,9 +333,18 @@ export async function buildDoctorPayslip(doctorId: string, monthStr?: string) {
     : {
         doctorSharePercent: sharePercent,
         paidConsultations: 0,
+        pendingConsultations: 0,
+        failedConsultations: 0,
+        consultationFeeGrossInPaise: 0,
+        medicineFeeGrossInPaise: 0,
         consultationGrossInPaise: 0,
-        consultationEarningsInPaise: 0
+        consultationEarningsInPaise: 0,
+        medicineEarningsInPaise: 0,
+        pendingEarningsInPaise: 0,
+        totalEarningsInPaise: 0
       };
+
+  const variablePayInPaise = consultation.totalEarningsInPaise;
 
   return {
     month: range.month,
@@ -306,7 +367,7 @@ export async function buildDoctorPayslip(doctorId: string, monthStr?: string) {
       netPaise
     },
     consultation,
-    totalEstimatedPayInPaise: netPaise + consultation.consultationEarningsInPaise
+    totalEstimatedPayInPaise: netPaise + variablePayInPaise
   };
 }
 

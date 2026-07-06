@@ -132,6 +132,7 @@ export interface StockRemoveRequest {
   note?: string;
   type?: 'SALE_OUT' | 'ADJUSTMENT_OUT' | 'EXPIRED_REMOVAL';
   saleAmountInPaise?: number;
+  prescriptionId?: string;
 }
 
 export interface RackCreateRequest {

@@ -2,7 +2,7 @@
   <div class="earn-hdr">
     <div>
       <h2>My Earnings</h2>
-      <p>Salary, consultation share, and net estimated pay</p>
+      <p>Salary, consultation fee, medicine sales, and payment status</p>
     </div>
     <input type="month" [formField]="monthForm.selectedMonth" (change)="load()" />
   </div>
@@ -19,14 +19,24 @@
         <div class="sub">Gross ₹{{ formatPaise(payslip()?.salary?.grossPaise ?? 0) }} · Leave {{ payslip()?.salary?.leaveDays ?? 0 }} days</div>
       </div>
       <div class="card">
-        <div class="lbl">Consultation Earnings ({{ payslip()?.consultation?.doctorSharePercent ?? 60 }}%)</div>
+        <div class="lbl">Consultation Fee Share ({{ payslip()?.consultation?.doctorSharePercent ?? 60 }}%)</div>
         <div class="val">₹{{ formatPaise(payslip()?.consultation?.consultationEarningsInPaise ?? 0) }}</div>
-        <div class="sub">{{ payslip()?.consultation?.paidConsultations ?? 0 }} paid consultations this month</div>
+        <div class="sub">{{ payslip()?.consultation?.paidConsultations ?? 0 }} paid · Fee gross ₹{{ formatPaise(payslip()?.consultation?.consultationFeeGrossInPaise ?? 0) }}</div>
+      </div>
+      <div class="card">
+        <div class="lbl">Medicine Share ({{ payslip()?.consultation?.doctorSharePercent ?? 60 }}%)</div>
+        <div class="val">₹{{ formatPaise(payslip()?.consultation?.medicineEarningsInPaise ?? 0) }}</div>
+        <div class="sub">From paid bookings + linked store sales</div>
+      </div>
+      <div class="card warn">
+        <div class="lbl">Pending (Unpaid)</div>
+        <div class="val">₹{{ formatPaise(payslip()?.consultation?.pendingEarningsInPaise ?? 0) }}</div>
+        <div class="sub">{{ payslip()?.consultation?.pendingConsultations ?? 0 }} awaiting payment</div>
       </div>
       <div class="card net">
         <div class="lbl">Total Estimated Pay</div>
         <div class="val">₹{{ formatPaise(payslip()?.totalEstimatedPayInPaise ?? 0) }}</div>
-        <div class="sub">Salary net + consultation share</div>
+        <div class="sub">Salary net + earned consult & medicine share</div>
       </div>
     </div>
 
@@ -56,10 +66,42 @@
       </table>
     </div>
 
-    @if (consultationSummary()) {
+    @if (consultationSummary()?.lineItems?.length) {
       <div class="panel">
-        <h3>Recent Consultation Payments</h3>
-        <p class="sub">Showing up to 50 recent paid consultations from dashboard summary.</p>
+        <h3>Income Breakdown</h3>
+        <p class="sub">
+          Paid, pending, failed consultation payments and medicine sales linked to your prescriptions.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Patient / Item</th>
+              <th class="num">Consult Fee</th>
+              <th class="num">Medicine</th>
+              <th class="num">Your Share</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of consultationSummary()!.lineItems; track row.id) {
+              <tr [class.pending-row]="row.status === 'CREATED'" [class.failed-row]="row.status === 'FAILED'">
+                <td>{{ row.createdAt | date: 'dd MMM yyyy' }}</td>
+                <td>{{ row.kind === 'MEDICINE_SALE' ? 'Medicine' : 'Consultation' }}</td>
+                <td>
+                  @if (row.status === 'PAID' || row.status === 'RECORDED') { Paid }
+                  @else if (row.status === 'CREATED') { Pending }
+                  @else { Failed }
+                </td>
+                <td>{{ row.patientName ?? row.label }}</td>
+                <td class="num">₹{{ formatPaise(row.consultationFeeInPaise) }}</td>
+                <td class="num">₹{{ formatPaise(row.medicineFeeInPaise) }}</td>
+                <td class="num"><strong>₹{{ formatPaise(row.doctorEarningsInPaise) }}</strong></td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
     }
   }

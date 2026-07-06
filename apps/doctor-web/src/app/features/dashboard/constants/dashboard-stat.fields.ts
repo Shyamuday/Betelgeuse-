@@ -14,8 +14,10 @@ export const WORKLIST_STAT_FIELDS: DetailFieldDef<WorklistStatCounts>[] = [
 
 export type PaymentSummaryStats = {
   paidConsultations: number;
+  pendingConsultations?: number;
   grossInPaise: number;
   estimatedDoctorEarningsInPaise: number;
+  pendingEarningsInPaise?: number;
   doctorSharePercent: number;
 };
 
@@ -25,10 +27,15 @@ function formatInr(paise: number) {
 
 export const PAYMENT_SUMMARY_STAT_FIELDS: DetailFieldDef<PaymentSummaryStats>[] = [
   { label: 'Paid Consultations', getValue: (s) => s.paidConsultations },
+  { label: 'Pending Payments', getValue: (s) => s.pendingConsultations ?? 0 },
   { label: 'Gross Revenue', getValue: (s) => formatInr(s.grossInPaise) },
   {
     label: 'Your Earnings',
     getLabel: (s) => `Your Earnings (${s.doctorSharePercent}%)`,
     getValue: (s) => formatInr(s.estimatedDoctorEarningsInPaise)
+  },
+  {
+    label: 'Pending Earnings',
+    getValue: (s) => formatInr(s.pendingEarningsInPaise ?? 0)
   }
 ];
