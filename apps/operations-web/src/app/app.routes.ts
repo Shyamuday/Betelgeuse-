@@ -77,6 +77,12 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/queue/queue.component').then((m) => m.QueueComponent)
       },
       {
+        path: ROUTE_PATHS.VISITOR_LEADS,
+        canActivate: [capabilityGuard],
+        loadComponent: () =>
+          import('./pages/visitor-leads/visitor-leads.component').then((m) => m.VisitorLeadsComponent)
+      },
+      {
         path: ROUTE_PATHS.SCAN,
         canActivate: [capabilityGuard],
         loadComponent: () =>

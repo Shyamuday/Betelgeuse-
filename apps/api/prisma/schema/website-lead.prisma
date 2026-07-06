@@ -1,0 +1,46 @@
+enum WebsiteLeadSource {
+  CHAT_BOT
+  HOME_BOOKING
+  PROMO_POPUP
+}
+
+enum WebsiteLeadFollowUp {
+  NEW
+  NEEDS_CALLBACK
+  CALLED
+  NO_ANSWER
+  WHATSAPP_SENT
+  REGISTERED
+  BOOKED
+  NOT_INTERESTED
+  CLOSED
+}
+
+model WebsiteLead {
+  id             String              @id @default(cuid())
+  source         WebsiteLeadSource
+  followUpStatus WebsiteLeadFollowUp @default(NEW)
+  visitorName    String?
+  visitorPhone   String?
+  visitorEmail   String?
+  concern        String?
+  entryPage      String?
+  visitorKey     String?
+  userId         String?
+  user           User?               @relation("UserWebsiteLeads", fields: [userId], references: [id], onDelete: SetNull)
+  chatSessionId  String?             @unique
+  chatSession    ChatSession?        @relation(fields: [chatSessionId], references: [id], onDelete: SetNull)
+  operatorNote   String?
+  calledAt       DateTime?
+  calledById     String?
+  calledBy       User?               @relation("LeadCalledBy", fields: [calledById], references: [id], onDelete: SetNull)
+  registeredAt   DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@index([followUpStatus])
+  @@index([source])
+  @@index([visitorPhone])
+  @@index([userId])
+  @@index([createdAt])
+}

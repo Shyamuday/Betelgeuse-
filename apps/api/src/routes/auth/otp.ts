@@ -4,6 +4,7 @@ import { Role } from '@prisma/client';
 import { prisma } from '../../db.js';
 import { generateOtp, storeOtp, verifyOtp, sendOtpSms, devOtp, isProduction } from '../../services/otp.js';
 import { createPatientRecord, normalizeMobile } from '../../services/patient-identity.js';
+import { captureLeadFromOtpIntent, markLeadsRegistered } from '../../services/website-leads.service.js';
 import { asyncRoute, publicUserSelect, toAuthResponse, logAuthEvent } from '../../utils/helpers.js';
 import { PRODUCT_EVENTS, trackProductEvent } from '../../services/product-analytics.js';
 
@@ -13,7 +14,15 @@ export function registerAuthOtpRoutes(router: Router) {
 router.post(
   '/auth/request-otp',
   asyncRoute(async (req, res) => {
-    const body = z.object({ mobile: z.string().min(8) }).parse(req.body);
+    const body = z
+      .object({
+        mobile: z.string().min(8),
+        leadSource: z.enum(['HOME_BOOKING', 'PROMO_POPUP']).optional(),
+        visitorName: z.string().max(120).optional(),
+        visitorKey: z.string().max(80).optional(),
+        entryPage: z.string().max(500).optional()
+      })
+      .parse(req.body);
     const mobile = normalizeMobile(body.mobile);
     if (!mobile) {
       return res.status(400).json({ message: 'Invalid mobile number.' });
@@ -25,6 +34,17 @@ router.post(
     } else {
       console.info(`[otp] DEV — OTP for ${mobile}: ${otp}`);
     }
+
+    if (body.leadSource) {
+      void captureLeadFromOtpIntent({
+        mobile,
+        source: body.leadSource,
+        visitorName: body.visitorName,
+        visitorKey: body.visitorKey,
+        entryPage: body.entryPage
+      });
+    }
+
     res.json({ message: 'OTP sent.', ...(!isProduction ? { devOtp: otp } : {}) });
   })
 );
@@ -65,6 +85,7 @@ router.post(
 
     if (patients.length === 1) {
       logAuthEvent('patient_login', { userId: patients[0].id, mobile });
+      void markLeadsRegistered(mobile, patients[0].id);
       void trackProductEvent({
         name: PRODUCT_EVENTS.PATIENT_LOGIN,
         actorId: patients[0].id,
@@ -80,6 +101,7 @@ router.post(
     });
 
     logAuthEvent('patient_login', { userId: user.id, mobile, event: 'otp_register' });
+    void markLeadsRegistered(mobile, user.id);
     void trackProductEvent({
       name: PRODUCT_EVENTS.PATIENT_LOGIN,
       actorId: user.id,
@@ -120,6 +142,7 @@ router.post(
     }
 
     logAuthEvent('patient_login', { userId: user.id, mobile, event: 'otp_select' });
+    void markLeadsRegistered(mobile, user.id);
     void trackProductEvent({
       name: PRODUCT_EVENTS.PATIENT_LOGIN,
       actorId: user.id,

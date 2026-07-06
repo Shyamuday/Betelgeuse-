@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../../../core/services/admin-api';
 
@@ -10,26 +10,40 @@ type ChatMessage = {
   createdAt: string;
 };
 
-type ChatSession = {
+type WebsiteLead = {
   id: string;
-  userId?: string | null;
-  visitorKey?: string | null;
-  entryPage?: string | null;
+  source: 'CHAT_BOT' | 'HOME_BOOKING' | 'PROMO_POPUP';
+  followUpStatus: string;
   visitorName?: string | null;
   visitorPhone?: string | null;
   visitorEmail?: string | null;
-  user?: { id: string; name: string; mobile?: string | null; email?: string | null } | null;
-  status: 'ACTIVE' | 'NEEDS_OPERATOR' | 'RESOLVED';
   concern?: string | null;
+  entryPage?: string | null;
   operatorNote?: string | null;
-  resolvedAt?: string | null;
+  calledAt?: string | null;
+  registeredAt?: string | null;
   createdAt: string;
-  updatedAt: string;
-  messages: ChatMessage[];
-  _count?: { messages: number };
+  user?: { id: string; name: string; mobile?: string | null; email?: string | null } | null;
+  calledBy?: { id: string; name: string } | null;
+  chatSession?: {
+    id: string;
+    status: string;
+    concern?: string | null;
+    operatorNote?: string | null;
+    resolvedAt?: string | null;
+    messages?: ChatMessage[];
+    _count?: { messages: number };
+  } | null;
 };
 
-type StatusFilter = 'NEEDS_OPERATOR' | 'ACTIVE' | 'RESOLVED' | 'ALL';
+type FollowUpFilter =
+  | 'ALL'
+  | 'NEW'
+  | 'NEEDS_CALLBACK'
+  | 'CALLED'
+  | 'REGISTERED'
+  | 'BOOKED'
+  | 'CLOSED';
 
 @Component({
   selector: 'app-chat-inbox-page',
@@ -38,19 +52,23 @@ type StatusFilter = 'NEEDS_OPERATOR' | 'ACTIVE' | 'RESOLVED' | 'ALL';
   styleUrl: './chat-inbox-page.scss'
 })
 export class ChatInboxPage {
-  readonly sessions = signal<ChatSession[]>([]);
-  readonly selected = signal<ChatSession | null>(null);
+  readonly leads = signal<WebsiteLead[]>([]);
+  readonly selected = signal<WebsiteLead | null>(null);
   readonly loading = signal(false);
   readonly detailLoading = signal(false);
-  readonly mutating = signal(false);
   readonly error = signal('');
-  readonly message = signal('');
-  readonly statusFilter = signal<StatusFilter>('NEEDS_OPERATOR');
-  readonly pendingCount = signal(0);
-  readonly stats = signal<{ total: number; loggedIn: number; anonymous: number; needsOperator: number; active: number } | null>(null);
+  readonly followUpFilter = signal<FollowUpFilter>('NEEDS_CALLBACK');
+  readonly stats = signal<{
+    total: number;
+    newLeads: number;
+    needsCallback: number;
+    called: number;
+    registered: number;
+    bySource: Record<string, number>;
+  } | null>(null);
 
-  resolveNote = '';
-  replyText = '';
+  /** Admin console is view-only — receptionists update follow-up in Operations portal. */
+  readonly canFollowUp = false;
 
   constructor(private readonly api: AdminApi) {
     void this.load();
@@ -60,96 +78,75 @@ export class ChatInboxPage {
     this.loading.set(true);
     this.error.set('');
     try {
-      const filter = this.statusFilter();
+      const filter = this.followUpFilter();
       const [res, statsRes] = await Promise.all([
-        this.api.listChatSessions(filter === 'ALL' ? undefined : filter),
-        this.api.getChatSessionStats()
+        this.api.listVisitorLeads(filter === 'ALL' ? undefined : filter),
+        this.api.getVisitorLeadStats()
       ]);
-      this.sessions.set(res.sessions);
+      this.leads.set(res.leads);
       this.stats.set(statsRes.stats);
-
-      if (filter !== 'NEEDS_OPERATOR') {
-        const pending = await this.api.listChatSessions('NEEDS_OPERATOR');
-        this.pendingCount.set(pending.pagination.total);
-      } else {
-        this.pendingCount.set(res.pagination.total);
-      }
     } catch {
-      this.error.set('Could not load chat sessions.');
+      this.error.set('Could not load visitor leads.');
     } finally {
       this.loading.set(false);
     }
   }
 
-  async setFilter(status: StatusFilter) {
-    this.statusFilter.set(status);
+  async setFilter(status: FollowUpFilter) {
+    this.followUpFilter.set(status);
     this.selected.set(null);
     await this.load();
   }
 
-  async selectSession(id: string) {
+  async selectLead(id: string) {
     this.detailLoading.set(true);
-    this.message.set('');
     try {
-      const res = await this.api.getChatSession(id);
-      this.selected.set(res.session);
+      const res = await this.api.getVisitorLead(id);
+      this.selected.set(res.lead);
     } catch {
-      this.error.set('Could not load session.');
+      this.error.set('Could not load lead.');
     } finally {
       this.detailLoading.set(false);
     }
   }
 
-  async resolve() {
-    const session = this.selected();
-    if (!session) return;
-    this.mutating.set(true);
-    try {
-      await this.api.resolveChatSession(session.id, this.resolveNote || undefined);
-      this.message.set('Session marked as resolved.');
-      this.resolveNote = '';
-      await this.load();
-      const updated = await this.api.getChatSession(session.id);
-      this.selected.set(updated.session);
-    } catch {
-      this.error.set('Could not resolve session.');
-    } finally {
-      this.mutating.set(false);
-    }
-  }
-
-  async sendReply() {
-    const session = this.selected();
-    const text = this.replyText.trim();
-    if (!session || !text) return;
-    this.mutating.set(true);
-    try {
-      await this.api.sendChatOperatorMessage(session.id, text);
-      this.replyText = '';
-      const updated = await this.api.getChatSession(session.id);
-      this.selected.set(updated.session);
-    } catch {
-      this.error.set('Could not send message.');
-    } finally {
-      this.mutating.set(false);
-    }
-  }
-
-  statusLabel(status: string): string {
+  followUpLabel(status: string): string {
     switch (status) {
-      case 'NEEDS_OPERATOR': return 'Needs follow-up';
-      case 'ACTIVE': return 'Active';
-      case 'RESOLVED': return 'Resolved';
+      case 'NEW': return 'New';
+      case 'NEEDS_CALLBACK': return 'Needs callback';
+      case 'CALLED': return 'Called';
+      case 'NO_ANSWER': return 'No answer';
+      case 'WHATSAPP_SENT': return 'WhatsApp sent';
+      case 'REGISTERED': return 'Registered';
+      case 'BOOKED': return 'Booked';
+      case 'NOT_INTERESTED': return 'Not interested';
+      case 'CLOSED': return 'Closed';
       default: return status;
     }
   }
 
-  statusClass(status: string): string {
+  followUpClass(status: string): string {
     switch (status) {
-      case 'NEEDS_OPERATOR': return 'badge-warn';
-      case 'ACTIVE': return 'badge-info';
-      case 'RESOLVED': return 'badge-ok';
-      default: return '';
+      case 'NEEDS_CALLBACK':
+      case 'NEW':
+        return 'badge-warn';
+      case 'CALLED':
+      case 'WHATSAPP_SENT':
+        return 'badge-info';
+      case 'REGISTERED':
+      case 'BOOKED':
+        return 'badge-ok';
+      default:
+        return '';
+    }
+  }
+
+  sourceLabel(source: string): string {
+    switch (source) {
+      case 'CHAT_BOT': return 'Chat';
+      case 'HOME_BOOKING': return 'Home booking';
+      case 'PROMO_POPUP': return 'Promo popup';
+      default: return source;
     }
   }
 
@@ -159,18 +156,16 @@ export class ChatInboxPage {
     });
   }
 
-  sessionPreview(s: ChatSession): string {
-    if (s.concern) return s.concern;
-    const first = s.messages?.[0];
-    if (first?.role === 'user') return first.content;
-    return first?.content?.slice(0, 80) ?? 'New conversation';
+  leadPreview(lead: WebsiteLead): string {
+    return lead.concern ?? lead.visitorName ?? lead.visitorPhone ?? 'Website inquiry';
   }
 
-  visitorLabel(s: ChatSession): string {
-    if (s.user?.name) return `Patient: ${s.user.name}`;
-    if (s.visitorName) return s.visitorName;
-    if (s.userId) return 'Logged-in patient';
-    if (s.visitorKey) return `Visitor ${s.visitorKey.slice(0, 8)}…`;
+  visitorLabel(lead: WebsiteLead): string {
+    if (lead.user?.name) return `Patient: ${lead.user.name}`;
+    if (lead.visitorName) return lead.visitorName;
+    if (lead.visitorPhone) return lead.visitorPhone;
     return 'Anonymous visitor';
   }
+
+  readonly pendingCount = computed(() => this.stats()?.needsCallback ?? 0);
 }

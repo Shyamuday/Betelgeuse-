@@ -16,7 +16,11 @@ export const API_PATHS = {
     WALK_IN: '/reception/walk-in',
     CONSULTATIONS: '/reception/consultations',
     COLLECT_CASH: (id: string) => `/reception/consultations/${id}/collect-cash`,
-    ASSIGN: (id: string) => `/reception/consultations/${id}/assign`
+    ASSIGN: (id: string) => `/reception/consultations/${id}/assign`,
+    VISITOR_LEADS: '/admin/visitor-leads',
+    VISITOR_LEAD_STATS: '/admin/visitor-leads/stats',
+    VISITOR_LEAD_BY_ID: (id: string) => `/admin/visitor-leads/${id}`,
+    VISITOR_LEAD_FOLLOW_UP: (id: string) => `/admin/visitor-leads/${id}/follow-up`
   },
   CLINIC_MANAGER: {
     ME: '/clinic-manager/me',

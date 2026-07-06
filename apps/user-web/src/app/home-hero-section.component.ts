@@ -43,7 +43,13 @@ export class HomeHeroSectionComponent {
     this.error.set('');
     this.busy.set(true);
     try {
-      await firstValueFrom(this.auth.requestOtp(mobile));
+      await firstValueFrom(
+        this.auth.requestOtp(mobile, {
+          source: 'HOME_BOOKING',
+          visitorName: trimmedName,
+          entryPage: typeof window !== 'undefined' ? window.location.pathname : undefined
+        })
+      );
       this.bookingFormModel.update((m) => ({ ...m, mobile }));
       this.step.set('otp');
     } catch (err: any) {

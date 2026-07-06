@@ -9,6 +9,7 @@ import {
   getPendingOptions,
   BOT_NAME
 } from '../services/chatbot.service.js';
+import { syncLeadFromChatSession } from '../services/website-leads.service.js';
 
 export const chatRouter = Router();
 
@@ -49,10 +50,11 @@ async function maybeLinkSessionToUser(sessionId: string, user: Express.Request['
   if (!user) return;
   const session = await prisma.chatSession.findUnique({ where: { id: sessionId }, select: { userId: true } });
   if (!session || session.userId) return;
-  await prisma.chatSession.update({
+  const updated = await prisma.chatSession.update({
     where: { id: sessionId },
     data: userLinkData(user)
   });
+  void syncLeadFromChatSession(updated);
 }
 
 /** Start a new chat session — stored for all visitors (logged in or anonymous). */
@@ -88,6 +90,8 @@ chatRouter.post(
       }
     });
 
+    void syncLeadFromChatSession(session);
+
     res.status(201).json({
       sessionId: session.id,
       isLoggedIn: Boolean(req.user),
@@ -118,6 +122,8 @@ chatRouter.patch(
       where: { id: sessionId },
       data: userLinkData(req.user)
     });
+
+    void syncLeadFromChatSession(updated);
 
     res.json({ session: updated, message: 'Chat linked to your account.' });
   })
@@ -170,8 +176,10 @@ chatRouter.post(
 
     const userMsg = await prisma.chatMessage.create({ data: { sessionId, role: 'user', content } });
 
-    const concern = session.concern ?? (session.botStage === 0 ? content.slice(0, 200) : undefined);
     const reply = getBotReply(session.botStage, content);
+    const intent =
+      session.botStage === 0 ? (reply.capturedIntent ?? content.slice(0, 200)) : undefined;
+    const concern = intent ?? session.concern ?? (session.botStage === 10 ? content.slice(0, 200) : undefined);
 
     const botMsg = await prisma.chatMessage.create({
       data: {
@@ -182,7 +190,7 @@ chatRouter.post(
       }
     });
 
-    await prisma.chatSession.update({
+    const updatedSession = await prisma.chatSession.update({
       where: { id: sessionId },
       data: {
         botStage: reply.nextStage,
@@ -193,6 +201,8 @@ chatRouter.post(
         ...(!session.userId && req.user ? userLinkData(req.user) : {})
       }
     });
+
+    void syncLeadFromChatSession(updatedSession);
 
     res.json({
       userMessage: { id: userMsg.id, role: 'user', content: userMsg.content, createdAt: userMsg.createdAt },

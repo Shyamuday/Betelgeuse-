@@ -50,8 +50,26 @@ export class AuthService {
     return localStorage.getItem(AUTH_TOKEN_KEY);
   }
 
-  requestOtp(mobile: string) {
-    return this.http.post<{ devOtp?: string }>(`${this.apiBase}${AUTH_PATHS.REQUEST_OTP}`, { mobile });
+  requestOtp(
+    mobile: string,
+    lead?: {
+      source: 'HOME_BOOKING' | 'PROMO_POPUP';
+      visitorName?: string;
+      visitorKey?: string;
+      entryPage?: string;
+    }
+  ) {
+    return this.http.post<{ devOtp?: string }>(`${this.apiBase}${AUTH_PATHS.REQUEST_OTP}`, {
+      mobile,
+      ...(lead
+        ? {
+            leadSource: lead.source,
+            visitorName: lead.visitorName,
+            visitorKey: lead.visitorKey,
+            entryPage: lead.entryPage ?? (typeof window !== 'undefined' ? window.location.pathname : undefined)
+          }
+        : {})
+    });
   }
 
   patientLogin(payload: { name: string; mobile: string; otp: string }) {

@@ -68,9 +68,20 @@ export class ChatbotWidgetComponent implements OnInit, AfterViewChecked {
       this.chat.close();
       return;
     }
-    if (option === 'Start a new question') {
-      this.chat.resetSession();
+    if (option === 'Start a new question' || option === 'Back to main menu') {
+      if (option === 'Start a new question') {
+        this.chat.resetSession();
+        this.shouldScroll = true;
+        return;
+      }
       this.shouldScroll = true;
+      void this.chat.sendMessage(option);
+      return;
+    }
+    if (option === 'Chat on WhatsApp') {
+      window.open(this.whatsappUrl(), '_blank', 'noopener');
+      this.shouldScroll = true;
+      void this.chat.sendMessage(option);
       return;
     }
     this.shouldScroll = true;

@@ -1,104 +1,218 @@
+.home-hero--booking {
+  display: grid;
+  gap: 1.25rem;
+  justify-items: start;
+}
 
-    .booking-card {
-      background: #fff;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 1.5rem 1.75rem;
-      margin-top: 1.5rem;
-      box-shadow: 0 2px 12px rgba(0,0,0,.06);
-      max-width: 440px;
-    }
-    .booking-card h3 {
-      margin: 0 0 .1rem;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #111827;
-    }
-    .booking-card .bc-sub {
-      font-size: .83rem;
-      color: #6b7280;
-      margin: 0 0 1rem;
-    }
-    .bc-fields {
-      display: flex;
-      flex-direction: column;
-      gap: .65rem;
-    }
-    .bc-fields input {
-      width: 100%;
-      box-sizing: border-box;
-      border: 1.5px solid #d1d5db;
-      border-radius: 10px;
-      padding: .65rem .85rem;
-      font-size: .93rem;
-      outline: none;
-      transition: border-color .15s;
-      &:focus { border-color: #2563eb; }
-    }
-    .bc-btn {
-      width: 100%;
-      background: #2563eb;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      padding: .7rem 1rem;
-      font-size: .95rem;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: .25rem;
-      transition: background .15s;
-      &:hover:not(:disabled) { background: #1d4ed8; }
-      &:disabled { opacity: .55; cursor: not-allowed; }
-    }
-    .bc-error {
-      color: #dc2626;
-      font-size: .8rem;
-      margin: .4rem 0 0;
-    }
-    .bc-hint {
-      font-size: .78rem;
-      color: #9ca3af;
-      margin: .5rem 0 0;
-      text-align: center;
-    }
-    .bc-otp-who {
-      font-size: .83rem;
-      color: #374151;
-      margin: 0 0 .85rem;
-      strong { color: #111827; }
-    }
-    .bc-back {
-      background: none;
-      border: none;
-      color: #6b7280;
-      font-size: .8rem;
-      cursor: pointer;
-      padding: .35rem 0 0;
-      text-decoration: underline;
-      &:hover { color: #374151; }
-    }
-    .bc-loading {
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-      color: #6b7280;
-      font-size: .9rem;
-      padding: .5rem 0;
-    }
-    .bc-spinner {
-      width: 18px;
-      height: 18px;
-      border: 2.5px solid #e5e7eb;
-      border-top-color: #2563eb;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .bc-done {
-      text-align: center;
-      padding: .25rem 0;
-      font-size: .9rem;
-      color: #065f46;
-      font-weight: 600;
-    }
-  
+.booking-card {
+  width: min(100%, 480px);
+  background: #fff;
+  border: 1px solid #dbe4f0;
+  border-radius: 20px;
+  padding: 1.75rem;
+  box-shadow: 0 18px 40px rgba(15, 98, 254, 0.08);
+}
+
+.booking-title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.5rem, 3vw, 1.85rem);
+  font-weight: 800;
+  color: #102033;
+  letter-spacing: -0.02em;
+}
+
+.bc-sub {
+  margin: 0 0 1.25rem;
+  color: #64748b;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.bc-fields {
+  display: grid;
+  gap: 1rem;
+}
+
+.bc-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.bc-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.bc-input-wrap {
+  display: flex;
+  align-items: stretch;
+  border: 1.5px solid #d5ddea;
+  border-radius: 14px;
+  background: #f8fbff;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+
+  &:focus-within {
+    border-color: #0f62fe;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(15, 98, 254, 0.1);
+  }
+}
+
+.bc-prefix {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.85rem;
+  background: #eef5ff;
+  color: #174ea6;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-right: 1px solid #d5ddea;
+  white-space: nowrap;
+}
+
+.bc-field input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid #d5ddea;
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  font-size: 1rem;
+  color: #102033;
+  background: #f8fbff;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+
+  &:focus {
+    border-color: #0f62fe;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(15, 98, 254, 0.1);
+  }
+
+  &::placeholder {
+    color: #94a3b8;
+  }
+}
+
+.bc-input-wrap input {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+
+  &:focus {
+    box-shadow: none;
+  }
+}
+
+.bc-btn {
+  width: 100%;
+  margin-top: 0.25rem;
+  min-height: 52px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0f62fe, #1a7aff);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(15, 98, 254, 0.22);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 32px rgba(15, 98, 254, 0.28);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.bc-error {
+  margin: 0.75rem 0 0;
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+.bc-hint {
+  margin: 0.85rem 0 0;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.bc-otp-who {
+  margin: 0 0 1rem;
+  color: #526070;
+  font-size: 0.9rem;
+
+  strong {
+    color: #102033;
+  }
+}
+
+.bc-back {
+  margin-top: 0.75rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #0f62fe;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.bc-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.bc-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid #dbeafe;
+  border-top-color: #0f62fe;
+  border-radius: 50%;
+  animation: hero-spin 0.7s linear infinite;
+}
+
+@keyframes hero-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.bc-done {
+  padding: 0.5rem 0;
+  text-align: center;
+  color: #087443;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.hero-trust-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .booking-card {
+    padding: 1.25rem;
+  }
+
+  .bc-btn {
+    min-height: 48px;
+  }
+}

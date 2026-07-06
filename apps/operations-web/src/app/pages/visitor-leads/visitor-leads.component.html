@@ -1,0 +1,130 @@
+<div class="visitor-leads-page">
+  <div class="hdr">
+    <h2>Visitor leads</h2>
+    <p>Follow up on website chat, home booking, and promo sign-ups. Mark calls and update status here.</p>
+  </div>
+
+  @if (error()) { <p class="error">{{ error() }}</p> }
+  @if (message()) { <p class="success">{{ message() }}</p> }
+
+  @if (stats(); as st) {
+    <div class="stats">
+      <span>Total {{ st.total }}</span>
+      <span>Needs callback {{ st.needsCallback }}</span>
+      <span>Called {{ st.called }}</span>
+      <span>Registered {{ st.registered }}</span>
+    </div>
+  }
+
+  <div class="filters">
+    @for (f of [
+      { key: 'NEEDS_CALLBACK', label: 'Needs callback' },
+      { key: 'NEW', label: 'New' },
+      { key: 'CALLED', label: 'Called' },
+      { key: 'REGISTERED', label: 'Registered' },
+      { key: 'ALL', label: 'All' }
+    ]; track f.key) {
+      <button
+        type="button"
+        class="filter-btn"
+        [class.active]="followUpFilter() === f.key"
+        (click)="setFilter($any(f.key))"
+      >{{ f.label }}</button>
+    }
+  </div>
+
+  <div class="layout">
+    <div class="list panel">
+      @if (loading()) {
+        <p class="muted">Loading…</p>
+      } @else if (leads().length === 0) {
+        <p class="muted">No leads in this list.</p>
+      } @else {
+        @for (lead of leads(); track lead.id) {
+          <button
+            type="button"
+            class="list-item"
+            [class.active]="selected()?.id === lead.id"
+            (click)="selectLead(lead.id)"
+          >
+            <div class="list-top">
+              <strong>{{ leadPreview(lead) }}</strong>
+              <span class="badge">{{ followUpLabel(lead.followUpStatus) }}</span>
+            </div>
+            <div class="list-meta">
+              @if (lead.visitorPhone) { <span>{{ lead.visitorPhone }}</span> }
+              <span>{{ sourceLabel(lead.source) }}</span>
+              @if (lead.user || lead.registeredAt) { <span class="reg">✓ Registered</span> }
+            </div>
+          </button>
+        }
+      }
+    </div>
+
+    <div class="detail panel">
+      @if (!selected()) {
+        <p class="muted">Select a lead to update follow-up.</p>
+      } @else if (detailLoading()) {
+        <p class="muted">Loading…</p>
+      } @else {
+        @let lead = selected()!;
+
+        <h3>{{ lead.visitorName ?? lead.visitorPhone ?? 'Visitor' }}</h3>
+        <p class="meta">
+          @if (lead.visitorPhone) { 📞 {{ lead.visitorPhone }} }
+          · {{ sourceLabel(lead.source) }}
+          · {{ formatTime(lead.createdAt) }}
+        </p>
+        @if (lead.concern) {
+          <p class="concern">{{ lead.concern }}</p>
+        }
+        @if (lead.user) {
+          <p class="reg-banner">✓ Registered patient: {{ lead.user.name }} ({{ lead.user.mobile }})</p>
+        }
+        @if (lead.calledAt) {
+          <p class="called-info">
+            Called {{ formatTime(lead.calledAt) }}
+            @if (lead.calledBy) { by {{ lead.calledBy.name }} }
+          </p>
+        }
+
+        <div class="follow-up-form">
+          <label>Follow-up status
+            <select [(ngModel)]="selectedStatus">
+              @for (opt of followUpOptions; track opt.value) {
+                <option [value]="opt.value">{{ opt.label }}</option>
+              }
+            </select>
+          </label>
+          <label>Note
+            <textarea [(ngModel)]="operatorNote" rows="2" placeholder="Call outcome, callback time…"></textarea>
+          </label>
+          <div class="actions">
+            <button type="button" class="btn-secondary" [disabled]="mutating()" (click)="markCalled()">
+              ✓ Mark as called
+            </button>
+            <button type="button" class="btn-primary" [disabled]="mutating()" (click)="saveFollowUp()">
+              Save follow-up
+            </button>
+          </div>
+        </div>
+
+        @if (lead.chatSession?.messages?.length) {
+          <h4>Chat</h4>
+          <div class="chat-thread">
+            @for (msg of lead.chatSession.messages; track msg.id) {
+              <div class="chat-msg" [class]="msg.role">
+                <span class="role">
+                  @if (msg.role === 'bot') { Dr. Priya }
+                  @else if (msg.role === 'operator') { Operator }
+                  @else { Visitor }
+                </span>
+                <p>{{ msg.content }}</p>
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>

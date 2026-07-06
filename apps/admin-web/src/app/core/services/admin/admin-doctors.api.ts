@@ -189,4 +189,46 @@ export class AdminDoctorsApi extends AdminApiBase {
       this.http.post<{ message: any }>(`${this.apiBase}${API_PATHS.ADMIN.CHAT_SESSION_MESSAGE(id)}`, { content })
     );
   }
+
+  // ── Visitor leads (website inquiries) ───────────────────────────────────────
+  getVisitorLeadStats() {
+    return firstValueFrom(
+      this.http.get<{
+        stats: {
+          total: number;
+          newLeads: number;
+          needsCallback: number;
+          called: number;
+          registered: number;
+          bySource: Record<string, number>;
+        };
+      }>(`${this.apiBase}${API_PATHS.ADMIN.VISITOR_LEAD_STATS}`)
+    );
+  }
+
+  listVisitorLeads(followUpStatus?: string, source?: string, page = 1) {
+    const params = new URLSearchParams({ page: String(page), pageSize: '30' });
+    if (followUpStatus) params.set('followUpStatus', followUpStatus);
+    if (source) params.set('source', source);
+    return firstValueFrom(
+      this.http.get<{ leads: any[]; pagination: { total: number; totalPages: number } }>(
+        `${this.apiBase}${API_PATHS.ADMIN.VISITOR_LEADS}?${params}`
+      )
+    );
+  }
+
+  getVisitorLead(id: string) {
+    return firstValueFrom(
+      this.http.get<{ lead: any }>(`${this.apiBase}${API_PATHS.ADMIN.VISITOR_LEAD_BY_ID(id)}`)
+    );
+  }
+
+  updateVisitorLeadFollowUp(
+    id: string,
+    payload: { followUpStatus: string; operatorNote?: string; markCalled?: boolean }
+  ) {
+    return firstValueFrom(
+      this.http.patch<{ lead: any }>(`${this.apiBase}${API_PATHS.ADMIN.VISITOR_LEAD_FOLLOW_UP(id)}`, payload)
+    );
+  }
 }

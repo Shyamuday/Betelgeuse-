@@ -1,144 +1,151 @@
 <div class="page-header">
   <div>
-    <h1>💬 Chat Inbox</h1>
-    <p class="subtitle">Review visitor conversations escalated by Dr. Priya when they need human follow-up.</p>
+    <h1>📋 Visitor Leads</h1>
+    <p class="subtitle">
+      Website inquiries from chat, home booking, and promo popup.
+      Receptionists mark follow-up in the Operations portal — this view is read-only for admins.
+    </p>
   </div>
   @if (pendingCount() > 0) {
-    <span class="pending-pill">{{ pendingCount() }} awaiting follow-up</span>
+    <span class="pending-pill">{{ pendingCount() }} need callback</span>
   }
 </div>
 
 @if (error()) { <p class="error-msg">{{ error() }}</p> }
-@if (message()) { <p class="success-msg">{{ message() }}</p> }
 
 @if (stats(); as st) {
   <div class="stats-row">
     <span class="stat-pill">Total: {{ st.total }}</span>
-    <span class="stat-pill">Logged in: {{ st.loggedIn }}</span>
-    <span class="stat-pill">Anonymous: {{ st.anonymous }}</span>
-    <span class="stat-pill">Active: {{ st.active }}</span>
+    <span class="stat-pill">New: {{ st.newLeads }}</span>
+    <span class="stat-pill">Needs callback: {{ st.needsCallback }}</span>
+    <span class="stat-pill">Called: {{ st.called }}</span>
+    <span class="stat-pill">Registered: {{ st.registered }}</span>
+    @if (st.bySource['CHAT_BOT']) {
+      <span class="stat-pill">Chat: {{ st.bySource['CHAT_BOT'] }}</span>
+    }
+    @if (st.bySource['HOME_BOOKING']) {
+      <span class="stat-pill">Home: {{ st.bySource['HOME_BOOKING'] }}</span>
+    }
+    @if (st.bySource['PROMO_POPUP']) {
+      <span class="stat-pill">Promo: {{ st.bySource['PROMO_POPUP'] }}</span>
+    }
   </div>
 }
 
-<!-- Status filter pills -->
 <div class="filter-pills">
   @for (f of [
-    { key: 'NEEDS_OPERATOR', label: 'Needs follow-up' },
-    { key: 'ACTIVE', label: 'Active' },
-    { key: 'RESOLVED', label: 'Resolved' },
+    { key: 'NEEDS_CALLBACK', label: 'Needs callback' },
+    { key: 'NEW', label: 'New' },
+    { key: 'CALLED', label: 'Called' },
+    { key: 'REGISTERED', label: 'Registered' },
+    { key: 'BOOKED', label: 'Booked' },
+    { key: 'CLOSED', label: 'Closed' },
     { key: 'ALL', label: 'All' }
   ]; track f.key) {
     <button
       class="pill"
-      [class.active]="statusFilter() === f.key"
+      [class.active]="followUpFilter() === f.key"
       (click)="setFilter($any(f.key))"
     >{{ f.label }}</button>
   }
 </div>
 
 <div class="inbox-layout">
-  <!-- Session list -->
   <div class="session-list panel">
     @if (loading()) {
       <p class="loading-text">Loading…</p>
-    } @else if (sessions().length === 0) {
-      <p class="empty-text">No sessions in this category.</p>
+    } @else if (leads().length === 0) {
+      <p class="empty-text">No leads in this category.</p>
     } @else {
-      @for (s of sessions(); track s.id) {
+      @for (lead of leads(); track lead.id) {
         <button
           class="session-item"
-          [class.selected]="selected()?.id === s.id"
-          (click)="selectSession(s.id)"
+          [class.selected]="selected()?.id === lead.id"
+          (click)="selectLead(lead.id)"
         >
           <div class="session-item-top">
-            <span class="session-concern">{{ sessionPreview(s) }}</span>
-            <span class="badge" [class]="statusClass(s.status)">{{ statusLabel(s.status) }}</span>
+            <span class="session-concern">{{ leadPreview(lead) }}</span>
+            <span class="badge" [class]="followUpClass(lead.followUpStatus)">
+              {{ followUpLabel(lead.followUpStatus) }}
+            </span>
           </div>
           <div class="session-item-meta">
-            <span>{{ visitorLabel(s) }}</span>
-            @if (s.visitorPhone) {
-              <span>📞 {{ s.visitorPhone }}</span>
+            <span>{{ visitorLabel(lead) }}</span>
+            <span class="source-tag">{{ sourceLabel(lead.source) }}</span>
+            @if (lead.registeredAt || lead.user) {
+              <span class="reg-tag">✓ Registered</span>
             }
-            @if (s.entryPage) {
-              <span>📄 {{ s.entryPage }}</span>
-            }
-            <span>{{ formatTime(s.createdAt) }}</span>
-            @if (s._count) {
-              <span>{{ s._count.messages }} msgs</span>
-            }
+            <span>{{ formatTime(lead.createdAt) }}</span>
           </div>
         </button>
       }
     }
   </div>
 
-  <!-- Detail panel -->
   <div class="session-detail panel">
     @if (!selected()) {
       <div class="detail-empty">
-        <p>Select a conversation to review.</p>
+        <p>Select a lead to review follow-up status and conversation.</p>
       </div>
     } @else if (detailLoading()) {
-      <p class="loading-text">Loading conversation…</p>
+      <p class="loading-text">Loading…</p>
     } @else {
-      @let s = selected()!;
+      @let lead = selected()!;
 
       <div class="detail-header">
         <div>
-          <h2>{{ s.concern ?? 'Visitor conversation' }}</h2>
+          <h2>{{ lead.concern ?? 'Website inquiry' }}</h2>
           <div class="detail-meta">
-            @if (s.visitorName) { <span>👤 {{ s.visitorName }}</span> }
-            @if (s.visitorPhone) { <span>📞 {{ s.visitorPhone }}</span> }
-            @if (s.visitorEmail) { <span>✉️ {{ s.visitorEmail }}</span> }
-            <span class="badge" [class]="statusClass(s.status)">{{ statusLabel(s.status) }}</span>
+            @if (lead.visitorName) { <span>👤 {{ lead.visitorName }}</span> }
+            @if (lead.visitorPhone) { <span>📞 {{ lead.visitorPhone }}</span> }
+            @if (lead.visitorEmail) { <span>✉️ {{ lead.visitorEmail }}</span> }
+            <span class="badge" [class]="followUpClass(lead.followUpStatus)">
+              {{ followUpLabel(lead.followUpStatus) }}
+            </span>
+            <span class="source-tag">{{ sourceLabel(lead.source) }}</span>
           </div>
         </div>
-        <span class="detail-time">Started {{ formatTime(s.createdAt) }}</span>
+        <span class="detail-time">Started {{ formatTime(lead.createdAt) }}</span>
       </div>
 
-      <!-- Messages thread -->
-      <div class="messages-thread">
-        @for (msg of s.messages; track msg.id) {
-          <div class="thread-msg" [class]="'role-' + msg.role">
-            <div class="thread-role">
-              @if (msg.role === 'bot') { Dr. Priya }
-              @else if (msg.role === 'operator') { Operator }
-              @else { Visitor }
-              · {{ formatTime(msg.createdAt) }}
+      <div class="follow-up-summary">
+        <h3>Follow-up (receptionist)</h3>
+        <dl class="follow-up-dl">
+          <dt>Status</dt>
+          <dd>{{ followUpLabel(lead.followUpStatus) }}</dd>
+          @if (lead.calledAt) {
+            <dt>Called</dt>
+            <dd>{{ formatTime(lead.calledAt) }}@if (lead.calledBy) { by {{ lead.calledBy.name }} }</dd>
+          }
+          @if (lead.registeredAt || lead.user) {
+            <dt>Registered</dt>
+            <dd>
+              @if (lead.registeredAt) { {{ formatTime(lead.registeredAt) }} }
+              @if (lead.user) { — {{ lead.user.name }} ({{ lead.user.mobile }}) }
+            </dd>
+          }
+          @if (lead.operatorNote) {
+            <dt>Note</dt>
+            <dd>{{ lead.operatorNote }}</dd>
+          }
+        </dl>
+        <p class="view-only-hint">Updates are done by reception in Operations → Visitor Leads.</p>
+      </div>
+
+      @if (lead.chatSession?.messages?.length) {
+        <h3 class="thread-heading">Chat conversation</h3>
+        <div class="messages-thread">
+          @for (msg of lead.chatSession!.messages!; track msg.id) {
+            <div class="thread-msg" [class]="'role-' + msg.role">
+              <div class="thread-role">
+                @if (msg.role === 'bot') { Dr. Priya }
+                @else if (msg.role === 'operator') { Operator }
+                @else { Visitor }
+                · {{ formatTime(msg.createdAt) }}
+              </div>
+              <div class="thread-bubble">{{ msg.content }}</div>
             </div>
-            <div class="thread-bubble">{{ msg.content }}</div>
-          </div>
-        }
-      </div>
-
-      <!-- Operator reply -->
-      @if (s.status !== 'RESOLVED') {
-        <div class="reply-row">
-          <textarea
-            class="reply-input"
-            placeholder="Send a message to the visitor…"
-            [(ngModel)]="replyText"
-            rows="2"
-          ></textarea>
-          <button class="btn-primary" (click)="sendReply()" [disabled]="mutating() || !replyText.trim()">
-            Send
-          </button>
-        </div>
-
-        <div class="resolve-row">
-          <input
-            class="resolve-note"
-            placeholder="Resolution note (optional)…"
-            [(ngModel)]="resolveNote"
-          />
-          <button class="btn-resolve" (click)="resolve()" [disabled]="mutating()">
-            ✓ Mark resolved
-          </button>
-        </div>
-      } @else {
-        <div class="resolved-banner">
-          ✓ Resolved {{ s.resolvedAt ? formatTime(s.resolvedAt) : '' }}
-          @if (s.operatorNote) { — {{ s.operatorNote }} }
+          }
         </div>
       }
     }

@@ -75,6 +75,8 @@ model User {
   inAppNotifications   InAppNotification[]   @relation("UserInAppNotifications")
   createdVacancies     JobVacancy[]           @relation("VacancyCreator")
   chatSessions         ChatSession[]          @relation("UserChatSessions")
+  websiteLeads         WebsiteLead[]          @relation("UserWebsiteLeads")
+  leadsCalled          WebsiteLead[]          @relation("LeadCalledBy")
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
 

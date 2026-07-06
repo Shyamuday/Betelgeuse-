@@ -64,7 +64,7 @@ export const NAV_ITEMS = [
   { path: adminNavPath(ROUTE_PATHS.FAQ), label: '❓ FAQ' },
   { path: adminNavPath(ROUTE_PATHS.BLOG), label: '📝 Blog' },
   { path: adminNavPath(ROUTE_PATHS.SITE_CONFIG), label: '⚙️ Site Settings' },
-  { path: adminNavPath(ROUTE_PATHS.CHAT_INBOX), label: '💬 Chat Inbox' },
+  { path: adminNavPath(ROUTE_PATHS.CHAT_INBOX), label: '💬 Visitor Leads' },
   { path: adminNavPath(ROUTE_PATHS.HR), label: '🪪 Doctor HR' },
   { path: adminNavPath(ROUTE_PATHS.HR_USERS), label: '👥 HR Managers' },
   { path: adminNavPath(ROUTE_PATHS.EMPLOYEES), label: '👥 Employees' },

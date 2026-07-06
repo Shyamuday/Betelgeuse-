@@ -63,7 +63,13 @@ export class FreeConsultationPromoComponent {
     this.error.set('');
     this.busy.set(true);
     try {
-      await firstValueFrom(this.auth.requestOtp(mobile));
+      await firstValueFrom(
+        this.auth.requestOtp(mobile, {
+          source: 'PROMO_POPUP',
+          visitorName: trimmedName,
+          entryPage: typeof window !== 'undefined' ? window.location.pathname : undefined
+        })
+      );
       this.formModel.update((m) => ({ ...m, mobile }));
       this.step.set('otp');
     } catch (err: unknown) {

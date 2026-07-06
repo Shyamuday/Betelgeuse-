@@ -3,7 +3,7 @@
   <div class="chat-fab-wrap">
     @if (showBadge() && !chat.isOpen()) {
       <span class="chat-badge" (click)="openChat()">
-        Chat with {{ chat.botName() }}
+        How may I help you?
       </span>
     }
 
@@ -82,7 +82,7 @@
             <p [innerHTML]="formatMessage(msg.content)"></p>
 
             @if (msg.showBookButton) {
-              <a href="/" class="msg-cta-btn" (click)="chat.close()">
+              <a href="/login" class="msg-cta-btn" (click)="chat.close()">
                 Book Consultation →
               </a>
             }
@@ -112,7 +112,7 @@
     <!-- Quick-reply options -->
     @if (chat.quickReplies().length && !chat.isLoading()) {
       <div class="quick-replies" role="group" aria-label="Quick replies">
-        <p class="quick-replies-label">Tap to reply:</p>
+        <p class="quick-replies-label">Choose an option:</p>
         <div class="quick-replies-list">
           @for (opt of chat.quickReplies(); track opt) {
             <button type="button" class="quick-reply-btn" (click)="selectOption(opt)">
@@ -127,7 +127,7 @@
     <div class="chat-input-row">
       <textarea
         class="chat-input"
-        placeholder="Tap an option above or type your message…"
+        placeholder="Choose an option above or type your message…"
         [(ngModel)]="inputText"
         (keydown)="onEnter($event)"
         rows="1"

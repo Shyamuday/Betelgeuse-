@@ -23,6 +23,7 @@ model ChatSession {
   operatorNote   String?
   resolvedAt     DateTime?
   messages       ChatMessage[]
+  websiteLead    WebsiteLead?
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 

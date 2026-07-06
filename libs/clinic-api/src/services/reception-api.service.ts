@@ -54,4 +54,42 @@ export class ReceptionApiService {
       this.http.put<any>(`${this.base}${API_PATHS.RECEPTION.ASSIGN(consultationId)}`, { doctorId })
     );
   }
+
+  getVisitorLeadStats() {
+    return firstValueFrom(
+      this.http.get<{
+        stats: {
+          total: number;
+          newLeads: number;
+          needsCallback: number;
+          called: number;
+          registered: number;
+          bySource: Record<string, number>;
+        };
+      }>(`${this.base}${API_PATHS.RECEPTION.VISITOR_LEAD_STATS}`)
+    );
+  }
+
+  listVisitorLeads(followUpStatus?: string, page = 1) {
+    const params = new URLSearchParams({ page: String(page), pageSize: '30' });
+    if (followUpStatus) params.set('followUpStatus', followUpStatus);
+    return firstValueFrom(
+      this.http.get<{ leads: any[]; pagination: { total: number } }>(
+        `${this.base}${API_PATHS.RECEPTION.VISITOR_LEADS}?${params}`
+      )
+    );
+  }
+
+  getVisitorLead(id: string) {
+    return firstValueFrom(this.http.get<{ lead: any }>(`${this.base}${API_PATHS.RECEPTION.VISITOR_LEAD_BY_ID(id)}`));
+  }
+
+  updateVisitorLeadFollowUp(
+    id: string,
+    payload: { followUpStatus: string; operatorNote?: string; markCalled?: boolean }
+  ) {
+    return firstValueFrom(
+      this.http.patch<{ lead: any }>(`${this.base}${API_PATHS.RECEPTION.VISITOR_LEAD_FOLLOW_UP(id)}`, payload)
+    );
+  }
 }

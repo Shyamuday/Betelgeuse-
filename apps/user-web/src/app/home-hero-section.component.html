@@ -1,58 +1,74 @@
 
     <section class="panel hero-panel">
-      <div class="home-hero">
-        <p class="eyebrow">Vitalis Care and Research Centre | Doctor-led digital clinic</p>
-        <h1>Chronic care that actually follows through.</h1>
-        <p class="hero-copy">
-          We specialize in long-running conditions that need deeper history, pattern tracking, and disciplined follow-up — not quick-fix consultations.
-        </p>
-
+      <div class="home-hero home-hero--booking">
         <div class="booking-card">
           @switch (step()) {
             @case ('form') {
-              <h3>Book an appointment</h3>
-              <p class="bc-sub">Enter your details — we'll send a one-time code to your mobile.</p>
+              <h1 class="booking-title">Book consultation</h1>
+              <p class="bc-sub">Enter your details and we will send an OTP to your mobile.</p>
+
               <div class="bc-fields">
-                <input
-                  [formField]="bookingForm.name"
-                  attr.placeholder="Your full name"
-                  autocomplete="name"
-                />
-                <input
-                  [formField]="bookingForm.mobile"
-                  attr.placeholder="Mobile number (10 digits)"
-                  inputmode="tel"
-                  autocomplete="tel"
-                />
+                <label class="bc-field">
+                  <span class="bc-label">Full name</span>
+                  <input
+                    [formField]="bookingForm.name"
+                    placeholder="e.g. Rahul Sharma"
+                    autocomplete="name"
+                  />
+                </label>
+
+                <label class="bc-field">
+                  <span class="bc-label">Mobile number</span>
+                  <div class="bc-input-wrap">
+                    <span class="bc-prefix">+91</span>
+                    <input
+                      [formField]="bookingForm.mobile"
+                      placeholder="10-digit mobile number"
+                      inputmode="tel"
+                      autocomplete="tel"
+                    />
+                  </div>
+                </label>
+
                 <button class="bc-btn" type="button" [disabled]="busy()" (click)="sendOtp()">
-                  {{ busy() ? 'Sending OTP…' : 'Book Appointment →' }}
+                  {{ busy() ? 'Sending OTP…' : 'Book consultation' }}
                 </button>
               </div>
+
               @if (error()) {
                 <p class="bc-error">{{ error() }}</p>
               }
-              <p class="bc-hint">No spam. OTP valid for 5 minutes.</p>
+              <p class="bc-hint">Secure OTP login. No password needed.</p>
             }
 
             @case ('otp') {
-              <h3>Verify your number</h3>
+              <h2 class="booking-title">Verify mobile</h2>
               <p class="bc-otp-who">
-                OTP sent to <strong>{{ bookingFormModel().mobile }}</strong>
+                OTP sent to <strong>+91 {{ bookingFormModel().mobile }}</strong>
               </p>
               <div class="bc-fields">
-                <input
-                  [formField]="bookingForm.otp"
-                  placeholder="Enter 6-digit OTP"
-                  inputmode="numeric"
-                />
-                <button class="bc-btn" type="button" [disabled]="busy() || bookingFormModel().otp.length < 4" (click)="verifyOtp()">
-                  {{ busy() ? 'Verifying…' : 'Confirm & Continue →' }}
+                <label class="bc-field">
+                  <span class="bc-label">Enter OTP</span>
+                  <input
+                    [formField]="bookingForm.otp"
+                    placeholder="6-digit OTP"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                  />
+                </label>
+                <button
+                  class="bc-btn"
+                  type="button"
+                  [disabled]="busy() || bookingFormModel().otp.length < 4"
+                  (click)="verifyOtp()"
+                >
+                  {{ busy() ? 'Verifying…' : 'Continue' }}
                 </button>
               </div>
               @if (error()) {
                 <p class="bc-error">{{ error() }}</p>
               }
-              <button class="bc-back" type="button" (click)="goBack()">← Change number</button>
+              <button class="bc-back" type="button" (click)="goBack()">← Change mobile number</button>
             }
 
             @case ('loading') {
@@ -63,12 +79,12 @@
             }
 
             @case ('done') {
-              <div class="bc-done">✓ Verified! Taking you to your dashboard…</div>
+              <div class="bc-done">Verified. Taking you to your dashboard…</div>
             }
           }
         </div>
 
-        <div class="hero-trust-row" style="margin-top:1.25rem">
+        <div class="hero-trust-row">
           <div class="trust-item">
             <span class="trust-icon">✓</span>
             <span>Licensed doctors</span>
