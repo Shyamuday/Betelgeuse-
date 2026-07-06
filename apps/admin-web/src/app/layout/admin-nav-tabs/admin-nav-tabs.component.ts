@@ -1,37 +1,34 @@
 import {
-  AfterViewInit,
   Component,
   ElementRef,
-  OnDestroy,
+  HostListener,
   computed,
   effect,
   inject,
   input,
-  signal,
-  viewChild
+  signal
 } from '@angular/core';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { filter, Subscription } from 'rxjs';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NAV_GROUPS, type AdminNavItem } from '../../core/constants/app-routes.constants';
 
 @Component({
   selector: 'app-admin-nav-tabs',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink],
   templateUrl: './admin-nav-tabs.component.html',
   styleUrl: './admin-nav-tabs.component.scss'
 })
-export class AdminNavTabsComponent implements AfterViewInit, OnDestroy {
+export class AdminNavTabsComponent {
   readonly items = input.required<readonly AdminNavItem[]>();
 
   private readonly router = inject(Router);
-  private readonly tabsScroll = viewChild<ElementRef<HTMLElement>>('tabsScroll');
-  private navSub?: Subscription;
-  private resizeObserver?: ResizeObserver;
+  private readonly host = inject(ElementRef<HTMLElement>);
 
+  readonly openGroupId = signal<string | null>(null);
   readonly activeGroupId = signal('');
-  readonly canScrollLeft = signal(false);
-  readonly canScrollRight = signal(false);
+  readonly currentPath = signal('');
 
   readonly visibleGroups = computed(() => {
     const items = this.items();
@@ -43,75 +40,73 @@ export class AdminNavTabsComponent implements AfterViewInit, OnDestroy {
     })).filter((group) => group.items.length > 0);
   });
 
-  readonly activeGroupItems = computed(() => {
-    const groups = this.visibleGroups();
-    const id = this.activeGroupId();
-    return groups.find((group) => group.id === id)?.items ?? groups[0]?.items ?? [];
-  });
-
-  readonly activeGroupLabel = computed(() => {
-    const id = this.activeGroupId();
-    return this.visibleGroups().find((group) => group.id === id)?.label ?? 'section';
+  readonly currentPageLabel = computed(() => {
+    const path = this.currentPath();
+    const item = this.items().find(
+      (entry) => path === entry.path || path.startsWith(`${entry.path}/`)
+    );
+    return item?.label ?? '';
   });
 
   constructor() {
+    this.syncFromUrl(this.router.url);
+
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed()
+      )
+      .subscribe((event) => {
+        this.syncFromUrl(event.urlAfterRedirects);
+        this.closeSubmenu();
+      });
+
     effect(() => {
       this.items();
       this.visibleGroups();
-      this.syncGroupFromUrl();
+      this.syncFromUrl(this.router.url);
     });
   }
 
-  ngAfterViewInit(): void {
-    this.syncGroupFromUrl();
-    this.navSub = this.router.events
-      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
-      .subscribe(() => {
-        this.syncGroupFromUrl();
-        queueMicrotask(() => this.scrollActiveIntoView());
-      });
-
-    const el = this.tabsScroll()?.nativeElement;
-    if (el && typeof ResizeObserver !== 'undefined') {
-      this.resizeObserver = new ResizeObserver(() => this.updateScrollButtons());
-      this.resizeObserver.observe(el);
-    }
-
-    queueMicrotask(() => {
-      this.updateScrollButtons();
-      this.scrollActiveIntoView();
-    });
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.openGroupId()) return;
+    const target = event.target;
+    if (target instanceof Node && this.host.nativeElement.contains(target)) return;
+    this.closeSubmenu();
   }
 
-  ngOnDestroy(): void {
-    this.navSub?.unsubscribe();
-    this.resizeObserver?.disconnect();
+  @HostListener('document:keydown', ['$event'])
+  onKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Escape' || !this.openGroupId()) return;
+    this.closeSubmenu();
+    event.stopPropagation();
   }
 
-  selectGroup(id: string): void {
-    this.activeGroupId.set(id);
-    queueMicrotask(() => {
-      this.updateScrollButtons();
-      this.scrollActiveIntoView();
-    });
+  toggleGroup(id: string): void {
+    this.openGroupId.update((current) => (current === id ? null : id));
   }
 
-  scroll(direction: -1 | 1): void {
-    const el = this.tabsScroll()?.nativeElement;
-    if (!el) return;
-    el.scrollBy({ left: direction * 220, behavior: 'smooth' });
-    window.setTimeout(() => this.updateScrollButtons(), 280);
+  closeSubmenu(): void {
+    this.openGroupId.set(null);
   }
 
-  onTabsScroll(): void {
-    this.updateScrollButtons();
+  isGroupActive(groupId: string): boolean {
+    return this.activeGroupId() === groupId;
   }
 
-  private syncGroupFromUrl(): void {
-    const url = this.router.url.split('?')[0];
+  isItemActive(path: string): boolean {
+    const url = this.currentPath();
+    return url === path || url.startsWith(`${path}/`);
+  }
+
+  private syncFromUrl(url: string): void {
+    const path = url.split('?')[0];
+    this.currentPath.set(path);
+
     const groups = this.visibleGroups();
     const match = groups.find((group) =>
-      group.items.some((item) => url === item.path || url.startsWith(`${item.path}/`))
+      group.items.some((item) => path === item.path || path.startsWith(`${item.path}/`))
     );
 
     if (match) {
@@ -126,26 +121,5 @@ export class AdminNavTabsComponent implements AfterViewInit, OnDestroy {
 
   private pathSegment(path: string): string {
     return path.split('/').filter(Boolean).pop() ?? '';
-  }
-
-  private updateScrollButtons(): void {
-    const el = this.tabsScroll()?.nativeElement;
-    if (!el) {
-      this.canScrollLeft.set(false);
-      this.canScrollRight.set(false);
-      return;
-    }
-
-    const { scrollLeft, scrollWidth, clientWidth } = el;
-    this.canScrollLeft.set(scrollLeft > 4);
-    this.canScrollRight.set(scrollLeft + clientWidth < scrollWidth - 4);
-  }
-
-  private scrollActiveIntoView(): void {
-    const el = this.tabsScroll()?.nativeElement;
-    if (!el) return;
-    const active = el.querySelector('a.active') as HTMLElement | null;
-    active?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
-    this.updateScrollButtons();
   }
 }

@@ -1,14 +1,17 @@
 <main class="admin-shell">
   <header class="admin-header">
     <div class="topbar">
-      <h1>Admin Console</h1>
+      <div class="topbar-brand">
+        <h1>Admin Console</h1>
+      </div>
+
+      <app-admin-nav-tabs [items]="navItems" />
+
       <div class="topbar-actions">
         <app-notification-bell-host [config]="bellConfig" />
         <button type="button" class="logout-btn" (click)="logout()">Logout</button>
       </div>
     </div>
-
-    <app-admin-nav-tabs [items]="navItems" />
   </header>
 
   <section class="content">

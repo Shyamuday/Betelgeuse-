@@ -1,129 +1,165 @@
 :host {
-  display: block;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
 }
 
 .admin-nav {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.current-page {
+  display: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #7dd3fc;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.12);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .admin-nav-groups {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  padding: 0.45rem 1.25rem 0;
-}
-
-.group-btn {
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.06);
-  color: #cbd5e1;
-  font-size: 0.82rem;
-  font-weight: 600;
-  padding: 0.35rem 0.7rem;
-  border-radius: 999px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.group-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #f8fafc;
-}
-
-.group-btn.active {
-  background: #38bdf8;
-  border-color: #38bdf8;
-  color: #0f172a;
-}
-
-.admin-nav-tabs-wrap {
-  display: flex;
-  align-items: stretch;
-  gap: 0.25rem;
-  padding: 0.45rem 0.5rem 0.65rem 0.75rem;
-}
-
-.scroll-btn {
-  flex: 0 0 2rem;
-  width: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #e2e8f0;
-  font-size: 1.15rem;
-  line-height: 1;
-  cursor: pointer;
-  align-self: center;
-}
-
-.scroll-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.scroll-btn:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-
-.admin-nav-tabs {
-  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
   flex: 1;
-  gap: 0.35rem;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
-  padding: 0 0.25rem;
+  padding: 0.15rem 0;
 }
 
-.admin-nav-tabs::-webkit-scrollbar {
+.admin-nav-groups::-webkit-scrollbar {
   display: none;
 }
 
-.admin-nav-tabs a {
-  text-decoration: none;
-  color: #cbd5e1;
-  padding: 0.42rem 0.7rem;
-  border-radius: 8px;
-  white-space: nowrap;
-  font-size: 0.86rem;
+.nav-group {
+  position: relative;
+  flex-shrink: 0;
 }
 
-.admin-nav-tabs a:hover {
+.group-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #cbd5e1;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.42rem 0.62rem;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.group-btn:hover,
+.nav-group.is-open .group-btn {
   background: rgba(255, 255, 255, 0.08);
   color: #f8fafc;
 }
 
-.admin-nav-tabs a.active {
-  background: rgba(56, 189, 248, 0.18);
+.nav-group.has-active .group-btn {
+  color: #7dd3fc;
+}
+
+.nav-group.has-active.is-open .group-btn,
+.nav-group.has-active .group-btn:hover {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(125, 211, 252, 0.25);
+}
+
+.caret {
+  font-size: 0.68rem;
+  opacity: 0.75;
+  transition: transform 0.15s ease;
+}
+
+.nav-group.is-open .caret {
+  transform: rotate(180deg);
+}
+
+.submenu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  min-width: 13.5rem;
+  max-width: min(18rem, 88vw);
+  max-height: min(18rem, 60vh);
+  overflow: auto;
+  padding: 0.35rem;
+  border-radius: 10px;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
+  z-index: 80;
+}
+
+.submenu-link {
+  display: block;
+  text-decoration: none;
+  color: #e2e8f0;
+  font-size: 0.84rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 7px;
+  line-height: 1.35;
+}
+
+.submenu-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.submenu-link.active {
+  background: rgba(56, 189, 248, 0.16);
   color: #7dd3fc;
   font-weight: 600;
-  box-shadow: inset 0 0 0 1px rgba(125, 211, 252, 0.35);
+}
+
+@media (min-width: 900px) {
+  .current-page {
+    display: inline-flex;
+  }
 }
 
 @media (max-width: 768px) {
+  :host {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .admin-nav {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+  }
+
+  .current-page {
+    display: inline-flex;
+    align-self: flex-start;
+  }
+
   .admin-nav-groups {
-    padding: 0.4rem 0.75rem 0;
-    gap: 0.3rem;
+    width: 100%;
   }
 
   .group-btn {
-    font-size: 0.76rem;
-    padding: 0.32rem 0.58rem;
+    font-size: 0.78rem;
+    padding: 0.38rem 0.55rem;
   }
 
-  .admin-nav-tabs-wrap {
-    padding: 0.4rem 0.35rem 0.55rem 0.5rem;
-  }
-
-  .scroll-btn {
-    flex-basis: 1.75rem;
-    width: 1.75rem;
-    font-size: 1rem;
-  }
-
-  .admin-nav-tabs a {
-    font-size: 0.82rem;
-    padding: 0.4rem 0.62rem;
+  .submenu {
+    left: auto;
+    right: 0;
   }
 }

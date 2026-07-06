@@ -18,8 +18,9 @@ router.post(HR_API_ROUTES.SELF_DOCTOR_LEAVE, asyncRoute(async (req, res) => {
 
   let userId: string;
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-    userId = decoded.userId;
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId?: string; id?: string };
+    userId = decoded.userId ?? decoded.id ?? '';
+    if (!userId) { res.status(401).json({ error: 'Invalid token' }); return; }
   } catch { res.status(401).json({ error: 'Invalid token' }); return; }
 
   const doctor = await prisma.doctor.findUnique({ where: { userId } });
@@ -80,8 +81,9 @@ router.get(HR_API_ROUTES.SELF_DOCTOR_LEAVES, asyncRoute(async (req, res) => {
 
   let userId: string;
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-    userId = decoded.userId;
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId?: string; id?: string };
+    userId = decoded.userId ?? decoded.id ?? '';
+    if (!userId) { res.status(401).json({ error: 'Invalid token' }); return; }
   } catch { res.status(401).json({ error: 'Invalid token' }); return; }
 
   const doctor = await prisma.doctor.findUnique({ where: { userId } });
