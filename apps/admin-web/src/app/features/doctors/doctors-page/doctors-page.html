@@ -1,3 +1,29 @@
+<section class="panel website-settings-panel">
+  <h2>Website — Doctor List Settings</h2>
+  <p class="panel-hint">
+    Control how many doctors appear on the public <em>Our Doctors</em> page.
+    Use the <em>Display order</em> field per doctor below to set the listing sequence.
+  </p>
+  <div class="config-row">
+    <label for="doctorListLimit">Max doctors shown on website (1–50)</label>
+    <input
+      id="doctorListLimit"
+      type="number"
+      min="1"
+      max="50"
+      [value]="doctorListLimitValue()"
+      (input)="doctorListLimitValue.set($any($event.target).value)"
+      [disabled]="savingConfig()"
+    />
+    <button type="button" (click)="saveDoctorListLimit()" [disabled]="savingConfig()">
+      {{ savingConfig() ? 'Saving…' : 'Save limit' }}
+    </button>
+  </div>
+  @if (configMessage()) {
+    <p class="success config-msg">{{ configMessage() }}</p>
+  }
+</section>
+
 <section class="panel">
   <h2>Create Doctor</h2>
   <fieldset class="toolbar" [disabled]="mutating()">
@@ -133,23 +159,7 @@
   @if (selectedDoctorDetails(); as selectedDoctor) {
     <article class="card">
       <strong>{{ selectedDoctor.name }}</strong>
-      <p>Email: {{ selectedDoctor.email || 'N/A' }}</p>
-      <p>Mobile: {{ selectedDoctor.mobile || 'N/A' }}</p>
-      <p>Doctor type: {{ doctorTypeLabel(selectedDoctor.doctorProfile?.doctorType) }}</p>
-      @if (specialtyFocusLabel(selectedDoctor.doctorProfile?.specialtyFocus)) {
-        <p>Specialty focus: {{ specialtyFocusLabel(selectedDoctor.doctorProfile?.specialtyFocus) }}</p>
-      }
-      <p>Specialty: {{ selectedDoctor.doctorProfile?.specialty || 'N/A' }}</p>
-      <p>Registration No: {{ selectedDoctor.doctorProfile?.registrationNo || 'N/A' }}</p>
-      <p>Status: {{ selectedDoctor.isActive ? 'Active' : 'Inactive' }}</p>
-      <p>Available: {{ selectedDoctor.doctorProfile?.isAvailable ? 'Yes' : 'No' }}</p>
-      <p>On website: {{ selectedDoctor.doctorProfile?.showOnWebsite ? 'Yes' : 'No' }}</p>
-      @if (selectedDoctor.doctorProfile?.bio) {
-        <p>Bio: {{ selectedDoctor.doctorProfile?.bio }}</p>
-      }
-      @if ((selectedDoctor.doctorProfile?.focusAreas ?? []).length) {
-        <p>Focus areas: {{ (selectedDoctor.doctorProfile?.focusAreas ?? []).join(', ') }}</p>
-      }
+      <vitalis-detail-rows [rows]="selectedDoctorDetailRows()" />
       <div class="actions">
         @if (selectedDoctor.isActive) {
           <button type="button" (click)="toggleDoctorStatus(selectedDoctor.id, false)" [disabled]="mutating()">
@@ -193,6 +203,7 @@
           <input type="checkbox" [formField]="editForm.showOnWebsite" />
           Show on website (Our Doctors page)
         </label>
+        <input type="number" attr.placeholder="Display order (1 = first, blank = auto)" min="1" max="999" [formField]="editForm.websiteOrder" />
         <input type="number" attr.placeholder="Years of experience" min="0" max="60" [formField]="editForm.yearsOfExperience" />
         <textarea
           attr.placeholder="Short bio shown on the website (max 1200 chars)"

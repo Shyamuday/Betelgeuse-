@@ -1,0 +1,16 @@
+model Testimonial {
+  id          String   @id @default(cuid())
+  patientName String
+  location    String?
+  condition   String?
+  duration    String?
+  quote       String   @db.Text
+  stars       Int      @default(5)
+  isPublished Boolean  @default(false)
+  sortOrder   Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublished])
+  @@index([sortOrder])
+}

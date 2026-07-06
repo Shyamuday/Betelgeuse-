@@ -1,14 +1,17 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, computed } from '@angular/core';
+import {
+  buildDetailRows,
+  DetailRowsComponent,
+  PATIENT_CLINICAL_PROFILE_FIELDS,
+  patientClinicalProfileHasData,
+  type PatientClinicalProfile
+} from '@vitalis/platform-ui';
 
-export type PatientClinicalProfile = {
-  allergies?: string | null;
-  currentMedications?: string | null;
-  chronicConditions?: string | null;
-};
+export type { PatientClinicalProfile };
 
 @Component({
   selector: 'app-patient-health-profile',
-  imports: [],
+  imports: [DetailRowsComponent],
   templateUrl: './patient-health-profile.html',
   styleUrl: './patient-health-profile.scss'
 })
@@ -16,11 +19,9 @@ export class PatientHealthProfileComponent {
   @Input({ required: true }) profile!: PatientClinicalProfile;
   @Input() compact = false;
 
+  readonly rows = computed(() => buildDetailRows(this.profile, PATIENT_CLINICAL_PROFILE_FIELDS));
+
   hasAny(): boolean {
-    return Boolean(
-      this.profile.allergies?.trim() ||
-        this.profile.currentMedications?.trim() ||
-        this.profile.chronicConditions?.trim()
-    );
+    return patientClinicalProfileHasData(this.profile);
   }
 }

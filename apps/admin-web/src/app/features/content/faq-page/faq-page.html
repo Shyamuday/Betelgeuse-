@@ -1,0 +1,74 @@
+<section class="panel">
+  <h2>Add FAQ Entry</h2>
+  <fieldset class="form-grid" [disabled]="mutating()">
+    <input attr.placeholder="Question *" [formField]="createForm.question" />
+    <textarea attr.placeholder="Answer *" rows="3" [formField]="createForm.answer"></textarea>
+    <div class="row-fields">
+      <label>Category <input attr.placeholder="e.g. Booking" [formField]="createForm.category" /></label>
+      <label>Sort order <input type="number" min="1" max="999" [formField]="createForm.sortOrder" /></label>
+      <label class="checkbox-label"><input type="checkbox" [formField]="createForm.isPublished" /> Published</label>
+    </div>
+    <button type="button" (click)="create()" [disabled]="mutating() || !createModel().question || !createModel().answer">
+      {{ mutating() ? 'Saving…' : 'Add Entry' }}
+    </button>
+  </fieldset>
+</section>
+
+@if (categories().length) {
+  <p class="cat-summary">Categories: {{ categories().join(' · ') }}</p>
+}
+
+<section class="panel">
+  <h2>All FAQ Entries ({{ entries().length }})</h2>
+  @if (loading()) { <p class="loading-text">Loading…</p> }
+
+  @for (e of entries(); track e.id) {
+    <article class="card" [class.is-published]="e.isPublished">
+      <div class="card-header">
+        <strong>{{ e.question }}</strong>
+        <div class="badge-row">
+          <span class="badge cat">{{ e.category }}</span>
+          <span class="badge" [class.published]="e.isPublished" [class.draft]="!e.isPublished">
+            {{ e.isPublished ? 'Shown' : 'Hidden' }}
+          </span>
+          @if (e.sortOrder) { <span class="badge order">#{{ e.sortOrder }}</span> }
+        </div>
+      </div>
+      <p class="answer-preview">{{ e.answer }}</p>
+
+      @if (editingId() === e.id) {
+        <fieldset class="form-grid edit-form" [disabled]="mutating()">
+          <input attr.placeholder="Question" [formField]="editForm.question" />
+          <textarea attr.placeholder="Answer" rows="3" [formField]="editForm.answer"></textarea>
+          <div class="row-fields">
+            <label>Category <input [formField]="editForm.category" /></label>
+            <label>Sort order <input type="number" [formField]="editForm.sortOrder" /></label>
+            <label class="checkbox-label"><input type="checkbox" [formField]="editForm.isPublished" /> Published</label>
+          </div>
+          <div class="actions">
+            <button type="button" (click)="saveEdit()" [disabled]="mutating()">Save</button>
+            <button type="button" class="ghost" (click)="cancelEdit()">Cancel</button>
+          </div>
+        </fieldset>
+      } @else {
+        <div class="actions">
+          <button type="button" (click)="startEdit(e)" [disabled]="mutating()">Edit</button>
+          <button type="button" class="ghost" (click)="togglePublish(e)" [disabled]="mutating()">
+            {{ e.isPublished ? 'Hide' : 'Show' }}
+          </button>
+          <button type="button" class="danger" (click)="remove(e.id)" [disabled]="mutating()">Delete</button>
+        </div>
+      }
+    </article>
+  } @empty {
+    @if (!loading()) { <p class="empty-state">No FAQ entries yet.</p> }
+  }
+</section>
+
+@if (message()) { <p class="success">{{ message() }}</p> }
+@if (error()) {
+  <div class="error-row">
+    <p class="error">{{ error() }}</p>
+    <button type="button" class="retry-btn" (click)="load()">Retry</button>
+  </div>
+}

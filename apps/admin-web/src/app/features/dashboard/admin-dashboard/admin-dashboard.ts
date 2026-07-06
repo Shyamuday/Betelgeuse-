@@ -2,9 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
+import { buildDetailRows, DetailRowsComponent } from '@vitalis/platform-ui';
 import { AdminApi } from '../../../core/services/admin-api';
 import { adminNavPath, ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
 import { formatAuditAction } from '../../audit/constants/audit.constants';
+import { ADMIN_DASHBOARD_STAT_FIELDS } from '../constants/dashboard-stat.fields';
 import {
   AUDIT_LOGS_PAGE_SIZE,
   PAYMENTS_DEFAULTS,
@@ -14,7 +16,7 @@ import {
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, FormField, RouterLink],
+  imports: [CommonModule, FormField, RouterLink, DetailRowsComponent],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.scss'
 })
@@ -154,5 +156,16 @@ export class AdminDashboard {
     } catch {
       this.adherenceAlerts = [];
     }
+  }
+
+  dashboardStatRows() {
+    return buildDetailRows(
+      {
+        revenueInPaise: this.revenueInPaise,
+        activeDoctors: this.activeDoctors,
+        consultationsCount: this.consultationsCount
+      },
+      ADMIN_DASHBOARD_STAT_FIELDS
+    );
   }
 }

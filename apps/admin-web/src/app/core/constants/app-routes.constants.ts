@@ -26,7 +26,11 @@ export const ROUTE_PATHS = {
   ECOSYSTEM_USERS: 'ecosystem-users',
   STAFF: 'staff',
   SCAN: 'scan',
-  VACANCIES: 'vacancies'
+  VACANCIES: 'vacancies',
+  TESTIMONIALS: 'testimonials',
+  FAQ: 'faq',
+  BLOG: 'blog',
+  SITE_CONFIG: 'site-config'
 } as const;
 
 /** When embedded in operations-web, set `globalThis.__ADMIN_ROUTE_BASE__ = 'admin'`. */
@@ -55,6 +59,10 @@ export const NAV_ITEMS = [
   { path: adminNavPath(ROUTE_PATHS.SCAN), label: 'Scan patient' },
   { path: adminNavPath(ROUTE_PATHS.DISEASES), label: 'Diseases' },
   { path: adminNavPath(ROUTE_PATHS.VACANCIES), label: '📢 Vacancies' },
+  { path: adminNavPath(ROUTE_PATHS.TESTIMONIALS), label: '⭐ Testimonials' },
+  { path: adminNavPath(ROUTE_PATHS.FAQ), label: '❓ FAQ' },
+  { path: adminNavPath(ROUTE_PATHS.BLOG), label: '📝 Blog' },
+  { path: adminNavPath(ROUTE_PATHS.SITE_CONFIG), label: '⚙️ Site Settings' },
   { path: adminNavPath(ROUTE_PATHS.HR), label: '🪪 Doctor HR' },
   { path: adminNavPath(ROUTE_PATHS.HR_USERS), label: '👥 HR Managers' },
   { path: adminNavPath(ROUTE_PATHS.EMPLOYEES), label: '👥 Employees' },
@@ -102,6 +110,11 @@ export const NAV_GROUPS: AdminNavGroup[] = [
     id: 'people',
     label: 'People & HR',
     segments: [ROUTE_PATHS.VACANCIES, ROUTE_PATHS.HR, ROUTE_PATHS.HR_USERS, ROUTE_PATHS.EMPLOYEES, ROUTE_PATHS.LEAVES, ROUTE_PATHS.PAYROLL]
+  },
+  {
+    id: 'content',
+    label: 'Website Content',
+    segments: [ROUTE_PATHS.TESTIMONIALS, ROUTE_PATHS.FAQ, ROUTE_PATHS.BLOG, ROUTE_PATHS.SITE_CONFIG]
   },
   {
     id: 'stores',

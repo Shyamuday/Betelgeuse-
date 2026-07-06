@@ -1,0 +1,47 @@
+:host {
+  display: block;
+}
+
+:host.detail-rows-panel {
+  display: contents;
+}
+
+:host.detail-rows-stat .stats {
+  display: contents;
+}
+
+.detail-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.detail-grid-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.75rem;
+}
+
+.detail-grid-item.highlight,
+.detail-grid-item.alert {
+  border-color: #fecaca;
+  background: #fff7f7;
+}
+
+.detail-grid-item .label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.detail-grid-item p {
+  margin: 0;
+}
+
+.detail-inline p {
+  margin: 0.25rem 0;
+}

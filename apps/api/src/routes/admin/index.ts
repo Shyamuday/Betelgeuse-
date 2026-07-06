@@ -22,6 +22,10 @@ import { registerAdminPortalUserRoutes } from './portal-users.js';
 import { registerAdminStaffRoutes } from './admin-staff.routes.js';
 import { registerAdminPermissionPresetRoutes } from './admin-permission-presets.routes.js';
 import { registerAdminVacancyRoutes } from './vacancies.js';
+import { registerAdminSiteConfigRoutes } from './site-config.js';
+import { registerAdminTestimonialRoutes } from './testimonials.js';
+import { registerAdminFaqRoutes } from './faq.js';
+import { registerAdminBlogRoutes } from './blog.js';
 import { adminPermissionMiddleware } from '../../admin-route-permissions.js';
 
 export function createAdminRouter(io: SocketIoServer) {
@@ -51,6 +55,10 @@ export function createAdminRouter(io: SocketIoServer) {
   registerAdminStaffRoutes(router);
   registerAdminPermissionPresetRoutes(router);
   registerAdminVacancyRoutes(router);
+  registerAdminSiteConfigRoutes(router);
+  registerAdminTestimonialRoutes(router);
+  registerAdminFaqRoutes(router);
+  registerAdminBlogRoutes(router);
 
   return router;
 }

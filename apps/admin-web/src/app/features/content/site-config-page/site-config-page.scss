@@ -1,0 +1,59 @@
+@use '../content-page';
+
+.page-hint { font-size: 0.875rem; color: #6b7280; margin: -0.4rem 0 1rem; }
+
+.config-row {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid #f1f5f9;
+
+  &:last-child { border-bottom: none; }
+}
+
+.config-meta {
+  flex: 1;
+  min-width: 0;
+
+  strong { font-size: 0.9rem; color: #111827; }
+  p { font-size: 0.8rem; color: #6b7280; margin: 0.2rem 0 0; line-height: 1.5; }
+}
+
+.config-input {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-shrink: 0;
+  width: 18rem;
+
+  input {
+    flex: 1;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+    min-height: 38px;
+    min-width: 0;
+  }
+
+  button {
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background: #2563eb;
+    color: #fff;
+    cursor: pointer;
+    min-height: 38px;
+
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+}
+
+@media (max-width: 640px) {
+  .config-row { flex-direction: column; }
+  .config-input { width: 100%; }
+}

@@ -1,0 +1,10 @@
+/// Generic key-value store for clinic-wide settings editable by admin.
+/// Keys are stable identifiers (e.g. "doctorListLimit", "whatsappPhone").
+model SiteConfig {
+  key       String   @id
+  value     String
+  label     String?
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}

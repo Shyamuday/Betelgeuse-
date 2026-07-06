@@ -1,0 +1,45 @@
+@if (variant() === 'grid') {
+  <div class="detail-grid">
+    @for (row of rows(); track row.label) {
+      <article class="detail-grid-item" [class.highlight]="row.highlight" [class.alert]="row.highlight">
+        <span class="label">{{ row.label }}</span>
+        <p>{{ row.value }}</p>
+      </article>
+    }
+  </div>
+} @else if (variant() === 'panel') {
+  @for (row of rows(); track row.label) {
+    <article class="panel">
+      <h2>{{ row.label }}</h2>
+      <p>{{ row.value }}</p>
+    </article>
+  }
+} @else if (variant() === 'stat') {
+  <div class="stats">
+    @for (row of rows(); track row.label) {
+      <article class="card">
+        <h3>{{ row.label }}</h3>
+        <p>{{ row.value }}</p>
+      </article>
+    }
+  </div>
+} @else if (variant() === 'blocks') {
+  @for (row of rows(); track row.label) {
+    <div>
+      <strong>{{ row.label }}</strong>
+      <p>{{ row.value }}</p>
+    </div>
+  }
+} @else {
+  <div class="detail-inline">
+    @for (row of rows(); track row.label || row.value) {
+      <p>
+        @if (row.label) {
+          {{ row.label }}: {{ row.value }}
+        } @else {
+          {{ row.value }}
+        }
+      </p>
+    }
+  </div>
+}

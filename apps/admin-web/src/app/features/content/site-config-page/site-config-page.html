@@ -1,0 +1,32 @@
+<section class="panel">
+  <h2>Site Settings</h2>
+  <p class="page-hint">Changes here appear on the public website immediately after saving.</p>
+
+  @if (loading()) { <p class="loading-text">Loading…</p> }
+
+  @for (entry of config(); track entry.key) {
+    <div class="config-row">
+      <div class="config-meta">
+        <strong>{{ entry.label }}</strong>
+        <p>{{ entry.description }}</p>
+      </div>
+      <div class="config-input">
+        <input
+          [value]="localValues()[entry.key] ?? entry.value"
+          (input)="updateLocal(entry.key, $any($event.target).value)"
+          [disabled]="saving() === entry.key"
+        />
+        <button
+          type="button"
+          (click)="save(entry.key)"
+          [disabled]="saving() === entry.key"
+        >
+          {{ saving() === entry.key ? 'Saving…' : 'Save' }}
+        </button>
+      </div>
+    </div>
+  }
+</section>
+
+@if (message()) { <p class="success">{{ message() }}</p> }
+@if (error()) { <p class="error">{{ error() }}</p> }

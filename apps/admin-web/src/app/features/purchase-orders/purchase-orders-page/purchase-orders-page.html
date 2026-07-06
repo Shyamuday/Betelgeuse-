@@ -129,10 +129,7 @@
             <button type="button" class="close-btn" (click)="closeModal()">✕</button>
           </div>
           <div class="mbody">
-            <p><strong>Status:</strong> {{ order.status }}</p>
-            <p><strong>Supplier:</strong> {{ order.supplier?.name }}</p>
-            <p><strong>Store:</strong> {{ order.store?.name }}</p>
-            @if (order.notes) { <p><strong>Notes:</strong> {{ order.notes }}</p> }
+            <vitalis-detail-rows [rows]="purchaseOrderDetailRows(order)" />
             <ul>
               @for (line of order.lines || []; track line.id) {
                 <li>{{ line.medicine?.name }} {{ line.medicine?.potency }} — qty {{ line.qtyOrdered }}</li>

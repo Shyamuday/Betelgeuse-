@@ -63,6 +63,27 @@ export class AdminApi {
   createDoctor(...args: Parameters<AdminDoctorsApi['createDoctor']>) {
     return this.doctors.createDoctor(...(args as Parameters<AdminDoctorsApi['createDoctor']>));
   }
+  setDoctorWebsiteOrder(...args: Parameters<AdminDoctorsApi['setDoctorWebsiteOrder']>) {
+    return this.doctors.setDoctorWebsiteOrder(...(args as Parameters<AdminDoctorsApi['setDoctorWebsiteOrder']>));
+  }
+  getSiteConfig(...args: Parameters<AdminDoctorsApi['getSiteConfig']>) {
+    return this.doctors.getSiteConfig(...(args as Parameters<AdminDoctorsApi['getSiteConfig']>));
+  }
+  setSiteConfig(...args: Parameters<AdminDoctorsApi['setSiteConfig']>) {
+    return this.doctors.setSiteConfig(...(args as Parameters<AdminDoctorsApi['setSiteConfig']>));
+  }
+  listTestimonials() { return this.doctors.listTestimonials(); }
+  createTestimonial(...args: Parameters<AdminDoctorsApi['createTestimonial']>) { return this.doctors.createTestimonial(...args); }
+  updateTestimonial(...args: Parameters<AdminDoctorsApi['updateTestimonial']>) { return this.doctors.updateTestimonial(...args); }
+  deleteTestimonial(...args: Parameters<AdminDoctorsApi['deleteTestimonial']>) { return this.doctors.deleteTestimonial(...args); }
+  listFaq() { return this.doctors.listFaq(); }
+  createFaqEntry(...args: Parameters<AdminDoctorsApi['createFaqEntry']>) { return this.doctors.createFaqEntry(...args); }
+  updateFaqEntry(...args: Parameters<AdminDoctorsApi['updateFaqEntry']>) { return this.doctors.updateFaqEntry(...args); }
+  deleteFaqEntry(...args: Parameters<AdminDoctorsApi['deleteFaqEntry']>) { return this.doctors.deleteFaqEntry(...args); }
+  listBlogPosts() { return this.doctors.listBlogPosts(); }
+  createBlogPost(...args: Parameters<AdminDoctorsApi['createBlogPost']>) { return this.doctors.createBlogPost(...args); }
+  updateBlogPost(...args: Parameters<AdminDoctorsApi['updateBlogPost']>) { return this.doctors.updateBlogPost(...args); }
+  deleteBlogPost(...args: Parameters<AdminDoctorsApi['deleteBlogPost']>) { return this.doctors.deleteBlogPost(...args); }
   getConsultations(...args: Parameters<AdminCatalogApi['getConsultations']>) {
     return this.catalog.getConsultations(...(args as Parameters<AdminCatalogApi['getConsultations']>));
   }

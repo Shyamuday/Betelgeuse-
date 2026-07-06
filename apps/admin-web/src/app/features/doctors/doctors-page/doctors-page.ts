@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
+import { buildDetailRows, DetailRowsComponent } from '@vitalis/platform-ui';
 import { AdminApi } from '../../../core/services/admin-api';
 import {
   DOCTORS_LIST_DEFAULTS,
@@ -8,6 +9,7 @@ import {
   type DoctorSortField,
   type DoctorStatusFilter
 } from '../constants/doctors-list.constants';
+import { DOCTOR_DETAIL_FIELDS } from '../constants/doctor-detail.fields';
 import {
   DOCTOR_TYPE_OPTIONS,
   SPECIALTY_FOCUS_OPTIONS,
@@ -33,10 +35,13 @@ type Doctor = {
     specialtyFocus?: HomeopathicSpecialtyFocus | null;
     bio?: string | null;
     showOnWebsite?: boolean;
+    websiteOrder?: number | null;
     yearsOfExperience?: number | null;
     focusAreas?: string[];
   };
 };
+
+type SiteConfigEntry = { key: string; value: string; label: string; description: string };
 
 function emptyCreateModel() {
   return {
@@ -63,6 +68,7 @@ function emptyEditModel() {
     specialtyFocus: '' as HomeopathicSpecialtyFocus | '',
     bio: '',
     showOnWebsite: false,
+    websiteOrder: '' as number | '',
     yearsOfExperience: '' as number | '',
     focusAreasText: ''
   };
@@ -70,7 +76,7 @@ function emptyEditModel() {
 
 @Component({
   selector: 'app-doctors-page',
-  imports: [CommonModule, FormField],
+  imports: [CommonModule, FormField, DetailRowsComponent],
   templateUrl: './doctors-page.html',
   styleUrl: './doctors-page.scss'
 })
@@ -110,8 +116,14 @@ export class DoctorsPage {
   readonly error = signal('');
   readonly message = signal('');
 
+  readonly siteConfig = signal<SiteConfigEntry[]>([]);
+  readonly savingConfig = signal(false);
+  readonly configMessage = signal('');
+  readonly doctorListLimitValue = signal('12');
+
   constructor(private readonly api: AdminApi) {
     void this.load();
+    void this.loadSiteConfig();
   }
 
   async load() {
@@ -226,6 +238,7 @@ export class DoctorsPage {
         specialtyFocus: edit.doctorType === 'SPECIALIST_CONSULTANT' ? edit.specialtyFocus || null : null,
         bio: edit.bio.trim() || null,
         showOnWebsite: edit.showOnWebsite,
+        websiteOrder: edit.websiteOrder !== '' ? Number(edit.websiteOrder) : null,
         yearsOfExperience: edit.yearsOfExperience !== '' ? Number(edit.yearsOfExperience) : null,
         focusAreas: edit.focusAreasText
           .split('\n')
@@ -379,6 +392,11 @@ export class DoctorsPage {
     return this.doctors().find((doctor) => doctor.id === this.selectedDoctorId) || null;
   }
 
+  selectedDoctorDetailRows() {
+    const doctor = this.selectedDoctorDetails();
+    return doctor ? buildDetailRows(doctor, DOCTOR_DETAIL_FIELDS) : [];
+  }
+
   setSelectedDoctor(doctorId: string) {
     this.selectedDoctorId = doctorId;
     this.syncEditFormFromSelectedDoctor();
@@ -401,9 +419,50 @@ export class DoctorsPage {
       specialtyFocus: selected.doctorProfile?.specialtyFocus || '',
       bio: selected.doctorProfile?.bio || '',
       showOnWebsite: selected.doctorProfile?.showOnWebsite ?? false,
+      websiteOrder: selected.doctorProfile?.websiteOrder ?? '',
       yearsOfExperience: selected.doctorProfile?.yearsOfExperience ?? '',
       focusAreasText: (selected.doctorProfile?.focusAreas ?? []).join('\n')
     });
+  }
+
+  async loadSiteConfig() {
+    try {
+      const res = await this.api.getSiteConfig();
+      this.siteConfig.set(res.config);
+      const limitEntry = res.config.find((c) => c.key === 'doctorListLimit');
+      if (limitEntry) this.doctorListLimitValue.set(limitEntry.value);
+    } catch { /* silently ignore */ }
+  }
+
+  async saveDoctorListLimit() {
+    this.configMessage.set('');
+    this.savingConfig.set(true);
+    try {
+      await this.api.setSiteConfig('doctorListLimit', this.doctorListLimitValue());
+      this.configMessage.set('Limit saved.');
+      await this.loadSiteConfig();
+    } catch {
+      this.configMessage.set('Could not save limit.');
+    } finally {
+      this.savingConfig.set(false);
+    }
+  }
+
+  async saveDoctorWebsiteOrder(doctorId: string, rawValue: number | '') {
+    const websiteOrder = rawValue !== '' ? Number(rawValue) : null;
+    this.message.set('');
+    this.mutating.set(true);
+    try {
+      await this.api.setDoctorWebsiteOrder(doctorId, websiteOrder);
+      this.message.set('Display order updated.');
+      await this.load();
+      this.selectedDoctorId = doctorId;
+      this.syncEditFormFromSelectedDoctor();
+    } catch {
+      this.error.set('Could not update display order.');
+    } finally {
+      this.mutating.set(false);
+    }
   }
 
   isSpecialistType(type: HomeopathicDoctorType) {

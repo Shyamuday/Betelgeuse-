@@ -45,20 +45,7 @@
       <button type="button" class="retry-btn" (click)="loadSummary()">Retry</button>
     </div>
   } @else if (summary(); as data) {
-    <div class="stats">
-      <article class="card">
-        <h3>Paid Consultations</h3>
-        <p>{{ data.totals.paidConsultations }}</p>
-      </article>
-      <article class="card">
-        <h3>Gross Revenue</h3>
-        <p>{{ data.totals.grossInPaise / 100 | currency: 'INR' }}</p>
-      </article>
-      <article class="card">
-        <h3>Your Earnings ({{ data.doctorSharePercent }}%)</h3>
-        <p>{{ data.totals.estimatedDoctorEarningsInPaise / 100 | currency: 'INR' }}</p>
-      </article>
-    </div>
+    <vitalis-detail-rows variant="stat" [rows]="paymentStatRows(data)" />
   } @else {
     <p class="empty-state">No payment data available yet.</p>
   }

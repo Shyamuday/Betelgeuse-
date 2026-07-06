@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
+import type { DetailRow } from '@vitalis/platform-ui';
+import { DetailRowsComponent } from '@vitalis/platform-ui';
 import { Consultation, Role } from './models';
 
 export type SendMessagePayload = { consultation: Consultation; body: string };
@@ -17,7 +19,7 @@ function emptyDetailForm() {
 @Component({
   selector: 'app-consultation-detail',
   standalone: true,
-  imports: [CommonModule, FormField],
+  imports: [CommonModule, FormField, DetailRowsComponent],
   templateUrl: './consultation-detail.component.html',
 })
 export class ConsultationDetailComponent implements OnChanges {
@@ -50,5 +52,22 @@ export class ConsultationDetailComponent implements OnChanges {
   emitUploadPrescription() {
     const { prescriptionNotes, prescriptionFileUrl } = this.detailFormModel();
     this.uploadPrescription.emit({ notes: prescriptionNotes, fileUrl: prescriptionFileUrl });
+  }
+
+  intakeAnswerRows(answers: Consultation['intakeAnswers'] | undefined): DetailRow[] {
+    if (!answers) {
+      return [];
+    }
+    return Object.entries(answers).map(([key, value]) => ({
+      label: key,
+      value: String(value)
+    }));
+  }
+
+  messageRows(messages: Consultation['messages'] | undefined): DetailRow[] {
+    return (messages ?? []).map((message) => ({
+      label: message.sender.name,
+      value: message.body
+    }));
   }
 }

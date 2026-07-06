@@ -67,6 +67,64 @@ button {
   padding: 0;
 }
 
+.website-settings-panel {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.panel-hint {
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin: 0 0 0.85rem;
+  line-height: 1.6;
+}
+
+.config-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+  }
+
+  input[type="number"] {
+    width: 5rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.4rem 0.55rem;
+    font-size: 0.9rem;
+  }
+}
+
+.config-msg {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.form-section-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.website-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  input { width: 1rem; height: 1rem; }
+}
+
 .success {
   color: #166534;
 }

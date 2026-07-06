@@ -47,6 +47,13 @@ export const API_PATHS = {
     DISEASES_LIST: '/admin/diseases/list',
     VACANCIES: '/admin/vacancies',
     VACANCY_BY_ID: (id: string) => `/admin/vacancies/${id}`,
+    SITE_CONFIG: '/admin/site-config',
+    TESTIMONIALS: '/admin/testimonials',
+    TESTIMONIAL_BY_ID: (id: string) => `/admin/testimonials/${id}`,
+    FAQ: '/admin/faq',
+    FAQ_BY_ID: (id: string) => `/admin/faq/${id}`,
+    BLOG: '/admin/blog',
+    BLOG_BY_ID: (id: string) => `/admin/blog/${id}`,
     FINANCE: {
       SUMMARY: '/admin/finance/summary',
       REVENUE_TREND: '/admin/finance/revenue/trend',

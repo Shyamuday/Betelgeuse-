@@ -47,6 +47,7 @@ export const doctorProfileSelect = {
   designation: true,
   bio: true,
   showOnWebsite: true,
+  websiteOrder: true,
   yearsOfExperience: true,
   focusAreas: true
 } as const;

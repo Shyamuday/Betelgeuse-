@@ -85,6 +85,7 @@ model Doctor {
   /// Public-facing fields shown on the clinic website
   bio              String?        @db.Text
   showOnWebsite    Boolean        @default(false)
+  websiteOrder     Int?
   yearsOfExperience Int?
   focusAreas       String[]       @default([])
 

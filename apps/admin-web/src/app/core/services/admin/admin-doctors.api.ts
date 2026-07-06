@@ -94,4 +94,66 @@ export class AdminDoctorsApi extends AdminApiBase {
   }) {
     return firstValueFrom(this.http.post(`${this.apiBase}${API_PATHS.ADMIN.DOCTORS}`, payload));
   }
+
+  setDoctorWebsiteOrder(doctorId: string, websiteOrder: number | null) {
+    return firstValueFrom(
+      this.http.patch(`${this.apiBase}${API_PATHS.ADMIN.DOCTORS}/${doctorId}/website-order`, { websiteOrder })
+    );
+  }
+
+  getSiteConfig() {
+    return firstValueFrom(
+      this.http.get<{ config: Array<{ key: string; value: string; label: string; description: string }> }>(
+        `${this.apiBase}${API_PATHS.ADMIN.SITE_CONFIG}`
+      )
+    );
+  }
+
+  setSiteConfig(key: string, value: string) {
+    return firstValueFrom(
+      this.http.patch(`${this.apiBase}${API_PATHS.ADMIN.SITE_CONFIG}/${key}`, { value })
+    );
+  }
+
+  // ── Testimonials ──────────────────────────────────────────────────────────
+  listTestimonials() {
+    return firstValueFrom(this.http.get<{ testimonials: any[] }>(`${this.apiBase}${API_PATHS.ADMIN.TESTIMONIALS}`));
+  }
+  createTestimonial(payload: any) {
+    return firstValueFrom(this.http.post<{ testimonial: any }>(`${this.apiBase}${API_PATHS.ADMIN.TESTIMONIALS}`, payload));
+  }
+  updateTestimonial(id: string, payload: any) {
+    return firstValueFrom(this.http.patch<{ testimonial: any }>(`${this.apiBase}${API_PATHS.ADMIN.TESTIMONIAL_BY_ID(id)}`, payload));
+  }
+  deleteTestimonial(id: string) {
+    return firstValueFrom(this.http.delete(`${this.apiBase}${API_PATHS.ADMIN.TESTIMONIAL_BY_ID(id)}`));
+  }
+
+  // ── FAQ ───────────────────────────────────────────────────────────────────
+  listFaq() {
+    return firstValueFrom(this.http.get<{ entries: any[] }>(`${this.apiBase}${API_PATHS.ADMIN.FAQ}`));
+  }
+  createFaqEntry(payload: any) {
+    return firstValueFrom(this.http.post<{ entry: any }>(`${this.apiBase}${API_PATHS.ADMIN.FAQ}`, payload));
+  }
+  updateFaqEntry(id: string, payload: any) {
+    return firstValueFrom(this.http.patch<{ entry: any }>(`${this.apiBase}${API_PATHS.ADMIN.FAQ_BY_ID(id)}`, payload));
+  }
+  deleteFaqEntry(id: string) {
+    return firstValueFrom(this.http.delete(`${this.apiBase}${API_PATHS.ADMIN.FAQ_BY_ID(id)}`));
+  }
+
+  // ── Blog ──────────────────────────────────────────────────────────────────
+  listBlogPosts() {
+    return firstValueFrom(this.http.get<{ posts: any[] }>(`${this.apiBase}${API_PATHS.ADMIN.BLOG}`));
+  }
+  createBlogPost(payload: any) {
+    return firstValueFrom(this.http.post<{ post: any }>(`${this.apiBase}${API_PATHS.ADMIN.BLOG}`, payload));
+  }
+  updateBlogPost(id: string, payload: any) {
+    return firstValueFrom(this.http.patch<{ post: any }>(`${this.apiBase}${API_PATHS.ADMIN.BLOG_BY_ID(id)}`, payload));
+  }
+  deleteBlogPost(id: string) {
+    return firstValueFrom(this.http.delete(`${this.apiBase}${API_PATHS.ADMIN.BLOG_BY_ID(id)}`));
+  }
 }

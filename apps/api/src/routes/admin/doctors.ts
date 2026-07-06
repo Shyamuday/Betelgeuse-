@@ -264,6 +264,7 @@ export function registerAdminDoctorRoutes(router: Router) {
           isAvailable: z.boolean().optional().default(true),
           bio: z.string().max(1200).optional().nullable(),
           showOnWebsite: z.boolean().optional(),
+          websiteOrder: z.number().int().min(1).max(999).optional().nullable(),
           yearsOfExperience: z.number().int().min(0).max(60).optional().nullable(),
           focusAreas: z.array(z.string().min(1)).optional()
         })
@@ -282,6 +283,7 @@ export function registerAdminDoctorRoutes(router: Router) {
       const publicProfileFields = {
         bio: body.bio ?? null,
         showOnWebsite: body.showOnWebsite ?? false,
+        websiteOrder: body.websiteOrder ?? null,
         yearsOfExperience: body.yearsOfExperience ?? null,
         focusAreas: (body.focusAreas ?? []).map((f) => f.trim()).filter(Boolean)
       };
@@ -345,6 +347,37 @@ export function registerAdminDoctorRoutes(router: Router) {
         }
       });
       res.json({ doctor, message: 'Doctor profile updated successfully.' });
+    })
+  );
+
+  /** Set the website display order for a doctor. */
+  router.patch(
+    '/admin/doctors/:id/website-order',
+    authRequired,
+    allowRoles(Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const doctorId = routeParam(req, 'id');
+      const { websiteOrder } = z
+        .object({ websiteOrder: z.number().int().min(1).max(999).nullable() })
+        .parse(req.body);
+
+      await prisma.doctor.update({
+        where: { userId: doctorId },
+        data: { websiteOrder }
+      });
+
+      await writeAuditLog({
+        actorId: req.user!.id,
+        actorRole: req.user!.role,
+        action: 'doctor.website_order',
+        targetType: 'doctor',
+        targetId: doctorId,
+        summary: websiteOrder != null
+          ? `Doctor website order set to ${websiteOrder}.`
+          : 'Doctor website order cleared.'
+      });
+
+      res.json({ message: 'Website order updated.' });
     })
   );
 }

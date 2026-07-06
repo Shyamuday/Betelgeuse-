@@ -3,9 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { buildDetailRows, DetailRowsComponent } from '@vitalis/platform-ui';
 import { environment } from '../../../../environments/environment';
 import { API_PATHS } from '../../../core/constants/api-paths.constants';
 import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
+import { PAYMENT_SUMMARY_STAT_FIELDS } from '../constants/dashboard-stat.fields';
 import { WorklistApiService } from '../../worklist/worklist-api.service';
 
 type PaymentSummary = {
@@ -20,7 +22,7 @@ type PaymentSummary = {
 
 @Component({
   selector: 'app-dashboard-home',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, DetailRowsComponent],
   templateUrl: './dashboard-home.html',
   styleUrl: './dashboard-home.scss',
 })
@@ -69,5 +71,17 @@ export class DashboardHome {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  paymentStatRows(data: PaymentSummary) {
+    return buildDetailRows(
+      {
+        paidConsultations: data.totals.paidConsultations,
+        grossInPaise: data.totals.grossInPaise,
+        estimatedDoctorEarningsInPaise: data.totals.estimatedDoctorEarningsInPaise,
+        doctorSharePercent: data.doctorSharePercent
+      },
+      PAYMENT_SUMMARY_STAT_FIELDS
+    );
   }
 }

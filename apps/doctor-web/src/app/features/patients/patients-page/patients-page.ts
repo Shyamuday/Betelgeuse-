@@ -13,6 +13,13 @@ import {
   PatientHealthProfileComponent,
   type PatientClinicalProfile
 } from '../../../shared/patient-health-profile/patient-health-profile';
+import { buildDetailRows, DetailRowsComponent } from '@vitalis/platform-ui';
+import {
+  ADHERENCE_DAY_FIELDS,
+  ADHERENCE_SUMMARY_FIELDS,
+  adherenceDayTotalsText,
+  adherenceTotalsText
+} from '../constants/adherence-detail.fields';
 
 type DoseEvent = {
   id: string;
@@ -67,7 +74,7 @@ function emptyCreatePatientModel() {
 
 @Component({
   selector: 'app-patients-page',
-  imports: [FormField, CommonModule, DatePipe, PatientIdCardComponent, RouterLink, PatientHealthProfileComponent],
+  imports: [FormField, CommonModule, DatePipe, PatientIdCardComponent, RouterLink, PatientHealthProfileComponent, DetailRowsComponent],
   templateUrl: './patients-page.html',
   styleUrl: './patients-page.scss'
 })
@@ -295,6 +302,20 @@ export class PatientsPage {
       this.labReferralsLoading.set(false);
     }
   }
+
+  adherenceSummaryRows(data: AdherenceSummary) {
+    return buildDetailRows(
+      { days: data.days, adherencePercent: data.adherencePercent },
+      ADHERENCE_SUMMARY_FIELDS
+    );
+  }
+
+  adherenceDayRows(day: AdherenceSummary['trend'][number]) {
+    return buildDetailRows(day, ADHERENCE_DAY_FIELDS);
+  }
+
+  adherenceTotalsText = adherenceTotalsText;
+  adherenceDayTotalsText = adherenceDayTotalsText;
 
   labStatusClass(status: string) {
     if (status === 'RESULT_READY') return 'lab-status ready';

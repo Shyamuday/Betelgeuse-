@@ -1,0 +1,89 @@
+<section class="panel">
+  <h2>Add Testimonial</h2>
+  <fieldset class="form-grid" [disabled]="mutating()">
+    <input attr.placeholder="Patient name *" [formField]="createForm.patientName" />
+    <input attr.placeholder="Location (e.g. Mumbai)" [formField]="createForm.location" />
+    <input attr.placeholder="Condition (e.g. Hair fall)" [formField]="createForm.condition" />
+    <input attr.placeholder="Duration (e.g. 4 months of care)" [formField]="createForm.duration" />
+    <textarea attr.placeholder="Patient quote *" rows="4" [formField]="createForm.quote"></textarea>
+    <div class="row-fields">
+      <label>Stars
+        <input type="number" min="1" max="5" [formField]="createForm.stars" />
+      </label>
+      <label>Sort order
+        <input type="number" min="1" max="999" attr.placeholder="blank = auto" [formField]="createForm.sortOrder" />
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" [formField]="createForm.isPublished" />
+        Publish immediately
+      </label>
+    </div>
+    <button type="button" (click)="create()" [disabled]="mutating() || !createModel().patientName || !createModel().quote">
+      {{ mutating() ? 'Saving…' : 'Add Testimonial' }}
+    </button>
+  </fieldset>
+</section>
+
+<section class="panel">
+  <h2>All Testimonials ({{ testimonials().length }})</h2>
+  @if (loading()) { <p class="loading-text">Loading…</p> }
+
+  @for (t of testimonials(); track t.id) {
+    <article class="card" [class.is-published]="t.isPublished">
+      <div class="card-header">
+        <div>
+          <strong>{{ t.patientName }}</strong>
+          @if (t.location) { <span class="meta">· {{ t.location }}</span> }
+          @if (t.condition) { <span class="meta">· {{ t.condition }}</span> }
+          <span class="stars-row">@for (s of stars(t.stars); track s) { ★ }</span>
+        </div>
+        <div class="badge-row">
+          <span class="badge" [class.published]="t.isPublished" [class.draft]="!t.isPublished">
+            {{ t.isPublished ? 'Published' : 'Draft' }}
+          </span>
+          @if (t.sortOrder) { <span class="badge order">#{{ t.sortOrder }}</span> }
+        </div>
+      </div>
+      <p class="quote">"{{ t.quote }}"</p>
+
+      @if (editingId() === t.id) {
+        <fieldset class="form-grid edit-form" [disabled]="mutating()">
+          <input attr.placeholder="Patient name" [formField]="editForm.patientName" />
+          <input attr.placeholder="Location" [formField]="editForm.location" />
+          <input attr.placeholder="Condition" [formField]="editForm.condition" />
+          <input attr.placeholder="Duration" [formField]="editForm.duration" />
+          <textarea attr.placeholder="Quote" rows="4" [formField]="editForm.quote"></textarea>
+          <div class="row-fields">
+            <label>Stars <input type="number" min="1" max="5" [formField]="editForm.stars" /></label>
+            <label>Sort order <input type="number" min="1" max="999" [formField]="editForm.sortOrder" /></label>
+            <label class="checkbox-label">
+              <input type="checkbox" [formField]="editForm.isPublished" /> Published
+            </label>
+          </div>
+          <div class="actions">
+            <button type="button" (click)="saveEdit()" [disabled]="mutating()">Save</button>
+            <button type="button" class="ghost" (click)="cancelEdit()">Cancel</button>
+          </div>
+        </fieldset>
+      } @else {
+        <div class="actions">
+          <button type="button" (click)="startEdit(t)" [disabled]="mutating()">Edit</button>
+          <button type="button" class="ghost" (click)="togglePublish(t)" [disabled]="mutating()">
+            {{ t.isPublished ? 'Unpublish' : 'Publish' }}
+          </button>
+          <button type="button" class="danger" (click)="remove(t.id)" [disabled]="mutating()">Delete</button>
+        </div>
+      }
+    </article>
+  } @empty {
+    @if (!loading()) { <p class="empty-state">No testimonials yet. Add one above.</p> }
+  }
+</section>
+
+@if (message()) { <p class="success">{{ message() }}</p> }
+@if (error()) {
+  <div class="error-row">
+    <p class="error">{{ error() }}</p>
+    <button type="button" class="retry-btn" (click)="load()">Retry</button>
+  </div>
+}

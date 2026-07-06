@@ -1,8 +1,10 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
+import { buildDetailRows, DetailRowsComponent } from '@vitalis/platform-ui';
 import { AdminApi } from '../../../core/services/admin-api';
 import { TOAST_DURATION_MS } from '../../../core/constants/timing.constants';
+import { PURCHASE_ORDER_DETAIL_FIELDS } from '../constants/purchase-order-detail.fields';
 
 type PoLine = { medicineId: string; label: string; qtyOrdered: number; unitPriceInPaise: number };
 
@@ -16,7 +18,7 @@ function emptyListFilters() {
 
 @Component({
   selector: 'app-purchase-orders-page',
-  imports: [FormField, DatePipe],
+  imports: [FormField, DatePipe, DetailRowsComponent],
   templateUrl: './purchase-orders-page.html',
   styleUrl: './purchase-orders-page.scss'
 })
@@ -183,5 +185,22 @@ export class PurchaseOrdersPage implements OnInit {
   private showToast(msg: string) {
     this.toast.set(msg);
     setTimeout(() => this.toast.set(''), TOAST_DURATION_MS);
+  }
+
+  purchaseOrderDetailRows(order: {
+    status: string;
+    supplier?: { name?: string };
+    store?: { name?: string };
+    notes?: string;
+  }) {
+    return buildDetailRows(
+      {
+        status: order.status,
+        supplierName: order.supplier?.name,
+        storeName: order.store?.name,
+        notes: order.notes
+      },
+      PURCHASE_ORDER_DETAIL_FIELDS
+    );
   }
 }

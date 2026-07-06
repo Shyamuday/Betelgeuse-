@@ -8,15 +8,12 @@
         </p>
 
         <h3>Intake answers</h3>
-        @for (answer of consultation.intakeAnswers | keyvalue; track answer.key) {
-          <p><strong>{{ answer.key }}:</strong> {{ answer.value }}</p>
-        }
+        <vitalis-detail-rows [rows]="intakeAnswerRows(consultation.intakeAnswers)" />
 
         <h3>Chat</h3>
         <div class="chat-box">
-          @for (message of consultation.messages; track message.id) {
-            <p><strong>{{ message.sender.name }}:</strong> {{ message.body }}</p>
-          } @empty {
+          <vitalis-detail-rows [rows]="messageRows(consultation.messages)" />
+          @if (!consultation.messages?.length) {
             <p class="muted">No messages yet.</p>
           }
         </div>

@@ -14,34 +14,47 @@
         </section>
 
         <div class="category-pills">
-          @for (cat of categories; track cat) {
+          @for (cat of categories(); track cat) {
             <button
               type="button"
               class="category-pill"
-              [class.active]="selectedCategory === cat"
+              [class.active]="selectedCategory() === cat"
               (click)="selectCategory(cat)">
               {{ cat }}
             </button>
           }
         </div>
 
-        <section class="blog-grid">
-          @for (post of filteredPosts; track post.slug) {
-            <article class="panel blog-card">
-              <p class="eyebrow">{{ post.category }}</p>
-              <h2>{{ post.title }}</h2>
-              <p class="blog-excerpt">{{ post.excerpt }}</p>
-              <div class="blog-meta">
-                <span>{{ post.date }}</span>
-                <span class="blog-dot">&middot;</span>
-                <span>{{ post.readTime }}</span>
-              </div>
-            </article>
-          }
-          @empty {
-            <p style="color:#526070">No articles in this category yet. Check back soon.</p>
-          }
-        </section>
+        @if (loading()) {
+          <section class="blog-grid">
+            @for (_ of [1,2,3,4,5,6]; track $index) {
+              <article class="panel blog-card doctors-skeleton" style="min-height:8rem">
+                <div class="doctors-skeleton-line" style="width:40%;margin-bottom:.5rem"></div>
+                <div class="doctors-skeleton-line" style="width:90%"></div>
+                <div class="doctors-skeleton-line" style="width:80%;margin-top:.4rem"></div>
+              </article>
+            }
+          </section>
+        } @else {
+          <section class="blog-grid">
+            @for (post of filteredPosts(); track post.id) {
+              <article class="panel blog-card">
+                <p class="eyebrow">{{ post.category }}</p>
+                <h2>{{ post.title }}</h2>
+                <p class="blog-excerpt">{{ post.excerpt }}</p>
+                <div class="blog-meta">
+                  <span>{{ postDate(post) }}</span>
+                  @if (post.readTime) {
+                    <span class="blog-dot">&middot;</span>
+                    <span>{{ post.readTime }}</span>
+                  }
+                </div>
+              </article>
+            } @empty {
+              <p style="color:#526070;grid-column:1/-1">No articles in this category yet. Check back soon.</p>
+            }
+          </section>
+        }
 
         <section class="panel about-cta">
           <div>

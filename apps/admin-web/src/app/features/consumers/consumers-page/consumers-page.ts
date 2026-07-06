@@ -2,6 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
+import {
+  buildDetailRows,
+  DetailRowsComponent,
+  PATIENT_CLINICAL_PROFILE_FIELDS,
+  patientClinicalProfileHasData
+} from '@vitalis/platform-ui';
 import { AdminApi } from '../../../core/services/admin-api';
 import {
   CONSUMERS_LIST_DEFAULTS,
@@ -16,6 +22,7 @@ import {
   SUPPORT_NOTE_CATEGORY_STYLES,
   type SupportNoteCategory
 } from '../constants/support-note.constants';
+import { SUPPORT_ACCOUNT_FIELDS } from '../constants/support-detail.fields';
 
 type Consumer = {
   id: string;
@@ -112,7 +119,7 @@ type SupportContext = {
 
 @Component({
   selector: 'app-consumers-page',
-  imports: [CommonModule, FormField, PatientIdCardComponent],
+  imports: [CommonModule, FormField, PatientIdCardComponent, DetailRowsComponent],
   templateUrl: './consumers-page.html',
   styleUrl: './consumers-page.scss'
 })
@@ -429,4 +436,23 @@ export class ConsumersPage {
     }
   }
 
+  clinicalProfileRows(consumer: ConsumerDetail['consumer']) {
+    return buildDetailRows(consumer, PATIENT_CLINICAL_PROFILE_FIELDS);
+  }
+
+  clinicalProfileHasData(consumer: ConsumerDetail['consumer']) {
+    return patientClinicalProfileHasData(consumer);
+  }
+
+  supportAccountRows(ctx: SupportContext) {
+    return buildDetailRows(
+      {
+        isActive: ctx.account.isActive,
+        adherencePercent: ctx.adherenceSummary.percent,
+        adherenceTaken: ctx.adherenceSummary.taken,
+        adherenceTotal: ctx.adherenceSummary.total
+      },
+      SUPPORT_ACCOUNT_FIELDS
+    );
+  }
 }

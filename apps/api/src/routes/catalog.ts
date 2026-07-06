@@ -113,6 +113,9 @@ router.put(
 router.get(
   '/doctors',
   asyncRoute(async (_req, res) => {
+    const limitConfig = await prisma.siteConfig.findUnique({ where: { key: 'doctorListLimit' } });
+    const limit = limitConfig ? Math.max(1, Math.min(50, parseInt(limitConfig.value, 10) || 12)) : 12;
+
     const doctors = await prisma.doctor.findMany({
       where: { showOnWebsite: true, user: { isActive: true } },
       select: {
@@ -124,11 +127,85 @@ router.get(
         yearsOfExperience: true,
         focusAreas: true,
         designation: true,
+        websiteOrder: true,
         user: { select: { id: true, name: true } }
       },
-      orderBy: [{ doctorType: 'asc' }, { user: { name: 'asc' } }]
+      orderBy: [{ websiteOrder: { sort: 'asc', nulls: 'last' } }, { user: { name: 'asc' } }],
+      take: limit
     });
 
-    res.json({ doctors });
+    res.json({ doctors, limit });
+  })
+);
+
+/** Public endpoint — published testimonials ordered by sortOrder then newest. */
+router.get(
+  '/testimonials',
+  asyncRoute(async (_req, res) => {
+    const testimonials = await prisma.testimonial.findMany({
+      where: { isPublished: true },
+      orderBy: [{ sortOrder: { sort: 'asc', nulls: 'last' } }, { createdAt: 'desc' }]
+    });
+    res.json({ testimonials });
+  })
+);
+
+/** Public endpoint — published FAQ entries ordered by category + sortOrder. */
+router.get(
+  '/faq',
+  asyncRoute(async (_req, res) => {
+    const entries = await prisma.faqEntry.findMany({
+      where: { isPublished: true },
+      orderBy: [{ category: 'asc' }, { sortOrder: { sort: 'asc', nulls: 'last' } }, { createdAt: 'asc' }]
+    });
+    res.json({ entries });
+  })
+);
+
+/** Public endpoint — published blog posts with optional category filter. */
+router.get(
+  '/blog',
+  asyncRoute(async (req, res) => {
+    const category = typeof req.query['category'] === 'string' ? req.query['category'] : undefined;
+    const posts = await prisma.blogPost.findMany({
+      where: { isPublished: true, ...(category ? { category } : {}) },
+      select: { id: true, slug: true, title: true, excerpt: true, category: true, readTime: true, publishedAt: true, createdAt: true },
+      orderBy: [{ publishedAt: { sort: 'desc', nulls: 'last' } }, { createdAt: 'desc' }]
+    });
+    const categories = await prisma.blogPost.findMany({
+      where: { isPublished: true },
+      select: { category: true },
+      distinct: ['category'],
+      orderBy: { category: 'asc' }
+    });
+    res.json({ posts, categories: categories.map((c) => c.category) });
+  })
+);
+
+/** Public endpoint — select SiteConfig keys exposed to the public website. */
+router.get(
+  '/public-config',
+  asyncRoute(async (_req, res) => {
+    const PUBLIC_KEYS = [
+      'whatsappPhone', 'clinicName',
+      'statConsultations', 'statDoctors', 'statRating', 'statFollowUp',
+      'statPatientsTreated', 'statConditionsTreated', 'statImprovement', 'statSatisfaction'
+    ];
+    const DEFAULTS: Record<string, string> = {
+      whatsappPhone: '919876543210',
+      clinicName: 'Vitalis Care and Research Centre',
+      statConsultations: '5,000+',
+      statDoctors: '12+',
+      statRating: '4.8★',
+      statFollowUp: '92%',
+      statPatientsTreated: '4,800+',
+      statConditionsTreated: '15+',
+      statImprovement: '92%',
+      statSatisfaction: '4.8 / 5'
+    };
+    const rows = await prisma.siteConfig.findMany({ where: { key: { in: PUBLIC_KEYS } } });
+    const map: Record<string, string> = Object.fromEntries(rows.map((r) => [r.key, r.value]));
+    const config = Object.fromEntries(PUBLIC_KEYS.map((k) => [k, map[k] ?? DEFAULTS[k] ?? '']));
+    res.json({ config });
   })
 );

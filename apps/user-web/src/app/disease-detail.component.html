@@ -106,18 +106,7 @@
             <section class="panel">
               <h2>Treatment options</h2>
               <div class="treatment-options">
-                @if (d.treatmentOptions.allopathy) {
-                  <div><strong>Allopathy</strong><p>{{ d.treatmentOptions.allopathy }}</p></div>
-                }
-                @if (d.treatmentOptions.ayurveda) {
-                  <div><strong>Ayurveda</strong><p>{{ d.treatmentOptions.ayurveda }}</p></div>
-                }
-                @if (d.treatmentOptions.homeopathy) {
-                  <div><strong>Homeopathy</strong><p>{{ d.treatmentOptions.homeopathy }}</p></div>
-                }
-                @if (d.treatmentOptions.lifestyle) {
-                  <div><strong>Lifestyle</strong><p>{{ d.treatmentOptions.lifestyle }}</p></div>
-                }
+                <vitalis-detail-rows variant="blocks" [rows]="treatmentOptionRows(d)" />
               </div>
             </section>
           }
@@ -170,17 +159,11 @@
             </article>
           </section>
 
-          <section class="content-grid three">
-            @if (d.severityLevel) {
-              <article class="panel"><h2>Severity</h2><p>{{ d.severityLevel }}</p></article>
-            }
-            @if (d.whenToSeeDoctor) {
-              <article class="panel"><h2>When to see doctor</h2><p>{{ d.whenToSeeDoctor }}</p></article>
-            }
-            @if (d.duration) {
-              <article class="panel"><h2>Expected duration</h2><p>{{ d.duration }}</p></article>
-            }
-          </section>
+          @if (quickFactRows(d).length) {
+            <section class="content-grid three">
+              <vitalis-detail-rows variant="panel" [rows]="quickFactRows(d)" />
+            </section>
+          }
 
           <section class="content-grid two">
             @if (d.stages?.length) {
@@ -197,12 +180,7 @@
             @if (d.commonIn) {
               <article class="panel">
                 <h2>Common in</h2>
-                @if (d.commonIn.ageGroup) {
-                  <p><strong>Age group:</strong> {{ d.commonIn.ageGroup }}</p>
-                }
-                @if (d.commonIn.gender) {
-                  <p><strong>Gender:</strong> {{ d.commonIn.gender }}</p>
-                }
+                <vitalis-detail-rows [rows]="commonInRows(d)" />
               </article>
             }
           </section>
@@ -219,17 +197,11 @@
             </section>
           }
 
-          <section class="panel review-panel">
-            @if (d.reviewedBy) {
-              <p><strong>Reviewed by:</strong> {{ d.reviewedBy }}</p>
-            }
-            @if (d.lastUpdated) {
-              <p><strong>Last updated:</strong> {{ d.lastUpdated }}</p>
-            }
-            @if (d.references && d.references.length) {
-              <p><strong>References:</strong> {{ d.references.join(', ') }}</p>
-            }
-          </section>
+          @if (reviewRows(d).length) {
+            <section class="panel review-panel">
+              <vitalis-detail-rows [rows]="reviewRows(d)" />
+            </section>
+          }
 
           <section class="about-cta panel">
             <div>

@@ -13,3 +13,11 @@ export type {
   ScanDestinationKind,
   PatientScanAppKey
 } from './patient-scan/types';
+export { DetailRowsComponent } from './detail-rows/detail-rows.component';
+export { buildDetailRows } from './detail-rows/detail-rows.util';
+export type { DetailRow, DetailFieldDef } from './detail-rows/detail-rows.types';
+export {
+  PATIENT_CLINICAL_PROFILE_FIELDS,
+  patientClinicalProfileHasData,
+  type PatientClinicalProfile
+} from './detail-rows/patient-clinical-profile.fields';

@@ -2,12 +2,14 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { buildDetailRows, DetailRowsComponent } from '@vitalis/platform-ui';
 import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
 import { WorklistApiService, type WorklistItem, type WorklistView } from '../worklist-api.service';
+import { worklistItemMetaFields } from '../constants/worklist-detail.fields';
 
 @Component({
   selector: 'app-worklist-page',
-  imports: [CommonModule, DatePipe, FormField, RouterLink],
+  imports: [CommonModule, DatePipe, FormField, RouterLink, DetailRowsComponent],
   templateUrl: './worklist-page.html',
   styleUrl: './worklist-page.scss'
 })
@@ -15,6 +17,11 @@ export class WorklistPage {
   private readonly worklistApi = inject(WorklistApiService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly datePipe = inject(DatePipe);
+
+  private readonly worklistMetaFieldDefs = worklistItemMetaFields((iso) =>
+    this.datePipe.transform(iso, 'mediumDate')
+  );
 
   readonly loading = signal(false);
   readonly error = signal('');
@@ -79,5 +86,9 @@ export class WorklistPage {
       return;
     }
     void this.router.navigate(['/', ROUTE_PATHS.PATIENT_SCAN, patientCode]);
+  }
+
+  worklistMetaRows(item: WorklistItem) {
+    return buildDetailRows(item, this.worklistMetaFieldDefs);
   }
 }

@@ -1,18 +1,24 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { buildDetailRows, DetailRowsComponent } from '@vitalis/platform-ui';
 import { AppFooterComponent } from './app-footer.component';
 import { AppHeaderComponent } from './app-header.component';
 import { AuthFormOverlayComponent } from './auth/auth-form-overlay.component';
 import { WHATSAPP_CONTACT_URL } from './core/constants/branding.constants';
+import {
+  DISEASE_COMMON_IN_FIELDS,
+  DISEASE_QUICK_FACT_FIELDS,
+  DISEASE_REVIEW_FIELDS,
+  DISEASE_TREATMENT_OPTION_FIELDS
+} from './disease/constants/disease-detail.fields';
 import { diseaseInfos } from './disease/disease-info.constants';
 import { DiseaseInfo } from './models';
 import { AppOverlayService } from './overlay.service';
 
 @Component({
   selector: 'app-disease-detail',
-  imports: [CommonModule, AppHeaderComponent, AppFooterComponent]
-,
+  imports: [CommonModule, AppHeaderComponent, AppFooterComponent, DetailRowsComponent],
   templateUrl: './disease-detail.component.html',
 })
 export class DiseaseDetailComponent implements OnInit {
@@ -40,5 +46,23 @@ export class DiseaseDetailComponent implements OnInit {
       width: '480px',
       panelClass: 'app-overlay-panel',
     });
+  }
+
+  quickFactRows(disease: DiseaseInfo) {
+    return buildDetailRows(disease, DISEASE_QUICK_FACT_FIELDS);
+  }
+
+  commonInRows(disease: DiseaseInfo) {
+    return disease.commonIn ? buildDetailRows(disease.commonIn, DISEASE_COMMON_IN_FIELDS) : [];
+  }
+
+  reviewRows(disease: DiseaseInfo) {
+    return buildDetailRows(disease, DISEASE_REVIEW_FIELDS);
+  }
+
+  treatmentOptionRows(disease: DiseaseInfo) {
+    return disease.treatmentOptions
+      ? buildDetailRows(disease.treatmentOptions, DISEASE_TREATMENT_OPTION_FIELDS)
+      : [];
   }
 }

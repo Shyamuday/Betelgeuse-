@@ -1,16 +1,5 @@
 <section class="stats">
-  <article class="card">
-    <h3>Revenue Collected</h3>
-    <p>{{ revenueInPaise / 100 | currency: 'INR' }}</p>
-  </article>
-  <article class="card">
-    <h3>Active Doctors</h3>
-    <p>{{ activeDoctors }}</p>
-  </article>
-  <article class="card">
-    <h3>Consultations</h3>
-    <p>{{ consultationsCount }}</p>
-  </article>
+  <vitalis-detail-rows variant="stat" [rows]="dashboardStatRows()" />
 </section>
 
 <section class="panel">

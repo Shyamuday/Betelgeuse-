@@ -1,22 +1,12 @@
 
     <!-- Stats Section -->
     <section class="stats-section">
-      <div class="stat-card">
-        <span class="stat-number">5,000+</span>
-        <span class="stat-label">Consultations completed</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-number">12+</span>
-        <span class="stat-label">Experienced doctors</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-number">4.8★</span>
-        <span class="stat-label">Patient rating</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-number">92%</span>
-        <span class="stat-label">Follow-up compliance</span>
-      </div>
+      @for (stat of stats(); track stat.label) {
+        <div class="stat-card">
+          <span class="stat-number">{{ stat.value }}</span>
+          <span class="stat-label">{{ stat.label }}</span>
+        </div>
+      }
     </section>
 
     <!-- Treatment Cards -->
@@ -46,4 +36,3 @@
         <a href="/treatments" class="card-link">View all treatments →</a>
       </article>
     </section>
-  

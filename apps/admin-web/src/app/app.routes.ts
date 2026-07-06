@@ -30,6 +30,10 @@ import { AdminPatientScanLauncherPage } from './features/scan/admin-patient-scan
 import { EcosystemUsersPage } from './features/ecosystem-users/ecosystem-users-page/ecosystem-users-page';
 import { StaffPage } from './features/staff/staff-page/staff-page';
 import { VacanciesPage } from './features/vacancies/vacancies-page/vacancies-page';
+import { TestimonialsPage } from './features/content/testimonials-page/testimonials-page';
+import { FaqPage } from './features/content/faq-page/faq-page';
+import { BlogPage } from './features/content/blog-page/blog-page';
+import { SiteConfigPage } from './features/content/site-config-page/site-config-page';
 
 export const routes: Routes = [
   { path: ROUTE_PATHS.LOGIN, component: AdminLogin },
@@ -65,7 +69,11 @@ export const routes: Routes = [
       { path: ROUTE_PATHS.ADHERENCE, component: AdherencePage },
       { path: ROUTE_PATHS.ANALYTICS, component: AnalyticsPage },
       { path: ROUTE_PATHS.FINANCE, component: FinancePage },
-      { path: ROUTE_PATHS.PAYROLL, component: PayrollPage }
+      { path: ROUTE_PATHS.PAYROLL, component: PayrollPage },
+      { path: ROUTE_PATHS.TESTIMONIALS, component: TestimonialsPage },
+      { path: ROUTE_PATHS.FAQ, component: FaqPage },
+      { path: ROUTE_PATHS.BLOG, component: BlogPage },
+      { path: ROUTE_PATHS.SITE_CONFIG, component: SiteConfigPage }
     ]
   },
   { path: '**', redirectTo: '' }
