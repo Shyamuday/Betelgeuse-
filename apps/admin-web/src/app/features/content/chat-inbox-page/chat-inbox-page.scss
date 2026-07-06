@@ -1,5 +1,21 @@
 @use '../content-page';
 
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.stat-pill {
+  background: #eef5ff;
+  color: #174ea6;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+}
+
 .page-header {
   display: flex;
   align-items: flex-start;

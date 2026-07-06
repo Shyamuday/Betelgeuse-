@@ -36,6 +36,10 @@ export class ClinicApiClient {
     return (await response.json()) as T;
   }
 
+  get<T>(path: string): Promise<T> {
+    return this.apiFetch<T>(path);
+  }
+
   loadRazorpayScript() {
     if (window.Razorpay) {
       return Promise.resolve();

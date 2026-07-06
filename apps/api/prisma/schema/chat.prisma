@@ -16,6 +16,10 @@ model ChatSession {
   botStage       Int               @default(0)
   /// Short summary of the visitor's concern (captured from first user message)
   concern        String?
+  /// Anonymous visitor id from browser (for analytics when not logged in)
+  visitorKey     String?
+  /// Page where chat was started
+  entryPage      String?
   operatorNote   String?
   resolvedAt     DateTime?
   messages       ChatMessage[]
@@ -25,6 +29,7 @@ model ChatSession {
   @@index([status])
   @@index([createdAt])
   @@index([userId])
+  @@index([visitorKey])
 }
 
 model ChatMessage {
@@ -34,6 +39,8 @@ model ChatMessage {
   /// 'bot' | 'user' | 'operator'
   role      String
   content   String      @db.Text
+  /// Quick-reply option labels shown below this bot message
+  options   String[]    @default([])
   createdAt DateTime    @default(now())
 
   @@index([sessionId, createdAt])

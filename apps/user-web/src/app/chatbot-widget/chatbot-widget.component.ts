@@ -1,11 +1,12 @@
 import {
   Component, ElementRef, ViewChild, AfterViewChecked,
-  inject, signal, OnInit
+  inject, signal, OnInit, effect
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatbotService } from '../core/services/chatbot.service';
 import { PublicConfigService } from '../core/services/public-config.service';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-chatbot-widget',
@@ -19,14 +20,23 @@ export class ChatbotWidgetComponent implements OnInit, AfterViewChecked {
 
   readonly chat = inject(ChatbotService);
   private readonly publicConfig = inject(PublicConfigService);
+  private readonly auth = inject(AuthService);
   inputText = '';
   private shouldScroll = false;
   readonly showBadge = signal(false);
   readonly whatsappUrl = signal('https://wa.me/');
 
+  constructor() {
+    effect(() => {
+      if (this.auth.isLoggedIn() && this.chat.sessionId()) {
+        void this.chat.linkToUser();
+      }
+    });
+  }
+
   ngOnInit() {
     void this.publicConfig.get().then(cfg => this.whatsappUrl.set(this.publicConfig.whatsappUrl(cfg)));
-    // Show pulsing badge on the button after 5 s if not already opened
+
     setTimeout(() => {
       if (!this.chat.isOpen()) this.showBadge.set(true);
     }, 5000);
@@ -51,6 +61,20 @@ export class ChatbotWidgetComponent implements OnInit, AfterViewChecked {
     }
     this.chat.toggle();
     this.shouldScroll = true;
+  }
+
+  selectOption(option: string) {
+    if (option === 'Close chat') {
+      this.chat.close();
+      return;
+    }
+    if (option === 'Start a new question') {
+      this.chat.resetSession();
+      this.shouldScroll = true;
+      return;
+    }
+    this.shouldScroll = true;
+    void this.chat.sendMessage(option);
   }
 
   send() {

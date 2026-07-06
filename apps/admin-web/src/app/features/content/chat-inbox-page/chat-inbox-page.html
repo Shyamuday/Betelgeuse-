@@ -11,6 +11,15 @@
 @if (error()) { <p class="error-msg">{{ error() }}</p> }
 @if (message()) { <p class="success-msg">{{ message() }}</p> }
 
+@if (stats(); as st) {
+  <div class="stats-row">
+    <span class="stat-pill">Total: {{ st.total }}</span>
+    <span class="stat-pill">Logged in: {{ st.loggedIn }}</span>
+    <span class="stat-pill">Anonymous: {{ st.anonymous }}</span>
+    <span class="stat-pill">Active: {{ st.active }}</span>
+  </div>
+}
+
 <!-- Status filter pills -->
 <div class="filter-pills">
   @for (f of [
@@ -46,11 +55,12 @@
             <span class="badge" [class]="statusClass(s.status)">{{ statusLabel(s.status) }}</span>
           </div>
           <div class="session-item-meta">
+            <span>{{ visitorLabel(s) }}</span>
             @if (s.visitorPhone) {
               <span>📞 {{ s.visitorPhone }}</span>
             }
-            @if (s.visitorName) {
-              <span>👤 {{ s.visitorName }}</span>
+            @if (s.entryPage) {
+              <span>📄 {{ s.entryPage }}</span>
             }
             <span>{{ formatTime(s.createdAt) }}</span>
             @if (s._count) {

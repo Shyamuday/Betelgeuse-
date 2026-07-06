@@ -48,30 +48,48 @@ export async function authRequired(req: Request, res: Response, next: NextFuncti
   }
 
   try {
-    const decoded = jwt.verify(token, jwtSecret) as AuthUser & { userId?: string };
-    const userId = decoded.id ?? decoded.userId;
-    if (!userId) {
+    const user = await resolveAuthUser(token);
+    if (!user) {
       return res.status(401).json({ message: AUTH_MESSAGES.INVALID_TOKEN });
     }
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true, name: true, role: true, email: true, mobile: true, patientCode: true, isActive: true }
-    });
-
-    if (!user?.isActive) {
-      return res.status(401).json({ message: AUTH_MESSAGES.INACTIVE_USER });
-    }
-
-    const staffProfile = await loadStaffProfileForUser(user.id, user.role);
-    req.user =
-      staffProfile === undefined
-        ? user
-        : { ...user, staffProfile: staffProfile as StaffProfileSummary | null };
-
+    req.user = user;
     next();
   } catch {
     return res.status(401).json({ message: AUTH_MESSAGES.INVALID_TOKEN });
   }
+}
+
+/** Sets req.user when a valid token is present; continues anonymously otherwise. */
+export async function authOptional(req: Request, _res: Response, next: NextFunction) {
+  const header = req.header('authorization');
+  const token = header?.startsWith('Bearer ') ? header.slice(7) : undefined;
+  if (!token) return next();
+
+  try {
+    const user = await resolveAuthUser(token);
+    if (user) req.user = user;
+  } catch {
+    // ignore invalid token for public chat
+  }
+  next();
+}
+
+async function resolveAuthUser(token: string): Promise<AuthUser | null> {
+  const decoded = jwt.verify(token, jwtSecret) as AuthUser & { userId?: string };
+  const userId = decoded.id ?? decoded.userId;
+  if (!userId) return null;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, name: true, role: true, email: true, mobile: true, patientCode: true, isActive: true }
+  });
+
+  if (!user?.isActive) return null;
+
+  const staffProfile = await loadStaffProfileForUser(user.id, user.role);
+  return staffProfile === undefined
+    ? user
+    : { ...user, staffProfile: staffProfile as StaffProfileSummary | null };
 }
 
 export function allowRoles(...roles: Role[]) {

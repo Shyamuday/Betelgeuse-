@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 import { ClinicApiClient } from '../../clinic-api/clinic-api.client';
 import { API_PATHS } from '../constants/api-paths.constants';
 
@@ -7,52 +7,79 @@ export interface ChatMsg {
   role: 'bot' | 'user' | 'operator';
   content: string;
   createdAt: string;
+  options?: string[];
   showBookButton?: boolean;
   showWhatsAppButton?: boolean;
+  allowFreeText?: boolean;
 }
 
 const SESSION_KEY = 'vitalis_chat_session_id';
+const VISITOR_KEY = 'vitalis_chat_visitor_key';
 
 @Injectable({ providedIn: 'root' })
 export class ChatbotService {
   private api = new ClinicApiClient();
 
-  readonly messages    = signal<ChatMsg[]>([]);
-  readonly isOpen      = signal(false);
-  readonly isLoading   = signal(false);
-  readonly sessionId   = signal<string | null>(null);
-  readonly botName     = signal('Dr. Priya');
+  readonly messages = signal<ChatMsg[]>([]);
+  readonly isOpen = signal(false);
+  readonly isLoading = signal(false);
+  readonly sessionId = signal<string | null>(null);
+  readonly botName = signal('Dr. Priya');
+  readonly activeOptions = signal<string[]>([]);
+
+  readonly quickReplies = computed(() => this.activeOptions());
 
   constructor() {
     const saved = localStorage.getItem(SESSION_KEY);
-    if (saved) this.loadSession(saved);
+    if (saved) void this.loadSession(saved);
   }
 
   toggle() {
-    this.isOpen.update(v => !v);
-    if (this.isOpen() && !this.sessionId()) this.startSession();
+    this.isOpen.update((v) => !v);
+    if (this.isOpen() && !this.sessionId()) void this.startSession();
   }
 
   open() {
     this.isOpen.set(true);
-    if (!this.sessionId()) this.startSession();
+    if (!this.sessionId()) void this.startSession();
   }
 
-  close() { this.isOpen.set(false); }
+  close() {
+    this.isOpen.set(false);
+  }
 
-  async startSession(userId?: string) {
+  /** Link anonymous chat to logged-in account (called after login). */
+  async linkToUser() {
+    const sid = this.sessionId();
+    if (!sid || !this.api.backendToken) return;
+    try {
+      await this.api.apiFetch(API_PATHS.CHAT.LINK(sid), { method: 'PATCH' });
+    } catch {
+      // non-fatal
+    }
+  }
+
+  async startSession() {
     this.isLoading.set(true);
     try {
       const res = await this.api.apiFetch<{
-        sessionId: string; messages: ChatMsg[]; botName: string;
+        sessionId: string;
+        messages: ChatMsg[];
+        botName: string;
+        activeOptions?: string[];
       }>(API_PATHS.CHAT.START, {
         method: 'POST',
-        body: JSON.stringify({ userId: userId ?? null })
+        body: JSON.stringify({
+          visitorKey: this.getVisitorKey(),
+          entryPage: typeof window !== 'undefined' ? window.location.pathname : undefined
+        })
       });
       this.sessionId.set(res.sessionId);
       this.botName.set(res.botName);
       this.messages.set(res.messages);
+      this.activeOptions.set(res.activeOptions ?? res.messages.at(-1)?.options ?? []);
       localStorage.setItem(SESSION_KEY, res.sessionId);
+      if (this.api.backendToken) void this.linkToUser();
     } finally {
       this.isLoading.set(false);
     }
@@ -60,11 +87,12 @@ export class ChatbotService {
 
   async sendMessage(content: string) {
     const sid = this.sessionId();
-    if (!sid) return;
+    if (!sid || this.isLoading()) return;
 
-    // Optimistically add user message
+    this.activeOptions.set([]);
+
     const tempId = 'tmp_' + Date.now();
-    this.messages.update(msgs => [
+    this.messages.update((msgs) => [
       ...msgs,
       { id: tempId, role: 'user', content, createdAt: new Date().toISOString() }
     ]);
@@ -72,32 +100,54 @@ export class ChatbotService {
     this.isLoading.set(true);
     try {
       const res = await this.api.apiFetch<{
-        userMessage: ChatMsg; botMessage: ChatMsg;
+        userMessage: ChatMsg;
+        botMessage: ChatMsg;
+        activeOptions?: string[];
       }>(API_PATHS.CHAT.MESSAGE(sid), {
         method: 'POST',
         body: JSON.stringify({ content })
       });
 
-      // Replace temp user message with real one, then add bot reply
-      this.messages.update(msgs =>
-        [...msgs.filter(m => m.id !== tempId), res.userMessage, res.botMessage]
-      );
+      this.messages.update((msgs) => [
+        ...msgs.filter((m) => m.id !== tempId),
+        res.userMessage,
+        res.botMessage
+      ]);
+      this.activeOptions.set(res.activeOptions ?? res.botMessage.options ?? []);
     } catch {
-      this.messages.update(msgs => msgs.filter(m => m.id !== tempId));
+      this.messages.update((msgs) => msgs.filter((m) => m.id !== tempId));
+      const lastBot = [...this.messages()].reverse().find((m) => m.role === 'bot');
+      this.activeOptions.set(lastBot?.options ?? []);
     } finally {
       this.isLoading.set(false);
     }
   }
 
+  selectOption(option: string) {
+    void this.sendMessage(option);
+  }
+
+  private getVisitorKey(): string {
+    let key = localStorage.getItem(VISITOR_KEY);
+    if (!key) {
+      key = crypto.randomUUID();
+      localStorage.setItem(VISITOR_KEY, key);
+    }
+    return key;
+  }
+
   private async loadSession(id: string) {
     try {
-      const res = await this.api.apiFetch<{ messages: ChatMsg[] }>(
-        API_PATHS.CHAT.SESSION(id)
-      );
+      const res = await this.api.apiFetch<{
+        messages: ChatMsg[];
+        activeOptions?: string[];
+      }>(API_PATHS.CHAT.SESSION(id));
       this.sessionId.set(id);
       this.messages.set(res.messages);
+      const lastBot = [...res.messages].reverse().find((m) => m.role === 'bot');
+      this.activeOptions.set(res.activeOptions ?? lastBot?.options ?? []);
+      if (this.api.backendToken) void this.linkToUser();
     } catch {
-      // Session expired or invalid — start fresh
       localStorage.removeItem(SESSION_KEY);
     }
   }
@@ -106,6 +156,7 @@ export class ChatbotService {
     localStorage.removeItem(SESSION_KEY);
     this.sessionId.set(null);
     this.messages.set([]);
-    this.startSession();
+    this.activeOptions.set([]);
+    void this.startSession();
   }
 }

@@ -12,9 +12,13 @@ type ChatMessage = {
 
 type ChatSession = {
   id: string;
+  userId?: string | null;
+  visitorKey?: string | null;
+  entryPage?: string | null;
   visitorName?: string | null;
   visitorPhone?: string | null;
   visitorEmail?: string | null;
+  user?: { id: string; name: string; mobile?: string | null; email?: string | null } | null;
   status: 'ACTIVE' | 'NEEDS_OPERATOR' | 'RESOLVED';
   concern?: string | null;
   operatorNote?: string | null;
@@ -43,6 +47,7 @@ export class ChatInboxPage {
   readonly message = signal('');
   readonly statusFilter = signal<StatusFilter>('NEEDS_OPERATOR');
   readonly pendingCount = signal(0);
+  readonly stats = signal<{ total: number; loggedIn: number; anonymous: number; needsOperator: number; active: number } | null>(null);
 
   resolveNote = '';
   replyText = '';
@@ -56,8 +61,12 @@ export class ChatInboxPage {
     this.error.set('');
     try {
       const filter = this.statusFilter();
-      const res = await this.api.listChatSessions(filter === 'ALL' ? undefined : filter);
+      const [res, statsRes] = await Promise.all([
+        this.api.listChatSessions(filter === 'ALL' ? undefined : filter),
+        this.api.getChatSessionStats()
+      ]);
       this.sessions.set(res.sessions);
+      this.stats.set(statsRes.stats);
 
       if (filter !== 'NEEDS_OPERATOR') {
         const pending = await this.api.listChatSessions('NEEDS_OPERATOR');
@@ -151,9 +160,17 @@ export class ChatInboxPage {
   }
 
   sessionPreview(s: ChatSession): string {
-    const first = s.messages?.[0];
     if (s.concern) return s.concern;
+    const first = s.messages?.[0];
     if (first?.role === 'user') return first.content;
     return first?.content?.slice(0, 80) ?? 'New conversation';
+  }
+
+  visitorLabel(s: ChatSession): string {
+    if (s.user?.name) return `Patient: ${s.user.name}`;
+    if (s.visitorName) return s.visitorName;
+    if (s.userId) return 'Logged-in patient';
+    if (s.visitorKey) return `Visitor ${s.visitorKey.slice(0, 8)}…`;
+    return 'Anonymous visitor';
   }
 }

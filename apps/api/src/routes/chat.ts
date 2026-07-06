@@ -1,36 +1,132 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { prisma } from '../db.js';
+import { authOptional } from '../auth.js';
 import { asyncRoute, routeParam } from '../utils/helpers.js';
-import { getBotReply, GREETING, BOT_NAME } from '../services/chatbot.service.js';
+import {
+  getBotReply,
+  getGreetingReply,
+  getPendingOptions,
+  BOT_NAME
+} from '../services/chatbot.service.js';
 
 export const chatRouter = Router();
 
-/** Start a new chat session — returns session ID + first bot greeting. */
+type BotExtras = {
+  options?: string[];
+  showBookButton?: boolean;
+  showWhatsAppButton?: boolean;
+  allowFreeText?: boolean;
+};
+
+function botMessagePayload(
+  msg: { id: string; role: string; content: string; createdAt: Date; options?: string[] },
+  extras: BotExtras = {}
+) {
+  return {
+    id: msg.id,
+    role: msg.role,
+    content: msg.content,
+    createdAt: msg.createdAt,
+    options: msg.options?.length ? msg.options : extras.options,
+    showBookButton: extras.showBookButton,
+    showWhatsAppButton: extras.showWhatsAppButton,
+    allowFreeText: extras.allowFreeText ?? true
+  };
+}
+
+function userLinkData(user: Express.Request['user']) {
+  if (!user) return {};
+  return {
+    userId: user.id,
+    visitorName: user.name,
+    visitorEmail: user.email ?? null,
+    visitorPhone: user.mobile ?? null
+  };
+}
+
+async function maybeLinkSessionToUser(sessionId: string, user: Express.Request['user']) {
+  if (!user) return;
+  const session = await prisma.chatSession.findUnique({ where: { id: sessionId }, select: { userId: true } });
+  if (!session || session.userId) return;
+  await prisma.chatSession.update({
+    where: { id: sessionId },
+    data: userLinkData(user)
+  });
+}
+
+/** Start a new chat session — stored for all visitors (logged in or anonymous). */
 chatRouter.post(
   '/chat/start',
+  authOptional,
   asyncRoute(async (req, res) => {
-    const { userId } = z.object({ userId: z.string().optional() }).parse(req.body);
+    const body = z
+      .object({
+        visitorKey: z.string().min(8).max(80).optional(),
+        entryPage: z.string().max(500).optional()
+      })
+      .parse(req.body);
+
+    const greetingReply = getGreetingReply();
+    const linked = userLinkData(req.user);
 
     const session = await prisma.chatSession.create({
-      data: { userId: userId || null, botStage: 0 }
+      data: {
+        botStage: 0,
+        visitorKey: body.visitorKey ?? null,
+        entryPage: body.entryPage ?? null,
+        ...linked
+      }
     });
 
     const greeting = await prisma.chatMessage.create({
-      data: { sessionId: session.id, role: 'bot', content: GREETING }
+      data: {
+        sessionId: session.id,
+        role: 'bot',
+        content: greetingReply.message,
+        options: greetingReply.options ?? []
+      }
     });
 
     res.status(201).json({
       sessionId: session.id,
-      messages: [{ id: greeting.id, role: 'bot', content: greeting.content, createdAt: greeting.createdAt }],
-      botName: BOT_NAME
+      isLoggedIn: Boolean(req.user),
+      messages: [
+        botMessagePayload(greeting, {
+          options: greetingReply.options,
+          allowFreeText: greetingReply.allowFreeText
+        })
+      ],
+      botName: BOT_NAME,
+      activeOptions: greetingReply.options ?? []
     });
+  })
+);
+
+/** Link an anonymous session to the logged-in patient (after login). */
+chatRouter.patch(
+  '/chat/:sessionId/link',
+  authOptional,
+  asyncRoute(async (req, res) => {
+    const sessionId = routeParam(req, 'sessionId');
+    if (!req.user) return res.status(401).json({ message: 'Login required to link chat.' });
+
+    const session = await prisma.chatSession.findUnique({ where: { id: sessionId } });
+    if (!session) return res.status(404).json({ message: 'Session not found.' });
+
+    const updated = await prisma.chatSession.update({
+      where: { id: sessionId },
+      data: userLinkData(req.user)
+    });
+
+    res.json({ session: updated, message: 'Chat linked to your account.' });
   })
 );
 
 /** Fetch all messages for a session. */
 chatRouter.get(
   '/chat/:sessionId',
+  authOptional,
   asyncRoute(async (req, res) => {
     const sessionId = routeParam(req, 'sessionId');
     const session = await prisma.chatSession.findUnique({
@@ -38,13 +134,31 @@ chatRouter.get(
       include: { messages: { orderBy: { createdAt: 'asc' } } }
     });
     if (!session) return res.status(404).json({ message: 'Session not found.' });
-    res.json({ session: { id: session.id, status: session.status, botStage: session.botStage }, messages: session.messages });
+
+    await maybeLinkSessionToUser(sessionId, req.user);
+
+    const messages = session.messages.map((m) => botMessagePayload(m));
+    const pending = session.status === 'ACTIVE' ? getPendingOptions(session.botStage) : undefined;
+
+    res.json({
+      session: {
+        id: session.id,
+        status: session.status,
+        botStage: session.botStage,
+        userId: session.userId,
+        visitorKey: session.visitorKey
+      },
+      messages,
+      activeOptions: pending,
+      isLoggedIn: Boolean(req.user)
+    });
   })
 );
 
-/** Send a user message — returns bot reply. */
+/** Send a user message — every message is stored in the database. */
 chatRouter.post(
   '/chat/:sessionId/message',
+  authOptional,
   asyncRoute(async (req, res) => {
     const sessionId = routeParam(req, 'sessionId');
     const { content } = z.object({ content: z.string().min(1).max(2000) }).parse(req.body);
@@ -52,19 +166,22 @@ chatRouter.post(
     const session = await prisma.chatSession.findUnique({ where: { id: sessionId } });
     if (!session) return res.status(404).json({ message: 'Session not found.' });
 
-    // Save user message
+    await maybeLinkSessionToUser(sessionId, req.user);
+
     const userMsg = await prisma.chatMessage.create({ data: { sessionId, role: 'user', content } });
 
-    // Capture concern from first user message
     const concern = session.concern ?? (session.botStage === 0 ? content.slice(0, 200) : undefined);
-
-    // Get bot response
     const reply = getBotReply(session.botStage, content);
 
-    // Save bot reply
-    const botMsg = await prisma.chatMessage.create({ data: { sessionId, role: 'bot', content: reply.message } });
+    const botMsg = await prisma.chatMessage.create({
+      data: {
+        sessionId,
+        role: 'bot',
+        content: reply.message,
+        options: reply.options ?? []
+      }
+    });
 
-    // Update session state
     await prisma.chatSession.update({
       where: { id: sessionId },
       data: {
@@ -72,20 +189,20 @@ chatRouter.post(
         status: reply.needsOperator ? 'NEEDS_OPERATOR' : session.status,
         concern: concern ?? session.concern,
         visitorName: reply.capturedName ?? session.visitorName,
-        visitorPhone: reply.capturedPhone ?? session.visitorPhone
+        visitorPhone: reply.capturedPhone ?? session.visitorPhone,
+        ...(!session.userId && req.user ? userLinkData(req.user) : {})
       }
     });
 
     res.json({
       userMessage: { id: userMsg.id, role: 'user', content: userMsg.content, createdAt: userMsg.createdAt },
-      botMessage: {
-        id: botMsg.id,
-        role: 'bot',
-        content: botMsg.content,
-        createdAt: botMsg.createdAt,
+      botMessage: botMessagePayload(botMsg, {
+        options: reply.options,
         showBookButton: reply.showBookButton,
-        showWhatsAppButton: reply.showWhatsAppButton
-      }
+        showWhatsAppButton: reply.showWhatsAppButton,
+        allowFreeText: reply.allowFreeText
+      }),
+      activeOptions: reply.options ?? []
     });
   })
 );

@@ -1,18 +1,40 @@
-// ── Floating action button ────────────────────────────────────────────────────
-.chat-fab-wrapper {
+// Stack height: bottom offset + WhatsApp + gap + chat + panel gap
+$fab-stack-offset: 1rem;
+$whatsapp-size: 52px;
+$chat-size: 56px;
+$fab-gap: 0.75rem;
+$panel-gap: 1rem;
+$stack-top: calc(#{$fab-stack-offset} + #{$whatsapp-size} + #{$fab-gap} + #{$chat-size} + #{$panel-gap});
+
+:host {
+  display: block;
   position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  z-index: 9999;
+  bottom: $fab-stack-offset;
+  right: 1rem;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+:host .support-fab-stack,
+:host .chat-panel {
+  pointer-events: auto;
+}
+
+// ── Floating support stack (chat above WhatsApp) ─────────────────────────────
+.support-fab-stack {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.5rem;
+  gap: $fab-gap;
+}
+
+.chat-fab-wrap {
+  position: relative;
 }
 
 .chat-fab {
-  width: 56px;
-  height: 56px;
+  width: $chat-size;
+  height: $chat-size;
   border-radius: 50%;
   background: linear-gradient(135deg, #0f62fe, #1a7aff);
   color: #fff;
@@ -28,7 +50,35 @@
   &.is-open { background: #334155; box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
 }
 
+.whatsapp-fab {
+  width: $whatsapp-size;
+  height: $whatsapp-size;
+  border-radius: 50%;
+  background: #13a45f;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 16px 34px rgba(19, 164, 95, 0.34);
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  .wa-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  &:hover {
+    transform: scale(1.07);
+    box-shadow: 0 18px 38px rgba(19, 164, 95, 0.42);
+  }
+}
+
 .chat-badge {
+  position: absolute;
+  right: calc(100% + 0.6rem);
+  top: 50%;
+  transform: translateY(-50%);
   background: #fff;
   color: #0f62fe;
   font-size: 0.78rem;
@@ -39,18 +89,19 @@
   cursor: pointer;
   white-space: nowrap;
   animation: badge-pulse 2s ease-in-out infinite;
+  pointer-events: auto;
 }
 
 @keyframes badge-pulse {
-  0%, 100% { transform: scale(1); }
-  50%       { transform: scale(1.04); }
+  0%, 100% { transform: translateY(-50%) scale(1); }
+  50%       { transform: translateY(-50%) scale(1.04); }
 }
 
 // ── Chat panel ────────────────────────────────────────────────────────────────
 .chat-panel {
   position: fixed;
-  bottom: 5.5rem;
-  right: 1.5rem;
+  bottom: calc(#{$stack-top} - #{$fab-stack-offset});
+  right: 0;
   width: 360px;
   max-width: calc(100vw - 2rem);
   height: 520px;
@@ -233,6 +284,55 @@
   30%           { transform: translateY(-5px); }
 }
 
+// ── Quick-reply options ───────────────────────────────────────────────────────
+.quick-replies {
+  flex-shrink: 0;
+  padding: 0.65rem 1rem 0.5rem;
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+}
+
+.quick-replies-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.quick-replies-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.quick-reply-btn {
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  border: 1.5px solid #0f62fe;
+  background: #eef5ff;
+  color: #0f62fe;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.3;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+
+  &:hover {
+    background: #0f62fe;
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
 // ── Input row ─────────────────────────────────────────────────────────────────
 .chat-input-row {
   display: flex;
@@ -290,6 +390,11 @@
 
 // ── Mobile ────────────────────────────────────────────────────────────────────
 @media (max-width: 480px) {
+  :host {
+    bottom: 1rem;
+    right: 1rem;
+  }
+
   .chat-panel {
     bottom: 0;
     right: 0;
@@ -298,10 +403,5 @@
     height: 100vh;
     max-height: 100vh;
     border-radius: 0;
-  }
-
-  .chat-fab-wrapper {
-    bottom: 1rem;
-    right: 1rem;
   }
 }

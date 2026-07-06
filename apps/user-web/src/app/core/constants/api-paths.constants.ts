@@ -30,7 +30,8 @@ export const API_PATHS = {
   CHAT: {
     START: '/chat/start',
     SESSION: (id: string) => `/chat/${id}`,
-    MESSAGE: (id: string) => `/chat/${id}/message`
+    MESSAGE: (id: string) => `/chat/${id}/message`,
+    LINK: (id: string) => `/chat/${id}/link`
   },
   VACANCIES: '/vacancies',
   DOCTORS: '/doctors',

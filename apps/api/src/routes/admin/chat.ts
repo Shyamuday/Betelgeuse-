@@ -6,6 +6,23 @@ import { prisma } from '../../db.js';
 import { asyncRoute, routeParam, queryText, queryPositiveInt, writeAuditLog } from '../../utils/helpers.js';
 
 export function registerAdminChatRoutes(router: Router) {
+  /** Summary counts for chat analytics. */
+  router.get(
+    '/admin/chat-sessions/stats',
+    authRequired,
+    allowRoles(Role.ADMIN, Role.RECEPTIONIST, Role.PATIENT_COORDINATOR),
+    asyncRoute(async (_req, res) => {
+      const [total, loggedIn, anonymous, needsOperator, active] = await Promise.all([
+        prisma.chatSession.count(),
+        prisma.chatSession.count({ where: { userId: { not: null } } }),
+        prisma.chatSession.count({ where: { userId: null } }),
+        prisma.chatSession.count({ where: { status: 'NEEDS_OPERATOR' } }),
+        prisma.chatSession.count({ where: { status: 'ACTIVE' } })
+      ]);
+      res.json({ stats: { total, loggedIn, anonymous, needsOperator, active } });
+    })
+  );
+
   /** List chat sessions — filterable by status. Default: NEEDS_OPERATOR first. */
   router.get(
     '/admin/chat-sessions',
@@ -24,6 +41,7 @@ export function registerAdminChatRoutes(router: Router) {
       const sessions = await prisma.chatSession.findMany({
         where,
         include: {
+          user: { select: { id: true, name: true, mobile: true, email: true } },
           messages: { orderBy: { createdAt: 'asc' }, take: 1 },
           _count: { select: { messages: true } }
         },
@@ -48,7 +66,10 @@ export function registerAdminChatRoutes(router: Router) {
       const id = routeParam(req, 'id');
       const session = await prisma.chatSession.findUnique({
         where: { id },
-        include: { messages: { orderBy: { createdAt: 'asc' } } }
+        include: {
+          user: { select: { id: true, name: true, mobile: true, email: true } },
+          messages: { orderBy: { createdAt: 'asc' } }
+        }
       });
       if (!session) return res.status(404).json({ message: 'Session not found.' });
       res.json({ session });

@@ -158,6 +158,13 @@ export class AdminDoctorsApi extends AdminApiBase {
   }
 
   // ── Chat Inbox ────────────────────────────────────────────────────────────
+  getChatSessionStats() {
+    return firstValueFrom(
+      this.http.get<{ stats: { total: number; loggedIn: number; anonymous: number; needsOperator: number; active: number } }>(
+        `${this.apiBase}${API_PATHS.ADMIN.CHAT_SESSION_STATS}`
+      )
+    );
+  }
   listChatSessions(status?: string, page = 1) {
     const params = new URLSearchParams({ page: String(page), pageSize: '30' });
     if (status) params.set('status', status);

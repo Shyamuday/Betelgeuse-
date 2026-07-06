@@ -40,13 +40,13 @@ export class PublicConfigService {
     if (!this.loading) {
       this.loading = this.client
         .get<{ config: PublicConfig }>(API_PATHS.PUBLIC_CONFIG)
-        .then((r) => {
+        .then((r: { config: PublicConfig }) => {
           this.cached = { ...FALLBACK, ...r.config };
           return this.cached;
         })
-        .catch(() => FALLBACK);
+        .catch(() => FALLBACK as PublicConfig);
     }
-    return this.loading;
+    return this.loading!;
   }
 
   whatsappUrl(config: PublicConfig): string {

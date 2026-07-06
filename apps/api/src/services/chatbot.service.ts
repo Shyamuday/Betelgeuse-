@@ -1,27 +1,75 @@
 /**
- * Rule-based chatbot scripted as "Dr. Priya", a warm and empathetic
- * care advisor at Vitalis. Guides visitors through understanding their
- * concern and booking a consultation. Flags for operator when visitor
- * declines or leaves contact details for follow-up.
+ * Guided Q&A chatbot as "Dr. Priya" — each step shows a question with
+ * tap-to-select options so users don't have to type unless they choose to.
  */
 
 export type BotReply = {
   message: string;
   nextStage: number;
   needsOperator: boolean;
+  options?: string[];
   capturedName?: string;
   capturedPhone?: string;
   showBookButton?: boolean;
   showWhatsAppButton?: boolean;
+  allowFreeText?: boolean;
 };
 
 const BOT_NAME = 'Dr. Priya';
 
-const GREETING =
-  `Hi there! 👋 I'm ${BOT_NAME}, your care advisor at Vitalis. I'm here to help you understand your concern and find the right care for you.\n\nWhat brings you here today? Feel free to describe your symptoms or health concern.`;
+const CONCERN_OPTIONS = [
+  'Skin, hair or allergy issues',
+  'Chronic or long-term condition',
+  'Digestive or lifestyle concern',
+  'Child or family health',
+  'Stress, sleep or mental wellness',
+  'General consultation',
+  'Something else'
+] as const;
 
-const YES_RE = /\byes\b|\bsure\b|\bokay\b|\byes please\b|\byep\b|\byeah\b|\bplease\b|\bi would\b|\bbook\b|\bwant to\b|\bwilling\b/i;
-const NO_RE  = /\bno\b|\bnot\b|\bdon'?t\b|\bnope\b|\bnah\b|\bnot now\b|\bmaybe later\b|\blater\b|\bnot interested\b|\bno thanks?\b/i;
+const DURATION_OPTIONS = [
+  'A few days',
+  '1–2 weeks',
+  '1–3 months',
+  'More than 3 months'
+] as const;
+
+const TREATMENT_OPTIONS = [
+  'First time seeking help',
+  'Tried homeopathy before',
+  'Tried other treatments',
+  'Not sure / mixed'
+] as const;
+
+const BOOK_OPTIONS = [
+  'Yes, I want to book',
+  'Tell me more first',
+  'Not right now'
+] as const;
+
+const FOLLOWUP_OPTIONS = [
+  'Book consultation now',
+  'I have another question',
+  'No, I am good'
+] as const;
+
+const CALLBACK_OPTIONS = [
+  'Yes, call or WhatsApp me',
+  'I will reach out myself',
+  'No thanks'
+] as const;
+
+const CLOSING_OPTIONS = [
+  'Start a new question',
+  'Close chat'
+] as const;
+
+const GREETING = `Hi there! 👋 I'm ${BOT_NAME}, your care advisor at Vitalis.\n\nI'll ask a few quick questions so we can guide you to the right care. Tap an option below to get started.`;
+
+const YES_RE =
+  /\byes\b|\bsure\b|\bokay\b|\byes please\b|\byep\b|\byeah\b|\bbook\b|\bwant to\b|\bwilling\b|want to book|book consultation|book now/i;
+const NO_RE =
+  /\bno\b|\bnot\b|\bdon'?t\b|\bnope\b|\bnah\b|\bnot now\b|\bmaybe later\b|\blater\b|\bnot interested\b|\bno thanks?\b|not right now|no, i am good|close chat/i;
 
 function hasPhone(text: string): boolean {
   return /(\+?\d[\d\s\-]{8,14}\d)/.test(text);
@@ -40,87 +88,153 @@ function isYes(text: string): boolean {
   return YES_RE.test(text);
 }
 
-/**
- * Returns the bot's next message and updated state based on
- * the current stage and user's latest message.
- */
+function matchesAny(text: string, options: readonly string[]): boolean {
+  const t = text.trim().toLowerCase();
+  return options.some((o) => t === o.toLowerCase() || t.includes(o.toLowerCase().slice(0, 12)));
+}
+
+/** Options shown for the question the bot is currently waiting on. */
+export function getPendingOptions(stage: number): string[] | undefined {
+  switch (stage) {
+    case 0:
+      return [...CONCERN_OPTIONS];
+    case 1:
+      return [...DURATION_OPTIONS];
+    case 2:
+      return [...TREATMENT_OPTIONS];
+    case 3:
+      return [...BOOK_OPTIONS];
+    case 4:
+      return [...FOLLOWUP_OPTIONS];
+    case 5:
+      return [...CALLBACK_OPTIONS];
+    case 7:
+      return [...CLOSING_OPTIONS];
+    default:
+      return undefined;
+  }
+}
+
+export function getGreetingReply(): BotReply {
+  return {
+    message: GREETING,
+    nextStage: 0,
+    needsOperator: false,
+    options: [...CONCERN_OPTIONS],
+    allowFreeText: true
+  };
+}
+
 export function getBotReply(stage: number, userMessage: string): BotReply {
   const msg = userMessage.trim();
 
   switch (stage) {
-    // Stage 0: user just sent their concern — acknowledge and ask duration
+    // Stage 0: concern selected
     case 0:
       return {
-        message:
-          `Thank you for sharing that with me. 🙏 I want to make sure you get the right help.\n\nHow long have you been experiencing this? (A few days, weeks, months…)`,
+        message: `Thank you for sharing. 🙏\n\nHow long have you been experiencing this?`,
         nextStage: 1,
-        needsOperator: false
+        needsOperator: false,
+        options: [...DURATION_OPTIONS],
+        allowFreeText: true
       };
 
-    // Stage 1: user described duration — ask about prior treatment
+    // Stage 1: duration selected
     case 1:
       return {
-        message:
-          `I see. Have you tried any treatments for this before, or is this the first time you are seeking help for it?`,
+        message: `Got it. Have you tried any treatment for this before?`,
         nextStage: 2,
-        needsOperator: false
+        needsOperator: false,
+        options: [...TREATMENT_OPTIONS],
+        allowFreeText: true
       };
 
-    // Stage 2: treatment history captured — suggest consultation
+    // Stage 2: treatment history — suggest consultation
     case 2:
       return {
         message:
-          `Thank you. Based on what you have shared, I believe a personalised consultation with one of our qualified homeopathic doctors would be very beneficial for you.\n\nWe offer detailed, confidential consultations from the comfort of your home. Would you like to book a consultation today?`,
+          `Thank you. Based on what you shared, a personalised online consultation with our homeopathic doctors would be a good next step.\n\nWould you like to book a consultation?`,
         nextStage: 3,
         needsOperator: false,
-        showBookButton: true
+        options: [...BOOK_OPTIONS],
+        allowFreeText: true
       };
 
-    // Stage 3: asked about booking — handle yes/no
+    // Stage 3: booking decision
     case 3:
-      if (isNo(msg)) {
+      if (matchesAny(msg, ['Tell me more first']) || /more|cost|process|how|what|doctor/i.test(msg)) {
         return {
           message:
-            `No worries at all! 😊 I completely understand — it can take time to feel ready.\n\nWould you like me to have one of our care coordinators call or WhatsApp you when you are ready? Just share your name and phone number and we will reach out at a time that suits you.`,
-          nextStage: 5,
-          needsOperator: false
-        };
-      }
-      return {
-        message:
-          `Wonderful! 🌟 You can book your consultation directly on our website. Our doctors review every case carefully and will guide you through the next steps.\n\nIs there anything you would like to know about the process, cost, or our doctors before you book?`,
-        nextStage: 4,
-        needsOperator: false,
-        showBookButton: true
-      };
-
-    // Stage 4: post-yes — answering follow-up questions after booking offer
-    case 4:
-      if (isNo(msg)) {
-        return {
-          message: `Of course! You can go ahead and book whenever you are ready. We are here if you need anything. 💚`,
+            `Of course! Our consultations are private, doctor-led, and done from your phone or laptop. A doctor reviews your case and guides you on medicine and follow-up.\n\nMost patients find it convenient and affordable compared to repeated clinic visits.`,
           nextStage: 4,
           needsOperator: false,
-          showBookButton: true
+          options: [...FOLLOWUP_OPTIONS],
+          showBookButton: true,
+          allowFreeText: true
+        };
+      }
+      if (isNo(msg) || matchesAny(msg, ['Not right now'])) {
+        return {
+          message:
+            `No worries at all! 😊 Would you like our care team to call or WhatsApp you when you are ready?`,
+          nextStage: 5,
+          needsOperator: false,
+          options: [...CALLBACK_OPTIONS],
+          allowFreeText: true
         };
       }
       return {
         message:
-          `Great question! Our consultations are conducted via private chat and are fully confidential. After booking, our team will assign the right doctor based on your concern.\n\nIs there anything else I can help clarify?`,
+          `Wonderful! 🌟 Tap below to book, or ask me anything before you go.`,
         nextStage: 4,
         needsOperator: false,
-        showBookButton: true
+        options: [...FOLLOWUP_OPTIONS],
+        showBookButton: true,
+        allowFreeText: true
       };
 
-    // Stage 5: asked for contact details — check for phone
-    case 5: {
-      if (isNo(msg)) {
+    // Stage 4: post-booking interest
+    case 4:
+      if (isNo(msg) || matchesAny(msg, ['No, I am good', 'Close chat'])) {
         return {
-          message:
-            `That is perfectly fine! 💚 We are always here whenever you are ready. You can also reach us directly on WhatsApp at any time. Wishing you good health!`,
+          message: `Thank you for chatting with me today. Wishing you good health! 💚`,
           nextStage: 7,
           needsOperator: false,
-          showWhatsAppButton: true
+          options: [...CLOSING_OPTIONS],
+          allowFreeText: true
+        };
+      }
+      if (matchesAny(msg, ['Book consultation now']) || isYes(msg)) {
+        return {
+          message: `Great — use the button below to book. Our team will take it from there!`,
+          nextStage: 4,
+          needsOperator: false,
+          showBookButton: true,
+          options: ['I have another question', 'No, I am good'],
+          allowFreeText: true
+        };
+      }
+      return {
+        message:
+          `Happy to help! Consultations are confidential, online, and tailored to your concern. A doctor is assigned based on what you shared.\n\nAnything else you'd like to know?`,
+        nextStage: 4,
+        needsOperator: false,
+        options: [...FOLLOWUP_OPTIONS],
+        showBookButton: true,
+        allowFreeText: true
+      };
+
+    // Stage 5: callback preference
+    case 5: {
+      if (isNo(msg) || matchesAny(msg, ['No thanks', 'I will reach out myself'])) {
+        return {
+          message:
+            `That is perfectly fine! 💚 Reach us on WhatsApp anytime. Wishing you good health!`,
+          nextStage: 7,
+          needsOperator: false,
+          showWhatsAppButton: true,
+          options: [...CLOSING_OPTIONS],
+          allowFreeText: true
         };
       }
 
@@ -128,37 +242,67 @@ export function getBotReply(stage: number, userMessage: string): BotReply {
       if (phone || hasPhone(msg)) {
         return {
           message:
-            `Thank you so much! 🙏 Our care coordinator will reach out to you very soon on ${phone ?? 'the number you shared'}. You are in good hands — we will make sure you get the right care.\n\nWishing you good health! 💚`,
+            `Thank you! 🙏 Our coordinator will reach out soon on ${phone ?? 'your number'}. You are in good hands.`,
           nextStage: 6,
           needsOperator: true,
-          capturedPhone: phone
+          capturedPhone: phone,
+          allowFreeText: true
         };
       }
 
-      // Might have given a name only — ask for phone
+      if (matchesAny(msg, ['Yes, call or WhatsApp me'])) {
+        return {
+          message: `Please type your name and mobile / WhatsApp number (e.g. Rahul 9876543210).`,
+          nextStage: 5,
+          needsOperator: false,
+          allowFreeText: true
+        };
+      }
+
       return {
-        message: `Thank you! Could you also share your phone number or WhatsApp number so our coordinator can reach you?`,
+        message: `Please share your phone or WhatsApp number so we can reach you.`,
         nextStage: 5,
         needsOperator: false,
-        capturedName: msg.length < 60 ? msg : undefined
+        capturedName: msg.length < 60 && !hasPhone(msg) ? msg : undefined,
+        allowFreeText: true
       };
     }
 
-    // Stage 6: contact captured, escalated
     case 6:
       return {
-        message: `You're welcome! Our team will be in touch with you very soon. Take care! 💚`,
-        nextStage: 6,
+        message: `You're welcome! Our team will be in touch very soon. Take care! 💚`,
+        nextStage: 7,
         needsOperator: false,
-        showWhatsAppButton: true
+        showWhatsAppButton: true,
+        options: [...CLOSING_OPTIONS],
+        allowFreeText: true
       };
 
-    // Stage 7: closed gracefully
+    case 7:
+      if (matchesAny(msg, ['Start a new question'])) {
+        return {
+          message: `Of course! What would you like help with today?`,
+          nextStage: 0,
+          needsOperator: false,
+          options: [...CONCERN_OPTIONS],
+          allowFreeText: true
+        };
+      }
+      return {
+        message: `Thank you for visiting Vitalis. We are here whenever you need us. 💚`,
+        nextStage: 7,
+        needsOperator: false,
+        options: ['Start a new question'],
+        allowFreeText: true
+      };
+
     default:
       return {
-        message: `Is there anything else I can help you with today?`,
-        nextStage: stage,
-        needsOperator: false
+        message: `How can I help you today?`,
+        nextStage: 0,
+        needsOperator: false,
+        options: [...CONCERN_OPTIONS],
+        allowFreeText: true
       };
   }
 }
