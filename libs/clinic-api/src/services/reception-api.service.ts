@@ -43,6 +43,26 @@ export class ReceptionApiService {
     return firstValueFrom(this.http.post<any>(`${this.base}${API_PATHS.RECEPTION.CONSULTATIONS}`, data));
   }
 
+  getPatientRewards(patientId: string) {
+    return firstValueFrom(
+      this.http.get<{ patient: { id: string; name: string; patientCode?: string | null }; balanceInPaise: number }>(
+        `${this.base}${API_PATHS.RECEPTION.PATIENT_REWARDS(patientId)}`
+      )
+    );
+  }
+
+  getPatientCheckoutQuote(
+    patientId: string,
+    payload: { diseaseId: string; promoCode?: string; walletRedeemInPaise?: number }
+  ) {
+    return firstValueFrom(
+      this.http.post<{ quote: Record<string, unknown> }>(
+        `${this.base}${API_PATHS.RECEPTION.PATIENT_CHECKOUT_QUOTE(patientId)}`,
+        payload
+      )
+    );
+  }
+
   collectCash(consultationId: string) {
     return firstValueFrom(
       this.http.post<any>(`${this.base}${API_PATHS.RECEPTION.COLLECT_CASH(consultationId)}`, {})

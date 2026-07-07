@@ -13,6 +13,14 @@ type PatientHit = {
   mobile?: string | null;
 };
 
+type CheckoutQuote = {
+  grossAmountInPaise: number;
+  discountInPaise: number;
+  walletRedeemedInPaise: number;
+  payableInPaise: number;
+  maxWalletRedeemInPaise: number;
+};
+
 @Component({
   selector: 'app-walk-in',
   standalone: true,
@@ -34,6 +42,9 @@ export class WalkInComponent implements OnInit {
 
   readonly patientHits = signal<PatientHit[]>([]);
   readonly selectedPatient = signal<PatientHit | null>(null);
+  readonly walletBalanceInPaise = signal(0);
+  readonly checkoutQuote = signal<CheckoutQuote | null>(null);
+  readonly quoteLoading = signal(false);
 
   readonly walkInModel = signal({
     name: '',
@@ -41,7 +52,8 @@ export class WalkInComponent implements OnInit {
     email: '',
     diseaseId: '',
     collectCash: true,
-    notes: ''
+    notes: '',
+    promoCode: ''
   });
   readonly walkInForm = form(this.walkInModel, (schema) => {
     required(schema.name, { message: 'Name is required' });
@@ -52,7 +64,9 @@ export class WalkInComponent implements OnInit {
   readonly existingModel = signal({
     lookup: '',
     diseaseId: '',
-    collectCash: true
+    collectCash: true,
+    promoCode: '',
+    useWallet: false
   });
   readonly existingForm = form(this.existingModel, (schema) => {
     required(schema.diseaseId, { message: 'Concern is required' });
@@ -131,6 +145,79 @@ export class WalkInComponent implements OnInit {
   selectPatient(patient: PatientHit): void {
     this.selectedPatient.set(patient);
     this.error.set('');
+    this.checkoutQuote.set(null);
+    void this.loadPatientWallet(patient.id);
+    void this.refreshCheckoutQuote();
+  }
+
+  onExistingDiseaseChange(): void {
+    void this.refreshCheckoutQuote();
+  }
+
+  onPromoChange(): void {
+    void this.refreshCheckoutQuote();
+  }
+
+  toggleUseWallet(checked: boolean): void {
+    this.existingModel.update((m) => ({ ...m, useWallet: checked }));
+    void this.refreshCheckoutQuote();
+  }
+
+  private async loadPatientWallet(patientId: string): Promise<void> {
+    try {
+      const res = await this.api.getPatientRewards(patientId);
+      this.walletBalanceInPaise.set(res.balanceInPaise ?? 0);
+    } catch {
+      this.walletBalanceInPaise.set(0);
+    }
+  }
+
+  private async refreshCheckoutQuote(): Promise<void> {
+    const patient = this.selectedPatient();
+    const diseaseId = this.existingModel().diseaseId;
+    if (!patient?.id || !diseaseId) {
+      this.checkoutQuote.set(null);
+      return;
+    }
+
+    this.quoteLoading.set(true);
+    try {
+      const form = this.existingModel();
+      const basePayload = {
+        diseaseId,
+        promoCode: form.promoCode.trim() || undefined
+      };
+      if (!form.useWallet) {
+        const res = await this.api.getPatientCheckoutQuote(patient.id, {
+          ...basePayload,
+          walletRedeemInPaise: 0
+        });
+        this.checkoutQuote.set(res.quote as CheckoutQuote);
+        return;
+      }
+
+      const preview = await this.api.getPatientCheckoutQuote(patient.id, basePayload);
+      const maxWallet = Number((preview.quote as CheckoutQuote).maxWalletRedeemInPaise ?? 0);
+      if (maxWallet <= 0) {
+        this.checkoutQuote.set(preview.quote as CheckoutQuote);
+        return;
+      }
+      const withWallet = await this.api.getPatientCheckoutQuote(patient.id, {
+        ...basePayload,
+        walletRedeemInPaise: maxWallet
+      });
+      this.checkoutQuote.set(withWallet.quote as CheckoutQuote);
+    } catch {
+      this.checkoutQuote.set(null);
+    } finally {
+      this.quoteLoading.set(false);
+    }
+  }
+
+  walletRedeemForSubmit(): number | undefined {
+    const form = this.existingModel();
+    if (!form.useWallet) return undefined;
+    return this.checkoutQuote()?.walletRedeemedInPaise || undefined;
   }
 
   async submitNew(): Promise<void> {
@@ -148,7 +235,8 @@ export class WalkInComponent implements OnInit {
         email: form.email || null,
         diseaseId: form.diseaseId,
         collectCash: form.collectCash,
-        notes: form.notes || undefined
+        notes: form.notes || undefined,
+        promoCode: form.promoCode.trim() || undefined
       });
       const code = result?.patient?.patientCode;
       this.toast.set(code ? `Registered — Patient ID: ${code}` : 'Walk-in registered');
@@ -178,7 +266,9 @@ export class WalkInComponent implements OnInit {
       await this.api.bookConsultation({
         patientId: patient.id,
         diseaseId: form.diseaseId,
-        collectCash: form.collectCash
+        collectCash: form.collectCash,
+        promoCode: form.promoCode.trim() || undefined,
+        walletRedeemInPaise: this.walletRedeemForSubmit()
       });
       const code = patient.patientCode;
       this.toast.set(code ? `Added to queue — Patient ID: ${code}` : 'Added to queue');

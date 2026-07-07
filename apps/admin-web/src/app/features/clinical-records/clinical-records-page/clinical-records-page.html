@@ -225,14 +225,18 @@
           </table>
         }
 
-        @if (analysisCaseSheetJson()) {
-          <h4>Case sheet</h4>
-          <pre class="json-block">{{ analysisCaseSheetJson() }}</pre>
-        }
+        @if (analysisClinicalSummary(); as summary) {
+          <h4>{{ summary.approachTitle }} · case sheet</h4>
+          @if (analysisCaseSheetRows().length) {
+            <vitalis-detail-rows variant="grid" [rows]="analysisCaseSheetRows()" />
+          } @else {
+            <p class="muted">No case sheet fields recorded yet.</p>
+          }
 
-        @if (analysisApproachJson()) {
-          <h4>Approach-specific data</h4>
-          <pre class="json-block">{{ analysisApproachJson() }}</pre>
+          @if (analysisApproachRows().length) {
+            <h4>Approach-specific notes</h4>
+            <vitalis-detail-rows variant="grid" [rows]="analysisApproachRows()" />
+          }
         }
       } @else {
         <div class="empty-detail">

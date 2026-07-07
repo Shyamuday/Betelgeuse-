@@ -22,6 +22,11 @@
             @if (consultation.prescription || consultation.prescriptions?.length) {
               <p class="success">Prescription uploaded</p>
             }
+            @if (enableDashboardLinks) {
+              <a class="dash-link" [routerLink]="dashboardPath" [queryParams]="dashboardQuery(consultation.id)">
+                Open chat &amp; prescription →
+              </a>
+            }
           </article>
         } @empty {
           <p class="muted">No consultations yet.</p>

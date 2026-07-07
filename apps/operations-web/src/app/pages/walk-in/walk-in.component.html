@@ -44,6 +44,10 @@
         <input type="checkbox" [formField]="walkInForm.collectCash" />
         Cash collected at desk
       </label>
+      <div class="field">
+        <label class="field-label" for="walkin-promo">Promo code (optional)</label>
+        <input id="walkin-promo" [formField]="walkInForm.promoCode" placeholder="e.g. WELCOME100" />
+      </div>
 
       @if (error()) {
         <p class="error">{{ error() }}</p>
@@ -93,18 +97,45 @@
           <span class="label">Selected</span>
           <strong>{{ patient.name }}</strong>
           <span class="code">{{ patient.patientCode }}</span>
+          @if (walletBalanceInPaise() > 0) {
+            <span class="wallet-pill">Wallet ₹{{ formatPaise(walletBalanceInPaise()) }}</span>
+          }
         </div>
       }
 
       <div class="field">
         <label class="field-label" for="walkin-existing-disease">Concern / disease</label>
-        <select id="walkin-existing-disease" [formField]="existingForm.diseaseId">
+        <select id="walkin-existing-disease" [formField]="existingForm.diseaseId" (change)="onExistingDiseaseChange()">
           <option value="">Select concern…</option>
           @for (d of diseases(); track d.id) {
             <option [value]="d.id">{{ d.name }} — ₹{{ formatPaise(d.feeInPaise) }}</option>
           }
         </select>
       </div>
+      <div class="field">
+        <label class="field-label" for="walkin-existing-promo">Promo code (optional)</label>
+        <input id="walkin-existing-promo" [formField]="existingForm.promoCode" placeholder="Promo code" (change)="onPromoChange()" />
+      </div>
+      @if (walletBalanceInPaise() > 0) {
+        <label class="check">
+          <input type="checkbox" [checked]="existingModel().useWallet" (change)="toggleUseWallet($any($event.target).checked)" />
+          Apply wallet balance (up to ₹{{ formatPaise(checkoutQuote()?.maxWalletRedeemInPaise ?? walletBalanceInPaise()) }})
+        </label>
+      }
+      @if (quoteLoading()) {
+        <p class="field-hint">Calculating payment…</p>
+      } @else if (checkoutQuote(); as quote) {
+        <div class="checkout-box">
+          <div class="checkout-row"><span>Consultation fee</span><strong>₹{{ formatPaise(quote.grossAmountInPaise) }}</strong></div>
+          @if (quote.discountInPaise > 0) {
+            <div class="checkout-row discount"><span>Promo discount</span><strong>−₹{{ formatPaise(quote.discountInPaise) }}</strong></div>
+          }
+          @if (quote.walletRedeemedInPaise > 0) {
+            <div class="checkout-row discount"><span>Wallet credit</span><strong>−₹{{ formatPaise(quote.walletRedeemedInPaise) }}</strong></div>
+          }
+          <div class="checkout-row total"><span>Collect at desk</span><strong>₹{{ formatPaise(quote.payableInPaise) }}</strong></div>
+        </div>
+      }
       <label class="check">
         <input type="checkbox" [formField]="existingForm.collectCash" />
         Cash collected at desk

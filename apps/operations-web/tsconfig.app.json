@@ -24,6 +24,8 @@
       "@vitalis/store-ui/*": ["../../libs/store-ui/src/*"],
       "@vitalis/contracts": ["../../libs/contracts/src/index.ts"],
       "@vitalis/contracts/*": ["../../libs/contracts/src/*"],
+      "@vitalis/homeopathy-approaches": ["../../libs/homeopathy-approaches/src/index.ts"],
+      "@vitalis/homeopathy-approaches/*": ["../../libs/homeopathy-approaches/src/*"],
       "@vitalis/admin-console": ["../../libs/admin-console/src/index.ts"],
       "@vitalis/admin-console/*": ["../../apps/admin-web/src/app/*"]
     },

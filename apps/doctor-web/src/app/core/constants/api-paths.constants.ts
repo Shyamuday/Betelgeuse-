@@ -1,7 +1,9 @@
+import { CROSS_APP_API_PATHS } from '@vitalis/clinic-api/cross-app-api-paths.constants';
+
 export const API_PATHS = {
   CONSULTATIONS: '/consultations',
   DOCTOR: {
-    WORKLIST: '/doctor/worklist',
+    WORKLIST: CROSS_APP_API_PATHS.DOCTOR.WORKLIST,
     PROFILE: '/doctor/profile',
     PAYMENTS_SUMMARY: '/doctor/payments/summary',
     MY_PAYSLIP: '/doctor/my-payslip',
@@ -11,16 +13,16 @@ export const API_PATHS = {
     PRESCRIPTIONS: '/doctor/prescriptions',
     PRESCRIPTION_PDF: (id: string) => `/patient/prescriptions/${id}/pdf`,
     PRESCRIPTION_SHARE: (id: string) => `/patient/prescriptions/${id}/share`,
-    APPOINTMENT_PRESCRIPTIONS: (consultationId: string) => `/doctor/appointments/${consultationId}/prescriptions`,
+    APPOINTMENT_PRESCRIPTIONS: CROSS_APP_API_PATHS.DOCTOR.APPOINTMENT_PRESCRIPTIONS,
     REPERTORY_SOURCES: '/doctor/repertory/sources',
     REPERTORY_RUBRICS_SEARCH: '/doctor/repertory/rubrics/search',
     REPERTORY_PRACTICE_SESSION: '/doctor/repertory/practice-session',
-    CONSULTATION_CASE_ANALYSES: (consultationId: string) => `/doctor/consultations/${consultationId}/case-analyses`,
-    CASE_ANALYSIS: (analysisId: string) => `/doctor/case-analyses/${analysisId}`,
+    CONSULTATION_CASE_ANALYSES: CROSS_APP_API_PATHS.DOCTOR.CONSULTATION_CASE_ANALYSES,
+    CASE_ANALYSIS: CROSS_APP_API_PATHS.DOCTOR.CASE_ANALYSIS,
     CASE_ANALYSIS_REPERTORIZE: (analysisId: string) => `/doctor/case-analyses/${analysisId}/repertorize`,
     CASE_ANALYSIS_SELECT_REMEDY: (analysisId: string) => `/doctor/case-analyses/${analysisId}/select-remedy`,
     REPERTORY_REMEDY_MATERIA_MEDICA: (remedyId: string) => `/doctor/repertory/remedies/${remedyId}/materia-medica`,
-    PATIENT_CASE_HISTORY: (patientId: string) => `/doctor/patients/${patientId}/case-history`
+    PATIENT_CASE_HISTORY: CROSS_APP_API_PATHS.DOCTOR.PATIENT_CASE_HISTORY
   },
   HR: {
     SELF_DOCTOR_LEAVES: '/hr/self/doctor-leaves',

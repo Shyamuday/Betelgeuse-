@@ -1,5 +1,6 @@
 export { CLINIC_API_BASE_URL, CLINIC_AUTH_TOKEN_KEY } from './api-base.url';
 export { API_PATHS } from './api-paths.constants';
+export { CROSS_APP_API_PATHS } from './cross-app-api-paths.constants';
 
 export { AccountantApiService } from './services/accountant-api.service';
 export { BranchOwnerApiService } from './services/branch-owner-api.service';

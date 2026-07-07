@@ -16,6 +16,7 @@
     <app-consultation-list
       [consultations]="consultations()"
       [activeId]="activeId()"
+      [enableDashboardLinks]="true"
       userRole="PATIENT"
       [disabled]="processing()"
       [paymentIdle]="paymentService.paymentFlowState() === 'IDLE'"

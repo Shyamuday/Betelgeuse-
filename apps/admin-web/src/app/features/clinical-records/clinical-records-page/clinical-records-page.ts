@@ -1,5 +1,6 @@
 import { buildDetailRows, DetailRowsComponent } from '@vitalis/platform-ui';
 import type { DetailFieldDef } from '@vitalis/platform-ui';
+import { buildAdminClinicalSummary } from '@vitalis/homeopathy-approaches';
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
@@ -120,15 +121,6 @@ const ANALYSIS_SUMMARY_FIELDS: DetailFieldDef<CaseAnalysisDetail>[] = [
   { label: 'Consultation', getValue: (a) => a.consultationId, omitWhenEmpty: true }
 ];
 
-function formatJson(value: unknown) {
-  if (value === null || value === undefined) return '';
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value);
-  }
-}
-
 @Component({
   selector: 'app-clinical-records-page',
   imports: [FormField, DatePipe, DetailRowsComponent],
@@ -190,8 +182,18 @@ export class ClinicalRecordsPage implements OnInit {
     return item ? buildDetailRows(item, ANALYSIS_SUMMARY_FIELDS) : [];
   });
 
-  readonly analysisCaseSheetJson = computed(() => formatJson(this.selectedAnalysis()?.caseSheet));
-  readonly analysisApproachJson = computed(() => formatJson(this.selectedAnalysis()?.approachData));
+  readonly analysisClinicalSummary = computed(() => {
+    const item = this.selectedAnalysis();
+    if (!item) return null;
+    return buildAdminClinicalSummary({
+      methodLabel: item.methodOption?.label,
+      caseSheet: item.caseSheet,
+      approachData: item.approachData
+    });
+  });
+
+  readonly analysisCaseSheetRows = computed(() => this.analysisClinicalSummary()?.caseSheetRows ?? []);
+  readonly analysisApproachRows = computed(() => this.analysisClinicalSummary()?.approachRows ?? []);
 
   readonly prescriptionStatuses = ['', 'DRAFT', 'PUBLISHED', 'CANCELLED'];
   readonly analysisStatuses = ['', 'DRAFT', 'FINALIZED'];

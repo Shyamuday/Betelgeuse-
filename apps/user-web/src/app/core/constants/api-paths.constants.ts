@@ -1,3 +1,5 @@
+import { CROSS_APP_API_PATHS } from '@vitalis/clinic-api/cross-app-api-paths.constants';
+
 export const API_PATHS = {
   CONSULTATIONS: '/consultations',
   BILLING_PLANS: '/billing/plans',
@@ -23,9 +25,9 @@ export const API_PATHS = {
     PROFILE_PASSWORD: '/patient/profile/password',
     CARD: '/patient/card',
     LAB_RESULTS: '/patient/lab-results',
-    REFERRALS_SUMMARY: '/patient/referrals/summary',
-    REWARDS: '/patient/rewards',
-    REWARDS_CHECKOUT_QUOTE: '/patient/rewards/checkout-quote',
+    REFERRALS_SUMMARY: CROSS_APP_API_PATHS.PATIENT.REFERRALS_SUMMARY,
+    REWARDS: CROSS_APP_API_PATHS.PATIENT.REWARDS,
+    REWARDS_CHECKOUT_QUOTE: CROSS_APP_API_PATHS.PATIENT.REWARDS_CHECKOUT_QUOTE,
     DELIVERIES: '/patient/deliveries',
     DELIVERY: (id: string) => `/patient/deliveries/${id}`
   },

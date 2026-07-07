@@ -14,6 +14,9 @@ import { enabledNotificationChannels, notificationService } from '../../services
 import { emitConsultationAssigned } from '../../services/consultation-realtime.js';
 import { createPatientRecord, searchPatients } from '../../services/patient-identity.js';
 import { resolveDiseaseConsultationFee } from '../../services/consultation-pricing.js';
+import { getWalletBalance } from '../../services/patient-wallet.js';
+import { quoteConsultationCheckoutForPatient, settleConsultationPaymentRewards } from '../../services/reward-settlement.js';
+import { PRODUCT_EVENTS, trackProductEvent } from '../../services/product-analytics.js';
 import {
   consultationInclude,
   getReceptionStoreFromRequest,
@@ -90,9 +93,28 @@ async function markCashPaid(
     properties: { consultationId, source: 'reception_cash' }
   });
 
+  void settleConsultationPaymentRewards(consultation.payment.id).catch((err) => {
+    console.error('[rewards] Settlement failed after reception cash payment', err);
+  });
+
   return prisma.consultation.findUniqueOrThrow({
     where: { id: consultationId },
     include: consultationInclude()
+  });
+}
+
+async function quoteReceptionCheckout(input: {
+  patientId: string;
+  diseaseId: string;
+  promoCode?: string;
+  walletRedeemInPaise?: number;
+}) {
+  return quoteConsultationCheckoutForPatient({
+    patientId: input.patientId,
+    diseaseId: input.diseaseId,
+    purchaseType: 'ONE_TIME',
+    promoCode: input.promoCode,
+    walletRedeemInPaise: input.walletRedeemInPaise
   });
 }
 
@@ -217,6 +239,52 @@ export function registerReceptionRoutes(router: import('express').Router, io: So
     })
   );
 
+  router.get(
+    '/reception/patients/:patientId/rewards',
+    authRequired,
+    allowRoles(...receptionRoles),
+    asyncRoute(async (req, res) => {
+      const patientId = routeParam(req, 'patientId');
+      const patient = await prisma.user.findFirst({
+        where: { id: patientId, role: Role.PATIENT },
+        select: { id: true, name: true, patientCode: true }
+      });
+      if (!patient) return res.status(404).json({ error: 'Patient not found.' });
+      const balanceInPaise = await getWalletBalance(patientId);
+      res.json({ patient, balanceInPaise });
+    })
+  );
+
+  router.post(
+    '/reception/patients/:patientId/checkout-quote',
+    authRequired,
+    allowRoles(...receptionRoles),
+    asyncRoute(async (req, res) => {
+      const patientId = routeParam(req, 'patientId');
+      const body = z
+        .object({
+          diseaseId: z.string().min(1),
+          promoCode: z.string().optional(),
+          walletRedeemInPaise: z.number().int().min(0).optional()
+        })
+        .parse(req.body);
+
+      const patient = await prisma.user.findFirst({
+        where: { id: patientId, role: Role.PATIENT },
+        select: { id: true }
+      });
+      if (!patient) return res.status(404).json({ error: 'Patient not found.' });
+
+      const quote = await quoteReceptionCheckout({
+        patientId,
+        diseaseId: body.diseaseId,
+        promoCode: body.promoCode,
+        walletRedeemInPaise: body.walletRedeemInPaise
+      });
+      res.json({ quote });
+    })
+  );
+
   router.post(
     '/reception/walk-in',
     authRequired,
@@ -230,7 +298,9 @@ export function registerReceptionRoutes(router: import('express').Router, io: So
           diseaseId: z.string().min(1),
           intakeAnswers: z.record(z.string(), z.string()).optional().default({}),
           collectCash: z.boolean().optional().default(false),
-          notes: z.string().optional()
+          notes: z.string().optional(),
+          promoCode: z.string().optional(),
+          walletRedeemInPaise: z.number().int().min(0).optional()
         })
         .parse(req.body);
 
@@ -260,6 +330,12 @@ export function registerReceptionRoutes(router: import('express').Router, io: So
       }
 
       const consultFeePaise = await resolveDiseaseConsultationFee(disease.id, storeId);
+      const checkout = await quoteReceptionCheckout({
+        patientId: patient.id,
+        diseaseId: body.diseaseId,
+        promoCode: body.promoCode,
+        walletRedeemInPaise: body.walletRedeemInPaise
+      });
 
       const consultation = await prisma.consultation.create({
         data: {
@@ -271,18 +347,27 @@ export function registerReceptionRoutes(router: import('express').Router, io: So
           pricingSnapshot: {
             source: 'reception_walk_in',
             diseaseFeeInPaise: consultFeePaise,
-            notes: body.notes ?? null
+            notes: body.notes ?? null,
+            checkout
           },
           payment: {
             create: {
-              amountInPaise: consultFeePaise,
+              grossAmountInPaise: checkout.grossAmountInPaise,
+              discountInPaise: checkout.discountInPaise,
+              walletRedeemedInPaise: checkout.walletRedeemedInPaise,
+              amountInPaise: checkout.payableInPaise,
               billingPlanCode: billingPlan.code,
+              appliedRules: checkout.appliedRules,
               lineItems: {
                 source: 'reception_walk_in',
                 diseaseName: disease.name,
-                consultationFeeInPaise: consultFeePaise,
+                consultationFeeInPaise: checkout.grossAmountInPaise,
                 diseaseFeeInPaise: consultFeePaise,
-                medicineFeeInPaise: 0
+                discountInPaise: checkout.discountInPaise,
+                walletRedeemedInPaise: checkout.walletRedeemedInPaise,
+                payableInPaise: checkout.payableInPaise,
+                medicineFeeInPaise: 0,
+                appliedRules: checkout.appliedRules
               },
               status: body.collectCash ? PaymentStatus.PAID : PaymentStatus.CREATED
             }
@@ -293,6 +378,12 @@ export function registerReceptionRoutes(router: import('express').Router, io: So
       });
 
       if (body.collectCash) {
+        const paymentId = consultation.payment?.id;
+        if (paymentId) {
+          void settleConsultationPaymentRewards(paymentId).catch((err) => {
+            console.error('[rewards] Settlement failed after reception walk-in cash', err);
+          });
+        }
         await writeAuditLog({
           actorId: req.user!.id,
           actorRole: req.user!.role,
@@ -300,7 +391,7 @@ export function registerReceptionRoutes(router: import('express').Router, io: So
           targetType: 'consultation',
           targetId: consultation.id,
           summary: `Cash payment recorded for ${patient.name}.`,
-          metadata: { patientId: patient.id, amountInPaise: consultFeePaise }
+          metadata: { patientId: patient.id, amountInPaise: checkout.payableInPaise }
         });
         void trackProductEvent({
           name: PRODUCT_EVENTS.PAYMENT_COMPLETED,
@@ -335,7 +426,9 @@ export function registerReceptionRoutes(router: import('express').Router, io: So
           patientId: z.string().min(1),
           diseaseId: z.string().min(1),
           intakeAnswers: z.record(z.string(), z.string()).optional().default({}),
-          collectCash: z.boolean().optional().default(false)
+          collectCash: z.boolean().optional().default(false),
+          promoCode: z.string().optional(),
+          walletRedeemInPaise: z.number().int().min(0).optional()
         })
         .parse(req.body);
 
@@ -353,6 +446,12 @@ export function registerReceptionRoutes(router: import('express').Router, io: So
       }
 
       const consultFeePaise = await resolveDiseaseConsultationFee(disease.id, storeId);
+      const checkout = await quoteReceptionCheckout({
+        patientId: patient.id,
+        diseaseId: body.diseaseId,
+        promoCode: body.promoCode,
+        walletRedeemInPaise: body.walletRedeemInPaise
+      });
 
       const consultation = await prisma.consultation.create({
         data: {
@@ -361,17 +460,25 @@ export function registerReceptionRoutes(router: import('express').Router, io: So
           clinicStoreId: storeId,
           intakeAnswers: body.intakeAnswers,
           billingPlanCode: billingPlan.code,
-          pricingSnapshot: { source: 'reception_booking', diseaseFeeInPaise: consultFeePaise },
+          pricingSnapshot: { source: 'reception_booking', diseaseFeeInPaise: consultFeePaise, checkout },
           payment: {
             create: {
-              amountInPaise: consultFeePaise,
+              grossAmountInPaise: checkout.grossAmountInPaise,
+              discountInPaise: checkout.discountInPaise,
+              walletRedeemedInPaise: checkout.walletRedeemedInPaise,
+              amountInPaise: checkout.payableInPaise,
               billingPlanCode: billingPlan.code,
+              appliedRules: checkout.appliedRules,
               lineItems: {
                 source: 'reception_booking',
                 diseaseName: disease.name,
-                consultationFeeInPaise: consultFeePaise,
+                consultationFeeInPaise: checkout.grossAmountInPaise,
                 diseaseFeeInPaise: consultFeePaise,
-                medicineFeeInPaise: 0
+                discountInPaise: checkout.discountInPaise,
+                walletRedeemedInPaise: checkout.walletRedeemedInPaise,
+                payableInPaise: checkout.payableInPaise,
+                medicineFeeInPaise: 0,
+                appliedRules: checkout.appliedRules
               },
               status: body.collectCash ? PaymentStatus.PAID : PaymentStatus.CREATED
             }
@@ -380,6 +487,12 @@ export function registerReceptionRoutes(router: import('express').Router, io: So
         },
         include: consultationInclude()
       });
+
+      if (body.collectCash && consultation.payment?.id) {
+        void settleConsultationPaymentRewards(consultation.payment.id).catch((err) => {
+          console.error('[rewards] Settlement failed after reception booking cash', err);
+        });
+      }
 
       res.status(201).json({ consultation });
     })

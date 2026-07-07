@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { RoleTaskGuideComponent } from '@vitalis/platform-ui';
 import { AppFooterComponent } from './app-footer.component';
 import { AppHeaderComponent } from './app-header.component';
@@ -71,7 +71,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly dataService = inject(DashboardDataService);
   readonly paymentService = inject(DashboardPaymentService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   readonly auth = inject(AuthService);
+
+  private pendingConsultationId: string | null = null;
 
   readonly diseases = signal<Disease[]>([]);
   readonly billingPlans = signal<BillingPlan[]>([]);
@@ -126,8 +129,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.pendingConsultationId = this.route.snapshot.queryParamMap.get('consultationId');
+    this.route.queryParamMap.subscribe((params) => {
+      this.pendingConsultationId = params.get('consultationId');
+      this.applyPendingConsultation();
+    });
     this.loadBaseData();
     this.realtimeChannel = this.dataService.watchChanges(() => this.loadConsultations());
+  }
+
+  private applyPendingConsultation() {
+    if (!this.pendingConsultationId) return;
+    const match = this.consultations().find((c) => c.id === this.pendingConsultationId);
+    if (match) {
+      this.activeConsultation.set(match);
+    }
   }
 
   ngOnDestroy() {
@@ -394,9 +410,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.dataService.loadConsultations().subscribe({
       next: ({ consultations }) => {
         this.consultations.set(consultations);
+        const preferredId = this.pendingConsultationId || this.activeConsultation()?.id;
         this.activeConsultation.set(
-          this.activeConsultation()
-            ? consultations.find((c) => c.id === this.activeConsultation()?.id) || null
+          preferredId
+            ? consultations.find((c) => c.id === preferredId) || consultations[0] || null
             : consultations[0] || null,
         );
         const current = this.assignmentModel();
