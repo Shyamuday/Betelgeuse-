@@ -1,0 +1,25 @@
+<section class="panel approach-panel">
+  <div class="panel-title-row">
+    <h3>Sehgal emotional core</h3>
+    <button type="button" (click)="save()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save emotional map' }}</button>
+  </div>
+  <p class="hint">Identify the dominant emotional disturbance and its mind–body linkage before remedy selection.</p>
+  <div class="approach-grid">
+    <label class="wide">
+      <span>Emotional disturbance</span>
+      <textarea rows="4" [formField]="form.emotionalDisturbance" placeholder="Fear, grief, anger, insecurity, suppression…"></textarea>
+    </label>
+    <label class="wide">
+      <span>Emotional trigger</span>
+      <textarea rows="2" [formField]="form.emotionalTrigger" placeholder="What event, relationship, or situation activates the disturbance?"></textarea>
+    </label>
+    <label class="wide">
+      <span>Mind–body linkage</span>
+      <textarea rows="3" [formField]="form.mindBodyLinkage" placeholder="How does the emotion express in physical symptoms or modalities?"></textarea>
+    </label>
+    <label class="wide">
+      <span>Emotional core remedy</span>
+      <input [formField]="form.emotionalCoreRemedy" placeholder="Remedy aligned with the emotional theme…" />
+    </label>
+  </div>
+</section>

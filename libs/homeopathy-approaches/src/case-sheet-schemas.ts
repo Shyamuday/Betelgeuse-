@@ -111,6 +111,43 @@ const ORGANON_LM_FIELDS: CaseSheetFieldDef[] = [
   { key: 'followUpObservations', label: 'Follow-up observations to monitor', rows: 3 }
 ];
 
+const KEYNOTE_FIELDS: CaseSheetFieldDef[] = [
+  { key: 'totalitySummary', label: 'Full totality summary', rows: 4, wide: true },
+  { key: 'generalsReview', label: 'Generals supporting the case', rows: 3 },
+  { key: 'particularsReview', label: 'Particulars & modalities', rows: 3 },
+  { key: 'consistencyCheck', label: 'Consistency check notes', rows: 2, hint: 'Does the keynote fit the broader totality?' }
+];
+
+const PATHOLOGICAL_FIELDS: CaseSheetFieldDef[] = [
+  { key: 'pathologyStage', label: 'Pathology stage / disease process', rows: 3, wide: true },
+  { key: 'clinicalDiagnosis', label: 'Clinical diagnosis', rows: 2 },
+  { key: 'investigationFindings', label: 'Investigation / report findings', rows: 3 },
+  { key: 'pathologyCorrelatedSymptoms', label: 'Symptoms correlating with pathology', rows: 3 },
+  { key: 'prescribingAnchor', label: 'Prescribing anchor symptoms', rows: 3 }
+];
+
+const SEHGAL_FIELDS: CaseSheetFieldDef[] = [
+  { key: 'presentingComplaint', label: 'Presenting complaint', rows: 2 },
+  { key: 'emotionalPresentation', label: 'Emotional presentation in clinic', rows: 3, wide: true },
+  { key: 'physicalCorrelation', label: 'Physical symptom correlation', rows: 3 },
+  { key: 'timelineTrigger', label: 'Timeline & emotional trigger', rows: 2 }
+];
+
+const INTEGRATIVE_FOLLOW_UP_FIELDS: CaseSheetFieldDef[] = [
+  { key: 'chronicDiagnosisContext', label: 'Chronic diagnosis context', rows: 2 },
+  { key: 'comorbidityNotes', label: 'Comorbidities & medications', rows: 3 },
+  { key: 'homeopathyPlan', label: 'Homeopathy plan summary', rows: 3 },
+  { key: 'followUpCadence', label: 'Follow-up cadence', rows: 2 },
+  { key: 'patientReportedGoals', label: 'Patient-reported goals', rows: 2 }
+];
+
+const SCHOLTEN_FIELDS: CaseSheetFieldDef[] = [
+  { key: 'lifeTheme', label: 'Life theme / pattern', rows: 3, wide: true },
+  { key: 'mineralAffinity', label: 'Mineral affinity clues', rows: 2 },
+  { key: 'confirmatorySymptoms', label: 'Confirmatory symptoms from totality', rows: 3, wide: true },
+  { key: 'differentialMinerals', label: 'Differential mineral remedies', rows: 2 }
+];
+
 export const CASE_SHEET_SCHEMAS: Record<CaseSheetSchemaId, CaseSheetFieldDef[]> = {
   classical: CLASSICAL_FIELDS,
   'eight-box': EIGHT_BOX_FIELDS,
@@ -123,7 +160,12 @@ export const CASE_SHEET_SCHEMAS: Record<CaseSheetSchemaId, CaseSheetFieldDef[]> 
   protocol: PROTOCOL_FIELDS,
   clinical: CLINICAL_FIELDS,
   hybrid: HYBRID_FIELDS,
-  'organon-lm': ORGANON_LM_FIELDS
+  'organon-lm': ORGANON_LM_FIELDS,
+  keynote: KEYNOTE_FIELDS,
+  pathological: PATHOLOGICAL_FIELDS,
+  sehgal: SEHGAL_FIELDS,
+  'integrative-follow-up': INTEGRATIVE_FOLLOW_UP_FIELDS,
+  scholten: SCHOLTEN_FIELDS
 };
 
 export function caseSheetFieldsForSchema(schemaId: CaseSheetSchemaId): CaseSheetFieldDef[] {

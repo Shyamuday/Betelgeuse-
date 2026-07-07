@@ -20,7 +20,11 @@ export type ApproachStepId =
   | 'remedy-select'
   | 'prescribe'
   | 'analysis-notes'
-  | 'lm-dosing';
+  | 'lm-dosing'
+  | 'keynote-striking'
+  | 'scholten-mapping'
+  | 'sehgal-emotion'
+  | 'integrative-follow-up';
 
 export type ApproachStepComponent =
   | 'approach-overview'
@@ -34,7 +38,11 @@ export type ApproachStepComponent =
   | 'remedy-results'
   | 'prescription-handoff'
   | 'analysis-notes'
-  | 'organon-lm-dosing';
+  | 'organon-lm-dosing'
+  | 'keynote-striking'
+  | 'scholten-mapper'
+  | 'sehgal-emotion'
+  | 'integrative-follow-up';
 
 export type ApproachStep = {
   id: ApproachStepId;
@@ -57,7 +65,12 @@ export type CaseSheetSchemaId =
   | 'protocol'
   | 'clinical'
   | 'hybrid'
-  | 'organon-lm';
+  | 'organon-lm'
+  | 'keynote'
+  | 'pathological'
+  | 'sehgal'
+  | 'integrative-follow-up'
+  | 'scholten';
 
 export type CaseSheetFieldDef = {
   key: string;
@@ -90,6 +103,8 @@ export type ApproachPrescriptionHints = {
 
 export type ApproachDefinition = {
   slug: string;
+  /** Public-site URL slug when it differs from `slug`. */
+  marketingSlug?: string;
   methodNormalizedLabel: string;
   title: string;
   developedBy?: string;
@@ -158,6 +173,37 @@ export type OrganonLmApproachData = {
   adjustmentNotes: string;
 };
 
+export type KeynoteApproachData = {
+  strikingSymptoms: string;
+  peculiarRareSymptoms: string;
+  totalityCrossCheck: string;
+  differentialShortlist: string;
+};
+
+export type ScholtenApproachData = {
+  thematicPattern: string;
+  series: string;
+  stage: string;
+  mineralShortlist: string;
+  confirmationNotes: string;
+};
+
+export type SehgalApproachData = {
+  emotionalDisturbance: string;
+  emotionalTrigger: string;
+  mindBodyLinkage: string;
+  emotionalCoreRemedy: string;
+};
+
+export type IntegrativeFollowUpApproachData = {
+  baselineMetrics: string;
+  subjectiveMarkers: string;
+  objectiveReports: string;
+  safetyRedFlags: string;
+  referralEscalation: string;
+  nextReviewPlan: string;
+};
+
 export type ApproachDataPayload = {
   kentHierarchy?: KentHierarchyData;
   sensation?: SensationApproachData;
@@ -165,6 +211,10 @@ export type ApproachDataPayload = {
   protocol?: ProtocolApproachData;
   hybrid?: HybridApproachData;
   organonLm?: OrganonLmApproachData;
+  keynote?: KeynoteApproachData;
+  scholten?: ScholtenApproachData;
+  sehgal?: SehgalApproachData;
+  integrativeFollowUp?: IntegrativeFollowUpApproachData;
 };
 
 export type BanerjiProtocol = {

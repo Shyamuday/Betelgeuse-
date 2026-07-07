@@ -1,0 +1,25 @@
+<section class="panel approach-panel">
+  <div class="panel-title-row">
+    <h3>Keynote symptoms</h3>
+    <button type="button" (click)="save()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save keynotes' }}</button>
+  </div>
+  <p class="hint">Capture striking, rare, and peculiar symptoms before cross-checking against the full totality.</p>
+  <div class="approach-grid">
+    <label class="wide">
+      <span>Striking symptoms</span>
+      <textarea rows="4" [formField]="form.strikingSymptoms" placeholder="Symptoms that stand out and demand attention…"></textarea>
+    </label>
+    <label class="wide">
+      <span>Peculiar / rare symptoms</span>
+      <textarea rows="3" [formField]="form.peculiarRareSymptoms" placeholder="Unusual, characteristic, or idiosyncratic features…"></textarea>
+    </label>
+    <label class="wide">
+      <span>Totality cross-check</span>
+      <textarea rows="3" [formField]="form.totalityCrossCheck" placeholder="Do keynotes fit the broader case picture? Contradictions?"></textarea>
+    </label>
+    <label class="wide">
+      <span>Differential shortlist</span>
+      <textarea rows="2" [formField]="form.differentialShortlist" placeholder="Remedies under consideration from keynote + totality…"></textarea>
+    </label>
+  </div>
+</section>

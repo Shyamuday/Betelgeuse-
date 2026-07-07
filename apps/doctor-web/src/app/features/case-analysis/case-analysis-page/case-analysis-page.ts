@@ -13,9 +13,13 @@ import {
   type ApproachStepComponent,
   type ApproachStepId,
   type KentHierarchyData,
+  type KeynoteApproachData,
   type MiasmaticApproachData,
   type OrganonLmApproachData,
   type ProtocolApproachData,
+  type ScholtenApproachData,
+  type SehgalApproachData,
+  type IntegrativeFollowUpApproachData,
   type SensationApproachData,
   type StepCompletionContext
 } from '@vitalis/homeopathy-approaches';
@@ -34,6 +38,10 @@ import { PrescriptionHandoffPanelComponent } from '../panels/prescription-handof
 import { ProtocolSelectPanelComponent } from '../panels/protocol-select-panel/protocol-select-panel';
 import { OrganonLmDosingPanelComponent } from '../panels/organon-lm-dosing-panel/organon-lm-dosing-panel';
 import { SensationCapturePanelComponent } from '../panels/sensation-capture-panel/sensation-capture-panel';
+import { KeynoteStrikingPanelComponent } from '../panels/keynote-striking-panel/keynote-striking-panel';
+import { ScholtenMapperPanelComponent } from '../panels/scholten-mapper-panel/scholten-mapper-panel';
+import { SehgalEmotionPanelComponent } from '../panels/sehgal-emotion-panel/sehgal-emotion-panel';
+import { IntegrativeFollowUpPanelComponent } from '../panels/integrative-follow-up-panel/integrative-follow-up-panel';
 import type {
   CaseAnalysis,
   ConsultationSummary,
@@ -63,7 +71,11 @@ import { formatRubricPath, rubricPathSegments } from '../rubric-path.util';
     MiasmLayerPanelComponent,
     ProtocolSelectPanelComponent,
     PrescriptionHandoffPanelComponent,
-    OrganonLmDosingPanelComponent
+    OrganonLmDosingPanelComponent,
+    KeynoteStrikingPanelComponent,
+    ScholtenMapperPanelComponent,
+    SehgalEmotionPanelComponent,
+    IntegrativeFollowUpPanelComponent
   ],
   templateUrl: './case-analysis-page.html'
 })
@@ -481,6 +493,22 @@ export class CaseAnalysisPage {
     void this.saveApproachData({ organonLm: data });
   }
 
+  saveKeynote(data: KeynoteApproachData) {
+    void this.saveApproachData({ keynote: data });
+  }
+
+  saveScholten(data: ScholtenApproachData) {
+    void this.saveApproachData({ scholten: data });
+  }
+
+  saveSehgal(data: SehgalApproachData) {
+    void this.saveApproachData({ sehgal: data });
+  }
+
+  saveIntegrativeFollowUp(data: IntegrativeFollowUpApproachData) {
+    void this.saveApproachData({ integrativeFollowUp: data });
+  }
+
   async saveRubrics() {
     const currentAnalysis = this.analysis();
     if (!currentAnalysis) return;
@@ -665,6 +693,11 @@ export class CaseAnalysisPage {
     const schema = this.activeApproach().caseSheetSchemaId;
     if (schema === 'eight-box') return '8-Box case structure';
     if (schema === 'organon-lm') return 'Baseline case (Organon LM)';
+    if (schema === 'keynote') return 'Totality review';
+    if (schema === 'scholten') return 'Scholten case sheet';
+    if (schema === 'sehgal') return 'Sehgal case sheet';
+    if (schema === 'pathological') return 'Pathology case sheet';
+    if (schema === 'integrative-follow-up') return 'Integrative care plan';
     if (this.activeApproach().workflowKind === 'PROTOCOL_DRIVEN') return 'Protocol notes';
     return 'Structured case sheet';
   }
@@ -683,5 +716,21 @@ export class CaseAnalysisPage {
 
   miasmData() {
     return this.approachData().miasmatic || null;
+  }
+
+  keynoteData() {
+    return this.approachData().keynote || null;
+  }
+
+  scholtenData() {
+    return this.approachData().scholten || null;
+  }
+
+  sehgalData() {
+    return this.approachData().sehgal || null;
+  }
+
+  integrativeFollowUpData() {
+    return this.approachData().integrativeFollowUp || null;
   }
 }

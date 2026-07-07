@@ -1,0 +1,39 @@
+<section class="panel approach-panel">
+  <div class="panel-title-row">
+    <h3>Scholten periodic table map</h3>
+    <button type="button" (click)="save()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save Scholten map' }}</button>
+  </div>
+  <p class="hint">Map the patient’s thematic pattern to series and stage before mineral remedy shortlisting.</p>
+  <div class="approach-grid">
+    <label class="wide">
+      <span>Thematic pattern</span>
+      <textarea rows="3" [formField]="form.thematicPattern" placeholder="Responsibility, performance, identity, autonomy, etc."></textarea>
+    </label>
+    <label>
+      <span>Series</span>
+      <select [formField]="form.series">
+        <option value="">Select series</option>
+        @for (series of seriesOptions; track series) {
+          <option [value]="series">{{ series }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      <span>Stage</span>
+      <select [formField]="form.stage">
+        <option value="">Select stage</option>
+        @for (stage of stageOptions; track stage) {
+          <option [value]="stage">Stage {{ stage }}</option>
+        }
+      </select>
+    </label>
+    <label class="wide">
+      <span>Mineral shortlist</span>
+      <textarea rows="2" [formField]="form.mineralShortlist" placeholder="e.g. Ferrum phos, Natrum mur, Aurum met…"></textarea>
+    </label>
+    <label class="wide">
+      <span>Confirmation notes</span>
+      <textarea rows="3" [formField]="form.confirmationNotes" placeholder="Materia medica confirmation, rubric support, or stage refinements…"></textarea>
+    </label>
+  </div>
+</section>

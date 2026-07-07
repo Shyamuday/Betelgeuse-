@@ -15,7 +15,9 @@
       "@vitalis/app-notifications/types": ["../../shared/app-notifications/types.ts"],
       "@vitalis/app-notifications/*": ["../../shared/app-notifications/*"],
       "@vitalis/role-task-guides": ["../../shared/role-task-guides/index.ts"],
-      "@vitalis/role-task-guides/*": ["../../shared/role-task-guides/*"]
+      "@vitalis/role-task-guides/*": ["../../shared/role-task-guides/*"],
+      "@vitalis/homeopathy-approaches": ["../../libs/homeopathy-approaches/src/index.ts"],
+      "@vitalis/homeopathy-approaches/*": ["../../libs/homeopathy-approaches/src/*"]
     },
     "outDir": "./out-tsc/app",
     "types": []

@@ -25,6 +25,14 @@ export function isStepComplete(step: ApproachStep, context: StepCompletionContex
       return hasProtocolData(context.approachData);
     case 'lm-dosing':
       return hasOrganonLmData(context.approachData);
+    case 'keynote-striking':
+      return hasKeynoteData(context.approachData);
+    case 'scholten-mapping':
+      return hasScholtenData(context.approachData);
+    case 'sehgal-emotion':
+      return hasSehgalData(context.approachData);
+    case 'integrative-follow-up':
+      return hasIntegrativeFollowUpData(context.approachData);
     case 'rubric-search':
       return (context.rubricCount || 0) > 0;
     case 'repertorize':
@@ -73,6 +81,30 @@ function hasOrganonLmData(approachData?: Record<string, unknown> | null) {
   const organon = approachData?.['organonLm'] as Record<string, string> | undefined;
   if (!organon) return false;
   return !!(organon['selectedLmPotency']?.trim() || organon['repetitionSchedule']?.trim());
+}
+
+function hasKeynoteData(approachData?: Record<string, unknown> | null) {
+  const keynote = approachData?.['keynote'] as Record<string, string> | undefined;
+  if (!keynote) return false;
+  return !!(keynote['strikingSymptoms']?.trim() || keynote['peculiarRareSymptoms']?.trim());
+}
+
+function hasScholtenData(approachData?: Record<string, unknown> | null) {
+  const scholten = approachData?.['scholten'] as Record<string, string> | undefined;
+  if (!scholten) return false;
+  return !!(scholten['series']?.trim() || scholten['thematicPattern']?.trim());
+}
+
+function hasSehgalData(approachData?: Record<string, unknown> | null) {
+  const sehgal = approachData?.['sehgal'] as Record<string, string> | undefined;
+  if (!sehgal) return false;
+  return !!sehgal['emotionalDisturbance']?.trim();
+}
+
+function hasIntegrativeFollowUpData(approachData?: Record<string, unknown> | null) {
+  const followUp = approachData?.['integrativeFollowUp'] as Record<string, string> | undefined;
+  if (!followUp) return false;
+  return !!(followUp['baselineMetrics']?.trim() || followUp['safetyRedFlags']?.trim());
 }
 
 export function firstIncompleteStepId(

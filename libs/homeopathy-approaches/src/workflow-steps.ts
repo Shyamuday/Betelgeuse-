@@ -284,6 +284,81 @@ export function buildOrganonLmWorkflow(): ApproachStep[] {
   ];
 }
 
+export function buildKeynoteWorkflow(): ApproachStep[] {
+  return [
+    { id: 'approach-select', label: 'Approach', shortLabel: 'Approach', component: 'approach-overview' },
+    {
+      id: 'keynote-striking',
+      label: 'Keynote symptoms',
+      shortLabel: 'Keynotes',
+      component: 'keynote-striking',
+      description: 'Identify striking, rare, and peculiar symptoms before totality cross-check.'
+    },
+    { id: 'case-sheet', label: 'Totality review', shortLabel: 'Totality', component: 'case-sheet' },
+    ...REPERTORY_WORKFLOW_TAIL,
+    { id: 'analysis-notes', label: 'Notes', shortLabel: 'Notes', component: 'analysis-notes', optional: true }
+  ];
+}
+
+export function buildScholtenWorkflow(): ApproachStep[] {
+  return [
+    { id: 'approach-select', label: 'Approach', shortLabel: 'Approach', component: 'approach-overview' },
+    {
+      id: 'scholten-mapping',
+      label: 'Periodic table map',
+      shortLabel: 'Scholten',
+      component: 'scholten-mapper',
+      description: 'Map series, stage, and mineral themes before repertorization.'
+    },
+    { id: 'case-sheet', label: 'Scholten case sheet', shortLabel: 'Case', component: 'case-sheet' },
+    ...REPERTORY_WORKFLOW_TAIL,
+    { id: 'analysis-notes', label: 'Notes', shortLabel: 'Notes', component: 'analysis-notes', optional: true }
+  ];
+}
+
+export function buildSehgalWorkflow(): ApproachStep[] {
+  return [
+    { id: 'approach-select', label: 'Approach', shortLabel: 'Approach', component: 'approach-overview' },
+    {
+      id: 'sehgal-emotion',
+      label: 'Emotional core',
+      shortLabel: 'Emotion',
+      component: 'sehgal-emotion',
+      description: 'Identify the emotional disturbance driving the case.'
+    },
+    { id: 'case-sheet', label: 'Case sheet', shortLabel: 'Case', component: 'case-sheet' },
+    ...REPERTORY_WORKFLOW_TAIL,
+    { id: 'analysis-notes', label: 'Notes', shortLabel: 'Notes', component: 'analysis-notes', optional: true }
+  ];
+}
+
+export function buildIntegrativeFollowUpWorkflow(): ApproachStep[] {
+  return [
+    { id: 'approach-select', label: 'Approach', shortLabel: 'Approach', component: 'approach-overview' },
+    {
+      id: 'integrative-follow-up',
+      label: 'Follow-up & safety',
+      shortLabel: 'Follow-up',
+      component: 'integrative-follow-up',
+      description: 'Track metrics, red flags, and referral logic for chronic digital care.'
+    },
+    { id: 'case-sheet', label: 'Care plan', shortLabel: 'Plan', component: 'case-sheet' },
+    {
+      id: 'rubric-search',
+      label: 'Symptom rubrics',
+      shortLabel: 'Rubrics',
+      component: 'repertory-workspace',
+      optional: true
+    },
+    { id: 'remedy-select', label: 'Select remedy', shortLabel: 'Remedy', component: 'remedy-results' },
+    { id: 'prescribe', label: 'Prescription', shortLabel: 'Prescribe', component: 'prescription-handoff' }
+  ];
+}
+
+export function buildPathologicalWorkflow(): ApproachStep[] {
+  return buildRepertoryWorkflow();
+}
+
 export function buildHybridWorkflow(): ApproachStep[] {
   return [
     {

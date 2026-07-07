@@ -946,7 +946,11 @@ async function main() {
     'Banerji Protocols',
     'Predictive Homeopathy',
     'Protocol-Based Prescribing',
-    'Integrated Hybrid Approach'
+    'Integrated Hybrid Approach',
+    'Keynote + Totality Approach',
+    'Pathology-Based Prescribing',
+    'Sehgal Method',
+    'Integrative Follow-up Approach'
   ];
 
   const defaultDiagnoses = [

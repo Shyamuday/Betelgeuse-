@@ -141,6 +141,38 @@
         />
       }
 
+      @if (showPanel('keynote-striking')) {
+        <app-keynote-striking-panel
+          [initial]="keynoteData()"
+          [saving]="savingApproachData()"
+          (saveRequested)="saveKeynote($event)"
+        />
+      }
+
+      @if (showPanel('scholten-mapper')) {
+        <app-scholten-mapper-panel
+          [initial]="scholtenData()"
+          [saving]="savingApproachData()"
+          (saveRequested)="saveScholten($event)"
+        />
+      }
+
+      @if (showPanel('sehgal-emotion')) {
+        <app-sehgal-emotion-panel
+          [initial]="sehgalData()"
+          [saving]="savingApproachData()"
+          (saveRequested)="saveSehgal($event)"
+        />
+      }
+
+      @if (showPanel('integrative-follow-up')) {
+        <app-integrative-follow-up-panel
+          [initial]="integrativeFollowUpData()"
+          [saving]="savingApproachData()"
+          (saveRequested)="saveIntegrativeFollowUp($event)"
+        />
+      }
+
       @if (showPanel('protocol-selector')) {
         <app-protocol-select-panel
           [diseaseName]="consultation()?.disease?.name || ''"

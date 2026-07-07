@@ -6,3 +6,4 @@ export * from './workflow-steps';
 export * from './approach-definitions';
 export * from './registry';
 export * from './workflow.util';
+export * from './marketing-export';

@@ -1,0 +1,33 @@
+<section class="panel approach-panel">
+  <div class="panel-title-row">
+    <h3>Integrative follow-up &amp; safety</h3>
+    <button type="button" (click)="save()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save follow-up plan' }}</button>
+  </div>
+  <p class="hint">Track baseline metrics, safety red flags, and referral logic for chronic integrative care.</p>
+  <div class="approach-grid">
+    <label class="wide">
+      <span>Baseline metrics</span>
+      <textarea rows="2" [formField]="form.baselineMetrics" placeholder="Weight, sleep score, pain scale, lab values at start…"></textarea>
+    </label>
+    <label class="wide">
+      <span>Subjective markers</span>
+      <textarea rows="2" [formField]="form.subjectiveMarkers" placeholder="Energy, mood, appetite, compliance notes…"></textarea>
+    </label>
+    <label class="wide">
+      <span>Objective reports</span>
+      <textarea rows="2" [formField]="form.objectiveReports" placeholder="Investigations, vitals, imaging trends…"></textarea>
+    </label>
+    <label class="wide">
+      <span>Safety red flags</span>
+      <textarea rows="2" [formField]="form.safetyRedFlags" placeholder="Symptoms requiring urgent medical review…"></textarea>
+    </label>
+    <label class="wide">
+      <span>Referral / escalation</span>
+      <textarea rows="2" [formField]="form.referralEscalation" placeholder="When to refer to specialist or emergency care…"></textarea>
+    </label>
+    <label class="wide">
+      <span>Next review plan</span>
+      <textarea rows="2" [formField]="form.nextReviewPlan" placeholder="Follow-up interval, what to reassess, remedy response criteria…"></textarea>
+    </label>
+  </div>
+</section>

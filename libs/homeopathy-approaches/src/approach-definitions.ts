@@ -2,11 +2,16 @@ import type { ApproachDefinition } from './types';
 import {
   buildEightBoxWorkflow,
   buildHybridWorkflow,
+  buildIntegrativeFollowUpWorkflow,
   buildKentianWorkflow,
+  buildKeynoteWorkflow,
   buildMiasmaticWorkflow,
   buildOrganonLmWorkflow,
+  buildPathologicalWorkflow,
   buildProtocolWorkflow,
   buildRepertoryWorkflow,
+  buildScholtenWorkflow,
+  buildSehgalWorkflow,
   buildSensationWorkflow
 } from './workflow-steps';
 
@@ -16,6 +21,7 @@ const GENERAL_BOOST = { chapterMatch: 'general', multiplier: 1.25, defaultWeight
 export const APPROACH_DEFINITIONS: ApproachDefinition[] = [
   {
     slug: 'classical-homeopathy',
+    marketingSlug: 'classical-homeopathy-framework',
     methodNormalizedLabel: 'classical homeopathy',
     title: 'Classical Homeopathy',
     shortDescription: 'Individualized prescribing using totality, single remedy, and minimum dose principles.',
@@ -126,6 +132,7 @@ export const APPROACH_DEFINITIONS: ApproachDefinition[] = [
   },
   {
     slug: 'constitutional-approach',
+    marketingSlug: 'constitutional',
     methodNormalizedLabel: 'constitutional approach',
     title: 'Constitutional Approach',
     shortDescription: 'Builds the remedy picture from temperament, generals, and life history.',
@@ -142,6 +149,7 @@ export const APPROACH_DEFINITIONS: ApproachDefinition[] = [
   },
   {
     slug: 'miasmatic-approach',
+    marketingSlug: 'miasmatic',
     methodNormalizedLabel: 'miasmatic approach',
     title: 'Miasmatic Approach',
     shortDescription: 'Layers psoric, sycotic, and syphilitic patterns into remedy selection.',
@@ -254,10 +262,14 @@ export const APPROACH_DEFINITIONS: ApproachDefinition[] = [
     strengths: ['Powerful for mineral pictures'],
     limits: ['Requires Scholten framework knowledge'],
     workflowKind: 'STRUCTURED_CASE',
-    steps: buildRepertoryWorkflow(),
-    caseSheetSchemaId: 'constitutional',
-    repertory: { enabled: true, defaultRubricWeight: 2 },
-    prescription: {}
+    steps: buildScholtenWorkflow(),
+    caseSheetSchemaId: 'scholten',
+    repertory: {
+      enabled: true,
+      searchPlaceholder: 'Validate mineral themes with confirmatory rubrics…',
+      defaultRubricWeight: 2
+    },
+    prescription: { potencyGuidance: 'Confirm mineral remedy with materia medica before potency selection.' }
   },
   {
     slug: 'banerji-protocols',
@@ -315,6 +327,7 @@ export const APPROACH_DEFINITIONS: ApproachDefinition[] = [
   },
   {
     slug: 'integrated-hybrid-approach',
+    marketingSlug: 'integrated-hybrid',
     methodNormalizedLabel: 'integrated hybrid approach',
     title: 'Integrated Hybrid Approach',
     shortDescription: 'Combines classical, clinical, and protocol tools as the case demands.',
@@ -328,6 +341,94 @@ export const APPROACH_DEFINITIONS: ApproachDefinition[] = [
     caseSheetSchemaId: 'hybrid',
     repertory: { enabled: true, defaultRubricWeight: 2 },
     prescription: {}
+  },
+  {
+    slug: 'keynote-totality',
+    methodNormalizedLabel: 'keynote + totality approach',
+    title: 'Keynote + Totality Approach',
+    shortDescription: 'Combines striking keynote symptoms with the broader symptom totality to reduce prescribing errors.',
+    focus: 'Balance precision clues with overall case coherence.',
+    bestFor: ['Cases with one or two striking symptoms', 'Mixed acute-chronic patterns', 'Difficult differentiation'],
+    processSteps: [
+      'Identify rare, peculiar, and characteristic symptoms',
+      'Cross-check with full totality for consistency',
+      'Repertorize differentials',
+      'Finalize remedy after materia medica confirmation'
+    ],
+    strengths: ['Improves remedy differentiation', 'Prevents overreliance on a single symptom'],
+    limits: ['Complex in poorly documented cases', 'Needs disciplined symptom hierarchy'],
+    workflowKind: 'REPERTORY_TOTALITY',
+    steps: buildKeynoteWorkflow(),
+    caseSheetSchemaId: 'keynote',
+    repertory: {
+      enabled: true,
+      searchPlaceholder: 'Search keynotes and confirm with totality rubrics…',
+      defaultRubricWeight: 4,
+    },
+    prescription: { potencyGuidance: 'Weight striking keynotes but confirm against full totality before prescribing.' }
+  },
+  {
+    slug: 'pathological-prescribing',
+    methodNormalizedLabel: 'pathology-based prescribing',
+    title: 'Pathology-Based Prescribing',
+    shortDescription: 'Uses pathology stage and disease process as a central prescribing anchor.',
+    focus: 'Bridge pathology clarity with remedy choice.',
+    bestFor: ['Advanced diagnosed disease', 'Integrative settings', 'Objective report trends'],
+    processSteps: ['Map pathology stage', 'Correlate key symptoms', 'Select remedy strategy', 'Track outcomes'],
+    strengths: ['Useful in modern diagnostics context', 'Supports specialist communication'],
+    limits: ['May underweight deeper individuality if used alone'],
+    workflowKind: 'PATHOLOGY_CLINICAL',
+    steps: buildPathologicalWorkflow(),
+    caseSheetSchemaId: 'pathological',
+    repertory: {
+      enabled: true,
+      searchPlaceholder: 'Search rubrics aligned with pathology stage and organ affinity…',
+      defaultRubricWeight: 2
+    },
+    prescription: {}
+  },
+  {
+    slug: 'sehgal-method',
+    methodNormalizedLabel: 'sehgal method',
+    title: 'Sehgal Method',
+    developedBy: 'M L Sehgal',
+    shortDescription: 'Focuses on emotional disturbance as a key driver in remedy selection.',
+    focus: 'Emotion-rooted interpretation of disease expression.',
+    bestFor: ['Emotionally triggered symptoms', 'Mind-body overlap cases'],
+    processSteps: ['Identify key emotional disturbance', 'Trace symptom linkage', 'Select remedy on emotional core', 'Monitor shifts'],
+    strengths: ['Clear emotional focus', 'Helpful in psychosomatic patterns'],
+    limits: ['Requires careful psychological interpretation'],
+    workflowKind: 'REPERTORY_TOTALITY',
+    steps: buildSehgalWorkflow(),
+    caseSheetSchemaId: 'sehgal',
+    repertory: {
+      enabled: true,
+      searchPlaceholder: 'Search mind/emotion rubrics linked to the emotional core…',
+      defaultRubricWeight: 3,
+      chapterBoosts: [{ chapterMatch: 'mind', multiplier: 1.4, defaultWeight: 3 }]
+    },
+    prescription: {}
+  },
+  {
+    slug: 'integrative-follow-up',
+    methodNormalizedLabel: 'integrative follow-up approach',
+    title: 'Integrative Follow-up Approach',
+    shortDescription: 'Combines homeopathy with monitoring, safety flags, and referral logic for chronic digital care.',
+    focus: 'Outcome tracking, safety screening, and tele-consultation continuity.',
+    bestFor: ['Comorbid chronic patients', 'Telemedicine follow-up', 'Cases needing periodic reports'],
+    processSteps: [
+      'Establish baseline symptoms and metrics',
+      'Begin individualized homeopathy plan',
+      'Track objective and subjective markers',
+      'Use red flags for referral when needed'
+    ],
+    strengths: ['Better safety in digital chronic care', 'Improves accountability with follow-up'],
+    limits: ['Needs consistent patient data input', 'Requires referral network'],
+    workflowKind: 'HYBRID',
+    steps: buildIntegrativeFollowUpWorkflow(),
+    caseSheetSchemaId: 'integrative-follow-up',
+    repertory: { enabled: true, defaultRubricWeight: 2 },
+    prescription: { adviceTemplate: 'Continue homeopathic plan with documented follow-up metrics and safety review.' }
   }
 ];
 
