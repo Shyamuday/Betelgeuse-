@@ -1,11 +1,6 @@
 @use '../../../libs/platform-ui/src/styles/form-fields';
+@use 'styles';
 @use 'styles/app-forms';
-
-@import 'styles/tokens';
-@import 'styles/base';
-@import 'styles/components';
-@import 'styles/ux-states';
-@import 'styles/case-analysis';
 
 * {
   box-sizing: border-box;
