@@ -16,7 +16,11 @@
           New case
         </button>
       } @else if (consultationId) {
-        <a class="btn-secondary" [routerLink]="['/', appointmentsPath]" [queryParams]="{ consultationId }">
+        <a
+          class="btn-secondary"
+          [routerLink]="['/', appointmentsPath]"
+          [queryParams]="analysis() ? { consultationId, caseAnalysisId: analysis()!.id } : { consultationId }"
+        >
           Prescription
         </a>
       }
@@ -42,18 +46,45 @@
     </section>
   } @else if (analysis(); as analysis) {
     @if (consultation(); as consultation) {
-      <section class="patient-banner">
-        <div>
-          <strong>{{ consultation.patient?.name || 'Patient' }}</strong>
-          <span class="muted">{{ consultation.disease?.name || 'Consultation' }}</span>
+      <app-consultation-context-header
+        [consultation]="consultation"
+        [consultationId]="consultationId"
+        [analysisLabel]="analysis.source?.name || ''"
+        activeView="case-analysis"
+      />
+      <div class="context-grid">
+        <app-consultation-intake-panel [consultation]="consultation" />
+        <app-consultation-chat-panel [consultationId]="consultationId" />
+      </div>
+
+      @if (analyses().length > 1) {
+        <section class="panel analysis-switcher">
+          <div class="panel-title-row">
+            <h3>Case analyses</h3>
+            <button type="button" class="btn-secondary" (click)="createNewAnalysis()" [disabled]="creatingAnalysis()">
+              {{ creatingAnalysis() ? 'Starting…' : '+ New analysis' }}
+            </button>
+          </div>
+          <div class="analysis-tabs">
+            @for (item of analyses(); track item.id) {
+              <button
+                type="button"
+                class="analysis-tab"
+                [class.active]="item.id === analysis.id"
+                (click)="switchAnalysis(item.id)"
+              >
+                {{ analysisLabel(item) }}
+              </button>
+            }
+          </div>
+        </section>
+      } @else {
+        <div class="inline-actions">
+          <button type="button" class="btn-secondary" (click)="createNewAnalysis()" [disabled]="creatingAnalysis()">
+            {{ creatingAnalysis() ? 'Starting…' : '+ New analysis' }}
+          </button>
         </div>
-        <div class="banner-meta">
-          <span class="badge">{{ consultation.status }}</span>
-          @if (analysis.source?.name) {
-            <span class="badge badge-soft">{{ analysis.source?.name }}</span>
-          }
-        </div>
-      </section>
+      }
     } @else if (standalone) {
       <section class="patient-banner">
         <div>
@@ -98,6 +129,26 @@
       </div>
     </section>
 
+    @if (!standalone) {
+      <section class="panel case-sheet-panel">
+        <div class="panel-title-row">
+          <h3>Structured case sheet</h3>
+          <button type="button" (click)="saveCaseSheet()" [disabled]="savingCaseSheet()">
+            {{ savingCaseSheet() ? 'Saving…' : 'Save case sheet' }}
+          </button>
+        </div>
+        <p class="hint">Capture the case in a structured format alongside repertory work.</p>
+        <div class="case-sheet-grid">
+          @for (field of caseSheetFields; track field.key) {
+            <label>
+              <span>{{ field.label }}</span>
+              <textarea rows="2" [formField]="caseSheetForm[field.key]"></textarea>
+            </label>
+          }
+        </div>
+      </section>
+    }
+
     <div class="workspace">
       <div class="column">
         <section class="panel">
@@ -120,6 +171,9 @@
               placeholder="e.g. anxiety morning, nausea, grief suppressed"
               (keyup.enter)="searchRubrics()"
             />
+            @if (!standalone && consultation()?.intakeAnswers) {
+              <button type="button" class="btn-secondary" (click)="suggestFromIntake()">From intake</button>
+            }
             <button type="button" class="btn-primary" (click)="searchRubrics()" [disabled]="searching() || searchModel().rubricQuery.trim().length < 2">
               {{ searching() ? 'Searching…' : 'Search' }}
             </button>

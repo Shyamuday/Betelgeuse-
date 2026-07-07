@@ -25,6 +25,7 @@ model Prescription {
   isLatest       Boolean            @default(true)
   methodOptionId String?
   diagnosedDiseaseOptionId String?
+  caseAnalysisId String?
   diagnosis      String
   advice         String?
   notes          String
@@ -36,6 +37,7 @@ model Prescription {
   patient        User               @relation("PatientPrescriptions", fields: [patientId], references: [id])
   methodOption   PrescriptionOption? @relation("PrescriptionMethod", fields: [methodOptionId], references: [id])
   diagnosedDiseaseOption PrescriptionOption? @relation("PrescriptionDiagnosedDisease", fields: [diagnosedDiseaseOptionId], references: [id])
+  caseAnalysis   CaseAnalysis?       @relation(fields: [caseAnalysisId], references: [id], onDelete: SetNull)
   items          PrescriptionItem[]
   doseEvents     MedicineDoseEvent[]
   medicineDeliveries MedicineDelivery[]
@@ -45,6 +47,7 @@ model Prescription {
 
   @@unique([consultationId, version])
   @@index([consultationId, isLatest])
+  @@index([caseAnalysisId])
 }
 
 model PrescriptionOption {

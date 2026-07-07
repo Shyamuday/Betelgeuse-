@@ -67,6 +67,7 @@ export type PrescriptionPayload = {
   followUpDate?: string;
   status: 'DRAFT' | 'PUBLISHED';
   safetyAcknowledged?: boolean;
+  caseAnalysisId?: string;
   items: Array<{
     medicineName: string;
     strength?: string;

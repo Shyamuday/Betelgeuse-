@@ -77,6 +77,10 @@ export class WorklistPage {
     void this.router.navigate(['/', ROUTE_PATHS.APPOINTMENTS], { queryParams: { consultationId } });
   }
 
+  openPrescription(consultationId: string) {
+    void this.router.navigate(['/', ROUTE_PATHS.APPOINTMENTS], { queryParams: { consultationId } });
+  }
+
   openCaseAnalysis(consultationId: string) {
     void this.router.navigate(['/', ROUTE_PATHS.CASE_ANALYSIS, consultationId, 'case-analysis']);
   }

@@ -67,6 +67,7 @@ export class CaseAnalysisApiService {
     analysisId: string,
     payload: {
       notes?: string;
+      caseSheet?: Record<string, string>;
       sourceId?: string;
       methodOptionId?: string | null;
       rubrics?: Array<{ rubricId: string; weight: number }>;

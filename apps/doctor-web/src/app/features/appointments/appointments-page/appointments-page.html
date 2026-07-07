@@ -1,6 +1,18 @@
 <h2>Create Prescription</h2>
 <p>Draft, edit, and publish multi-medicine prescriptions with follow-up versions.</p>
 
+@if (consultationContext) {
+  <app-consultation-context-header
+    [consultation]="consultationContext"
+    [consultationId]="prescriptionModel().consultationId"
+    activeView="prescription"
+  />
+  <div class="consultation-context-grid">
+    <app-consultation-intake-panel [consultation]="consultationContext" />
+    <app-consultation-chat-panel [consultationId]="prescriptionModel().consultationId" />
+  </div>
+}
+
 @if (patientClinical) {
   <app-patient-health-profile [profile]="patientClinical" />
 }
@@ -44,7 +56,13 @@
     <button type="button" (click)="loadConsultationPrescriptions()">Load history</button>
     <button type="button" (click)="resetEditorForFollowUp()">New follow-up version</button>
     @if (prescriptionModel().consultationId) {
-      <a class="link-btn" [routerLink]="['/', caseAnalysisPath, prescriptionModel().consultationId, 'case-analysis']">Case analysis</a>
+      <a
+        class="link-btn"
+        [routerLink]="['/', caseAnalysisPath, prescriptionModel().consultationId, 'case-analysis']"
+        [queryParams]="prescriptionModel().caseAnalysisId ? { caseAnalysisId: prescriptionModel().caseAnalysisId } : null"
+      >
+        Case analysis
+      </a>
     }
   </div>
 

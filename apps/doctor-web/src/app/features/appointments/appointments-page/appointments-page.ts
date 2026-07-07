@@ -5,9 +5,14 @@ import { form, FormField } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import { RouterLink } from '@angular/router';
 import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
+import { ConsultationApiService } from '../../../core/services/consultation-api.service';
+import type { DoctorConsultation } from '../../../core/types/consultation.types';
 import { AppointmentsPrescriptionsService } from './appointments-prescriptions.service';
 import { PrescriptionPdfService } from '../../../core/services/prescription-pdf.service';
 import { DoctorSessionService } from '../../../core/services/doctor-session';
+import { ConsultationChatPanelComponent } from '../../../shared/consultation-chat-panel/consultation-chat-panel';
+import { ConsultationContextHeaderComponent } from '../../../shared/consultation-context-header/consultation-context-header';
+import { ConsultationIntakePanelComponent } from '../../../shared/consultation-intake-panel/consultation-intake-panel';
 import type {
   LoadedPrescription,
   MedicineRow,
@@ -37,6 +42,7 @@ function newMedicineRow(): MedicineRow {
 function emptyPrescriptionModel() {
   return {
     consultationId: '',
+    caseAnalysisId: '',
     methodOptionId: '',
     diagnosedDiseaseOptionId: '',
     diagnosis: '',
@@ -50,7 +56,15 @@ function emptyPrescriptionModel() {
 
 @Component({
   selector: 'app-appointments-page',
-  imports: [FormField, DatePipe, PatientHealthProfileComponent, RouterLink],
+  imports: [
+    FormField,
+    DatePipe,
+    PatientHealthProfileComponent,
+    RouterLink,
+    ConsultationContextHeaderComponent,
+    ConsultationIntakePanelComponent,
+    ConsultationChatPanelComponent
+  ],
   templateUrl: './appointments-page.html',
   styleUrl: './appointments-page.scss'
 })
@@ -58,6 +72,7 @@ export class AppointmentsPage {
   private readonly prescriptions = inject(AppointmentsPrescriptionsService);
   private readonly prescriptionPdf = inject(PrescriptionPdfService);
   private readonly session = inject(DoctorSessionService);
+  private readonly consultationApi = inject(ConsultationApiService);
   private readonly route = inject(ActivatedRoute);
 
   defaultMethodOptionId = '';
@@ -90,6 +105,7 @@ export class AppointmentsPage {
   savingTemplateError = '';
   deletingTemplateId = '';
   patientClinical: PatientClinicalProfile | null = null;
+  consultationContext: DoctorConsultation | null = null;
   pdfBusyId = '';
   pdfError = '';
 
@@ -99,18 +115,42 @@ export class AppointmentsPage {
     void this.loadDoctorDefaultApproach();
     if (this.prescriptionModel().consultationId) {
       void this.loadConsultationPrescriptions();
+      void this.loadConsultationContext();
+    }
+  }
+
+  async loadConsultationContext() {
+    const consultationId = this.prescriptionModel().consultationId.trim();
+    if (!consultationId) {
+      this.consultationContext = null;
+      return;
+    }
+
+    try {
+      this.consultationContext = await this.consultationApi.loadConsultation(consultationId);
+    } catch {
+      this.consultationContext = null;
     }
   }
 
   private createInitialPrescriptionModel() {
     const consultationId = this.route.snapshot.queryParamMap.get('consultationId') || '';
+    const caseAnalysisId = this.route.snapshot.queryParamMap.get('caseAnalysisId') || '';
     const remedySuggestion = this.route.snapshot.queryParamMap.get('remedy') || '';
+    const diagnosisSuggestion = this.route.snapshot.queryParamMap.get('diagnosis') || '';
     const methodFromCase = this.route.snapshot.queryParamMap.get('methodOptionId') || '';
     const medicineRows = [newMedicineRow()];
     if (remedySuggestion) {
       medicineRows[0].medicineName = remedySuggestion;
     }
-    return { ...emptyPrescriptionModel(), consultationId, methodOptionId: methodFromCase, medicineRows };
+    return {
+      ...emptyPrescriptionModel(),
+      consultationId,
+      caseAnalysisId,
+      methodOptionId: methodFromCase,
+      diagnosis: diagnosisSuggestion || remedySuggestion,
+      medicineRows
+    };
   }
 
   async loadDoctorDefaultApproach() {
@@ -207,6 +247,7 @@ export class AppointmentsPage {
       const response = await this.prescriptions.loadConsultationPrescriptions(consultationId);
       this.loadedPrescriptions = response.prescriptions || [];
       this.consultationStatus = response.consultation?.status || '';
+      await this.loadConsultationContext();
       this.patientClinical = response.patient
         ? {
             allergies: response.patient.allergies,
@@ -353,6 +394,7 @@ export class AppointmentsPage {
       followUpDate: form.followUpDate || undefined,
       status: targetStatus,
       safetyAcknowledged,
+      ...(form.caseAnalysisId ? { caseAnalysisId: form.caseAnalysisId } : {}),
       items: form.medicineRows.map((row) => ({
         medicineName: row.medicineName,
         strength: row.strength || undefined,

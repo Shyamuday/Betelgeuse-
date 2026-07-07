@@ -21,6 +21,7 @@ export const prescriptionInputSchema = z.object({
   fileUrl: z.string().url().optional().or(z.literal('')),
   followUpDate: z.coerce.date().optional(),
   status: z.nativeEnum(PrescriptionStatus).default(PrescriptionStatus.DRAFT),
+  caseAnalysisId: z.string().min(1).optional(),
   items: z.array(prescriptionItemInputSchema).min(1),
   safetyAcknowledged: z.boolean().optional().default(false)
 });

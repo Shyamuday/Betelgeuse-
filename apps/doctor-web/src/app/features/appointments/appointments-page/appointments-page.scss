@@ -1,3 +1,13 @@
+.consultation-context-grid {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  @media (min-width: 960px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .grid {
   display: grid;
   gap: 0.5rem;

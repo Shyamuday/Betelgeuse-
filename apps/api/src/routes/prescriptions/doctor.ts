@@ -85,6 +85,15 @@ export function registerDoctorPrescriptionRoutes(router: Router, io: SocketIoSer
         return res.status(400).json({ message: 'Invalid prescription method or diagnosed disease option.' });
       }
 
+      if (body.caseAnalysisId) {
+        const linkedAnalysis = await prisma.caseAnalysis.findFirst({
+          where: { id: body.caseAnalysisId, consultationId: consultation.id }
+        });
+        if (!linkedAnalysis) {
+          return res.status(400).json({ message: 'Invalid case analysis for this consultation.' });
+        }
+      }
+
       const safetyCheck = assertPrescriptionSafetyAcknowledged(body.items, body.safetyAcknowledged);
       if (!safetyCheck.ok) {
         return res.status(409).json({
@@ -110,6 +119,7 @@ export function registerDoctorPrescriptionRoutes(router: Router, io: SocketIoSer
             isLatest: true,
             methodOptionId: methodOption.id,
             diagnosedDiseaseOptionId: diagnosedDiseaseOption.id,
+            caseAnalysisId: body.caseAnalysisId || null,
             diagnosis: body.diagnosis,
             advice: body.advice || null,
             notes: body.notes,
@@ -182,7 +192,7 @@ export function registerDoctorPrescriptionRoutes(router: Router, io: SocketIoSer
       const body = prescriptionInputSchema.parse(req.body);
       const prescription = await prisma.prescription.findUnique({
         where: { id: routeParam(req, 'id') },
-        include: { consultation: { select: { assignedDoctorId: true } } }
+        include: { consultation: { select: { assignedDoctorId: true, id: true } } }
       });
 
       if (!prescription) return res.status(404).json({ message: 'Prescription not found' });
@@ -203,6 +213,15 @@ export function registerDoctorPrescriptionRoutes(router: Router, io: SocketIoSer
         return res.status(400).json({ message: 'Invalid prescription method or diagnosed disease option.' });
       }
 
+      if (body.caseAnalysisId) {
+        const linkedAnalysis = await prisma.caseAnalysis.findFirst({
+          where: { id: body.caseAnalysisId, consultationId: prescription.consultation.id }
+        });
+        if (!linkedAnalysis) {
+          return res.status(400).json({ message: 'Invalid case analysis for this consultation.' });
+        }
+      }
+
       const safetyCheck = assertPrescriptionSafetyAcknowledged(body.items, body.safetyAcknowledged);
       if (!safetyCheck.ok) {
         return res.status(409).json({
@@ -214,7 +233,11 @@ export function registerDoctorPrescriptionRoutes(router: Router, io: SocketIoSer
       const updated = await prisma.$transaction(async (tx) => {
         const updatedRx = await tx.prescription.update({
           where: { id: prescription.id },
-          data: { methodOptionId: methodOption.id, diagnosedDiseaseOptionId: diagnosedDiseaseOption.id, diagnosis: body.diagnosis, advice: body.advice || null, notes: body.notes, fileUrl: body.fileUrl || null, followUpDate: body.followUpDate || null, status: body.status, uploadedById: req.user!.id }
+          data: {
+            methodOptionId: methodOption.id,
+            diagnosedDiseaseOptionId: diagnosedDiseaseOption.id,
+            caseAnalysisId: body.caseAnalysisId === undefined ? undefined : body.caseAnalysisId || null,
+            diagnosis: body.diagnosis, advice: body.advice || null, notes: body.notes, fileUrl: body.fileUrl || null, followUpDate: body.followUpDate || null, status: body.status, uploadedById: req.user!.id }
         });
 
         await tx.prescriptionItem.deleteMany({ where: { prescriptionId: updatedRx.id } });

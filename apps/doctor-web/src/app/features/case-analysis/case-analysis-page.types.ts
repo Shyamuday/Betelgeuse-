@@ -46,6 +46,7 @@ export type CaseAnalysis = {
   consultationId?: string | null;
   status: 'DRAFT' | 'FINALIZED';
   notes?: string | null;
+  caseSheet?: Record<string, string> | null;
   methodOptionId?: string | null;
   methodOption?: { id: string; label: string } | null;
   source?: RepertorySource | null;
@@ -59,8 +60,9 @@ export type CaseAnalysis = {
 export type ConsultationSummary = {
   id: string;
   status: string;
+  intakeAnswers?: Record<string, string> | null;
   patient?: { id: string; name: string; patientCode?: string | null };
-  disease?: { id: string; name: string };
+  disease?: { id: string; name: string; intakeQuestions?: string[] };
 };
 
 export type MateriaMedicaSection = {

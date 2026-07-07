@@ -3,7 +3,12 @@ import { Component, inject, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
+import { CASE_SHEET_FIELDS, hydrateCaseSheet } from '../../../core/constants/case-sheet.constants';
+import { ConsultationChatPanelComponent } from '../../../shared/consultation-chat-panel/consultation-chat-panel';
+import { ConsultationContextHeaderComponent } from '../../../shared/consultation-context-header/consultation-context-header';
+import { ConsultationIntakePanelComponent } from '../../../shared/consultation-intake-panel/consultation-intake-panel';
 import { CaseAnalysisApiService } from '../case-analysis-api.service';
+import { primaryIntakeSearchPhrase } from '../intake-rubric.util';
 import type {
   CaseAnalysis,
   ConsultationSummary,
@@ -18,7 +23,14 @@ import { formatRubricPath, rubricPathSegments } from '../rubric-path.util';
 @Component({
   selector: 'app-case-analysis-page',
   host: { class: 'case-analysis-page' },
-  imports: [FormField, RouterLink, DecimalPipe],
+  imports: [
+    FormField,
+    RouterLink,
+    DecimalPipe,
+    ConsultationContextHeaderComponent,
+    ConsultationIntakePanelComponent,
+    ConsultationChatPanelComponent
+  ],
   templateUrl: './case-analysis-page.html'
 })
 export class CaseAnalysisPage {
@@ -30,10 +42,12 @@ export class CaseAnalysisPage {
   readonly worklistPath = ROUTE_PATHS.WORKLIST;
   readonly repertoryPath = ROUTE_PATHS.REPERTORY;
   readonly weightOptions = [1, 2, 3, 4] as const;
+  readonly caseSheetFields = CASE_SHEET_FIELDS;
 
   readonly standalone = this.route.snapshot.data['standalone'] === true;
   readonly consultationId = this.standalone ? '' : this.route.snapshot.paramMap.get('consultationId') || '';
   readonly consultation = signal<ConsultationSummary | null>(null);
+  readonly analyses = signal<CaseAnalysis[]>([]);
   readonly analysis = signal<CaseAnalysis | null>(null);
   readonly sources = signal<RepertorySource[]>([]);
   readonly selectedRubrics = signal<SelectedRubric[]>([]);
@@ -42,6 +56,8 @@ export class CaseAnalysisPage {
   readonly searchForm = form(this.searchModel);
   readonly notesModel = signal({ notes: '' });
   readonly notesForm = form(this.notesModel);
+  readonly caseSheetModel = signal(hydrateCaseSheet());
+  readonly caseSheetForm = form(this.caseSheetModel);
   readonly searchResults = signal<RubricSearchResult[]>([]);
   readonly searchedOnce = signal(false);
   readonly maxResultScore = signal(0);
@@ -52,6 +68,8 @@ export class CaseAnalysisPage {
   readonly loading = signal(false);
   readonly searching = signal(false);
   readonly saving = signal(false);
+  readonly savingCaseSheet = signal(false);
+  readonly creatingAnalysis = signal(false);
   readonly repertorizing = signal(false);
   readonly selectingRemedyId = signal('');
   readonly focusedRemedy = signal<RepertoryRemedyRef | null>(null);
@@ -151,9 +169,18 @@ export class CaseAnalysisPage {
     try {
       const response = await this.api.loadConsultationAnalyses(id);
       this.consultation.set(response.consultation);
+      this.analyses.set(response.analyses);
+      const preferredAnalysisId = this.route.snapshot.queryParamMap.get('caseAnalysisId') || '';
+      const preferred = preferredAnalysisId
+        ? response.analyses.find((item) => item.id === preferredAnalysisId)
+        : undefined;
       const nextAnalysis =
+        preferred ||
         response.analyses[0] ||
         (await this.api.createAnalysis(id, { sourceId: this.searchModel().selectedSourceId || undefined }));
+      if (!response.analyses.length) {
+        this.analyses.set([nextAnalysis]);
+      }
       this.analysis.set(nextAnalysis);
       this.searchModel.update((model) => ({
         ...model,
@@ -171,6 +198,7 @@ export class CaseAnalysisPage {
 
   private hydrateFromAnalysis(nextAnalysis: CaseAnalysis) {
     this.notesModel.set({ notes: nextAnalysis.notes || '' });
+    this.caseSheetModel.set(hydrateCaseSheet(nextAnalysis.caseSheet));
     this.selectedMethodOptionId.set(nextAnalysis.methodOptionId || nextAnalysis.methodOption?.id || '');
     this.selectedRubrics.set(
       nextAnalysis.rubrics.map((item) => ({
@@ -312,6 +340,70 @@ export class CaseAnalysisPage {
     }
   }
 
+  analysisLabel(analysis: CaseAnalysis) {
+    const created = analysis.createdAt ? new Date(analysis.createdAt).toLocaleString() : 'Case';
+    const remedy = analysis.selectedRemedy?.name;
+    return remedy ? `${created} · ${remedy}` : created;
+  }
+
+  async switchAnalysis(analysisId: string) {
+    const selected = this.analyses().find((item) => item.id === analysisId);
+    if (!selected || selected.id === this.analysis()?.id) return;
+    this.analysis.set(selected);
+    this.hydrateFromAnalysis(selected);
+    this.searchResults.set([]);
+    this.searchedOnce.set(false);
+    this.message.set('Switched to another case analysis.');
+  }
+
+  async createNewAnalysis() {
+    if (!this.consultationId) return;
+    this.creatingAnalysis.set(true);
+    this.error.set('');
+    try {
+      const created = await this.api.createAnalysis(this.consultationId, {
+        sourceId: this.searchModel().selectedSourceId || this.analysis()?.source?.id || undefined
+      });
+      this.analyses.set([created, ...this.analyses()]);
+      this.analysis.set(created);
+      this.hydrateFromAnalysis(created);
+      this.searchResults.set([]);
+      this.searchedOnce.set(false);
+      this.message.set('New case analysis started.');
+    } catch {
+      this.error.set('Could not start a new case analysis.');
+    } finally {
+      this.creatingAnalysis.set(false);
+    }
+  }
+
+  suggestFromIntake() {
+    const phrase = primaryIntakeSearchPhrase(this.consultation()?.intakeAnswers);
+    if (!phrase) {
+      this.message.set('No intake answers available to suggest rubric search terms.');
+      return;
+    }
+    this.searchModel.update((model) => ({ ...model, rubricQuery: phrase }));
+    this.message.set(`Search prefilled from intake: "${phrase}".`);
+  }
+
+  async saveCaseSheet() {
+    const currentAnalysis = this.analysis();
+    if (!currentAnalysis) return;
+    this.savingCaseSheet.set(true);
+    this.error.set('');
+    try {
+      const updated = await this.api.updateAnalysis(currentAnalysis.id, { caseSheet: this.caseSheetModel() });
+      this.analysis.set(updated);
+      this.analyses.set(this.analyses().map((item) => (item.id === updated.id ? updated : item)));
+      this.message.set('Case sheet saved.');
+    } catch {
+      this.error.set('Could not save case sheet.');
+    } finally {
+      this.savingCaseSheet.set(false);
+    }
+  }
+
   async saveNotes() {
     const currentAnalysis = this.analysis();
     if (!currentAnalysis) return;
@@ -372,7 +464,9 @@ export class CaseAnalysisPage {
     void this.router.navigate(['/', ROUTE_PATHS.APPOINTMENTS], {
       queryParams: {
         consultationId: this.consultationId,
+        caseAnalysisId: currentAnalysis.id,
         remedy: currentAnalysis.selectedRemedy.name,
+        diagnosis: currentAnalysis.selectedRemedy.name,
         ...(this.selectedMethodOptionId() ? { methodOptionId: this.selectedMethodOptionId() } : {})
       }
     });

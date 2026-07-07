@@ -1,0 +1,61 @@
+.consultation-chat-panel {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border-subtle, #e5e7eb);
+  border-radius: 12px;
+  background: var(--surface-elevated, #fff);
+}
+
+.chat-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chat-head h3 {
+  margin: 0;
+}
+
+.chat-log {
+  display: grid;
+  gap: 0.65rem;
+  max-height: 280px;
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+.chat-message {
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  background: #f9fafb;
+}
+
+.chat-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.chat-compose {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.chat-compose textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+.ghost {
+  background: transparent;
+  border: none;
+  color: #4f46e5;
+  cursor: pointer;
+}
+
+.error {
+  color: #b91c1c;
+}

@@ -1,0 +1,41 @@
+<section class="consultation-context-header">
+  <div class="context-main">
+    @if (showWorklistLink) {
+      <a class="back-link" [routerLink]="['/', worklistPath]">← Worklist</a>
+    }
+    <div class="context-title">
+      <strong>{{ consultation.patient?.name || 'Patient' }}</strong>
+      <span class="muted">{{ consultation.disease?.name || 'Consultation' }}</span>
+    </div>
+    @if (patientCode()) {
+      <small class="muted">Patient {{ patientCode() }}</small>
+    }
+  </div>
+
+  <div class="context-meta">
+    <span class="badge">{{ consultation.status }}</span>
+    @if (analysisLabel) {
+      <span class="badge badge-soft">{{ analysisLabel }}</span>
+    }
+  </div>
+
+  @if (consultationId) {
+    <div class="context-actions">
+      <a
+        class="btn-secondary"
+        [class.active]="activeView === 'case-analysis'"
+        [routerLink]="['/', caseAnalysisPath, consultationId, 'case-analysis']"
+      >
+        Case analysis
+      </a>
+      <a
+        class="btn-secondary"
+        [class.active]="activeView === 'prescription'"
+        [routerLink]="['/', appointmentsPath]"
+        [queryParams]="{ consultationId }"
+      >
+        Prescription
+      </a>
+    </div>
+  }
+</section>

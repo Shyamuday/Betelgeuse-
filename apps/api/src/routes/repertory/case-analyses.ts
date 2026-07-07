@@ -25,6 +25,7 @@ const rubricSelectionSchema = z.object({
 
 const updateAnalysisSchema = z.object({
   notes: z.string().max(5000).optional(),
+  caseSheet: z.record(z.string(), z.string()).optional(),
   status: z.nativeEnum(CaseAnalysisStatus).optional(),
   sourceId: z.string().optional(),
   methodOptionId: z.string().min(1).nullable().optional(),
@@ -237,6 +238,7 @@ export function registerCaseAnalysisRoutes(router: Router) {
           where: { id: analysisId },
           data: {
             notes: body.notes === undefined ? undefined : body.notes || null,
+            caseSheet: body.caseSheet === undefined ? undefined : body.caseSheet,
             status: body.status,
             sourceId: body.sourceId,
             methodOptionId: body.methodOptionId === undefined ? undefined : body.methodOptionId

@@ -1,0 +1,12 @@
+.consultation-intake-panel {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border-subtle, #e5e7eb);
+  border-radius: 12px;
+  background: var(--surface-elevated, #fff);
+}
+
+.consultation-intake-panel h3 {
+  margin: 0;
+}

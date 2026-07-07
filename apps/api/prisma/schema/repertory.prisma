@@ -107,6 +107,7 @@ model CaseAnalysis {
   sourceId         String?
   status           CaseAnalysisStatus   @default(DRAFT)
   notes            String?
+  caseSheet        Json?
   methodOptionId   String?
   selectedRemedyId String?
   methodOption     PrescriptionOption?  @relation("CaseAnalysisMethod", fields: [methodOptionId], references: [id], onDelete: SetNull)
@@ -116,6 +117,7 @@ model CaseAnalysis {
   selectedRemedy   HomeopathicRemedy?   @relation("SelectedRemedy", fields: [selectedRemedyId], references: [id], onDelete: SetNull)
   rubrics          CaseAnalysisRubric[]
   results          CaseAnalysisResult[]
+  prescriptions    Prescription[]
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
 

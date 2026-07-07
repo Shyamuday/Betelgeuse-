@@ -1,0 +1,40 @@
+<section class="consultation-chat-panel">
+  <div class="chat-head">
+    <h3>Patient chat</h3>
+    <button type="button" class="ghost" (click)="load()" [disabled]="loading()">Refresh</button>
+  </div>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  <div class="chat-log">
+    @if (loading() && !messages().length) {
+      <p class="muted">Loading messages…</p>
+    }
+    @for (message of messages(); track message.id) {
+      <article class="chat-message">
+        <div class="chat-meta">
+          <strong>{{ message.sender.name }}</strong>
+          <small>{{ message.createdAt | date: 'short' }}</small>
+        </div>
+        <p>{{ message.body }}</p>
+      </article>
+    } @empty {
+      @if (!loading()) {
+        <p class="muted">No messages yet. Start the conversation with your patient.</p>
+      }
+    }
+  </div>
+
+  <div class="chat-compose">
+    <textarea
+      rows="3"
+      placeholder="Type a message to the patient…"
+      [formField]="draftForm.body"
+    ></textarea>
+    <button type="button" (click)="send()" [disabled]="sending() || !draftModel().body.trim()">
+      {{ sending() ? 'Sending…' : 'Send' }}
+    </button>
+  </div>
+</section>

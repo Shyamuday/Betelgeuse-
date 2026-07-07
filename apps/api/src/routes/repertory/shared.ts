@@ -22,8 +22,9 @@ export async function assertDoctorConsultationAccess(req: Request, res: Response
       assignedDoctorId: true,
       patientId: true,
       status: true,
+      intakeAnswers: true,
       patient: { select: { id: true, name: true, patientCode: true } },
-      disease: { select: { id: true, name: true } }
+      disease: { select: { id: true, name: true, intakeQuestions: true } }
     }
   });
 
