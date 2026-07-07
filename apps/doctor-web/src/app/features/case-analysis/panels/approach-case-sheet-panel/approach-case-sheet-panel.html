@@ -1,0 +1,20 @@
+<section class="panel case-sheet-panel">
+  <div class="panel-title-row">
+    <h3>{{ title }}</h3>
+    <button type="button" (click)="saveRequested.emit()" [disabled]="saving">
+      {{ saving ? 'Saving…' : 'Save case sheet' }}
+    </button>
+  </div>
+  <p class="hint">{{ description }}</p>
+  <div class="case-sheet-grid">
+    @for (field of fields; track field.key) {
+      <label [class.wide]="field.wide">
+        <span>{{ field.label }}</span>
+        @if (field.hint) {
+          <small class="muted">{{ field.hint }}</small>
+        }
+        <textarea rows="{{ field.rows || 2 }}" [formField]="$any(caseSheetForm)[field.key]"></textarea>
+      </label>
+    }
+  </div>
+</section>

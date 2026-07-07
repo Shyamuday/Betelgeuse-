@@ -108,6 +108,7 @@ model CaseAnalysis {
   status           CaseAnalysisStatus   @default(DRAFT)
   notes            String?
   caseSheet        Json?
+  approachData     Json?
   methodOptionId   String?
   selectedRemedyId String?
   methodOption     PrescriptionOption?  @relation("CaseAnalysisMethod", fields: [methodOptionId], references: [id], onDelete: SetNull)

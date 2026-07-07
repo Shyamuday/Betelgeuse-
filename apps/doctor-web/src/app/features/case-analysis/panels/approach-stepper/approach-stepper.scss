@@ -1,0 +1,50 @@
+.approach-stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+}
+
+.step-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--color-border, #d1d5db);
+  background: var(--color-surface, #fff);
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+.step-chip.active {
+  border-color: var(--color-brand, #4f46e5);
+  background: var(--color-info-bg, #eef2ff);
+}
+
+.step-chip.done:not(.active) {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.step-chip.optional .step-label::after {
+  content: ' *';
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+
+.step-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  background: #f3f4f6;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.step-label {
+  font-size: 0.85rem;
+}

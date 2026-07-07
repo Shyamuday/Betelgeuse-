@@ -47,6 +47,7 @@ export type CaseAnalysis = {
   status: 'DRAFT' | 'FINALIZED';
   notes?: string | null;
   caseSheet?: Record<string, string> | null;
+  approachData?: Record<string, unknown> | null;
   methodOptionId?: string | null;
   methodOption?: { id: string; label: string } | null;
   source?: RepertorySource | null;

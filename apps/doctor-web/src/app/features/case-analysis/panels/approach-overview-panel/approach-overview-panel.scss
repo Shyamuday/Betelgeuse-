@@ -1,0 +1,40 @@
+.approach-overview-panel {
+  margin-bottom: 0.75rem;
+}
+
+.approach-detail {
+  margin-top: 0.85rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.detail-grid {
+  display: grid;
+  gap: 0.75rem;
+
+  @media (min-width: 760px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  h4 {
+    margin: 0 0 0.35rem;
+    font-size: 0.9rem;
+  }
+
+  ol,
+  ul {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+}
+
+.guidance {
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.protocol-note {
+  border-left: 3px solid #f59e0b;
+}

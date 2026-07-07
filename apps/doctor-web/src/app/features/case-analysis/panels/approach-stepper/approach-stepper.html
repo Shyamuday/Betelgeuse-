@@ -1,0 +1,15 @@
+<nav class="approach-stepper" aria-label="Case analysis workflow">
+  @for (step of steps; track step.id; let index = $index) {
+    <button
+      type="button"
+      class="step-chip"
+      [class.active]="isActive(step)"
+      [class.done]="isDone(step)"
+      [class.optional]="step.optional"
+      (click)="select(step)"
+    >
+      <span class="step-index">{{ index + 1 }}</span>
+      <span class="step-label">{{ step.shortLabel }}</span>
+    </button>
+  }
+</nav>

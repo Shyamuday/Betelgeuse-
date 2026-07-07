@@ -1,0 +1,52 @@
+<section class="panel approach-overview-panel">
+  <div class="panel-title-row">
+    <h3>Prescribing approach</h3>
+    @if (approach) {
+      <span class="badge badge-soft">{{ approach.workflowKind.replace('_', ' ') }}</span>
+    }
+  </div>
+
+  <p class="hint">The approach controls case sheet fields, workflow steps, and repertory weighting for this analysis.</p>
+
+  <div class="approach-row">
+    <select class="approach-select" [value]="selectedMethodOptionId" (change)="onSelect($event)" [disabled]="saving">
+      <option value="">Select approach</option>
+      @for (method of methods; track method.id) {
+        <option [value]="method.id">{{ method.label }}</option>
+      }
+    </select>
+  </div>
+
+  @if (approach; as def) {
+    <div class="approach-detail">
+      <p><strong>{{ def.title }}</strong> — {{ def.shortDescription }}</p>
+      <p class="muted">{{ def.focus }}</p>
+
+      <div class="detail-grid">
+        <div>
+          <h4>Process</h4>
+          <ol>
+            @for (step of def.processSteps; track step) {
+              <li>{{ step }}</li>
+            }
+          </ol>
+        </div>
+        <div>
+          <h4>Best for</h4>
+          <ul>
+            @for (item of def.bestFor; track item) {
+              <li>{{ item }}</li>
+            }
+          </ul>
+        </div>
+      </div>
+
+      @if (def.prescription.potencyGuidance) {
+        <p class="guidance"><strong>Potency guidance:</strong> {{ def.prescription.potencyGuidance }}</p>
+      }
+      @if (def.prescription.skipRepertory) {
+        <p class="guidance protocol-note">This approach uses protocol-led prescribing; repertory steps are optional or skipped.</p>
+      }
+    </div>
+  }
+</section>

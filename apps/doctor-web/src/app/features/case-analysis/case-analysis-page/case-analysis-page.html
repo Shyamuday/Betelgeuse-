@@ -99,56 +99,93 @@
       </section>
     }
 
-    <div class="steps">
-      <span class="step" [class.done]="selectedMethodOptionId()">0. Approach</span>
-      <span class="step" [class.done]="selectedRubrics().length > 0">1. Symptoms</span>
-      <span class="step" [class.done]="analysis.results.length > 0">2. Repertorize</span>
-      <span class="step" [class.done]="!!analysis.selectedRemedy">3. Remedy</span>
-    </div>
+    <div class="steps-workflow">
+      <app-approach-stepper
+        [steps]="workflowSteps()"
+        [activeStepId]="activeStepId()"
+        [completion]="stepCompletion()"
+        (stepSelected)="setActiveStep($event)"
+      />
 
-    <section class="panel approach-panel">
-      <div class="panel-title-row">
-        <h3>Prescribing approach</h3>
-        @if (analysis.methodOption?.label && !selectedMethodOptionId()) {
-          <span class="badge badge-soft">{{ analysis.methodOption?.label }}</span>
-        }
-      </div>
-      <p class="hint">Choose the homeopathic method for this case. Your profile default is pre-selected when you open a new case.</p>
-      <div class="approach-row">
-        <select
-          class="approach-select"
-          [value]="selectedMethodOptionId()"
-          (change)="saveApproach(($any($event.target)).value)"
-          [disabled]="saving()"
-        >
-          <option value="">Select approach</option>
-          @for (method of methods(); track method.id) {
-            <option [value]="method.id">{{ method.label }}</option>
-          }
-        </select>
-      </div>
-    </section>
+      @if (showPanel('approach-overview')) {
+        <app-approach-overview-panel
+          [methods]="methods()"
+          [selectedMethodOptionId]="selectedMethodOptionId()"
+          [approach]="activeApproach()"
+          [saving]="saving()"
+          (approachChanged)="saveApproach($event)"
+        />
+      }
 
-    @if (!standalone) {
-      <section class="panel case-sheet-panel">
-        <div class="panel-title-row">
-          <h3>Structured case sheet</h3>
-          <button type="button" (click)="saveCaseSheet()" [disabled]="savingCaseSheet()">
-            {{ savingCaseSheet() ? 'Saving…' : 'Save case sheet' }}
-          </button>
-        </div>
-        <p class="hint">Capture the case in a structured format alongside repertory work.</p>
-        <div class="case-sheet-grid">
-          @for (field of caseSheetFields; track field.key) {
-            <label>
-              <span>{{ field.label }}</span>
-              <textarea rows="2" [formField]="caseSheetForm[field.key]"></textarea>
-            </label>
-          }
-        </div>
-      </section>
-    }
+      @if (showPanel('kent-hierarchy')) {
+        <app-kent-hierarchy-panel
+          [initial]="kentData()"
+          [saving]="savingApproachData()"
+          (saveRequested)="saveKentHierarchy($event)"
+        />
+      }
 
+      @if (showPanel('sensation-mapper')) {
+        <app-sensation-capture-panel
+          [initial]="sensationData()"
+          [saving]="savingApproachData()"
+          (saveRequested)="saveSensation($event)"
+        />
+      }
+
+      @if (showPanel('miasm-selector')) {
+        <app-miasm-layer-panel
+          [initial]="miasmData()"
+          [saving]="savingApproachData()"
+          (saveRequested)="saveMiasm($event)"
+        />
+      }
+
+      @if (showPanel('protocol-selector')) {
+        <app-protocol-select-panel
+          [diseaseName]="consultation()?.disease?.name || ''"
+          [initial]="protocolData()"
+          [saving]="savingApproachData()"
+          (saveRequested)="saveProtocol($event)"
+          (useInPrescription)="saveProtocol($event); openPrescriptionWithRemedy()"
+        />
+      }
+
+      @if (showPanel('case-sheet') && !standalone) {
+        <app-approach-case-sheet-panel
+          [fields]="caseSheetFields()"
+          [title]="activeApproach().workflowKind === 'PROTOCOL_DRIVEN' ? 'Protocol notes' : 'Structured case sheet'"
+          [description]="'Schema: ' + activeApproach().caseSheetSchemaId + ' — ' + activeApproach().focus"
+          [saving]="savingCaseSheet()"
+          [caseSheetForm]="caseSheetForm"
+          (saveRequested)="saveCaseSheet()"
+        />
+      }
+
+      @if (showPanel('prescription-handoff')) {
+        <app-prescription-handoff-panel
+          [approach]="activeApproach()"
+          [selectedRemedyName]="analysis.selectedRemedy?.name || ''"
+          [protocolPrimaryRemedy]="protocolData()?.primaryRemedy || ''"
+          [protocolCompanionRemedy]="protocolData()?.companionRemedy || ''"
+          [disabled]="!analysis.selectedRemedy && !protocolData()?.primaryRemedy"
+          (handoff)="openPrescriptionWithRemedy()"
+        />
+      }
+
+      @if (showPanel('analysis-notes')) {
+        <section class="panel notes-panel">
+          <h3>Analysis notes</h3>
+          <textarea
+            [formField]="notesForm.notes"
+            rows="4"
+            placeholder="Key observations, modalities, mentals, or follow-up thoughts…"
+          ></textarea>
+          <button type="button" class="btn-secondary btn-sm" (click)="saveNotes()" [disabled]="saving()">Save notes</button>
+        </section>
+      }
+
+      @if (showRepertoryWorkspace()) {
     <div class="workspace">
       <div class="column">
         <section class="panel">
@@ -168,7 +205,7 @@
           <div class="search-box">
             <input
               [formField]="searchForm.rubricQuery"
-              placeholder="e.g. anxiety morning, nausea, grief suppressed"
+              [placeholder]="activeApproach().repertory.searchPlaceholder || 'Search rubrics…'"
               (keyup.enter)="searchRubrics()"
             />
             @if (!standalone && consultation()?.intakeAnswers) {
@@ -278,16 +315,6 @@
           } @else {
             <p class="hint">Search and add symptoms that match the patient. Assign weight 1–4 by importance.</p>
           }
-        </section>
-
-        <section class="panel notes-panel">
-          <h3>Analysis notes</h3>
-          <textarea
-            [formField]="notesForm.notes"
-            rows="4"
-            placeholder="Key observations, modalities, mentals, or follow-up thoughts…"
-          ></textarea>
-          <button type="button" class="btn-secondary btn-sm" (click)="saveNotes()" [disabled]="saving()">Save notes</button>
         </section>
       </div>
 
@@ -420,6 +447,8 @@
           </section>
         }
       </div>
+    </div>
+      }
     </div>
   }
 </section>

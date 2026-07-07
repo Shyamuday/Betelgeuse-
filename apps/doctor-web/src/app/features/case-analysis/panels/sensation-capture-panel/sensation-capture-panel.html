@@ -1,0 +1,34 @@
+<section class="panel sensation-panel">
+  <div class="panel-title-row">
+    <h3>Sensation mapping</h3>
+    <button type="button" (click)="save()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save sensation map' }}</button>
+  </div>
+  <p class="hint">Capture the patient’s exact language and the core sensation theme before remedy family selection.</p>
+  <div class="sensation-grid">
+    <label class="wide">
+      <span>Patient’s own words</span>
+      <textarea rows="4" [formField]="form.patientLanguage" placeholder="Record metaphors, hand gestures, repeated phrases…"></textarea>
+    </label>
+    <label class="wide">
+      <span>Core sensation theme</span>
+      <textarea rows="3" [formField]="form.coreSensation" placeholder="e.g. crushed, split, stuck, attacked, bound…"></textarea>
+    </label>
+    <label>
+      <span>Kingdom</span>
+      <select [formField]="form.kingdom">
+        <option value="">Select kingdom</option>
+        @for (kingdom of kingdoms; track kingdom) {
+          <option [value]="kingdom">{{ kingdom }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      <span>Remedy family notes</span>
+      <input [formField]="form.remedyFamily" placeholder="e.g. Snake, Carbon, Muriaticum…" />
+    </label>
+    <label class="wide">
+      <span>Level of experience</span>
+      <textarea rows="2" [formField]="form.levelOfExperience" placeholder="Level 1–4 or descriptive depth notes…"></textarea>
+    </label>
+  </div>
+</section>

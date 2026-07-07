@@ -137,11 +137,15 @@ export class AppointmentsPage {
     const consultationId = this.route.snapshot.queryParamMap.get('consultationId') || '';
     const caseAnalysisId = this.route.snapshot.queryParamMap.get('caseAnalysisId') || '';
     const remedySuggestion = this.route.snapshot.queryParamMap.get('remedy') || '';
+    const companionRemedy = this.route.snapshot.queryParamMap.get('companionRemedy') || '';
     const diagnosisSuggestion = this.route.snapshot.queryParamMap.get('diagnosis') || '';
     const methodFromCase = this.route.snapshot.queryParamMap.get('methodOptionId') || '';
     const medicineRows = [newMedicineRow()];
     if (remedySuggestion) {
       medicineRows[0].medicineName = remedySuggestion;
+    }
+    if (companionRemedy) {
+      medicineRows.push({ ...newMedicineRow(), medicineName: companionRemedy });
     }
     return {
       ...emptyPrescriptionModel(),

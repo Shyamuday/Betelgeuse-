@@ -1,0 +1,38 @@
+<section class="panel miasm-panel">
+  <div class="panel-title-row">
+    <h3>Miasmatic layer</h3>
+    <button type="button" (click)="save()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save miasmatic map' }}</button>
+  </div>
+  <p class="hint">Document the active miasmatic layer before repertorization and remedy selection.</p>
+  <div class="miasm-grid">
+    <label>
+      <span>Presenting layer</span>
+      <input [formField]="form.presentingLayer" placeholder="What is expressing now?" />
+    </label>
+    <label>
+      <span>Dominant miasm</span>
+      <select [formField]="form.dominantMiasm">
+        <option value="">Select dominant miasm</option>
+        @for (option of miasmOptions; track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      <span>Psora signs</span>
+      <textarea rows="3" [formField]="form.psoraSigns"></textarea>
+    </label>
+    <label>
+      <span>Sycosis signs</span>
+      <textarea rows="3" [formField]="form.sycosisSigns"></textarea>
+    </label>
+    <label>
+      <span>Syphilis signs</span>
+      <textarea rows="3" [formField]="form.syphilisSigns"></textarea>
+    </label>
+    <label class="wide">
+      <span>Family miasm pattern</span>
+      <textarea rows="2" [formField]="form.familyMiasm"></textarea>
+    </label>
+  </div>
+</section>

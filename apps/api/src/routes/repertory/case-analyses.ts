@@ -5,6 +5,7 @@ import { authRequired, allowRoles } from '../../auth.js';
 import { prisma } from '../../db.js';
 import { asyncRoute } from '../../utils/helpers.js';
 import { computeRepertorization } from '../../services/repertorization.js';
+import { applyApproachRubricWeights } from '../../services/approach-repertory-weights.js';
 import {
   assertMethodOptionId,
   resolveDoctorDefaultMethodOptionId
@@ -26,6 +27,7 @@ const rubricSelectionSchema = z.object({
 const updateAnalysisSchema = z.object({
   notes: z.string().max(5000).optional(),
   caseSheet: z.record(z.string(), z.string()).optional(),
+  approachData: z.record(z.string(), z.unknown()).optional(),
   status: z.nativeEnum(CaseAnalysisStatus).optional(),
   sourceId: z.string().optional(),
   methodOptionId: z.string().min(1).nullable().optional(),
@@ -239,6 +241,7 @@ export function registerCaseAnalysisRoutes(router: Router) {
           data: {
             notes: body.notes === undefined ? undefined : body.notes || null,
             caseSheet: body.caseSheet === undefined ? undefined : body.caseSheet,
+            approachData: body.approachData === undefined ? undefined : body.approachData,
             status: body.status,
             sourceId: body.sourceId,
             methodOptionId: body.methodOptionId === undefined ? undefined : body.methodOptionId
@@ -265,6 +268,22 @@ export function registerCaseAnalysisRoutes(router: Router) {
       }
 
       const rubricIds = existing.rubrics.map((item) => item.rubricId);
+      const rubricMeta = await prisma.repertoryRubric.findMany({
+        where: { id: { in: rubricIds } },
+        select: { id: true, chapter: true }
+      });
+      const chapterByRubricId = new Map(rubricMeta.map((item) => [item.id, item.chapter]));
+
+      const weightedRubrics = applyApproachRubricWeights(
+        existing.methodOption?.label,
+        existing.rubrics.map((item) => ({
+          rubricId: item.rubricId,
+          weight: item.weight,
+          chapter: chapterByRubricId.get(item.rubricId)
+        }))
+      );
+      const weightByRubricId = new Map(weightedRubrics.map((item) => [item.rubricId, item.weight]));
+
       const remedyLinks = await prisma.repertoryRubricRemedy.findMany({
         where: { rubricId: { in: rubricIds } },
         select: { rubricId: true, remedyId: true, grade: true }
@@ -280,7 +299,7 @@ export function registerCaseAnalysisRoutes(router: Router) {
       const ranked = computeRepertorization(
         existing.rubrics.map((item) => ({
           rubricId: item.rubricId,
-          weight: item.weight,
+          weight: weightByRubricId.get(item.rubricId) || item.weight,
           remedyGrades: linksByRubric.get(item.rubricId) || []
         }))
       ).slice(0, 25);

@@ -1,14 +1,37 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import {
+  caseSheetFieldsForSchema,
+  defaultRubricWeightForChapter,
+  firstIncompleteStepId,
+  hydrateCaseSheetForSchema,
+  resolveApproachByMethodLabel,
+  type ApproachDataPayload,
+  type ApproachDefinition,
+  type ApproachStepComponent,
+  type ApproachStepId,
+  type KentHierarchyData,
+  type MiasmaticApproachData,
+  type ProtocolApproachData,
+  type SensationApproachData,
+  type StepCompletionContext
+} from '@vitalis/homeopathy-approaches';
 import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
-import { CASE_SHEET_FIELDS, hydrateCaseSheet } from '../../../core/constants/case-sheet.constants';
 import { ConsultationChatPanelComponent } from '../../../shared/consultation-chat-panel/consultation-chat-panel';
 import { ConsultationContextHeaderComponent } from '../../../shared/consultation-context-header/consultation-context-header';
 import { ConsultationIntakePanelComponent } from '../../../shared/consultation-intake-panel/consultation-intake-panel';
 import { CaseAnalysisApiService } from '../case-analysis-api.service';
 import { primaryIntakeSearchPhrase } from '../intake-rubric.util';
+import { ApproachCaseSheetPanelComponent } from '../panels/approach-case-sheet-panel/approach-case-sheet-panel';
+import { ApproachOverviewPanelComponent } from '../panels/approach-overview-panel/approach-overview-panel';
+import { ApproachStepperComponent } from '../panels/approach-stepper/approach-stepper';
+import { KentHierarchyPanelComponent } from '../panels/kent-hierarchy-panel/kent-hierarchy-panel';
+import { MiasmLayerPanelComponent } from '../panels/miasm-layer-panel/miasm-layer-panel';
+import { PrescriptionHandoffPanelComponent } from '../panels/prescription-handoff-panel/prescription-handoff-panel';
+import { ProtocolSelectPanelComponent } from '../panels/protocol-select-panel/protocol-select-panel';
+import { SensationCapturePanelComponent } from '../panels/sensation-capture-panel/sensation-capture-panel';
 import type {
   CaseAnalysis,
   ConsultationSummary,
@@ -29,7 +52,15 @@ import { formatRubricPath, rubricPathSegments } from '../rubric-path.util';
     DecimalPipe,
     ConsultationContextHeaderComponent,
     ConsultationIntakePanelComponent,
-    ConsultationChatPanelComponent
+    ConsultationChatPanelComponent,
+    ApproachStepperComponent,
+    ApproachOverviewPanelComponent,
+    ApproachCaseSheetPanelComponent,
+    KentHierarchyPanelComponent,
+    SensationCapturePanelComponent,
+    MiasmLayerPanelComponent,
+    ProtocolSelectPanelComponent,
+    PrescriptionHandoffPanelComponent
   ],
   templateUrl: './case-analysis-page.html'
 })
@@ -42,7 +73,6 @@ export class CaseAnalysisPage {
   readonly worklistPath = ROUTE_PATHS.WORKLIST;
   readonly repertoryPath = ROUTE_PATHS.REPERTORY;
   readonly weightOptions = [1, 2, 3, 4] as const;
-  readonly caseSheetFields = CASE_SHEET_FIELDS;
 
   readonly standalone = this.route.snapshot.data['standalone'] === true;
   readonly consultationId = this.standalone ? '' : this.route.snapshot.paramMap.get('consultationId') || '';
@@ -56,19 +86,23 @@ export class CaseAnalysisPage {
   readonly searchForm = form(this.searchModel);
   readonly notesModel = signal({ notes: '' });
   readonly notesForm = form(this.notesModel);
-  readonly caseSheetModel = signal(hydrateCaseSheet());
+  readonly caseSheetModel = signal(hydrateCaseSheetForSchema('classical'));
   readonly caseSheetForm = form(this.caseSheetModel);
+  readonly approachData = signal<ApproachDataPayload>({});
+
   readonly searchResults = signal<RubricSearchResult[]>([]);
   readonly searchedOnce = signal(false);
   readonly maxResultScore = signal(0);
 
   readonly methods = signal<Array<{ id: string; label: string }>>([]);
   readonly selectedMethodOptionId = signal('');
+  readonly activeStepId = signal<ApproachStepId>('approach-select');
 
   readonly loading = signal(false);
   readonly searching = signal(false);
   readonly saving = signal(false);
   readonly savingCaseSheet = signal(false);
+  readonly savingApproachData = signal(false);
   readonly creatingAnalysis = signal(false);
   readonly repertorizing = signal(false);
   readonly selectingRemedyId = signal('');
@@ -82,6 +116,30 @@ export class CaseAnalysisPage {
   readonly formatRubricPath = formatRubricPath;
   readonly rubricPathSegments = rubricPathSegments;
 
+  readonly activeApproach = computed<ApproachDefinition>(() => {
+    const method = this.methods().find((item) => item.id === this.selectedMethodOptionId());
+    return resolveApproachByMethodLabel(method?.label || this.analysis()?.methodOption?.label);
+  });
+
+  readonly workflowSteps = computed(() => this.activeApproach().steps);
+
+  readonly caseSheetFields = computed(() => caseSheetFieldsForSchema(this.activeApproach().caseSheetSchemaId));
+
+  readonly stepCompletion = computed<StepCompletionContext>(() => ({
+    methodOptionId: this.selectedMethodOptionId() || this.analysis()?.methodOptionId,
+    caseSheet: this.caseSheetModel(),
+    approachData: this.approachData() as Record<string, unknown>,
+    rubricCount: this.selectedRubrics().length,
+    resultCount: this.analysis()?.results.length || 0,
+    selectedRemedyId: this.analysis()?.selectedRemedy?.id || null
+  }));
+
+  readonly activeStepComponent = computed<ApproachStepComponent | null>(() => {
+    return this.workflowSteps().find((step) => step.id === this.activeStepId())?.component || null;
+  });
+
+  readonly repertoryEnabled = computed(() => this.activeApproach().repertory.enabled);
+
   constructor() {
     void this.loadSources();
     void this.loadMethodOptions();
@@ -90,6 +148,22 @@ export class CaseAnalysisPage {
     } else if (this.consultationId) {
       void this.load();
     }
+  }
+
+  showPanel(component: ApproachStepComponent) {
+    return this.activeStepComponent() === component;
+  }
+
+  showRepertoryWorkspace() {
+    const component = this.activeStepComponent();
+    return (
+      this.repertoryEnabled() &&
+      (component === 'repertory-workspace' || component === 'remedy-results' || component === 'analysis-notes')
+    );
+  }
+
+  setActiveStep(stepId: ApproachStepId) {
+    this.activeStepId.set(stepId);
   }
 
   async loadPracticeSession() {
@@ -197,8 +271,10 @@ export class CaseAnalysisPage {
   }
 
   private hydrateFromAnalysis(nextAnalysis: CaseAnalysis) {
+    const approach = resolveApproachByMethodLabel(nextAnalysis.methodOption?.label);
     this.notesModel.set({ notes: nextAnalysis.notes || '' });
-    this.caseSheetModel.set(hydrateCaseSheet(nextAnalysis.caseSheet));
+    this.caseSheetModel.set(hydrateCaseSheetForSchema(approach.caseSheetSchemaId, nextAnalysis.caseSheet));
+    this.approachData.set((nextAnalysis.approachData as ApproachDataPayload) || {});
     this.selectedMethodOptionId.set(nextAnalysis.methodOptionId || nextAnalysis.methodOption?.id || '');
     this.selectedRubrics.set(
       nextAnalysis.rubrics.map((item) => ({
@@ -208,9 +284,22 @@ export class CaseAnalysisPage {
       }))
     );
     this.maxResultScore.set(nextAnalysis.results[0]?.totalScore || 0);
+    this.activeStepId.set(firstIncompleteStepId(approach.steps, {
+      methodOptionId: nextAnalysis.methodOptionId,
+      caseSheet: nextAnalysis.caseSheet || undefined,
+      approachData: (nextAnalysis.approachData as Record<string, unknown>) || undefined,
+      rubricCount: nextAnalysis.rubrics.length,
+      resultCount: nextAnalysis.results.length,
+      selectedRemedyId: nextAnalysis.selectedRemedy?.id || null
+    }));
     if (nextAnalysis.selectedRemedy && this.focusedRemedy()?.id !== nextAnalysis.selectedRemedy.id) {
       void this.focusRemedy(nextAnalysis.selectedRemedy);
     }
+  }
+
+  private syncAnalysisInList(updated: CaseAnalysis) {
+    this.analysis.set(updated);
+    this.analyses.set(this.analyses().map((item) => (item.id === updated.id ? updated : item)));
   }
 
   async focusRemedy(remedy: RepertoryRemedyRef) {
@@ -274,11 +363,13 @@ export class CaseAnalysisPage {
 
   addRubric(rubric: RubricSearchResult) {
     if (this.hasRubric(rubric.id)) return;
+    const approach = this.activeApproach();
+    const defaultWeight = defaultRubricWeightForChapter(approach, rubric.chapter);
     this.selectedRubrics.set([
       ...this.selectedRubrics(),
       {
         rubricId: rubric.id,
-        weight: 2,
+        weight: defaultWeight,
         rubric: {
           id: rubric.id,
           chapter: rubric.chapter,
@@ -305,21 +396,79 @@ export class CaseAnalysisPage {
   async saveApproach(methodOptionId: string) {
     const currentAnalysis = this.analysis();
     if (!currentAnalysis) return;
+
+    const previousMethodId = this.selectedMethodOptionId();
+    const nextMethod = this.methods().find((item) => item.id === methodOptionId);
+    const nextApproach = resolveApproachByMethodLabel(nextMethod?.label);
+
+    if (previousMethodId && previousMethodId !== methodOptionId && this.hasCaseSheetContent()) {
+      const confirmed = confirm(
+        `Switch to ${nextApproach.title}? The case sheet will use the new approach structure. Existing case sheet values may be reorganized.`
+      );
+      if (!confirmed) return;
+    }
+
     this.selectedMethodOptionId.set(methodOptionId);
+    this.caseSheetModel.set(hydrateCaseSheetForSchema(nextApproach.caseSheetSchemaId, this.caseSheetModel()));
+    this.activeStepId.set(firstIncompleteStepId(nextApproach.steps, {
+      methodOptionId,
+      caseSheet: this.caseSheetModel(),
+      approachData: this.approachData() as Record<string, unknown>
+    }));
+
     this.saving.set(true);
     this.error.set('');
     try {
       const updated = await this.api.updateAnalysis(currentAnalysis.id, {
-        methodOptionId: methodOptionId || null
+        methodOptionId: methodOptionId || null,
+        caseSheet: this.caseSheetModel()
       });
-      this.analysis.set(updated);
+      this.syncAnalysisInList(updated);
       this.hydrateFromAnalysis(updated);
-      this.message.set('Prescribing approach updated.');
+      this.message.set(`Approach updated to ${nextApproach.title}.`);
     } catch {
       this.error.set('Could not save approach.');
     } finally {
       this.saving.set(false);
     }
+  }
+
+  private hasCaseSheetContent() {
+    return Object.entries(this.caseSheetModel()).some(([key, value]) => !key.startsWith('_') && !!value?.trim());
+  }
+
+  async saveApproachData(partial: ApproachDataPayload) {
+    const currentAnalysis = this.analysis();
+    if (!currentAnalysis) return;
+    const merged = { ...this.approachData(), ...partial };
+    this.approachData.set(merged);
+    this.savingApproachData.set(true);
+    this.error.set('');
+    try {
+      const updated = await this.api.updateAnalysis(currentAnalysis.id, { approachData: merged as Record<string, unknown> });
+      this.syncAnalysisInList(updated);
+      this.message.set('Approach-specific case data saved.');
+    } catch {
+      this.error.set('Could not save approach data.');
+    } finally {
+      this.savingApproachData.set(false);
+    }
+  }
+
+  saveKentHierarchy(data: KentHierarchyData) {
+    void this.saveApproachData({ kentHierarchy: data });
+  }
+
+  saveSensation(data: SensationApproachData) {
+    void this.saveApproachData({ sensation: data });
+  }
+
+  saveMiasm(data: MiasmaticApproachData) {
+    void this.saveApproachData({ miasmatic: data });
+  }
+
+  saveProtocol(data: ProtocolApproachData) {
+    void this.saveApproachData({ protocol: data });
   }
 
   async saveRubrics() {
@@ -330,7 +479,7 @@ export class CaseAnalysisPage {
     this.message.set('');
     try {
       const updated = await this.api.updateAnalysis(currentAnalysis.id, { rubrics: this.rubricPayload() });
-      this.analysis.set(updated);
+      this.syncAnalysisInList(updated);
       this.hydrateFromAnalysis(updated);
       this.message.set('Case rubrics saved.');
     } catch {
@@ -343,6 +492,9 @@ export class CaseAnalysisPage {
   analysisLabel(analysis: CaseAnalysis) {
     const created = analysis.createdAt ? new Date(analysis.createdAt).toLocaleString() : 'Case';
     const remedy = analysis.selectedRemedy?.name;
+    const approach = analysis.methodOption?.label;
+    if (approach && remedy) return `${approach} · ${remedy}`;
+    if (approach) return `${approach} · ${created}`;
     return remedy ? `${created} · ${remedy}` : created;
   }
 
@@ -362,7 +514,8 @@ export class CaseAnalysisPage {
     this.error.set('');
     try {
       const created = await this.api.createAnalysis(this.consultationId, {
-        sourceId: this.searchModel().selectedSourceId || this.analysis()?.source?.id || undefined
+        sourceId: this.searchModel().selectedSourceId || this.analysis()?.source?.id || undefined,
+        methodOptionId: this.selectedMethodOptionId() || undefined
       });
       this.analyses.set([created, ...this.analyses()]);
       this.analysis.set(created);
@@ -393,9 +546,9 @@ export class CaseAnalysisPage {
     this.savingCaseSheet.set(true);
     this.error.set('');
     try {
-      const updated = await this.api.updateAnalysis(currentAnalysis.id, { caseSheet: this.caseSheetModel() });
-      this.analysis.set(updated);
-      this.analyses.set(this.analyses().map((item) => (item.id === updated.id ? updated : item)));
+      const sheet = { ...this.caseSheetModel(), _schema: this.activeApproach().caseSheetSchemaId, _version: '1' };
+      const updated = await this.api.updateAnalysis(currentAnalysis.id, { caseSheet: sheet });
+      this.syncAnalysisInList(updated);
       this.message.set('Case sheet saved.');
     } catch {
       this.error.set('Could not save case sheet.');
@@ -412,7 +565,7 @@ export class CaseAnalysisPage {
     this.message.set('');
     try {
       const updated = await this.api.updateAnalysis(currentAnalysis.id, { notes: this.notesModel().notes });
-      this.analysis.set(updated);
+      this.syncAnalysisInList(updated);
       this.message.set('Notes saved.');
     } catch {
       this.error.set('Could not save notes.');
@@ -430,8 +583,9 @@ export class CaseAnalysisPage {
     try {
       await this.saveRubrics();
       const updated = await this.api.repertorize(currentAnalysis.id);
-      this.analysis.set(updated);
+      this.syncAnalysisInList(updated);
       this.hydrateFromAnalysis(updated);
+      this.setActiveStep('remedy-select');
       this.message.set('Repertorization complete. Review ranked remedies on the right.');
     } catch {
       this.error.set('Repertorization failed. Add rubrics and try again.');
@@ -448,8 +602,9 @@ export class CaseAnalysisPage {
     this.message.set('');
     try {
       const updated = await this.api.selectRemedy(currentAnalysis.id, remedy.id);
-      this.analysis.set(updated);
+      this.syncAnalysisInList(updated);
       await this.focusRemedy(remedy);
+      this.setActiveStep('prescribe');
       this.message.set(`${remedy.name} selected as the case remedy.`);
     } catch {
       this.error.set('Could not select remedy.');
@@ -460,15 +615,37 @@ export class CaseAnalysisPage {
 
   openPrescriptionWithRemedy() {
     const currentAnalysis = this.analysis();
-    if (!currentAnalysis?.selectedRemedy || !this.consultationId) return;
+    if (!this.consultationId) return;
+
+    const protocol = this.approachData().protocol;
+    const remedy = currentAnalysis?.selectedRemedy?.name || protocol?.primaryRemedy;
+    if (!remedy) return;
+
     void this.router.navigate(['/', ROUTE_PATHS.APPOINTMENTS], {
       queryParams: {
         consultationId: this.consultationId,
-        caseAnalysisId: currentAnalysis.id,
-        remedy: currentAnalysis.selectedRemedy.name,
-        diagnosis: currentAnalysis.selectedRemedy.name,
+        caseAnalysisId: currentAnalysis?.id,
+        remedy,
+        diagnosis: remedy,
+        ...(protocol?.companionRemedy ? { companionRemedy: protocol.companionRemedy } : {}),
         ...(this.selectedMethodOptionId() ? { methodOptionId: this.selectedMethodOptionId() } : {})
       }
     });
+  }
+
+  protocolData() {
+    return this.approachData().protocol || null;
+  }
+
+  kentData() {
+    return this.approachData().kentHierarchy || null;
+  }
+
+  sensationData() {
+    return this.approachData().sensation || null;
+  }
+
+  miasmData() {
+    return this.approachData().miasmatic || null;
   }
 }

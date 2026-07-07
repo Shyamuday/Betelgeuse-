@@ -1,0 +1,25 @@
+<section class="panel kent-hierarchy-panel">
+  <div class="panel-title-row">
+    <h3>Kentian symptom hierarchy</h3>
+    <button type="button" (click)="save()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save hierarchy' }}</button>
+  </div>
+  <p class="hint">Capture symptoms in Kent’s order: mental generals first, then physical generals, then particulars.</p>
+  <div class="hierarchy-grid">
+    <label>
+      <span>Mental generals (priority)</span>
+      <textarea rows="4" [formField]="form.mentalGenerals" placeholder="Fears, anxieties, irritability, delusions, will/affection/intellect…"></textarea>
+    </label>
+    <label>
+      <span>Physical generals</span>
+      <textarea rows="3" [formField]="form.physicalGenerals" placeholder="Thermal state, appetite, thirst, sleep, perspiration…"></textarea>
+    </label>
+    <label>
+      <span>Particular symptoms</span>
+      <textarea rows="3" [formField]="form.particularSymptoms" placeholder="Localized symptoms with sensation and modality…"></textarea>
+    </label>
+    <label>
+      <span>Striking / peculiar keynotes</span>
+      <textarea rows="3" [formField]="form.strikingKeynotes" placeholder="Strange, rare, and peculiar symptoms…"></textarea>
+    </label>
+  </div>
+</section>

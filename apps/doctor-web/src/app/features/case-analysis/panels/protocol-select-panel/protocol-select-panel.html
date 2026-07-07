@@ -1,0 +1,48 @@
+<section class="panel protocol-panel">
+  <div class="panel-title-row">
+    <h3>Protocol selection</h3>
+    <button type="button" (click)="save()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save protocol' }}</button>
+  </div>
+  <p class="hint">
+    @if (diseaseName) {
+      Protocols suggested for <strong>{{ diseaseName }}</strong>. Personalize before prescribing.
+    } @else {
+      Select a protocol set and personalize if needed.
+    }
+  </p>
+
+  <div class="protocol-list">
+    @for (protocol of protocols(); track protocol.id) {
+      <article class="protocol-card" [class.selected]="model().protocolId === protocol.id">
+        <div>
+          <strong>{{ protocol.name }}</strong>
+          <p class="muted">{{ protocol.disease }}</p>
+          <p>{{ protocol.primaryRemedy }}@if (protocol.companionRemedy) { + {{ protocol.companionRemedy }} }</p>
+          <small class="muted">{{ protocol.notes }}</small>
+        </div>
+        <button type="button" (click)="selectProtocol(protocol.id)">
+          {{ model().protocolId === protocol.id ? 'Selected' : 'Use protocol' }}
+        </button>
+      </article>
+    }
+  </div>
+
+  <div class="protocol-form">
+    <label>
+      <span>Personalization notes</span>
+      <textarea rows="3" [formField]="form.personalizationNotes"></textarea>
+    </label>
+    <label>
+      <span>Primary remedy</span>
+      <input [formField]="form.primaryRemedy" />
+    </label>
+    <label>
+      <span>Companion remedy</span>
+      <input [formField]="form.companionRemedy" />
+    </label>
+  </div>
+
+  @if (model().protocolId) {
+    <button type="button" class="btn-primary" (click)="prescribeFromProtocol()">Open prescription with protocol →</button>
+  }
+</section>
