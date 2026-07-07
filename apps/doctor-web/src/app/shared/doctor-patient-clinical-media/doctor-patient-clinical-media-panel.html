@@ -25,12 +25,10 @@
       }
     </select>
 
-    <select [formField]="uploadForm.diseaseId">
-      <option value="">Related disease…</option>
-      @for (d of diseases(); track d.id) {
-        <option [value]="d.id">{{ d.name }}</option>
-      }
-    </select>
+    <app-disease-picker
+      [value]="uploadModel().diseaseId"
+      (valueChange)="setDiseaseId($event)"
+    />
 
     <input type="text" [formField]="uploadForm.conditionLabel" placeholder="Condition label" />
     <textarea rows="2" [formField]="uploadForm.observations" placeholder="Clinical observations"></textarea>

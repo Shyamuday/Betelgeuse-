@@ -37,13 +37,12 @@
         }
       </select>
 
-      <label class="field-label" for="clinical-media-disease">Related disease</label>
-      <select id="clinical-media-disease" [formField]="uploadForm.diseaseId">
-        <option value="">Optional — clinic disease list</option>
-        @for (d of diseases(); track d.id) {
-          <option [value]="d.id">{{ d.name }}</option>
-        }
-      </select>
+      <app-disease-picker
+        selectId="clinical-media-disease"
+        label="Related disease"
+        [value]="uploadModel().diseaseId"
+        (valueChange)="setDiseaseId($event)"
+      />
 
       <label class="field-label" for="clinical-media-condition">Or condition label</label>
       <input id="clinical-media-condition" type="text" [formField]="uploadForm.conditionLabel" placeholder="e.g. eczema, plantar wart" />

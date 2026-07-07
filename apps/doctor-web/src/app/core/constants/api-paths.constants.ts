@@ -10,6 +10,8 @@ export const API_PATHS = {
     MY_PAYSLIP: '/doctor/my-payslip',
     SLOTS: '/doctor/slots',
     PRESCRIPTION_OPTIONS: '/doctor/prescription-options',
+    DISEASES: '/doctor/diseases',
+    DISEASE_CATEGORIES: '/doctor/diseases/categories',
     PRESCRIPTION_TEMPLATES: '/doctor/prescription-templates',
     PRESCRIPTIONS: '/doctor/prescriptions',
     PRESCRIPTION_PDF: (id: string) => `/patient/prescriptions/${id}/pdf`,

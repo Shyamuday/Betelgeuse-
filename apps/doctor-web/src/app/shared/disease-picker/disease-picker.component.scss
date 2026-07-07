@@ -1,0 +1,34 @@
+.disease-picker {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.search-row,
+.add-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.search-row input,
+.add-form input,
+.add-form select,
+.disease-picker > select {
+  min-height: 38px;
+}
+
+.search-row input,
+.add-form input {
+  flex: 1 1 180px;
+}
+
+.add-form select,
+.disease-picker > select {
+  width: 100%;
+}
+
+.picker-error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 0.86rem;
+}

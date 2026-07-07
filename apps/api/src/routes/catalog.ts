@@ -35,7 +35,7 @@ router.get(
   asyncRoute(async (_req, res) => {
     const diseases = await prisma.disease.findMany({
       where: { isActive: true },
-      orderBy: { feeInPaise: 'asc' }
+      orderBy: [{ publicCategory: 'asc' }, { name: 'asc' }]
     });
     res.json({ diseases });
   })
@@ -77,7 +77,8 @@ router.post(
         name: z.string().min(3),
         description: z.string().min(3),
         feeInPaise: z.number().int().positive(),
-        intakeQuestions: z.array(z.string().min(3)).min(1)
+        intakeQuestions: z.array(z.string().min(3)).min(1),
+        publicCategory: z.string().min(2).max(80).optional()
       })
       .parse(req.body);
 
@@ -97,7 +98,8 @@ router.put(
         description: z.string().min(3),
         feeInPaise: z.number().int().positive(),
         isActive: z.boolean(),
-        intakeQuestions: z.array(z.string().min(1)).min(1)
+        intakeQuestions: z.array(z.string().min(1)).min(1),
+        publicCategory: z.string().min(2).max(80).nullable().optional()
       })
       .parse(req.body);
 

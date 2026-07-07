@@ -18,10 +18,13 @@ export class AppointmentsPrescriptionsService {
 
   private readonly http = inject(HttpClient);
 
-  loadOptions(type: OptionType) {
+  loadOptions(type: OptionType, q?: string) {
+    const params: Record<string, string> = { type };
+    if (q?.trim()) params['q'] = q.trim();
+
     return firstValueFrom(
       this.http.get<{ options: PrescriptionOption[] }>(`${this.apiBase}${API_PATHS.DOCTOR.PRESCRIPTION_OPTIONS}`, {
-        params: { type }
+        params
       })
     ).then((response) => response.options);
   }

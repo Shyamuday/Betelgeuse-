@@ -122,6 +122,15 @@
   </div>
 
   <label for="diagnosedDisease">Diagnosed Disease</label>
+  <div class="inline">
+    <input
+      type="search"
+      [formField]="optionDraftForm.diagnosedDiseaseSearch"
+      placeholder="Search diagnosed diseases"
+      (keyup.enter)="searchDiagnosedDiseases()"
+    />
+    <button type="button" (click)="searchDiagnosedDiseases()">Search</button>
+  </div>
   <select id="diagnosedDisease" [formField]="prescriptionForm.diagnosedDiseaseOptionId">
     <option value="">Select diagnosed disease</option>
     @for (item of diagnosedDiseases; track item.id) {

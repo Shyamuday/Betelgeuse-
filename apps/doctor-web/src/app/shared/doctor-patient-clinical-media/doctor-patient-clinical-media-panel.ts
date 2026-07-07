@@ -4,10 +4,11 @@ import { form, FormField } from '@angular/forms/signals';
 import { CLINICAL_MEDIA_TYPE_LABELS, type ClinicalMediaType } from '@vitalis/homeopathy-approaches';
 import { CaseAnalysisApiService } from '../../features/case-analysis/case-analysis-api.service';
 import type { ClinicalMediaItem } from '../../features/case-analysis/clinical-media.types';
+import { DiseasePickerComponent } from '../disease-picker/disease-picker.component';
 
 @Component({
   selector: 'app-doctor-patient-clinical-media-panel',
-  imports: [CommonModule, FormField],
+  imports: [CommonModule, FormField, DiseasePickerComponent],
   templateUrl: './doctor-patient-clinical-media-panel.html',
   styleUrl: './doctor-patient-clinical-media-panel.scss'
 })
@@ -18,7 +19,6 @@ export class DoctorPatientClinicalMediaPanelComponent implements OnChanges, OnDe
 
   readonly mediaTypes = Object.entries(CLINICAL_MEDIA_TYPE_LABELS) as Array<[ClinicalMediaType, string]>;
   readonly media = signal<ClinicalMediaItem[]>([]);
-  readonly diseases = signal<Array<{ id: string; name: string }>>([]);
   readonly bodyRegionMap = signal<Record<string, string[]>>({});
   readonly loading = signal(false);
   readonly uploading = signal(false);
@@ -56,13 +56,15 @@ export class DoctorPatientClinicalMediaPanelComponent implements OnChanges, OnDe
     return this.previewObjectUrl;
   }
 
+  setDiseaseId(diseaseId: string) {
+    this.uploadModel.update((model) => ({ ...model, diseaseId }));
+  }
+
   async bootstrap() {
     try {
       const meta = await this.api.loadClinicalMediaMeta();
-      this.diseases.set(meta.diseases);
       this.bodyRegionMap.set(meta.bodyRegions);
     } catch {
-      this.diseases.set([]);
       this.bodyRegionMap.set({});
     }
     await this.reload();

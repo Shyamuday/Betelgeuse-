@@ -1,0 +1,54 @@
+<div class="disease-picker">
+  <label class="field-label" [attr.for]="selectId">{{ label }}</label>
+
+  <div class="search-row">
+    <input
+      type="search"
+      placeholder="Search diseases…"
+      [formField]="searchForm.q"
+      (keyup.enter)="searchDiseases()"
+    />
+    <button type="button" class="btn-secondary" (click)="searchDiseases()" [disabled]="loading()">Search</button>
+    <button type="button" class="btn-secondary" (click)="toggleAddForm()">
+      {{ showAddForm() ? 'Cancel' : 'Add new' }}
+    </button>
+  </div>
+
+  @if (showAddForm()) {
+    <div class="add-form">
+      <input type="text" [formField]="addForm.name" placeholder="Disease name" />
+      <select [formField]="addForm.publicCategory">
+        @for (category of categoryOptions(); track category.key) {
+          <option [value]="category.key">{{ category.label }}</option>
+        }
+      </select>
+      <button type="button" class="btn-primary" (click)="createDisease()" [disabled]="creating()">
+        {{ creating() ? 'Saving…' : 'Save disease' }}
+      </button>
+    </div>
+  }
+
+  @if (error()) {
+    <p class="picker-error">{{ error() }}</p>
+  }
+
+  <select [id]="selectId" [value]="value" (change)="onSelect($any($event.target).value)" [disabled]="loading()">
+    <option value="">Optional — select disease</option>
+    @for (group of categories(); track group.key) {
+      @if (group.diseases.length) {
+        <optgroup [label]="group.label">
+          @for (disease of group.diseases; track disease.id) {
+            <option [value]="disease.id">{{ disease.name }}</option>
+          }
+        </optgroup>
+      }
+    }
+    @if (uncategorized().length) {
+      <optgroup label="Other">
+        @for (disease of uncategorized(); track disease.id) {
+          <option [value]="disease.id">{{ disease.name }}</option>
+        }
+      </optgroup>
+    }
+  </select>
+</div>

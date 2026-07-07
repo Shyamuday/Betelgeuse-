@@ -82,7 +82,7 @@ export class AppointmentsPage {
   readonly prescriptionForm = form(this.prescriptionModel);
   readonly templateModel = signal({ templateName: '' });
   readonly templateForm = form(this.templateModel);
-  readonly optionDraftModel = signal({ newMethod: '', newDiagnosedDisease: '' });
+  readonly optionDraftModel = signal({ newMethod: '', newDiagnosedDisease: '', diagnosedDiseaseSearch: '' });
   readonly optionDraftForm = form(this.optionDraftModel);
 
   status: 'DRAFT' | 'PUBLISHED' = 'DRAFT';
@@ -179,14 +179,27 @@ export class AppointmentsPage {
   async loadOptions() {
     this.error = '';
     try {
+      const search = this.optionDraftModel().diagnosedDiseaseSearch;
       const [methods, diagnosedDiseases] = await Promise.all([
         this.prescriptions.loadOptions('METHOD'),
-        this.prescriptions.loadOptions('DIAGNOSED_DISEASE')
+        this.prescriptions.loadOptions('DIAGNOSED_DISEASE', search)
       ]);
       this.methods = methods;
       this.diagnosedDiseases = diagnosedDiseases;
+      this.applyDefaultMethodIfEmpty();
     } catch {
       this.error = 'Could not load dropdown options. Login with API-backed doctor account.';
+    }
+  }
+
+  async searchDiagnosedDiseases() {
+    try {
+      this.diagnosedDiseases = await this.prescriptions.loadOptions(
+        'DIAGNOSED_DISEASE',
+        this.optionDraftModel().diagnosedDiseaseSearch
+      );
+    } catch {
+      this.error = 'Could not search diagnosed diseases.';
     }
   }
 

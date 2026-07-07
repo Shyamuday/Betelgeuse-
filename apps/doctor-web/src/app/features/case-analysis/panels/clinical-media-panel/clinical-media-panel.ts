@@ -9,10 +9,11 @@ import {
 } from '@vitalis/homeopathy-approaches';
 import { CaseAnalysisApiService } from '../../case-analysis-api.service';
 import type { ClinicalMediaItem } from '../../clinical-media.types';
+import { DiseasePickerComponent } from '../../../../shared/disease-picker/disease-picker.component';
 
 @Component({
   selector: 'app-clinical-media-panel',
-  imports: [CommonModule, FormField],
+  imports: [CommonModule, FormField, DiseasePickerComponent],
   templateUrl: './clinical-media-panel.html',
   styleUrl: './clinical-media-panel.scss'
 })
@@ -32,7 +33,6 @@ export class ClinicalMediaPanelComponent implements OnChanges, OnDestroy {
   readonly message = signal('');
   readonly previewUrls = signal<Record<string, string>>({});
   readonly suggestedPhrases = signal<string[]>([]);
-  readonly diseases = signal<Array<{ id: string; name: string }>>([]);
 
   readonly uploadModel = signal({
     mediaType: 'SKIN' as ClinicalMediaType,
@@ -54,12 +54,6 @@ export class ClinicalMediaPanelComponent implements OnChanges, OnDestroy {
   }
 
   async bootstrap() {
-    try {
-      const meta = await this.api.loadClinicalMediaMeta();
-      this.diseases.set(meta.diseases);
-    } catch {
-      this.diseases.set([]);
-    }
     await this.reload();
   }
 
@@ -226,5 +220,9 @@ export class ClinicalMediaPanelComponent implements OnChanges, OnDestroy {
 
   selectedPreviewUrl() {
     return this.previewObjectUrl;
+  }
+
+  setDiseaseId(diseaseId: string) {
+    this.uploadModel.update((model) => ({ ...model, diseaseId }));
   }
 }
