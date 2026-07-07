@@ -1,3 +1,7 @@
+@use '../../../libs/platform-ui/src/styles/form-fields';
+@use 'styles/app-forms';
+@use 'styles/ux-states';
+
 * {
   box-sizing: border-box;
 }
@@ -9,7 +13,3 @@ body {
   background: #f4f7fb;
   color: #0f172a;
 }
-
-@use '../../../libs/platform-ui/src/styles/form-fields';
-@use 'styles/app-forms';
-@use 'styles/ux-states';

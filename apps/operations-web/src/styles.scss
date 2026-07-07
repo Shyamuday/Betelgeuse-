@@ -1,3 +1,5 @@
+@use './styles/app-forms';
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -73,8 +75,6 @@ input, select, textarea {
 ::-webkit-scrollbar-track { background: var(--bg-primary); }
 ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-
-@use './styles/app-forms';
 
 /* Print styles */
 @media print {
