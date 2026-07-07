@@ -12,6 +12,7 @@ deploy/certbot/
 dist/
 apps/*/dist/
 build/
+apps/api/uploads/
 apps/*/build/
 out-tsc/
 apps/*/out-tsc/

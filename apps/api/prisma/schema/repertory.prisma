@@ -9,6 +9,15 @@ enum CaseAnalysisStatus {
   FINALIZED
 }
 
+enum ClinicalMediaType {
+  SKIN
+  TONGUE
+  NAIL
+  HAIR
+  SWELLING
+  OTHER
+}
+
 model RepertorySource {
   id          String              @id @default(cuid())
   code        RepertorySourceCode @unique
@@ -119,6 +128,7 @@ model CaseAnalysis {
   rubrics          CaseAnalysisRubric[]
   results          CaseAnalysisResult[]
   prescriptions    Prescription[]
+  clinicalMedia    ClinicalMedia[]
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
 
@@ -149,4 +159,23 @@ model CaseAnalysisResult {
 
   @@unique([analysisId, remedyId])
   @@index([analysisId, rank])
+}
+
+model ClinicalMedia {
+  id             String            @id @default(cuid())
+  caseAnalysisId String
+  uploadedById   String
+  mediaType      ClinicalMediaType
+  bodyRegion     String?
+  storageKey     String
+  mimeType       String
+  fileName       String?
+  observations   String?
+  patientConsent Boolean           @default(false)
+  caseAnalysis   CaseAnalysis      @relation(fields: [caseAnalysisId], references: [id], onDelete: Cascade)
+  uploadedBy     User              @relation("ClinicalMediaUploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([caseAnalysisId, createdAt])
 }

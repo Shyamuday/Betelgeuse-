@@ -1,0 +1,114 @@
+<section class="panel clinical-media-panel">
+  <div class="panel-title-row">
+    <div>
+      <h3>Visual symptoms</h3>
+      <p class="muted">Attach clinical photos, record observations, and jump to repertory searches. No cloud vision — doctor confirms every rubric.</p>
+    </div>
+  </div>
+
+  @if (error()) {
+    <p class="alert alert-error">{{ error() }}</p>
+  }
+  @if (message()) {
+    <p class="alert alert-success">{{ message() }}</p>
+  }
+
+  <div class="upload-grid">
+    <div class="upload-form">
+      <label class="field-label" for="clinical-media-file">Clinical image</label>
+      <input id="clinical-media-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" (change)="onFileSelected($event)" />
+
+      @if (selectedPreviewUrl(); as previewUrl) {
+        <img class="selected-preview" [src]="previewUrl" alt="Selected clinical image preview" />
+      }
+
+      <label class="field-label" for="clinical-media-type">Symptom type</label>
+      <select id="clinical-media-type" [formField]="uploadForm.mediaType" (change)="refreshSuggestions()">
+        @for (entry of mediaTypes; track entry[0]) {
+          <option [value]="entry[0]">{{ entry[1] }}</option>
+        }
+      </select>
+
+      <label class="field-label" for="clinical-media-region">Body region (optional)</label>
+      <select id="clinical-media-region" [formField]="uploadForm.bodyRegion" (change)="refreshSuggestions()">
+        <option value="">Select region…</option>
+        @for (region of bodyRegions(); track region) {
+          <option [value]="region">{{ region }}</option>
+        }
+      </select>
+
+      <label class="field-label" for="clinical-media-observations">Your observations</label>
+      <textarea
+        id="clinical-media-observations"
+        rows="4"
+        [formField]="uploadForm.observations"
+        placeholder="Describe what you see in repertory-friendly language…"
+        (change)="refreshSuggestions()"
+      ></textarea>
+
+      <label class="check">
+        <input type="checkbox" [formField]="uploadForm.patientConsent" />
+        Patient consented to attach this clinical image to the case record
+      </label>
+
+      <div class="actions">
+        <button type="button" class="btn-primary" (click)="uploadSelectedFile()" [disabled]="uploading()">
+          {{ uploading() ? 'Uploading…' : 'Attach image' }}
+        </button>
+        <button type="button" class="btn-secondary" (click)="refreshSuggestions()">Suggest rubric searches</button>
+      </div>
+    </div>
+
+    <div class="phrase-box">
+      <h4>Suggested repertory searches</h4>
+      <p class="muted compact">Tap a phrase to search rubrics. Review and add only what fits the totality.</p>
+      @if (suggestedPhrases().length) {
+        <div class="phrase-list">
+          @for (phrase of suggestedPhrases(); track phrase) {
+            <button type="button" class="phrase-chip" (click)="applyPhrase(phrase)">{{ phrase }}</button>
+          }
+        </div>
+      } @else {
+        <p class="muted">Enter observations or pick a symptom type, then suggest searches.</p>
+      }
+    </div>
+  </div>
+
+  <div class="media-list">
+    <h4>Attached images</h4>
+    @if (loading()) {
+      <p class="muted">Loading clinical images…</p>
+    } @else if (media().length) {
+      @for (item of media(); track item.id) {
+        <article class="media-card">
+          <div class="media-preview">
+            @if (previewUrls()[item.id]; as imageUrl) {
+              <img [src]="imageUrl" [alt]="item.mediaTypeLabel" />
+            }
+          </div>
+          <div class="media-meta">
+            <strong>{{ item.mediaTypeLabel }}</strong>
+            @if (item.bodyRegion) {
+              <p class="muted">{{ item.bodyRegion }}</p>
+            }
+            <textarea
+              class="observation-edit"
+              rows="3"
+              [value]="item.observations || ''"
+              placeholder="Observations for this image…"
+              (change)="saveObservations(item, $any($event.target).value)"
+            ></textarea>
+            <div class="card-actions">
+              <button type="button" class="btn-secondary btn-sm" (click)="refreshSuggestions(item)">Suggest searches</button>
+              <button type="button" class="btn-danger btn-sm" (click)="removeMedia(item)" [disabled]="deletingMediaId() === item.id">
+                {{ deletingMediaId() === item.id ? 'Removing…' : 'Remove' }}
+              </button>
+            </div>
+          </div>
+        </article>
+      }
+    } @else {
+      <p class="muted">No clinical images attached yet.</p>
+    }
+  </div>
+</section>

@@ -276,6 +276,17 @@
       }
 
       @if (showRepertoryWorkspace()) {
+    <app-collapsible-section
+      title="Visual symptoms"
+      subtitle="Attach clinical images and turn observations into repertory searches."
+      [startCollapsed]="false"
+    >
+      <app-clinical-media-panel
+        [analysisId]="analysis.id"
+        (rubricPhraseSelected)="applyRubricSearchPhrase($event)"
+      />
+    </app-collapsible-section>
+
     <div class="workspace">
       <div class="column">
         <section class="panel">

@@ -45,6 +45,7 @@ import { ScholtenMapperPanelComponent } from '../panels/scholten-mapper-panel/sc
 import { SehgalEmotionPanelComponent } from '../panels/sehgal-emotion-panel/sehgal-emotion-panel';
 import { IntegrativeFollowUpPanelComponent } from '../panels/integrative-follow-up-panel/integrative-follow-up-panel';
 import { PatientCaseTimelinePanelComponent } from '../panels/patient-case-timeline-panel/patient-case-timeline-panel';
+import { ClinicalMediaPanelComponent } from '../panels/clinical-media-panel/clinical-media-panel';
 import type {
   CaseAnalysis,
   ConsultationSummary,
@@ -81,7 +82,8 @@ import { formatRubricPath, rubricPathSegments } from '../rubric-path.util';
     ScholtenMapperPanelComponent,
     SehgalEmotionPanelComponent,
     IntegrativeFollowUpPanelComponent,
-    PatientCaseTimelinePanelComponent
+    PatientCaseTimelinePanelComponent,
+    ClinicalMediaPanelComponent
   ],
   templateUrl: './case-analysis-page.html'
 })
@@ -445,6 +447,13 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
     } finally {
       this.searching.set(false);
     }
+  }
+
+  applyRubricSearchPhrase(phrase: string) {
+    const trimmed = phrase.trim();
+    if (!trimmed) return;
+    this.searchModel.update((model) => ({ ...model, rubricQuery: trimmed }));
+    void this.searchRubrics();
   }
 
   hasRubric(rubricId: string) {

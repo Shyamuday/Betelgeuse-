@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { API_PATHS } from '../../core/constants/api-paths.constants';
+import type { ClinicalMediaItem } from './clinical-media.types';
 import type {
   CaseAnalysis,
   ConsultationSummary,
@@ -120,5 +121,68 @@ export class CaseAnalysisApiService {
         `${this.apiBase}${API_PATHS.DOCTOR.PATIENT_CASE_HISTORY(patientId)}`
       )
     );
+  }
+
+  listClinicalMedia(analysisId: string) {
+    return firstValueFrom(
+      this.http.get<{ media: ClinicalMediaItem[] }>(
+        `${this.apiBase}${API_PATHS.DOCTOR.CASE_ANALYSIS_CLINICAL_MEDIA(analysisId)}`
+      )
+    ).then((response) => response.media);
+  }
+
+  uploadClinicalMedia(
+    analysisId: string,
+    payload: {
+      mediaType: string;
+      bodyRegion?: string;
+      observations?: string;
+      patientConsent: boolean;
+      mimeType: string;
+      fileName?: string;
+      dataBase64: string;
+    }
+  ) {
+    return firstValueFrom(
+      this.http.post<{ media: ClinicalMediaItem }>(
+        `${this.apiBase}${API_PATHS.DOCTOR.CASE_ANALYSIS_CLINICAL_MEDIA(analysisId)}`,
+        payload
+      )
+    ).then((response) => response.media);
+  }
+
+  updateClinicalMedia(
+    analysisId: string,
+    mediaId: string,
+    payload: { bodyRegion?: string; observations?: string; patientConsent?: boolean }
+  ) {
+    return firstValueFrom(
+      this.http.patch<{ media: ClinicalMediaItem }>(
+        `${this.apiBase}${API_PATHS.DOCTOR.CASE_ANALYSIS_CLINICAL_MEDIA_ITEM(analysisId, mediaId)}`,
+        payload
+      )
+    ).then((response) => response.media);
+  }
+
+  deleteClinicalMedia(analysisId: string, mediaId: string) {
+    return firstValueFrom(
+      this.http.delete<{ ok: boolean }>(
+        `${this.apiBase}${API_PATHS.DOCTOR.CASE_ANALYSIS_CLINICAL_MEDIA_ITEM(analysisId, mediaId)}`
+      )
+    );
+  }
+
+  loadClinicalMediaFile(analysisId: string, mediaId: string) {
+    return firstValueFrom(
+      this.http.get(`${this.apiBase}${API_PATHS.DOCTOR.CASE_ANALYSIS_CLINICAL_MEDIA_FILE(analysisId, mediaId)}`, {
+        responseType: 'blob'
+      })
+    );
+  }
+
+  suggestClinicalMediaPhrases(payload: { mediaType: string; observations?: string; bodyRegion?: string }) {
+    return firstValueFrom(
+      this.http.post<{ phrases: string[] }>(`${this.apiBase}${API_PATHS.DOCTOR.CLINICAL_MEDIA_SUGGEST_PHRASES}`, payload)
+    ).then((response) => response.phrases);
   }
 }
