@@ -1,0 +1,47 @@
+<section class="orders-page panel">
+  <div class="page-hdr">
+    <p class="eyebrow">My Account</p>
+    <h1>Orders &amp; deliveries</h1>
+    <p class="page-lead">Track medicine deliveries to your address.</p>
+  </div>
+
+  @if (loading()) {
+    <p class="loading-text">Loading orders…</p>
+  } @else if (!deliveries().length) {
+    <div class="empty-state">
+      <p>No medicine deliveries yet.</p>
+      <p class="muted">After your doctor prescribes medicines, deliveries will appear here.</p>
+    </div>
+  } @else {
+    <div class="order-list">
+      @for (order of deliveries(); track order.id) {
+        <article class="order-card" [class]="'status-' + order.status.toLowerCase()">
+          <div class="order-top">
+            <div>
+              <strong>{{ order.deliveryNumber }}</strong>
+              @if (order.store) {
+                <p class="store">{{ order.store.name }}</p>
+              }
+            </div>
+            <span class="status-badge">{{ statusText(order.status) }}</span>
+          </div>
+          <p class="address">{{ order.deliveryAddress }}</p>
+          <p class="meta">
+            {{ order.totals?.itemCount || order.lines?.length || 0 }} item(s)
+            · Placed {{ order.createdAt | date:'mediumDate' }}
+          </p>
+          @if (order.lines?.length) {
+            <ul class="items">
+              @for (line of order.lines; track $index) {
+                <li>{{ line.qty }}× {{ line.label }}</li>
+              }
+            </ul>
+          }
+          @if (order.deliveredAt) {
+            <p class="delivered">Delivered {{ order.deliveredAt | date:'medium' }}</p>
+          }
+        </article>
+      }
+    </div>
+  }
+</section>

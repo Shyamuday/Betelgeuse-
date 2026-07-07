@@ -145,6 +145,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         purchaseType: payload.purchaseType,
         ...(payload.purchaseType === PURCHASE_TYPES.PLAN ? { planCode: payload.planCode } : {}),
         ...(payload.walletRedeemInPaise ? { walletRedeemInPaise: payload.walletRedeemInPaise } : {}),
+        ...(payload.promoCode ? { promoCode: payload.promoCode } : {}),
       })
       .subscribe({
         next: () => {

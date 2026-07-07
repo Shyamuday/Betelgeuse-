@@ -1,0 +1,35 @@
+@if (loading()) {
+  <p class="loading-text">Loading clinic card…</p>
+} @else if (card(); as c) {
+  <p class="card-hint">Bring this ID to every visit. Staff can find your record quickly with this number.</p>
+  <div class="id-card" id="patient-id-card-print">
+    <header class="id-card-header">
+      <p class="brand">Vitalis Care</p>
+      @if (c.clinic) {
+        <p class="clinic">{{ c.clinic.name }} ({{ c.clinic.code }})</p>
+      }
+    </header>
+    <div class="id-card-body">
+      <div class="id-card-main">
+        <p class="label">Patient ID</p>
+        <p class="patient-code">{{ c.patientCode }}</p>
+        <p class="patient-name">{{ c.name }}</p>
+        @if (c.mobile) { <p class="contact">{{ c.mobile }}</p> }
+      </div>
+      <div class="id-card-qr">
+        <img [src]="qrImageUrl(c)" width="120" height="120" alt="Scan for quick access" />
+        <p class="qr-hint">Scan at clinic</p>
+      </div>
+    </div>
+    <footer class="id-card-footer">
+      <p>Keep this card safe for future consultations.</p>
+    </footer>
+  </div>
+  <button type="button" class="btn-print" (click)="printCard()">Print my card</button>
+} @else {
+  <app-download-qr
+    [compact]="true"
+    title="Share the app with family"
+    subtitle="Your patient ID will appear after your first clinic visit."
+  />
+}

@@ -456,6 +456,18 @@ export const ROUTE_SEO_CONTENT = {
     seoTitle: 'Rewards Wallet | Vitalis Care',
     seoDescription: 'View your Vitalis Care wallet balance and reward history.'
   },
+  'patient/account/consultations': {
+    seoTitle: 'My Consultations | Vitalis Care',
+    seoDescription: 'View consultation history and complete pending payments.'
+  },
+  'patient/account/orders': {
+    seoTitle: 'Orders & Deliveries | Vitalis Care',
+    seoDescription: 'Track medicine delivery orders and status.'
+  },
+  'patient/account/card': {
+    seoTitle: 'My Clinic Card | Vitalis Care',
+    seoDescription: 'Your patient ID card and QR code for clinic visits.'
+  },
   'doctor/dashboard': {
     seoTitle: 'Doctor Dashboard | Vitalis Care',
     seoDescription: 'Review assigned consultations, patient chats, and prescriptions in the Vitalis Care doctor dashboard.'

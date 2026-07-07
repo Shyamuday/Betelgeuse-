@@ -52,6 +52,19 @@
 
       @if (checkoutQuote(); as quote) {
         <div class="price-breakdown">
+          <label class="promo-field">
+            Promo code
+            <div class="promo-row">
+              <input
+                type="text"
+                [value]="promoCode()"
+                (input)="onPromoChange($event)"
+                placeholder="e.g. SUMMER25"
+                autocomplete="off"
+              />
+              <button type="button" class="promo-btn" (click)="applyPromo()">Apply</button>
+            </div>
+          </label>
           <div class="price-row">
             <span>Consultation fee</span>
             <span>{{ quote.grossAmountInPaise / 100 | currency: CURRENCY_CODE }}</span>

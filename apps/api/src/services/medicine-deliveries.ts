@@ -128,10 +128,12 @@ export async function createMedicineDelivery(input: {
 export async function listMedicineDeliveries(filters: {
   storeId?: string;
   executiveUserId?: string;
+  patientId?: string;
   status?: MedicineDeliveryStatus;
   forExecutiveId?: string;
 }) {
   const where: Prisma.MedicineDeliveryWhereInput = {
+    ...(filters.patientId ? { patientId: filters.patientId } : {}),
     ...(filters.storeId ? { storeId: filters.storeId } : {}),
     ...(filters.status ? { status: filters.status } : {}),
     ...(filters.forExecutiveId
@@ -158,6 +160,14 @@ export async function listMedicineDeliveries(filters: {
 export async function getMedicineDelivery(id: string) {
   const delivery = await prisma.medicineDelivery.findUnique({
     where: { id },
+    include: deliveryInclude
+  });
+  return delivery ? formatDelivery(delivery) : null;
+}
+
+export async function getPatientMedicineDelivery(patientId: string, deliveryId: string) {
+  const delivery = await prisma.medicineDelivery.findFirst({
+    where: { id: deliveryId, patientId },
     include: deliveryInclude
   });
   return delivery ? formatDelivery(delivery) : null;

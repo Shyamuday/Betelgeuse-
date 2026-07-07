@@ -20,23 +20,13 @@ import {
 } from './core/constants/patient-profile.constants';
 import { environment } from '../environments/environment';
 import { AuthService } from './auth/auth.service';
-import { AppDownloadQrComponent } from './shared/app-download-qr/app-download-qr.component';
+import { PatientIdCardComponent } from './shared/patient-id-card/patient-id-card.component';
 import { PatientAddressBookComponent } from './shared/patient-address-book/patient-address-book.component';
-
-type PatientIdCard = {
-  patientCode: string;
-  name: string;
-  email?: string | null;
-  mobile?: string | null;
-  clinic?: { id: string; name: string; code: string; address?: string | null } | null;
-  issuedAt?: string;
-  scanUrl?: string;
-};
 
 @Component({
   selector: 'app-patient-profile',
   standalone: true,
-  imports: [CommonModule, FormField, AppDownloadQrComponent, PatientAddressBookComponent],
+  imports: [CommonModule, FormField, PatientIdCardComponent, PatientAddressBookComponent],
   styleUrl: './patient-profile.component.scss',
   templateUrl: './patient-profile.component.html',
 })
@@ -53,7 +43,6 @@ export class PatientProfileComponent implements OnInit {
   readonly successMsg = signal('');
   readonly errorMsg = signal('');
   readonly profile = signal<PatientProfile | null>(null);
-  readonly patientCard = signal<PatientIdCard | null>(null);
   readonly hasPassword = signal(false);
 
   readonly profileFormModel = signal(emptyProfileForm());
@@ -106,41 +95,11 @@ export class PatientProfileComponent implements OnInit {
       this.hasPassword.set(Boolean(profile.hasPassword));
       this.profileFormModel.set(profileToForm(profile));
       this.reminderFormModel.set(reminderPreferences);
-
-      try {
-        const { card } = await this.apiFetch<{ card: PatientIdCard }>(API_PATHS.PATIENT.CARD);
-        this.patientCard.set(card);
-      } catch {
-        if (profile.patientCode) {
-          this.patientCard.set({
-            patientCode: profile.patientCode,
-            name: profile.name,
-            mobile: profile.mobile,
-            email: profile.email,
-            clinic: profile.homeClinicStore ?? null,
-            scanUrl: `${environment.apiUrl}/go/p/${encodeURIComponent(profile.patientCode)}`,
-          });
-        }
-      }
     } catch {
       this.errorMsg.set('Could not load profile.');
     } finally {
       this.loading.set(false);
     }
-  }
-
-  printCard() {
-    document.body.classList.add('printing-patient-card');
-    window.print();
-    window.setTimeout(() => document.body.classList.remove('printing-patient-card'), 500);
-  }
-
-  scanUrl(card: PatientIdCard): string {
-    return card.scanUrl ?? `${environment.apiUrl}/go/p/${encodeURIComponent(card.patientCode)}`;
-  }
-
-  qrImageUrl(card: PatientIdCard): string {
-    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(this.scanUrl(card))}`;
   }
 
   updateReminderField<K extends keyof ReminderPreferences>(field: K, value: ReminderPreferences[K]) {

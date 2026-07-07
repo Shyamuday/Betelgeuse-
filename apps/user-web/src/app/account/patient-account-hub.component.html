@@ -17,12 +17,16 @@
         <strong>{{ p.mobile || '—' }}</strong>
       </div>
       <div class="summary-card">
-        <span class="label">Email</span>
-        <strong>{{ p.email || 'Not added' }}</strong>
+        <span class="label">Wallet</span>
+        <strong>{{ formatInr(walletBalanceInPaise()) }}</strong>
+      </div>
+      <div class="summary-card">
+        <span class="label">Referral code</span>
+        <strong>{{ referralCode() || '—' }}</strong>
       </div>
       <div class="summary-card">
         <span class="label">Patient ID</span>
-        <strong>{{ p.patientCode || 'Assigned after first visit' }}</strong>
+        <strong>{{ p.patientCode || 'After first visit' }}</strong>
       </div>
     </div>
   }

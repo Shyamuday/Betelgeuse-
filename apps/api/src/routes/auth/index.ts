@@ -7,6 +7,7 @@ import { registerAuthPatientRoutes } from './patient.js';
 import { registerAuthProfileRoutes } from './profile.js';
 import { registerPatientAddressRoutes } from '../patient-addresses.js';
 import { registerPatientRewardsRoutes } from '../patient-rewards.js';
+import { registerPatientDeliveryRoutes } from '../patient-deliveries.js';
 import { registerAuthStaffRoutes } from './staff.js';
 
 export const router = Router();
@@ -20,3 +21,4 @@ registerAuthPatientRoutes(router);
 registerAuthProfileRoutes(router);
 registerPatientAddressRoutes(router);
 registerPatientRewardsRoutes(router);
+registerPatientDeliveryRoutes(router);

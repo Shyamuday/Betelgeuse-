@@ -24,6 +24,9 @@ import { PatientAccountProfilePage } from './account/patient-account-profile-pag
 import { PatientAccountAddressesPageComponent } from './account/patient-account-addresses-page.component';
 import { PatientAccountReferPageComponent } from './account/patient-account-refer-page.component';
 import { PatientAccountRewardsPageComponent } from './account/patient-account-rewards-page.component';
+import { PatientAccountConsultationsPageComponent } from './account/patient-account-consultations-page.component';
+import { PatientAccountOrdersPageComponent } from './account/patient-account-orders-page.component';
+import { PatientAccountCardPageComponent } from './account/patient-account-card-page.component';
 
 export const routes: Routes = [
   {
@@ -174,6 +177,21 @@ export const routes: Routes = [
         path: 'rewards',
         component: PatientAccountRewardsPageComponent,
         data: ROUTE_SEO_CONTENT['patient/account/rewards']
+      },
+      {
+        path: 'consultations',
+        component: PatientAccountConsultationsPageComponent,
+        data: ROUTE_SEO_CONTENT['patient/account/consultations']
+      },
+      {
+        path: 'orders',
+        component: PatientAccountOrdersPageComponent,
+        data: ROUTE_SEO_CONTENT['patient/account/orders']
+      },
+      {
+        path: 'card',
+        component: PatientAccountCardPageComponent,
+        data: ROUTE_SEO_CONTENT['patient/account/card']
       }
     ]
   },

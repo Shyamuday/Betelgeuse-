@@ -35,11 +35,35 @@ export const PATIENT_ACCOUNT_NAV: PatientAccountNavItem[] = [
     available: true
   },
   {
-    id: 'dashboard',
-    label: 'My Care Dashboard',
-    description: 'Consultations, medicines, prescriptions',
-    path: `/${ROUTE_PATHS.PATIENT_DASHBOARD}`,
+    id: 'consultations',
+    label: 'My Consultations',
+    description: 'Past visits, pay pending, prescriptions',
+    path: `/${ROUTE_PATHS.PATIENT_ACCOUNT_CONSULTATIONS}`,
     icon: '🩺',
+    available: true
+  },
+  {
+    id: 'orders',
+    label: 'Orders & Deliveries',
+    description: 'Track medicine deliveries',
+    path: `/${ROUTE_PATHS.PATIENT_ACCOUNT_ORDERS}`,
+    icon: '📦',
+    available: true
+  },
+  {
+    id: 'card',
+    label: 'Clinic card',
+    description: 'Patient ID and QR for visits',
+    path: `/${ROUTE_PATHS.PATIENT_ACCOUNT_CARD}`,
+    icon: '🪪',
+    available: true
+  },
+  {
+    id: 'dashboard',
+    label: 'Care dashboard',
+    description: 'Chat, medicines, today’s doses',
+    path: `/${ROUTE_PATHS.PATIENT_DASHBOARD}`,
+    icon: '💬',
     available: true
   },
   {

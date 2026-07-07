@@ -25,10 +25,18 @@ export class PatientAccountHubComponent implements OnInit {
   } | null>(null);
 
   readonly quickLinks = PATIENT_ACCOUNT_NAV.filter((item) =>
-    ['profile', 'addresses', 'dashboard', 'refer', 'rewards'].includes(item.id)
+    ['profile', 'addresses', 'consultations', 'orders', 'card', 'refer', 'rewards', 'dashboard'].includes(item.id)
   );
 
+  readonly walletBalanceInPaise = signal(0);
+  readonly referralCode = signal('');
+
   readonly dashboardLink = `/${ROUTE_PATHS.PATIENT_DASHBOARD}`;
+  readonly CURRENCY_CODE = 'INR';
+
+  formatInr(paise: number) {
+    return (paise / 100).toLocaleString('en-IN', { style: 'currency', currency: 'INR' });
+  }
 
   ngOnInit() {
     void this.load();
@@ -38,14 +46,30 @@ export class PatientAccountHubComponent implements OnInit {
     const token = this.auth.token;
     try {
       if (token) {
-        const res = await fetch(`${environment.apiUrl}${API_PATHS.PATIENT.PROFILE}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
+        const [profileRes, rewardsRes, referRes] = await Promise.all([
+          fetch(`${environment.apiUrl}${API_PATHS.PATIENT.PROFILE}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          fetch(`${environment.apiUrl}${API_PATHS.PATIENT.REWARDS}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          fetch(`${environment.apiUrl}${API_PATHS.PATIENT.REFERRALS_SUMMARY}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ]);
+        if (profileRes.ok) {
+          const data = await profileRes.json();
           this.profile.set(data.profile);
-          return;
         }
+        if (rewardsRes.ok) {
+          const rewards = await rewardsRes.json();
+          this.walletBalanceInPaise.set(rewards.balanceInPaise ?? 0);
+        }
+        if (referRes.ok) {
+          const refer = await referRes.json();
+          this.referralCode.set(refer.code ?? '');
+        }
+        if (this.profile()) return;
       }
       const user = this.auth.user();
       if (user) this.profile.set({ name: user.name, mobile: user.mobile, email: user.email });

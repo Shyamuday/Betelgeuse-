@@ -25,7 +25,9 @@ export const API_PATHS = {
     LAB_RESULTS: '/patient/lab-results',
     REFERRALS_SUMMARY: '/patient/referrals/summary',
     REWARDS: '/patient/rewards',
-    REWARDS_CHECKOUT_QUOTE: '/patient/rewards/checkout-quote'
+    REWARDS_CHECKOUT_QUOTE: '/patient/rewards/checkout-quote',
+    DELIVERIES: '/patient/deliveries',
+    DELIVERY: (id: string) => `/patient/deliveries/${id}`
   },
   ADMIN: {
     DOCTORS: '/admin/doctors',

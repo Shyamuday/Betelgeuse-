@@ -17,6 +17,7 @@ export type BookConsultationPayload = {
   purchaseType: typeof PURCHASE_TYPES.ONE_TIME | typeof PURCHASE_TYPES.PLAN;
   planCode?: string;
   walletRedeemInPaise?: number;
+  promoCode?: string;
 };
 
 type BookingForm = {
@@ -68,6 +69,7 @@ export class BookConsultationPanelComponent implements OnChanges {
   readonly bookingFormModel = signal<BookingForm>(emptyBookingForm());
   readonly bookingForm = form(this.bookingFormModel);
   readonly useWallet = signal(false);
+  readonly promoCode = signal('');
   readonly quoteLoading = signal(false);
   readonly checkoutQuote = signal<CheckoutQuote | null>(null);
 
@@ -144,6 +146,15 @@ export class BookConsultationPanelComponent implements OnChanges {
     this.scheduleQuoteRefresh();
   }
 
+  onPromoChange(event: Event) {
+    this.promoCode.set((event.target as HTMLInputElement).value.toUpperCase());
+    this.scheduleQuoteRefresh();
+  }
+
+  applyPromo() {
+    this.scheduleQuoteRefresh();
+  }
+
   patchIntakeAnswer(question: string, event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.bookingFormModel.update((m) => ({
@@ -168,6 +179,7 @@ export class BookConsultationPanelComponent implements OnChanges {
       ...(this.useWallet() && quote?.walletRedeemedInPaise
         ? { walletRedeemInPaise: quote.walletRedeemedInPaise }
         : {}),
+      ...(this.promoCode().trim() ? { promoCode: this.promoCode().trim() } : {}),
     });
   }
 
@@ -197,6 +209,7 @@ export class BookConsultationPanelComponent implements OnChanges {
           purchaseType: form.purchaseType,
           ...(form.purchaseType === PURCHASE_TYPES.PLAN ? { planCode: form.selectedPlanCode } : {}),
           walletRedeemInPaise: this.useWallet() ? 99_999_999 : 0,
+          ...(this.promoCode().trim() ? { promoCode: this.promoCode().trim() } : {}),
         }),
       });
       if (!res.ok) {
