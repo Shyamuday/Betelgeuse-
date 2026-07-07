@@ -6,6 +6,7 @@ import { registerAuthOtpRoutes } from './otp.js';
 import { registerAuthPatientRoutes } from './patient.js';
 import { registerAuthProfileRoutes } from './profile.js';
 import { registerPatientAddressRoutes } from '../patient-addresses.js';
+import { registerPatientRewardsRoutes } from '../patient-rewards.js';
 import { registerAuthStaffRoutes } from './staff.js';
 
 export const router = Router();
@@ -18,3 +19,4 @@ registerAuthGoogleRoutes(router);
 registerAuthPatientRoutes(router);
 registerAuthProfileRoutes(router);
 registerPatientAddressRoutes(router);
+registerPatientRewardsRoutes(router);

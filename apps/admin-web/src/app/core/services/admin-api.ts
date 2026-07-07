@@ -5,6 +5,7 @@ import { AdminCatalogApi } from './admin/admin-catalog.api';
 import { AdminHrApi } from './admin/admin-hr.api';
 import { AdminFinanceApi } from './admin/admin-finance.api';
 import { AdminOpsApi } from './admin/admin-ops.api';
+import { AdminRewardsApi } from './admin/admin-rewards.api';
 
 @Service()
 export class AdminApi {
@@ -14,6 +15,7 @@ export class AdminApi {
   private readonly hr = inject(AdminHrApi);
   private readonly finance = inject(AdminFinanceApi);
   private readonly ops = inject(AdminOpsApi);
+  private readonly rewards = inject(AdminRewardsApi);
 
   getReports(...args: Parameters<AdminReportsApi['getReports']>) {
     return this.reports.getReports(...(args as Parameters<AdminReportsApi['getReports']>));
@@ -434,5 +436,21 @@ export class AdminApi {
   }
   closeVacancy(...args: Parameters<AdminOpsApi['closeVacancy']>) {
     return this.ops.closeVacancy(...(args as Parameters<AdminOpsApi['closeVacancy']>));
+  }
+
+  listRewardRules() {
+    return this.rewards.listRewardRules();
+  }
+  createRewardRule(payload: unknown) {
+    return this.rewards.createRewardRule(payload);
+  }
+  updateRewardRule(id: string, payload: unknown) {
+    return this.rewards.updateRewardRule(id, payload);
+  }
+  deleteRewardRule(id: string) {
+    return this.rewards.deleteRewardRule(id);
+  }
+  listReferrals(limit = 50) {
+    return this.rewards.listReferrals(limit);
   }
 }

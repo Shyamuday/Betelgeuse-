@@ -9,6 +9,7 @@ import { enabledNotificationChannels, notificationService } from '../services/no
 import { emitConsultationAssigned } from '../services/consultation-realtime.js';
 import { ensureBillingPlans } from './catalog.js';
 import { resolveDiseaseConsultationFee } from '../services/consultation-pricing.js';
+import { resolveConsultationCheckout } from '../services/checkout-pricing.js';
 import { PRODUCT_EVENTS, trackProductEvent } from '../services/product-analytics.js';
 
 export function createConsultationsRouter(io: SocketIoServer) {
@@ -25,7 +26,9 @@ export function createConsultationsRouter(io: SocketIoServer) {
           diseaseId: z.string().min(1),
           intakeAnswers: z.record(z.string(), z.string().min(1)),
           purchaseType: z.enum(['ONE_TIME', 'PLAN']).optional().default('ONE_TIME'),
-          planCode: z.string().min(2).optional()
+          planCode: z.string().min(2).optional(),
+          promoCode: z.string().min(2).max(32).optional(),
+          walletRedeemInPaise: z.number().int().min(0).optional()
         })
         .parse(req.body);
 
@@ -45,7 +48,13 @@ export function createConsultationsRouter(io: SocketIoServer) {
         select: { homeClinicStoreId: true }
       });
       const consultFeePaise = await resolveDiseaseConsultationFee(disease.id, patient.homeClinicStoreId);
-      const amountInPaise = body.purchaseType === 'ONE_TIME' ? consultFeePaise : selectedPlan.priceInPaise;
+      const grossInPaise = body.purchaseType === 'ONE_TIME' ? consultFeePaise : selectedPlan.priceInPaise;
+      const checkout = await resolveConsultationCheckout({
+        patientId: req.user!.id,
+        grossInPaise,
+        promoCode: body.promoCode,
+        walletRedeemInPaise: body.walletRedeemInPaise
+      });
       const consultation = await prisma.consultation.create({
         data: {
           patientId: req.user!.id,
@@ -58,22 +67,31 @@ export function createConsultationsRouter(io: SocketIoServer) {
             diseaseFeeInPaise: consultFeePaise,
             selectedPlanCode: selectedPlan.code,
             selectedPlanName: selectedPlan.name,
-            selectedPlanPriceInPaise: selectedPlan.priceInPaise
+            selectedPlanPriceInPaise: selectedPlan.priceInPaise,
+            checkout
           },
           payment: {
             create: {
-              amountInPaise,
+              grossAmountInPaise: checkout.grossAmountInPaise,
+              discountInPaise: checkout.discountInPaise,
+              walletRedeemedInPaise: checkout.walletRedeemedInPaise,
+              amountInPaise: checkout.payableInPaise,
               billingPlanCode: selectedPlan.code,
+              appliedRules: checkout.appliedRules,
               lineItems: {
                 purchaseType: body.purchaseType,
                 diseaseName: disease.name,
-                consultationFeeInPaise: amountInPaise,
+                consultationFeeInPaise: checkout.grossAmountInPaise,
                 diseaseFeeInPaise: consultFeePaise,
+                discountInPaise: checkout.discountInPaise,
+                walletRedeemedInPaise: checkout.walletRedeemedInPaise,
+                payableInPaise: checkout.payableInPaise,
                 medicineFeeInPaise: 0,
                 planCode: selectedPlan.code,
                 planName: selectedPlan.name,
                 selectedPlanPriceInPaise: selectedPlan.priceInPaise,
-                consultationsLimit: selectedPlan.consultationsLimit
+                consultationsLimit: selectedPlan.consultationsLimit,
+                appliedRules: checkout.appliedRules
               },
               status: PaymentStatus.CREATED
             }

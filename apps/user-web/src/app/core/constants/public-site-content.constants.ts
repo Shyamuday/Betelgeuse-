@@ -448,6 +448,14 @@ export const ROUTE_SEO_CONTENT = {
     seoTitle: 'Manage Addresses | Vitalis Care',
     seoDescription: 'Save and manage delivery addresses for medicine orders.'
   },
+  'patient/account/refer': {
+    seoTitle: 'Refer and Earn | Vitalis Care',
+    seoDescription: 'Invite friends to Vitalis Care and earn wallet rewards.'
+  },
+  'patient/account/rewards': {
+    seoTitle: 'Rewards Wallet | Vitalis Care',
+    seoDescription: 'View your Vitalis Care wallet balance and reward history.'
+  },
   'doctor/dashboard': {
     seoTitle: 'Doctor Dashboard | Vitalis Care',
     seoDescription: 'Review assigned consultations, patient chats, and prescriptions in the Vitalis Care doctor dashboard.'

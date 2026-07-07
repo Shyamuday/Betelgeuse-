@@ -36,6 +36,7 @@ import { FaqPage } from './features/content/faq-page/faq-page';
 import { BlogPage } from './features/content/blog-page/blog-page';
 import { SiteConfigPage } from './features/content/site-config-page/site-config-page';
 import { ChatInboxPage } from './features/content/chat-inbox-page/chat-inbox-page';
+import { RewardsPage } from './features/rewards/rewards-page/rewards-page';
 
 export const routes: Routes = [
   { path: ROUTE_PATHS.LOGIN, component: AdminLogin },
@@ -51,6 +52,7 @@ export const routes: Routes = [
       { path: ROUTE_PATHS.SCAN, component: AdminPatientScanLauncherPage },
       { path: ROUTE_PATHS.DISEASES, component: DiseasesPage },
       { path: ROUTE_PATHS.RATES, component: RatesPage },
+      { path: ROUTE_PATHS.REWARDS, component: RewardsPage },
       { path: ROUTE_PATHS.VACANCIES, component: VacanciesPage },
       { path: ROUTE_PATHS.HR, component: DoctorHrComponent },
       { path: ROUTE_PATHS.HR_USERS, component: HrUsersComponent },

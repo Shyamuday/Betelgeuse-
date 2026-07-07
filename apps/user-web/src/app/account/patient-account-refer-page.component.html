@@ -1,0 +1,42 @@
+<section class="refer-page panel">
+  <div class="page-hdr">
+    <p class="eyebrow">My Account</p>
+    <h1>Refer and Earn</h1>
+    <p class="page-lead">Share your link. When friends sign up and pay for their first consultation, you both benefit — per admin reward rules.</p>
+  </div>
+
+  @if (loading()) {
+    <p class="loading-text">Loading…</p>
+  } @else {
+    <div class="code-card">
+      <span class="label">Your referral code</span>
+      <strong class="code">{{ code() }}</strong>
+      <div class="actions">
+        <button type="button" class="btn-primary" (click)="copyLink()">
+          {{ copied() ? 'Copied!' : 'Copy invite link' }}
+        </button>
+        <button type="button" class="btn-secondary" (click)="whatsappShare()">Share on WhatsApp</button>
+      </div>
+      <p class="share-url">{{ shareUrl() }}</p>
+    </div>
+
+    <div class="stats-grid">
+      <div><span>Invited</span><strong>{{ stats().total }}</strong></div>
+      <div><span>Joined</span><strong>{{ stats().registered }}</strong></div>
+      <div><span>Qualified</span><strong>{{ stats().qualified }}</strong></div>
+      <div><span>Rewarded</span><strong>{{ stats().rewarded }}</strong></div>
+    </div>
+
+    @if (referrals().length) {
+      <h2>Friends you referred</h2>
+      <ul class="ref-list">
+        @for (r of referrals(); track $index) {
+          <li>
+            <span>{{ r.referredUser?.name || 'Friend' }}</span>
+            <small>{{ r.status }}</small>
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>

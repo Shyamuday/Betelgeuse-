@@ -27,6 +27,8 @@ export class AppHeaderComponent implements OnDestroy {
     hub: `/${ROUTE_PATHS.PATIENT_ACCOUNT}`,
     profile: `/${ROUTE_PATHS.PATIENT_ACCOUNT_PROFILE}`,
     addresses: `/${ROUTE_PATHS.PATIENT_ACCOUNT_ADDRESSES}`,
+    refer: `/${ROUTE_PATHS.PATIENT_ACCOUNT_REFER}`,
+    rewards: `/${ROUTE_PATHS.PATIENT_ACCOUNT_REWARDS}`,
     dashboard: `/${ROUTE_PATHS.PATIENT_DASHBOARD}`,
   };
 

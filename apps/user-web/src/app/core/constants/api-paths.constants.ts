@@ -22,7 +22,10 @@ export const API_PATHS = {
     ADDRESS_DEFAULT: (id: string) => `/patient/addresses/${id}/default`,
     PROFILE_PASSWORD: '/patient/profile/password',
     CARD: '/patient/card',
-    LAB_RESULTS: '/patient/lab-results'
+    LAB_RESULTS: '/patient/lab-results',
+    REFERRALS_SUMMARY: '/patient/referrals/summary',
+    REWARDS: '/patient/rewards',
+    REWARDS_CHECKOUT_QUOTE: '/patient/rewards/checkout-quote'
   },
   ADMIN: {
     DOCTORS: '/admin/doctors',

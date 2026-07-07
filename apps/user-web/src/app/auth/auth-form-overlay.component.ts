@@ -28,6 +28,10 @@ type LoginMode = 'password' | 'otp';
 })
 export class AuthFormOverlayComponent {
   private readonly overlayData = (inject(APP_OVERLAY_DATA) as AuthFormOverlayData | null) || {};
+  private readonly referralCodeFromUrl =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('ref') || undefined
+      : undefined;
   readonly loginMode = signal<LoginMode>('password');
   readonly isProcessing = signal(false);
   readonly forgotStep = signal<ForgotStep>(this.overlayData.initialForgotStep || 'none');
@@ -110,7 +114,11 @@ export class AuthFormOverlayComponent {
   }
 
   loginPatientWithOtp() {
-    this.process('Logging in patient...', this.auth.patientLogin(this.patientOtpModel())).subscribe({
+    const otp = this.patientOtpModel();
+    this.process('Logging in patient...', this.auth.patientLogin({
+      ...otp,
+      referralCode: this.referralCodeFromUrl
+    })).subscribe({
       next: (response) => {
         if ('requiresPatientSelection' in response) {
           this.patientSelection.set({

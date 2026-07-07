@@ -4,6 +4,7 @@ import { Role } from '@prisma/client';
 import { prisma } from '../../db.js';
 import { generateOtp, storeOtp, verifyOtp, sendOtpSms, devOtp, isProduction } from '../../services/otp.js';
 import { createPatientRecord, normalizeMobile } from '../../services/patient-identity.js';
+import { attachReferralOnSignup } from '../../services/referral-codes.js';
 import { captureLeadFromOtpIntent, markLeadsRegistered } from '../../services/website-leads.service.js';
 import { asyncRoute, publicUserSelect, toAuthResponse, logAuthEvent } from '../../utils/helpers.js';
 import { PRODUCT_EVENTS, trackProductEvent } from '../../services/product-analytics.js';
@@ -56,7 +57,8 @@ router.post(
       .object({
         mobile: z.string().min(8),
         otp: z.string().min(4),
-        name: z.string().min(2).optional()
+        name: z.string().min(2).optional(),
+        referralCode: z.string().min(3).max(32).optional()
       })
       .parse(req.body);
 
@@ -99,6 +101,12 @@ router.post(
       name: body.name?.trim() || 'Patient',
       mobile
     });
+
+    if (body.referralCode) {
+      void attachReferralOnSignup(user.id, body.referralCode).catch((err) => {
+        console.warn('[referral] Could not attach on signup', err);
+      });
+    }
 
     logAuthEvent('patient_login', { userId: user.id, mobile, event: 'otp_register' });
     void markLeadsRegistered(mobile, user.id);

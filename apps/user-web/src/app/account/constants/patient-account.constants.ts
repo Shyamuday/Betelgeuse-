@@ -45,17 +45,17 @@ export const PATIENT_ACCOUNT_NAV: PatientAccountNavItem[] = [
   {
     id: 'refer',
     label: 'Refer and Earn',
-    description: 'Invite friends — coming soon',
-    path: `/${ROUTE_PATHS.PATIENT_ACCOUNT}`,
+    description: 'Invite friends and earn rewards',
+    path: `/${ROUTE_PATHS.PATIENT_ACCOUNT_REFER}`,
     icon: '🎁',
-    available: false
+    available: true
   },
   {
     id: 'rewards',
     label: 'Rewards',
-    description: 'Points and wallet — coming soon',
-    path: `/${ROUTE_PATHS.PATIENT_ACCOUNT}`,
+    description: 'Wallet balance and history',
+    path: `/${ROUTE_PATHS.PATIENT_ACCOUNT_REWARDS}`,
     icon: '⭐',
-    available: false
+    available: true
   }
 ];

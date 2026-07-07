@@ -22,6 +22,8 @@ import { PatientAccountShellComponent } from './account/patient-account-shell.co
 import { PatientAccountHubComponent } from './account/patient-account-hub.component';
 import { PatientAccountProfilePage } from './account/patient-account-profile-page.component';
 import { PatientAccountAddressesPageComponent } from './account/patient-account-addresses-page.component';
+import { PatientAccountReferPageComponent } from './account/patient-account-refer-page.component';
+import { PatientAccountRewardsPageComponent } from './account/patient-account-rewards-page.component';
 
 export const routes: Routes = [
   {
@@ -162,6 +164,16 @@ export const routes: Routes = [
         path: 'addresses',
         component: PatientAccountAddressesPageComponent,
         data: ROUTE_SEO_CONTENT['patient/account/addresses']
+      },
+      {
+        path: 'refer',
+        component: PatientAccountReferPageComponent,
+        data: ROUTE_SEO_CONTENT['patient/account/refer']
+      },
+      {
+        path: 'rewards',
+        component: PatientAccountRewardsPageComponent,
+        data: ROUTE_SEO_CONTENT['patient/account/rewards']
       }
     ]
   },

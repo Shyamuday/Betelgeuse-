@@ -1,0 +1,33 @@
+<section class="rewards-page panel">
+  <div class="page-hdr">
+    <p class="eyebrow">My Account</p>
+    <h1>Rewards wallet</h1>
+    <p class="page-lead">Earn credits from referrals and promotions. Use your balance at consultation checkout (per admin rules).</p>
+  </div>
+
+  @if (loading()) {
+    <p class="loading-text">Loading…</p>
+  } @else {
+    <div class="balance-card">
+      <span>Available balance</span>
+      <strong>{{ formatInr(balanceInPaise()) }}</strong>
+    </div>
+
+    <h2>History</h2>
+    @if (!ledger().length) {
+      <p class="empty">No wallet activity yet. Refer a friend or complete a consultation to earn rewards.</p>
+    } @else {
+      <ul class="ledger">
+        @for (row of ledger(); track row.id) {
+          <li [class.credit]="row.direction === 'CREDIT'" [class.debit]="row.direction === 'DEBIT'">
+            <div>
+              <strong>{{ row.rule?.name || row.note || (row.direction === 'CREDIT' ? 'Credit' : 'Debit') }}</strong>
+              <small>{{ row.createdAt | date:'medium' }}</small>
+            </div>
+            <span>{{ row.direction === 'CREDIT' ? '+' : '−' }}{{ formatInr(row.amountInPaise) }}</span>
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>

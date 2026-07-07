@@ -17,7 +17,7 @@ export class PatientAccountShellComponent {
   readonly auth = inject(AuthService);
   readonly whatsappLink = WHATSAPP_CONTACT_URL;
   readonly navItems = PATIENT_ACCOUNT_NAV.filter((item) =>
-    ['overview', 'profile', 'addresses', 'dashboard'].includes(item.id)
+    ['overview', 'profile', 'addresses', 'refer', 'rewards', 'dashboard'].includes(item.id)
   );
 
   logout() {

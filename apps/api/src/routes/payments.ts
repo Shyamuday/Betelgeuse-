@@ -11,6 +11,7 @@ import { enabledNotificationChannels, notificationService } from '../services/no
 import { buildDoctorPayslip, buildPayslipHistory, parseMonth } from '../services/payroll.js';
 import { doctorReceivesConsultationShare, resolveDoctorSharePercent } from '../services/doctor-compensation.js';
 import { buildDoctorEarningsReport } from '../services/doctor-earnings.js';
+import { settleConsultationPaymentRewards } from '../services/reward-settlement.js';
 import { PRODUCT_EVENTS, trackProductEvent } from '../services/product-analytics.js';
 
 export function createPaymentsRouter(io: SocketIoServer) {
@@ -131,6 +132,9 @@ export function createPaymentsRouter(io: SocketIoServer) {
           actorRole: req.user!.role,
           properties: { consultationId, razorpayPaymentId: body.razorpayPaymentId }
         });
+        void settleConsultationPaymentRewards(payment.id).catch((err) => {
+          console.error('[rewards] Settlement failed after verify', err);
+        });
       }
 
       res.json({ ok: true });
@@ -215,6 +219,9 @@ export function createPaymentsRouter(io: SocketIoServer) {
           actorId: payment.consultation.patientId,
           actorRole: Role.PATIENT,
           properties: { consultationId: payment.consultationId, razorpayPaymentId: paymentEntity.id, source: 'webhook' }
+        });
+        void settleConsultationPaymentRewards(payment.id).catch((err) => {
+          console.error('[rewards] Settlement failed after webhook', err);
         });
       }
 

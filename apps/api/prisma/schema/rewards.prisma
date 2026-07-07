@@ -1,0 +1,145 @@
+enum RewardProgramKind {
+  REFERRAL
+  LOYALTY
+  PROMO
+  WELCOME
+  CUSTOM
+}
+
+enum RewardTrigger {
+  PATIENT_SIGNUP_WITH_REFERRAL
+  FIRST_CONSULTATION_PAID
+  CONSULTATION_PAID
+  MEDICINE_ORDER_PAID
+  MANUAL
+}
+
+enum RewardBeneficiary {
+  REFERRER
+  REFERRED_PATIENT
+  PAYING_PATIENT
+}
+
+enum RewardValueType {
+  WALLET_CREDIT_FLAT
+  CHECKOUT_DISCOUNT_FLAT
+  CHECKOUT_DISCOUNT_PERCENT
+}
+
+enum RewardAppliesTo {
+  CONSULTATION
+  MEDICINE_DELIVERY
+  ANY
+}
+
+enum PatientReferralStatus {
+  REGISTERED
+  QUALIFIED
+  REWARDED
+  REJECTED
+}
+
+enum WalletLedgerDirection {
+  CREDIT
+  DEBIT
+}
+
+/// Admin-configurable reward / discount rule. Combine trigger + beneficiary + value type for any program.
+model RewardProgramRule {
+  id                 String            @id @default(cuid())
+  code               String            @unique
+  name               String
+  description        String?
+  kind               RewardProgramKind
+  trigger            RewardTrigger
+  beneficiary        RewardBeneficiary
+  valueType          RewardValueType
+  /// Flat amount in paise, or basis points for percent (1000 = 10%).
+  valueAmount        Int
+  appliesTo          RewardAppliesTo   @default(CONSULTATION)
+  promoCode          String?           @unique
+  maxUsesPerPatient  Int?
+  maxUsesGlobal      Int?
+  maxDiscountInPaise Int?
+  minOrderInPaise    Int?
+  minPayableInPaise  Int               @default(100)
+  validFrom          DateTime?
+  validUntil         DateTime?
+  isActive           Boolean           @default(true)
+  priority           Int               @default(0)
+  conditions         Json?
+  ledgerEntries      WalletLedgerEntry[]
+  redemptions        RewardRedemption[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([isActive, trigger, appliesTo])
+  @@index([kind, isActive])
+}
+
+model RewardRedemption {
+  id            String            @id @default(cuid())
+  ruleId        String
+  patientId     String
+  paymentId     String?
+  amountInPaise Int
+  context       Json?
+  rule          RewardProgramRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  patient       User              @relation("RewardRedemptionPatient", fields: [patientId], references: [id], onDelete: Cascade)
+  payment       Payment?          @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  createdAt     DateTime          @default(now())
+
+  @@index([ruleId, patientId])
+  @@index([patientId, createdAt])
+  @@index([paymentId])
+}
+
+model PatientReferralCode {
+  id        String            @id @default(cuid())
+  patientId String            @unique
+  code      String            @unique
+  isActive  Boolean           @default(true)
+  patient   User              @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  referrals PatientReferral[]
+  createdAt DateTime          @default(now())
+}
+
+model PatientReferral {
+  id             String                @id @default(cuid())
+  referrerId     String
+  referredUserId String                @unique
+  referralCodeId String
+  status         PatientReferralStatus @default(REGISTERED)
+  qualifiedAt    DateTime?
+  rewardedAt     DateTime?
+  referrer       User                  @relation("ReferralsMade", fields: [referrerId], references: [id], onDelete: Cascade)
+  referredUser   User                  @relation("ReferralReceived", fields: [referredUserId], references: [id], onDelete: Cascade)
+  referralCode   PatientReferralCode   @relation(fields: [referralCodeId], references: [id], onDelete: Cascade)
+  createdAt      DateTime              @default(now())
+
+  @@index([referrerId, status])
+}
+
+model PatientWallet {
+  patientId      String   @id
+  balanceInPaise Int      @default(0)
+  patient        User     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  updatedAt      DateTime @updatedAt
+}
+
+model WalletLedgerEntry {
+  id            String                @id @default(cuid())
+  patientId     String
+  direction     WalletLedgerDirection
+  amountInPaise Int
+  balanceAfter  Int
+  sourceType    String
+  sourceId      String?
+  ruleId        String?
+  note          String?
+  patient       User                  @relation("WalletLedgerPatient", fields: [patientId], references: [id], onDelete: Cascade)
+  rule          RewardProgramRule?    @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+  createdAt     DateTime              @default(now())
+
+  @@index([patientId, createdAt])
+}

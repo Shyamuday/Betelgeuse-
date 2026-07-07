@@ -71,6 +71,11 @@ export const API_PATHS = {
     LEAD_FUNNEL: '/admin/analytics/lead-funnel',
     SALARY_EMPLOYEES: '/admin/salary/employees',
     SALARY_BY_EMPLOYEE: (empType: string, id: string) => `/admin/salary/${empType}/${id}`,
+    REWARD_RULES: '/admin/rewards/rules',
+    REWARD_RULE_BY_ID: (id: string) => `/admin/rewards/rules/${id}`,
+    REWARD_REFERRALS: '/admin/rewards/referrals',
+    REWARD_WALLET: (patientId: string) => `/admin/rewards/wallet/${patientId}`,
+    REWARD_WALLET_ADJUST: (patientId: string) => `/admin/rewards/wallet/${patientId}/adjust`,
     FINANCE: {
       SUMMARY: '/admin/finance/summary',
       REVENUE_TREND: '/admin/finance/revenue/trend',

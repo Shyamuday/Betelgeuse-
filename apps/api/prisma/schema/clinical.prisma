@@ -83,10 +83,15 @@ model Payment {
   billingPlanCode String?
   providerOrderId String?
   providerPaymentId String?
+  grossAmountInPaise Int?
+  discountInPaise    Int          @default(0)
+  walletRedeemedInPaise Int       @default(0)
   amountInPaise   Int
   lineItems       Json?
+  appliedRules    Json?
   status          PaymentStatus @default(CREATED)
   consultation    Consultation  @relation(fields: [consultationId], references: [id])
+  rewardRedemptions RewardRedemption[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 }

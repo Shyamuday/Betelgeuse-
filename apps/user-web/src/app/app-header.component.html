@@ -33,6 +33,8 @@
                   <a role="menuitem" [routerLink]="accountPaths.hub" (click)="closeAccountMenu()">My Account</a>
                   <a role="menuitem" [routerLink]="accountPaths.profile" (click)="closeAccountMenu()">Edit Account</a>
                   <a role="menuitem" [routerLink]="accountPaths.addresses" (click)="closeAccountMenu()">Manage Addresses</a>
+                  <a role="menuitem" [routerLink]="accountPaths.refer" (click)="closeAccountMenu()">Refer and Earn</a>
+                  <a role="menuitem" [routerLink]="accountPaths.rewards" (click)="closeAccountMenu()">Rewards</a>
                   <a role="menuitem" [routerLink]="accountPaths.dashboard" (click)="closeAccountMenu()">Care Dashboard</a>
                   <button type="button" role="menuitem" class="menu-logout" (click)="closeAccountMenu(); logout.emit()">Logout</button>
                 </div>
