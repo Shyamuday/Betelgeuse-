@@ -6,7 +6,7 @@ The platform uses **3 primary web portals** (+ API).
 
 | Portal | App folder | Port | Includes |
 |--------|------------|------|----------|
-| **Patient** | `apps/user-web` | 4200 | Patient mobile/web (Capacitor) |
+| **Patient** | `apps/user-web` | 4203 | Patient mobile/web (Capacitor) |
 | **Clinical** | `apps/doctor-web` | 4202 | Doctor consultations |
 | **Operations** | `apps/operations-web` | 5800 | All staff, partners, store counter, store manager, embedded admin |
 | **Admin UI source** | `apps/admin-web` | — | Compiled into operations-web at `/admin/*` |
@@ -26,7 +26,7 @@ Legacy per-role apps (`hr-web`, `partners-web`, `store`, etc.) have been **remov
 npm run dev:operations   # http://localhost:5800 — everything except patient/doctor
 npm run dev:admin        # alias → operations-web
 npm run dev:doctor       # http://localhost:4202
-npm run dev:user         # http://localhost:4200
+npm run dev:user         # http://localhost:4203
 ```
 
 ## Store staff

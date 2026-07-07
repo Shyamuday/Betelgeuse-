@@ -8,7 +8,7 @@ This document describes the full role and application landscape for a scalable d
 
 | App | Path | Port | Primary users | Status |
 |-----|------|------|---------------|--------|
-| **Patient** | `apps/user-web` | 4200 | Patients / families | Built |
+| **Patient** | `apps/user-web` | 4203 | Patients / families | Built |
 | **Super Admin** | `apps/admin-web` | 4201 | Platform admin, finance, catalog | Built |
 | **Doctor** | `apps/doctor-web` | 4202 | Consulting doctors | Built |
 | **Store Staff** | `apps/store` | 4300 | Counter staff (PIN login) | Built |
@@ -223,7 +223,7 @@ When adding a new app to this monorepo:
 | Service | Port |
 |---------|------|
 | API | 4000 |
-| Patient (`user-web`) | 4200 |
+| Patient (`user-web`) | 4203 |
 | Admin | 4201 |
 | Doctor | 4202 |
 | Store staff | 4300 |

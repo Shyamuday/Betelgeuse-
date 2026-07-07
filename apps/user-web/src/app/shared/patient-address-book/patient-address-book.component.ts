@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, inject, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
-import { API_PATHS } from '../core/constants/api-paths.constants';
+import { API_PATHS } from '../../core/constants/api-paths.constants';
 import {
   ADDRESS_TYPE_OPTIONS,
   addressToForm,
@@ -9,9 +9,9 @@ import {
   emptyAddressForm,
   formToAddressPayload,
   type PatientAddress
-} from '../core/constants/patient-address.constants';
-import { environment } from '../../environments/environment';
-import { AuthService } from '../auth/auth.service';
+} from '../../core/constants/patient-address.constants';
+import { environment } from '../../../environments/environment';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-patient-address-book',
@@ -103,7 +103,14 @@ export class PatientAddressBookComponent implements OnInit {
     this.saving.set(true);
     this.errorMsg.set('');
     this.successMsg.set('');
-    const payload = formToAddressPayload(this.formModel());
+    const model = this.formModel();
+    const pin = model.pincode.trim();
+    if (!/^\d{6}$/.test(pin)) {
+      this.errorMsg.set('PIN code must be exactly 6 digits.');
+      this.saving.set(false);
+      return;
+    }
+    const payload = formToAddressPayload(model);
     const editingId = this.editingId();
 
     try {

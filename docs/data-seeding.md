@@ -112,7 +112,7 @@ The script:
 | Admin | `admin@vitalisclinic.local` | Admin (embedded in operations `:5800`) |
 | Doctor | `doctor@vitalisclinic.local` | Doctor `:4202` |
 | HR | `hr@vitalisclinic.local` | Operations `:5800` |
-| Patient (Rahul) | `patient1@vitalisclinic.local` or mobile OTP | Patient `:4200` |
+| Patient (Rahul) | `patient1@vitalisclinic.local` or mobile OTP | Patient `:4203` |
 | Store manager | `manager@ranchi.vitalis.local` | Operations `:5800` |
 | Store staff | `staff@ranchi.vitalis.local` | Operations `:5800` |
 

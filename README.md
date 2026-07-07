@@ -6,7 +6,7 @@ Clinic platform — Angular frontend + pure Node.js/Express/TypeScript backend.
 
 | App | Path | Port |
 |-----|------|------|
-| Patient | `apps/user-web` | 4200 |
+| Patient | `apps/user-web` | 4203 |
 | Doctor | `apps/doctor-web` | 4202 |
 | Operations (staff, partners, store, admin) | `apps/operations-web` | 5800 |
 | Admin UI source (embedded) | `apps/admin-web` | — |
@@ -41,7 +41,7 @@ Copy `.env.example` to `.env` in `apps/api` and fill in the values:
 DATABASE_URL="postgresql://user:pass@host:5432/db?sslmode=require"
 JWT_SECRET="change-before-production"
 PORT=4000
-WEB_ORIGIN="http://localhost:4200"
+WEB_ORIGIN="http://localhost:4203"
 DEV_OTP="123456"
 RAZORPAY_KEY_ID=""
 RAZORPAY_KEY_SECRET=""
@@ -68,7 +68,7 @@ For a full local setup guide (fresh Postgres, `prisma db push`, demo logins, OOR
 ```powershell
 npm install --prefix apps/user-web
 npm install --prefix apps/api
-npm run dev:user     # Patient web on :4200
+npm run dev:user     # Patient web on :4203
 npm run dev:api      # API on :4000
 ```
 
@@ -110,7 +110,7 @@ npm run seed --prefix apps/api
 
 | App | Port | Quick-login persona |
 |-----|------|---------------------|
-| Patient | 4200 | Rahul / Priya |
+| Patient | 4203 | Rahul / Priya |
 | Operations | 5800 | All staff, partners, store counter, store manager, admin |
 | Doctor | 4202 | Dr. Meera Sharma |
 

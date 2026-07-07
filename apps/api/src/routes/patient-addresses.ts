@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Role } from '@prisma/client';
-import { authRequired, allowRoles } from '../../auth.js';
-import { asyncRoute, routeParam } from '../../utils/helpers.js';
+import { authRequired, allowRoles } from '../auth.js';
+import { asyncRoute, routeParam } from '../utils/helpers.js';
 import {
   createPatientAddress,
   deletePatientAddress,
@@ -9,7 +9,7 @@ import {
   patientAddressInputSchema,
   setDefaultPatientAddress,
   updatePatientAddress
-} from '../../services/patient-addresses.js';
+} from '../services/patient-addresses.js';
 
 export function registerPatientAddressRoutes(router: Router) {
   router.get(

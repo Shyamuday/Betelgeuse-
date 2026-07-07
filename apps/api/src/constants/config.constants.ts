@@ -1,7 +1,7 @@
 export const SERVER_CONFIG = {
   DEFAULT_PORT: 4000,
   ORIGINS: {
-    WEB: process.env.WEB_ORIGIN || 'http://localhost:4200',
+    WEB: process.env.WEB_ORIGIN || 'http://localhost:4203',
     ADMIN: process.env.ADMIN_ORIGIN || 'http://localhost:4201',
     DOCTOR: process.env.DOCTOR_ORIGIN || 'http://localhost:4202',
     OPERATIONS: process.env.OPERATIONS_ORIGIN || 'http://localhost:5800'

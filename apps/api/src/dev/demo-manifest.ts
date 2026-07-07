@@ -130,7 +130,7 @@ export const DEV_SEED_IDS = {
 } as const;
 
 export const DEV_DEMO_APPS = [
-  { id: 'user-web', label: 'Patient app', port: 4200, url: SERVER_CONFIG.ORIGINS.WEB },
+  { id: 'user-web', label: 'Patient app', port: 4203, url: SERVER_CONFIG.ORIGINS.WEB },
   { id: 'doctor-web', label: 'Doctor app', port: 4202, url: SERVER_CONFIG.ORIGINS.DOCTOR },
   { id: 'operations-web', label: 'Operations (staff, partners, store)', port: 5800, url: SERVER_CONFIG.ORIGINS.OPERATIONS },
   { id: 'admin-web', label: 'Admin source (embedded in operations)', port: 4201, url: SERVER_CONFIG.ORIGINS.ADMIN },
