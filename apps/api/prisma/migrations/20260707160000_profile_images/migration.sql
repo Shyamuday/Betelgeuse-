@@ -1,5 +1,1 @@
--- AlterTable
-ALTER TABLE "User" ADD COLUMN "profileImageKey" TEXT;
-
--- AlterTable
-ALTER TABLE "StoreStaff" ADD COLUMN "profileImageKey" TEXT;
+-- Migration contents captured in 00000000000000_baseline
