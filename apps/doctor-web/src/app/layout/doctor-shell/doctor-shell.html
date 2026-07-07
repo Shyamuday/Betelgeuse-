@@ -14,6 +14,15 @@
     </div>
     <div class="topbar-end">
       <app-notification-bell-host [config]="bellConfig" />
+      @if (!loadingSession) {
+        <vitalis-profile-avatar
+          [apiBase]="apiBase"
+          [tokenKey]="authTokenKey"
+          [displayName]="doctorName || 'Doctor'"
+          [profileImageUrl]="doctorProfileImageUrl"
+          size="md"
+        />
+      }
       <button type="button" class="logout-btn" (click)="logout()">Logout</button>
     </div>
   </header>

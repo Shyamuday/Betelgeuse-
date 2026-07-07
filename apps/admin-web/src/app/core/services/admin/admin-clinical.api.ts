@@ -67,4 +67,12 @@ export class AdminClinicalApi {
       this.http.get<{ analysis: unknown }>(`${this.apiBase}${API_PATHS.ADMIN.CASE_ANALYSIS_BY_ID(id)}`)
     );
   }
+
+  listPatientClinicalMedia(patientId: string) {
+    return firstValueFrom(
+      this.http.get<{ media: Array<Record<string, unknown>> }>(
+        `${this.apiBase}${API_PATHS.ADMIN.PATIENT_CLINICAL_MEDIA(patientId)}`
+      )
+    );
+  }
 }

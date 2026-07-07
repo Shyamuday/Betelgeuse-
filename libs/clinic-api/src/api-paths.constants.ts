@@ -20,6 +20,7 @@ export const API_PATHS = {
     ASSIGN: (id: string) => `/reception/consultations/${id}/assign`,
     PATIENT_REWARDS: (patientId: string) => `/reception/patients/${patientId}/rewards`,
     PATIENT_CHECKOUT_QUOTE: (patientId: string) => `/reception/patients/${patientId}/checkout-quote`,
+    CHECKOUT_QUOTE: '/reception/checkout-quote',
     VISITOR_LEADS: '/admin/visitor-leads',
     VISITOR_LEAD_STATS: '/admin/visitor-leads/stats',
     VISITOR_LEAD_META: '/admin/visitor-leads/meta',

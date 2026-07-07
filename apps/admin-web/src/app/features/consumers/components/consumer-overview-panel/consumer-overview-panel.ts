@@ -7,6 +7,7 @@ import { PatientIdCardComponent, type PatientIdCardData } from '../../../../shar
 import { clinicalRecordsQuery, type ActiveDoctor, type ClinicalSummary, type ConsumerDetail } from '../../models/consumers.models';
 import { ConsumerClinicalSummaryPanelComponent } from '../consumer-clinical-summary-panel/consumer-clinical-summary-panel';
 import { ConsumerConsultationsPanelComponent } from '../consumer-consultations-panel/consumer-consultations-panel';
+import { ConsumerHealthPhotosPanelComponent } from '../consumer-health-photos-panel/consumer-health-photos-panel';
 
 @Component({
   selector: 'app-consumer-overview-panel',
@@ -16,7 +17,8 @@ import { ConsumerConsultationsPanelComponent } from '../consumer-consultations-p
     DetailRowsComponent,
     PatientIdCardComponent,
     ConsumerClinicalSummaryPanelComponent,
-    ConsumerConsultationsPanelComponent
+    ConsumerConsultationsPanelComponent,
+    ConsumerHealthPhotosPanelComponent
   ],
   templateUrl: './consumer-overview-panel.html',
   styleUrl: './consumer-overview-panel.scss'

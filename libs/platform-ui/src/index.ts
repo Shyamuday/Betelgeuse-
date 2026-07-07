@@ -15,6 +15,7 @@ export type {
 } from './patient-scan/types';
 export { DetailRowsComponent } from './detail-rows/detail-rows.component';
 export { ProfileAvatarUploadComponent } from './profile-avatar-upload/profile-avatar-upload.component';
+export { ProfileAvatarDisplayComponent } from './profile-avatar-display/profile-avatar-display.component';
 export { buildDetailRows } from './detail-rows/detail-rows.util';
 export type { DetailRow, DetailFieldDef } from './detail-rows/detail-rows.types';
 export {

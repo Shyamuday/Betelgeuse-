@@ -286,6 +286,31 @@ export function registerReceptionRoutes(router: import('express').Router, io: So
   );
 
   router.post(
+    '/reception/checkout-quote',
+    authRequired,
+    allowRoles(...receptionRoles),
+    asyncRoute(async (req, res) => {
+      const body = z
+        .object({
+          diseaseId: z.string().min(1),
+          promoCode: z.string().optional(),
+          storeId: z.string().optional()
+        })
+        .parse(req.body);
+
+      const ctx = await resolveReceptionContext(req.user!.id, req.user!.role);
+      const storeId = requireStoreId(ctx, body.storeId);
+      const consultFeePaise = await resolveDiseaseConsultationFee(body.diseaseId, storeId);
+      const { resolveGuestConsultationCheckout } = await import('../../services/checkout-pricing.js');
+      const quote = await resolveGuestConsultationCheckout({
+        grossInPaise: consultFeePaise,
+        promoCode: body.promoCode
+      });
+      res.json({ quote });
+    })
+  );
+
+  router.post(
     '/reception/walk-in',
     authRequired,
     allowRoles(...receptionRoles),

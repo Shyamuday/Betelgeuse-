@@ -46,6 +46,8 @@ export class QueueComponent implements OnInit {
   readonly searchForm = form(this.searchModel);
   toast = signal('');
   assignTarget = signal<QueueConsultation | null>(null);
+  cashTarget = signal<QueueConsultation | null>(null);
+  cashSubmitting = signal(false);
   readonly assignFormModel = signal({ doctorId: '' });
   readonly assignForm = form(this.assignFormModel);
 
@@ -103,13 +105,44 @@ export class QueueComponent implements OnInit {
     return (paise / 100).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
   }
 
-  async collectCash(item: QueueConsultation): Promise<void> {
+  paymentGross(item: QueueConsultation): number {
+    return item.payment?.grossAmountInPaise ?? item.disease?.feeInPaise ?? item.payment?.amountInPaise ?? 0;
+  }
+
+  paymentDiscount(item: QueueConsultation): number {
+    return item.payment?.discountInPaise ?? 0;
+  }
+
+  paymentWallet(item: QueueConsultation): number {
+    return item.payment?.walletRedeemedInPaise ?? 0;
+  }
+
+  paymentPayable(item: QueueConsultation): number {
+    return item.payment?.amountInPaise ?? item.disease?.feeInPaise ?? 0;
+  }
+
+  openCollectCash(item: QueueConsultation): void {
+    this.cashTarget.set(item);
+  }
+
+  closeCollectCash(): void {
+    this.cashTarget.set(null);
+    this.cashSubmitting.set(false);
+  }
+
+  async confirmCollectCash(): Promise<void> {
+    const target = this.cashTarget();
+    if (!target || this.cashSubmitting()) return;
+
+    this.cashSubmitting.set(true);
     try {
-      await this.api.collectCash(item.id);
+      await this.api.collectCash(target.id);
       this.showToast('Cash payment recorded');
+      this.closeCollectCash();
       this.reload();
     } catch {
       this.showToast('Payment failed');
+      this.cashSubmitting.set(false);
     }
   }
 

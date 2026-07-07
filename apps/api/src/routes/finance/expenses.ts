@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { Role } from '@prisma/client';
+import { ExpenseCategory, ExpenseLevel, Role } from '@prisma/client';
 import { authRequired, allowRoles } from '../../auth.js';
 import { prisma } from '../../db.js';
 import { asyncRoute, queryText, routeParam } from '../../utils/helpers.js';
+import { parseMonth } from '../../services/payroll.js';
 import { expenseBodySchema, monthDateRange } from './shared.js';
 
 export function registerFinanceExpenseRoutes(router: Router) {

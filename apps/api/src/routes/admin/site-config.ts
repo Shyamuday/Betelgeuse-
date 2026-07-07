@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { Role } from '@prisma/client';
 import { authRequired, allowRoles } from '../../auth.js';
 import { prisma } from '../../db.js';
-import { asyncRoute, writeAuditLog } from '../../utils/helpers.js';
+import { asyncRoute, routeParam, writeAuditLog } from '../../utils/helpers.js';
 
 /** Allowed config keys and their human-readable labels. */
 const CONFIG_META: Record<string, { label: string; description: string }> = {
@@ -82,7 +82,7 @@ export function registerAdminSiteConfigRoutes(router: Router) {
     authRequired,
     allowRoles(Role.ADMIN),
     asyncRoute(async (req, res) => {
-      const key = req.params['key'];
+      const key = routeParam(req, 'key');
       if (!ALLOWED_KEYS.includes(key)) {
         return res.status(400).json({ message: `Unknown config key: ${key}` });
       }

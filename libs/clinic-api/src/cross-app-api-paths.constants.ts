@@ -18,10 +18,12 @@ export const CROSS_APP_API_PATHS = {
     PRESCRIPTION_BY_ID: (id: string) => `/admin/prescriptions/${id}`,
     CASE_ANALYSES: '/admin/case-analyses',
     CASE_ANALYSIS_BY_ID: (id: string) => `/admin/case-analyses/${id}`,
-    REWARD_WALLET: (patientId: string) => `/admin/rewards/wallet/${patientId}`
+    REWARD_WALLET: (patientId: string) => `/admin/rewards/wallet/${patientId}`,
+    PATIENT_CLINICAL_MEDIA: (patientId: string) => `/admin/patients/${patientId}/clinical-media`
   },
   RECEPTION: {
     PATIENT_REWARDS: (patientId: string) => `/reception/patients/${patientId}/rewards`,
-    PATIENT_CHECKOUT_QUOTE: (patientId: string) => `/reception/patients/${patientId}/checkout-quote`
+    PATIENT_CHECKOUT_QUOTE: (patientId: string) => `/reception/patients/${patientId}/checkout-quote`,
+    CHECKOUT_QUOTE: '/reception/checkout-quote'
   }
 } as const;

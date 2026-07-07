@@ -1,4 +1,4 @@
-import { ProductEventCategory, Role } from '@prisma/client';
+import { Prisma, ProductEventCategory, Role } from '@prisma/client';
 import { prisma } from '../db.js';
 
 export const PRODUCT_EVENTS = {
@@ -39,7 +39,7 @@ export async function trackProductEvent(input: {
         actorId: input.actorId ?? null,
         actorRole: input.actorRole ?? null,
         sessionId: input.sessionId ?? null,
-        properties: input.properties ?? undefined
+        properties: (input.properties ?? undefined) as Prisma.InputJsonValue | undefined
       }
     });
   } catch (error) {

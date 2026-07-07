@@ -1,0 +1,32 @@
+<section class="health-photos-panel">
+  <h3>Health photos</h3>
+  @if (loading()) {
+    <p class="loading-text">Loading health photos…</p>
+  } @else if (error()) {
+    <p class="error-text">{{ error() }}</p>
+  } @else if (!photos().length) {
+    <p class="empty-state">No categorized health photos uploaded yet.</p>
+  } @else {
+    <div class="photo-grid">
+      @for (photo of photos(); track photo.id) {
+        <figure class="photo-card">
+          @if (previewUrls()[photo.id]; as src) {
+            <img [src]="src" [alt]="photo.mediaTypeLabel || 'Health photo'" loading="lazy" />
+          } @else {
+            <div class="photo-placeholder">…</div>
+          }
+          <figcaption>
+            <strong>{{ photo.mediaTypeLabel || 'Photo' }}</strong>
+            @if (photo.bodyRegion) { <span>{{ photo.bodyRegion }}</span> }
+            @if (photo.diseaseName || photo.conditionLabel) {
+              <small>{{ photo.diseaseName || photo.conditionLabel }}</small>
+            }
+          </figcaption>
+        </figure>
+      }
+    </div>
+    @if (photos().length > 12) {
+      <p class="field-hint">Showing latest 12 of {{ photos().length }} photos.</p>
+    }
+  }
+</section>

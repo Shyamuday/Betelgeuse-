@@ -471,4 +471,7 @@ export class AdminApi {
   getAdminCaseAnalysis(...args: Parameters<AdminClinicalApi['getCaseAnalysis']>) {
     return this.clinical.getCaseAnalysis(...args);
   }
+  listPatientClinicalMedia(...args: Parameters<AdminClinicalApi['listPatientClinicalMedia']>) {
+    return this.clinical.listPatientClinicalMedia(...args);
+  }
 }

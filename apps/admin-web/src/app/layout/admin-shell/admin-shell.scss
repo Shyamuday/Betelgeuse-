@@ -57,6 +57,9 @@
   font-weight: 600;
   font-size: 0.86rem;
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .account-link:hover,

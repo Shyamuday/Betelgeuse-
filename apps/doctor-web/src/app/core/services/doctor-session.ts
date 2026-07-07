@@ -10,6 +10,7 @@ export type DoctorSession = {
   name: string;
   email?: string | null;
   mobile?: string | null;
+  profileImageUrl?: string | null;
   doctorProfile: DoctorProfileSummary | null;
 };
 
@@ -29,6 +30,7 @@ export class DoctorSessionService {
           name: string;
           email?: string | null;
           mobile?: string | null;
+          profileImageUrl?: string | null;
           doctorProfile?: DoctorProfileSummary | null;
         };
       }>(`${this.apiBase}${API_PATHS.DOCTOR.PROFILE}`)
@@ -38,6 +40,7 @@ export class DoctorSessionService {
       name: response.profile.name,
       email: response.profile.email,
       mobile: response.profile.mobile,
+      profileImageUrl: response.profile.profileImageUrl ?? null,
       doctorProfile: response.profile.doctorProfile || null
     };
 

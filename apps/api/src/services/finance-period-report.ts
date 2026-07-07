@@ -4,6 +4,10 @@ import { calcNetSalary, getLeaveDaysMap, parseMonth } from './payroll.js';
 
 export type FinanceGranularity = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
+function monthKey(date: Date) {
+  return date.toISOString().slice(0, 7);
+}
+
 export type FinancePeriodPreset =
   | 'today'
   | 'this_week'
@@ -399,7 +403,7 @@ export async function computeFinancePeriodReport(input: {
       const monthlyNet = calcNetSalary(
         doctor.salaryPerMonth,
         leaveDaysMap.get(doctor.id) ?? 0,
-        parseMonth(def.start).daysInMonth
+        parseMonth(monthKey(def.start)).daysInMonth
       );
       payroll += proRatedPayroll(monthlyNet, def.start, def.end);
     }
@@ -408,7 +412,7 @@ export async function computeFinancePeriodReport(input: {
       const monthlyNet = calcNetSalary(
         staff.salaryPerMonth,
         leaveDaysMap.get(staff.id) ?? 0,
-        parseMonth(def.start).daysInMonth
+        parseMonth(monthKey(def.start)).daysInMonth
       );
       payroll += proRatedPayroll(monthlyNet, def.start, def.end);
     }

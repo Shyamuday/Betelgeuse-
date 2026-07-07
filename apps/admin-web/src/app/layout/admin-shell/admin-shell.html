@@ -9,7 +9,15 @@
 
       <div class="topbar-actions">
         <app-notification-bell-host [config]="bellConfig" />
-        <a class="account-link" [routerLink]="accountPath">Account</a>
+        <a class="account-link" [routerLink]="accountPath">
+          <vitalis-profile-avatar
+            [apiBase]="apiBase"
+            [tokenKey]="authTokenKey"
+            [displayName]="auth.user()?.name || 'Admin'"
+            [profileImageUrl]="auth.user()?.profileImageUrl ?? null"
+          />
+          <span>Account</span>
+        </a>
         <button type="button" class="logout-btn" (click)="logout()">Logout</button>
       </div>    </div>
   </header>

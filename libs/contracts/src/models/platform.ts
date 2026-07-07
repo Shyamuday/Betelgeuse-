@@ -39,7 +39,13 @@ export interface QueueConsultation {
   patient?: { id: string; name: string; mobile?: string | null; patientCode?: string | null };
   assignedDoctor?: { id: string; name: string } | null;
   disease?: { id: string; name: string; feeInPaise: number };
-  payment?: { status: string; amountInPaise: number } | null;
+  payment?: {
+    status: string;
+    amountInPaise: number;
+    grossAmountInPaise?: number;
+    discountInPaise?: number;
+    walletRedeemedInPaise?: number;
+  } | null;
 }
 
 export interface QueueSummary {

@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { RoleTaskGuideComponent, NotificationBellHostComponent } from '@vitalis/platform-ui';
+import { RoleTaskGuideComponent, NotificationBellHostComponent, ProfileAvatarDisplayComponent } from '@vitalis/platform-ui';
 import { environment } from '../../../environments/environment';
 import { AUTH_TOKEN_KEY } from '../../core/constants/auth.constants';
 import { ROUTE_PATHS } from '../../core/constants/app-routes.constants';
@@ -30,13 +30,14 @@ const NAV_ICONS: Record<string, { icon: string; shortLabel: string }> = {
 
 @Component({
   selector: 'app-doctor-shell',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, RoleTaskGuideComponent, NotificationBellHostComponent],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, RoleTaskGuideComponent, NotificationBellHostComponent, ProfileAvatarDisplayComponent],
   templateUrl: './doctor-shell.html',
   styleUrl: './doctor-shell.scss',
 })
 export class DoctorShell implements OnInit, OnDestroy {
   navItems: DoctorNavItem[] = [];
   doctorName = '';
+  doctorProfileImageUrl: string | null = null;
   doctorTypeLabel = '';
   specialtyLabel = '';
   doctorTypeKey: string | null = null;
@@ -52,6 +53,8 @@ export class DoctorShell implements OnInit, OnDestroy {
     tokenKey: AUTH_TOKEN_KEY,
     apiPath: '/notifications'
   };
+  readonly apiBase = environment.apiUrl;
+  readonly authTokenKey = AUTH_TOKEN_KEY;
 
   constructor(
     private readonly auth: Auth,
@@ -62,6 +65,7 @@ export class DoctorShell implements OnInit, OnDestroy {
     try {
       const profile = await this.session.load();
       this.doctorName = profile.name;
+      this.doctorProfileImageUrl = profile.profileImageUrl ?? null;
       this.doctorTypeLabel = profile.doctorProfile?.doctorTypeLabel || 'Doctor';
       this.specialtyLabel = profile.doctorProfile?.specialty || '';
       this.doctorTypeKey = profile.doctorProfile?.doctorType ?? null;

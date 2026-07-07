@@ -1,5 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';import { RoleTaskGuideComponent, NotificationBellHostComponent } from '@vitalis/platform-ui';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { RoleTaskGuideComponent, NotificationBellHostComponent, ProfileAvatarDisplayComponent } from '@vitalis/platform-ui';
 import { environment } from '../../../environments/environment';
 import { AUTH_TOKEN_KEY } from '../../core/constants/auth.constants';
 import { AdminAuth } from '../../core/services/admin-auth';
@@ -9,17 +10,20 @@ import { navItemsForUser } from '../../core/admin-navigation';
 
 @Component({
   selector: 'app-admin-shell',
-  imports: [RouterOutlet, RouterLink, RoleTaskGuideComponent, NotificationBellHostComponent, AdminNavTabsComponent],
+  imports: [RouterOutlet, RouterLink, RoleTaskGuideComponent, NotificationBellHostComponent, AdminNavTabsComponent, ProfileAvatarDisplayComponent],
   templateUrl: './admin-shell.html',
   styleUrl: './admin-shell.scss'
 })
 export class AdminShell {
-  private readonly auth = inject(AdminAuth);
+  readonly auth = inject(AdminAuth);
   private readonly router = inject(Router);
 
   readonly filteredNavItems = computed(() => navItemsForUser(NAV_ITEMS, this.auth.user()));
   readonly accountPath = adminNavPath(ROUTE_PATHS.ACCOUNT);
-  readonly bellConfig = {    apiBase: environment.apiUrl,
+  readonly apiBase = environment.apiUrl;
+  readonly authTokenKey = AUTH_TOKEN_KEY;
+  readonly bellConfig = {
+    apiBase: environment.apiUrl,
     tokenKey: AUTH_TOKEN_KEY,
     apiPath: '/notifications'
   };

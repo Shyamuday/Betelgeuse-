@@ -92,14 +92,24 @@ export function registerAdminAuditRoutes(router: Router) {
       };
 
       const total = await prisma.auditLog.count({ where });
-      const logs = await prisma.auditLog.findMany({
-        where,
-        include: {
-          actor: { select: { id: true, name: true, email: true, role: true } }
-        },
-        orderBy: { createdAt: 'desc' },
-        ...(exportType === 'csv' ? { take: 10000 } : { skip: (page - 1) * pageSize, take: pageSize })
-      });
+      const include = {
+        actor: { select: { id: true, name: true, email: true, role: true } }
+      } as const;
+      const logs =
+        exportType === 'csv'
+          ? await prisma.auditLog.findMany({
+              where,
+              include,
+              orderBy: { createdAt: 'desc' },
+              take: 10000
+            })
+          : await prisma.auditLog.findMany({
+              where,
+              include,
+              orderBy: { createdAt: 'desc' },
+              skip: (page - 1) * pageSize,
+              take: pageSize
+            });
 
       const formatted = logs.map((log) => ({
         id: log.id,

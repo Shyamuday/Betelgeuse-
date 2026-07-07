@@ -1,0 +1,7 @@
+<div class="profile-avatar" [class.profile-avatar-md]="size === 'md'">
+  @if (previewUrl()) {
+    <img [src]="previewUrl()!" [alt]="displayName + ' profile photo'" class="profile-avatar-image" />
+  } @else {
+    <span class="profile-avatar-initial">{{ initial() }}</span>
+  }
+</div>

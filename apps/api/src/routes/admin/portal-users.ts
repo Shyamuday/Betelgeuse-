@@ -88,7 +88,7 @@ export function registerAdminPortalUserRoutes(router: Router) {
     asyncRoute(async (_req, res) => {
       const [stores, warehouses, suppliers, diagnosticCenters] = await Promise.all([
         prisma.store.findMany({
-          where: { isActive: true, kind: StoreKind.CLINIC },
+          where: { isActive: true, kind: StoreKind.BRANCH },
           select: { id: true, name: true, code: true },
           orderBy: { name: 'asc' }
         }),

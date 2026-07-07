@@ -25,7 +25,12 @@
 
         <div class="sidebar-footer">
           <a class="user-info" [routerLink]="accountPath" (click)="sidebarOpen.set(false)">
-            <div class="user-avatar">{{ userInitial() }}</div>
+            <vitalis-profile-avatar
+              [apiBase]="apiBase"
+              [tokenKey]="authTokenKey"
+              [displayName]="displayName()"
+              [profileImageUrl]="profileImageUrl()"
+            />
             <div class="user-details">
               <div class="user-name">{{ auth.currentUser()?.name }}</div>
               <div class="user-role">{{ roleLabel() }}</div>
@@ -46,7 +51,12 @@
           <div class="topbar-right">
             <app-notification-bell-host [config]="bellConfig()" />
             <a class="topbar-user" [routerLink]="accountPath">
-              <div class="topbar-avatar">{{ userInitial() }}</div>
+              <vitalis-profile-avatar
+                [apiBase]="apiBase"
+                [tokenKey]="authTokenKey"
+                [displayName]="displayName()"
+                [profileImageUrl]="profileImageUrl()"
+              />
               <span class="topbar-name">{{ auth.currentUser()?.name }}</span>
             </a>
             <button class="topbar-logout" (click)="auth.logout()" title="Logout">

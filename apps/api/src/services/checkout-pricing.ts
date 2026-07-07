@@ -57,6 +57,73 @@ async function triggerMatchesCheckout(rule: RewardProgramRule, isFirstPayment: b
   return false;
 }
 
+/** Preview checkout for a brand-new walk-in (no patient record yet). */
+export async function resolveGuestConsultationCheckout(input: {
+  grossInPaise: number;
+  promoCode?: string;
+}): Promise<ConsultationCheckoutQuote> {
+  const { grossInPaise } = input;
+  if (grossInPaise <= 0) {
+    return {
+      grossAmountInPaise: 0,
+      discountInPaise: 0,
+      walletRedeemedInPaise: 0,
+      payableInPaise: 0,
+      walletBalanceInPaise: 0,
+      maxWalletRedeemInPaise: 0,
+      appliedRules: []
+    };
+  }
+
+  const rules = await listActiveCheckoutDiscountRules();
+  const appliedRules: AppliedCheckoutRule[] = [];
+  let discountInPaise = 0;
+  let remainingGross = grossInPaise;
+  const promo = input.promoCode?.trim().toUpperCase();
+  const isFirstPayment = true;
+  const hasReferrer = false;
+
+  for (const rule of rules) {
+    if (rule.valueType !== RewardValueType.CHECKOUT_DISCOUNT_FLAT && rule.valueType !== RewardValueType.CHECKOUT_DISCOUNT_PERCENT) {
+      continue;
+    }
+    if (rule.promoCode) {
+      if (!promo || rule.promoCode.toUpperCase() !== promo) continue;
+    }
+    if (rule.minOrderInPaise != null && grossInPaise < rule.minOrderInPaise) continue;
+    if (!(await triggerMatchesCheckout(rule, isFirstPayment))) continue;
+    if (rule.beneficiary !== RewardBeneficiary.PAYING_PATIENT) continue;
+
+    const amount = computeDiscountAmount(rule, remainingGross);
+    if (amount <= 0) continue;
+
+    discountInPaise += amount;
+    remainingGross = Math.max(0, remainingGross - amount);
+    appliedRules.push({
+      ruleId: rule.id,
+      code: rule.code,
+      name: rule.name,
+      amountInPaise: amount,
+      valueType: rule.valueType
+    });
+  }
+
+  const afterDiscount = Math.max(0, grossInPaise - discountInPaise);
+  const policyRule = await getActiveWalletPolicyRule();
+  const policy = walletPolicyFromRule(policyRule);
+  const payableInPaise = Math.max(policy.minPayableInPaise, afterDiscount);
+
+  return {
+    grossAmountInPaise: grossInPaise,
+    discountInPaise,
+    walletRedeemedInPaise: 0,
+    payableInPaise,
+    walletBalanceInPaise: 0,
+    maxWalletRedeemInPaise: 0,
+    appliedRules
+  };
+}
+
 export async function resolveConsultationCheckout(input: CheckoutContext): Promise<ConsultationCheckoutQuote> {
   const { patientId, grossInPaise } = input;
   if (grossInPaise <= 0) {

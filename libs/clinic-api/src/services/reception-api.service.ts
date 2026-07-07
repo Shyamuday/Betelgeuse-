@@ -63,6 +63,15 @@ export class ReceptionApiService {
     );
   }
 
+  getWalkInCheckoutQuote(payload: { diseaseId: string; promoCode?: string; storeId?: string }) {
+    return firstValueFrom(
+      this.http.post<{ quote: Record<string, unknown> }>(
+        `${this.base}${API_PATHS.RECEPTION.CHECKOUT_QUOTE}`,
+        payload
+      )
+    );
+  }
+
   collectCash(consultationId: string) {
     return firstValueFrom(
       this.http.post<any>(`${this.base}${API_PATHS.RECEPTION.COLLECT_CASH(consultationId)}`, {})

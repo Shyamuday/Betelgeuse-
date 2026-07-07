@@ -46,6 +46,9 @@ export class WalkInComponent implements OnInit {
   readonly checkoutQuote = signal<CheckoutQuote | null>(null);
   readonly quoteLoading = signal(false);
 
+  readonly newCheckoutQuote = signal<CheckoutQuote | null>(null);
+  readonly newQuoteLoading = signal(false);
+
   readonly walkInModel = signal({
     name: '',
     mobile: '',
@@ -102,6 +105,7 @@ export class WalkInComponent implements OnInit {
     this.error.set('');
     this.patientHits.set([]);
     this.selectedPatient.set(null);
+    this.newCheckoutQuote.set(null);
   }
 
   formatPaise(paise: number): string {
@@ -156,6 +160,37 @@ export class WalkInComponent implements OnInit {
 
   onPromoChange(): void {
     void this.refreshCheckoutQuote();
+    void this.refreshNewCheckoutQuote();
+  }
+
+  onNewDiseaseChange(): void {
+    void this.refreshNewCheckoutQuote();
+  }
+
+  onNewPromoChange(): void {
+    void this.refreshNewCheckoutQuote();
+  }
+
+  private async refreshNewCheckoutQuote(): Promise<void> {
+    const diseaseId = this.walkInModel().diseaseId;
+    if (!diseaseId) {
+      this.newCheckoutQuote.set(null);
+      return;
+    }
+
+    this.newQuoteLoading.set(true);
+    try {
+      const form = this.walkInModel();
+      const res = await this.api.getWalkInCheckoutQuote({
+        diseaseId,
+        promoCode: form.promoCode.trim() || undefined
+      });
+      this.newCheckoutQuote.set(res.quote as CheckoutQuote);
+    } catch {
+      this.newCheckoutQuote.set(null);
+    } finally {
+      this.newQuoteLoading.set(false);
+    }
   }
 
   toggleUseWallet(checked: boolean): void {

@@ -11,6 +11,7 @@ import {
   routeParam
 } from '../../utils/helpers.js';
 import { caseAnalysisInclude } from '../repertory/shared.js';
+import { clinicalMediaInclude, serializeClinicalMedia } from '../../services/clinical-media-shared.js';
 
 function paginationMeta(page: number, pageSize: number, total: number) {
   return { page, pageSize, total, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
@@ -286,6 +287,28 @@ export function registerAdminClinicalRecordsRoutes(router: Router) {
         : null;
 
       res.json({ analysis: { ...analysis, assignedDoctor } });
+    })
+  );
+
+  router.get(
+    '/admin/patients/:patientId/clinical-media',
+    authRequired,
+    allowRoles(Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const patientId = routeParam(req, 'patientId');
+      const patient = await prisma.user.findFirst({
+        where: { id: patientId, role: Role.PATIENT },
+        select: { id: true }
+      });
+      if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+      const media = await prisma.clinicalMedia.findMany({
+        where: { patientId },
+        include: clinicalMediaInclude,
+        orderBy: { createdAt: 'desc' },
+        take: 24
+      });
+      res.json({ media: media.map(serializeClinicalMedia) });
     })
   );
 }

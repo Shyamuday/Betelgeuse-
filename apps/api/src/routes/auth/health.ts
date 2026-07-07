@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { asyncRoute } from '../../utils/helpers.js';
+import { prisma } from '../../db.js';
 
 export function registerAuthHealthRoutes(router: Router) {
 // ─── Health check ──────────────────────────────────────────────────────────────

@@ -49,7 +49,17 @@ export function consultationInclude() {
     assignedDoctor: { select: { id: true, name: true } },
     disease: { select: { id: true, name: true, feeInPaise: true } },
     clinicStore: { select: { id: true, name: true, code: true } },
-    payment: { select: { id: true, status: true, amountInPaise: true, providerPaymentId: true } }
+    payment: {
+      select: {
+        id: true,
+        status: true,
+        amountInPaise: true,
+        grossAmountInPaise: true,
+        discountInPaise: true,
+        walletRedeemedInPaise: true,
+        providerPaymentId: true
+      }
+    }
   } as const;
 }
 

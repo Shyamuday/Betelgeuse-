@@ -64,7 +64,7 @@
           }
           <div class="actions">
             @if (c.status === 'PAYMENT_PENDING') {
-              <button type="button" class="btn-primary" (click)="collectCash(c)">Record cash</button>
+              <button type="button" class="btn-primary" (click)="openCollectCash(c)">Record cash</button>
             }
             @if (c.status === 'PAID' || c.status === 'ASSIGNED') {
               <button type="button" class="btn-secondary" (click)="openAssign(c)">
@@ -87,6 +87,31 @@
     </div>
   }
 </div>
+
+@if (cashTarget(); as target) {
+  <div class="modal-backdrop" (click)="closeCollectCash()">
+    <div class="modal form-surface" (click)="$event.stopPropagation()">
+      <h3>Record cash payment</h3>
+      <p>{{ target.patient?.name }} — {{ target.disease?.name }}</p>
+      <div class="checkout-box">
+        <div class="checkout-row"><span>Consultation fee</span><strong>₹{{ formatPaise(paymentGross(target)) }}</strong></div>
+        @if (paymentDiscount(target) > 0) {
+          <div class="checkout-row discount"><span>Promo discount</span><strong>−₹{{ formatPaise(paymentDiscount(target)) }}</strong></div>
+        }
+        @if (paymentWallet(target) > 0) {
+          <div class="checkout-row discount"><span>Wallet credit</span><strong>−₹{{ formatPaise(paymentWallet(target)) }}</strong></div>
+        }
+        <div class="checkout-row total"><span>Collect at desk</span><strong>₹{{ formatPaise(paymentPayable(target)) }}</strong></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" (click)="closeCollectCash()" [disabled]="cashSubmitting()">Cancel</button>
+        <button type="button" class="btn-primary" [disabled]="cashSubmitting()" (click)="confirmCollectCash()">
+          {{ cashSubmitting() ? 'Recording…' : 'Confirm cash received' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
 
 @if (assignTarget()) {
   <div class="modal-backdrop" (click)="closeAssign()">

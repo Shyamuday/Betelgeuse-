@@ -1,0 +1,66 @@
+.health-photos-panel {
+  margin: 1rem 0;
+
+  h3 {
+    margin: 0 0 0.65rem;
+  }
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.65rem;
+}
+
+.photo-card {
+  margin: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+
+  img,
+  .photo-placeholder {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: #f1f5f9;
+  }
+
+  .photo-placeholder {
+    display: grid;
+    place-items: center;
+    color: #94a3b8;
+  }
+
+  figcaption {
+    display: grid;
+    gap: 0.1rem;
+    padding: 0.45rem 0.5rem;
+    font-size: 0.75rem;
+    color: #64748b;
+
+    strong {
+      color: #0f172a;
+      font-size: 0.78rem;
+    }
+
+    small {
+      color: #475569;
+    }
+  }
+}
+
+.loading-text,
+.empty-state,
+.error-text,
+.field-hint {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.error-text {
+  color: #b91c1c;
+}

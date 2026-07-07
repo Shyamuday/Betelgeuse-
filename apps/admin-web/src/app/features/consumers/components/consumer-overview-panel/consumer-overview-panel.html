@@ -28,6 +28,8 @@
   }
 </section>
 
+<app-consumer-health-photos-panel [patientId]="patientId" />
+
 @if (detail.doseNotes?.length) {
   <h3>Skipped &amp; missed dose notes (7 days)</h3>
   @for (note of detail.doseNotes; track note.id) {
