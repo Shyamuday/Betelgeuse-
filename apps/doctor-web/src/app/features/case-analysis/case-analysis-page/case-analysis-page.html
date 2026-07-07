@@ -213,6 +213,16 @@
         />
       }
 
+      @if (activeStructuredPanel(); as panel) {
+        <app-approach-structured-panel
+          [config]="panel.def"
+          [initial]="structuredPanelInitial(panel.dataKey)"
+          [saving]="savingApproachData()"
+          (saveRequested)="saveStructuredPanel(panel.dataKey, $event)"
+          (autoSaveRequested)="saveStructuredPanel(panel.dataKey, $event, true)"
+        />
+      }
+
       @if (showPanel('protocol-selector')) {
         <app-protocol-select-panel
           [diseaseName]="consultation()?.disease?.name || ''"

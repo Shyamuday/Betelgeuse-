@@ -8,6 +8,7 @@ import {
   firstIncompleteStepId,
   hydrateCaseSheetForSchema,
   resolveApproachByMethodLabel,
+  structuredPanelForComponent,
   type ApproachDataPayload,
   type ApproachDefinition,
   type ApproachStepComponent,
@@ -44,6 +45,7 @@ import { KeynoteStrikingPanelComponent } from '../panels/keynote-striking-panel/
 import { ScholtenMapperPanelComponent } from '../panels/scholten-mapper-panel/scholten-mapper-panel';
 import { SehgalEmotionPanelComponent } from '../panels/sehgal-emotion-panel/sehgal-emotion-panel';
 import { IntegrativeFollowUpPanelComponent } from '../panels/integrative-follow-up-panel/integrative-follow-up-panel';
+import { ApproachStructuredPanelComponent } from '../panels/approach-structured-panel/approach-structured-panel';
 import { PatientCaseTimelinePanelComponent } from '../panels/patient-case-timeline-panel/patient-case-timeline-panel';
 import { ClinicalMediaPanelComponent } from '../panels/clinical-media-panel/clinical-media-panel';
 import type {
@@ -82,6 +84,7 @@ import { formatRubricPath, rubricPathSegments } from '../rubric-path.util';
     ScholtenMapperPanelComponent,
     SehgalEmotionPanelComponent,
     IntegrativeFollowUpPanelComponent,
+    ApproachStructuredPanelComponent,
     PatientCaseTimelinePanelComponent,
     ClinicalMediaPanelComponent
   ],
@@ -171,6 +174,8 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
   readonly activeStepComponent = computed<ApproachStepComponent | null>(() => {
     return this.workflowSteps().find((step) => step.id === this.activeStepId())?.component || null;
   });
+
+  readonly activeStructuredPanel = computed(() => structuredPanelForComponent(this.activeStepComponent()));
 
   readonly repertoryEnabled = computed(() => this.activeApproach().repertory.enabled);
 
@@ -729,6 +734,15 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
 
   saveIntegrativeFollowUp(data: IntegrativeFollowUpApproachData, silent = false) {
     void this.saveApproachData({ integrativeFollowUp: data }, silent);
+  }
+
+  structuredPanelInitial(dataKey: keyof ApproachDataPayload) {
+    const block = this.approachData()[dataKey];
+    return (block as Record<string, string> | undefined) || null;
+  }
+
+  saveStructuredPanel(dataKey: keyof ApproachDataPayload, data: Record<string, string>, silent = false) {
+    void this.saveApproachData({ [dataKey]: data } as ApproachDataPayload, silent);
   }
 
   async saveRubrics() {

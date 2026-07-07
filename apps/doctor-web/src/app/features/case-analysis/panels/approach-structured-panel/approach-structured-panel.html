@@ -1,0 +1,22 @@
+<section class="panel approach-panel">
+  <div class="panel-title-row">
+    <h3>{{ config.title }}</h3>
+    <div class="panel-save-actions">
+      <span class="autosave-note muted">Auto-saves as you type</span>
+      <button type="button" class="btn-save-now" (click)="save()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save now' }}</button>
+    </div>
+  </div>
+  <p class="hint">{{ config.hint }}</p>
+  <div class="approach-grid">
+    @for (field of config.fields; track field.key) {
+      <label [class.wide]="field.wide">
+        <span>{{ field.label }}</span>
+        @if (field.multiline === false) {
+          <input [formField]="form[field.key]" [placeholder]="field.placeholder || ''" />
+        } @else {
+          <textarea [rows]="field.rows || 2" [formField]="form[field.key]" [placeholder]="field.placeholder || ''"></textarea>
+        }
+      </label>
+    }
+  </div>
+</section>

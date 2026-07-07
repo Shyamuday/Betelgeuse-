@@ -24,7 +24,22 @@ export type ApproachStepId =
   | 'keynote-striking'
   | 'scholten-mapping'
   | 'sehgal-emotion'
-  | 'integrative-follow-up';
+  | 'integrative-follow-up'
+  | 'boenninghausen-lsm'
+  | 'boger-totality'
+  | 'constitutional-profile'
+  | 'clinical-acute'
+  | 'predictive-pathology'
+  | 'pathological-anchor'
+  | 'eight-box-guided'
+  | 'fibonacci-potency'
+  | 'tautopathy-isopathy'
+  | 'eizayaga-layers'
+  | 'vithoulkas-essences'
+  | 'drainage-support'
+  | 'hering-tracking'
+  | 'acute-fast-track'
+  | 'combination-remedy';
 
 export type ApproachStepComponent =
   | 'approach-overview'
@@ -42,7 +57,22 @@ export type ApproachStepComponent =
   | 'keynote-striking'
   | 'scholten-mapper'
   | 'sehgal-emotion'
-  | 'integrative-follow-up';
+  | 'integrative-follow-up'
+  | 'boenninghausen-lsm'
+  | 'boger-totality'
+  | 'constitutional-profile'
+  | 'clinical-acute'
+  | 'predictive-pathology'
+  | 'pathological-anchor'
+  | 'eight-box-guided'
+  | 'fibonacci-potency'
+  | 'tautopathy-isopathy'
+  | 'eizayaga-layers'
+  | 'vithoulkas-essences'
+  | 'drainage-support'
+  | 'hering-tracking'
+  | 'acute-fast-track'
+  | 'combination-remedy';
 
 export type ApproachStep = {
   id: ApproachStepId;
@@ -70,7 +100,15 @@ export type CaseSheetSchemaId =
   | 'pathological'
   | 'sehgal'
   | 'integrative-follow-up'
-  | 'scholten';
+  | 'scholten'
+  | 'fibonacci'
+  | 'tautopathy'
+  | 'eizayaga'
+  | 'vithoulkas'
+  | 'drainage'
+  | 'hering'
+  | 'acute-fast'
+  | 'combination';
 
 export type CaseSheetFieldDef = {
   key: string;
@@ -204,6 +242,8 @@ export type IntegrativeFollowUpApproachData = {
   nextReviewPlan: string;
 };
 
+export type StringMapApproachData = Record<string, string>;
+
 export type ApproachDataPayload = {
   kentHierarchy?: KentHierarchyData;
   sensation?: SensationApproachData;
@@ -215,6 +255,21 @@ export type ApproachDataPayload = {
   scholten?: ScholtenApproachData;
   sehgal?: SehgalApproachData;
   integrativeFollowUp?: IntegrativeFollowUpApproachData;
+  boenninghausenLsm?: StringMapApproachData;
+  bogerTotality?: StringMapApproachData;
+  constitutionalProfile?: StringMapApproachData;
+  clinicalAcute?: StringMapApproachData;
+  predictivePathology?: StringMapApproachData;
+  pathologicalAnchor?: StringMapApproachData;
+  eightBoxGuided?: StringMapApproachData;
+  fibonacciPotency?: StringMapApproachData;
+  tautopathyIsopathy?: StringMapApproachData;
+  eizayagaLayers?: StringMapApproachData;
+  vithoulkasEssences?: StringMapApproachData;
+  drainageSupport?: StringMapApproachData;
+  heringTracking?: StringMapApproachData;
+  acuteFastTrack?: StringMapApproachData;
+  combinationRemedy?: StringMapApproachData;
 };
 
 export type BanerjiProtocol = {

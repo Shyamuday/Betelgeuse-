@@ -1,4 +1,4 @@
-import type { ApproachStep, ApproachStepComponent } from './types';
+import type { ApproachStep, ApproachStepComponent, ApproachStepId } from './types';
 
 const REPERTORY_WORKFLOW_TAIL: ApproachStep[] = [
   {
@@ -30,6 +30,262 @@ const REPERTORY_WORKFLOW_TAIL: ApproachStep[] = [
     description: 'Hand off to the prescription editor with linked case analysis.'
   }
 ];
+
+function structuredStep(
+  id: ApproachStepId,
+  label: string,
+  shortLabel: string,
+  component: ApproachStepComponent,
+  description?: string,
+  optional = false
+): ApproachStep {
+  return { id, label, shortLabel, component, description, optional };
+}
+
+const APPROACH_SELECT_STEP: ApproachStep = {
+  id: 'approach-select',
+  label: 'Approach',
+  shortLabel: 'Approach',
+  component: 'approach-overview',
+  description: 'Choose the homeopathic method that governs this case analysis.'
+};
+
+const ANALYSIS_NOTES_STEP: ApproachStep = {
+  id: 'analysis-notes',
+  label: 'Notes',
+  shortLabel: 'Notes',
+  component: 'analysis-notes',
+  description: 'Free-form analysis notes and follow-up thoughts.',
+  optional: true
+};
+
+const HERING_TRACKING_STEP: ApproachStep = {
+  id: 'hering-tracking',
+  label: "Hering's law tracker",
+  shortLabel: 'Hering',
+  component: 'hering-tracking',
+  description: "Optional aggravation and direction-of-cure tracking after prescribing.",
+  optional: true
+};
+
+export function buildBoenninghausenWorkflow(): ApproachStep[] {
+  return [
+    APPROACH_SELECT_STEP,
+    structuredStep(
+      'boenninghausen-lsm',
+      'LSM symptom set',
+      'LSM',
+      'boenninghausen-lsm',
+      'Capture location, sensation, modality, and concomitants.'
+    ),
+    { id: 'case-sheet', label: 'Case sheet', shortLabel: 'Case', component: 'case-sheet' },
+    ...REPERTORY_WORKFLOW_TAIL,
+    ANALYSIS_NOTES_STEP,
+    HERING_TRACKING_STEP
+  ];
+}
+
+export function buildBogerWorkflow(): ApproachStep[] {
+  return [
+    APPROACH_SELECT_STEP,
+    structuredStep(
+      'boger-totality',
+      'Pathological totality',
+      'Totality',
+      'boger-totality',
+      'Map Boger pathological generals and time patterns.'
+    ),
+    { id: 'case-sheet', label: 'Case sheet', shortLabel: 'Case', component: 'case-sheet' },
+    ...REPERTORY_WORKFLOW_TAIL,
+    ANALYSIS_NOTES_STEP,
+    HERING_TRACKING_STEP
+  ];
+}
+
+export function buildConstitutionalWorkflow(): ApproachStep[] {
+  return [
+    APPROACH_SELECT_STEP,
+    structuredStep(
+      'constitutional-profile',
+      'Constitutional profile',
+      'Constitution',
+      'constitutional-profile',
+      'Temperament, thermal state, and generals before particulars.'
+    ),
+    { id: 'case-sheet', label: 'Case sheet', shortLabel: 'Case', component: 'case-sheet' },
+    ...REPERTORY_WORKFLOW_TAIL,
+    ANALYSIS_NOTES_STEP
+  ];
+}
+
+export function buildClinicalAcuteWorkflow(): ApproachStep[] {
+  return [
+    APPROACH_SELECT_STEP,
+    structuredStep(
+      'clinical-acute',
+      'Acute clinical snapshot',
+      'Acute',
+      'clinical-acute',
+      'Fast clinical capture for high-volume OPD.'
+    ),
+    { id: 'case-sheet', label: 'Case notes', shortLabel: 'Case', component: 'case-sheet' },
+    ...REPERTORY_WORKFLOW_TAIL,
+    ANALYSIS_NOTES_STEP
+  ];
+}
+
+export function buildPredictiveWorkflow(): ApproachStep[] {
+  return [
+    APPROACH_SELECT_STEP,
+    structuredStep(
+      'predictive-pathology',
+      'Predictive pathology',
+      'Predict',
+      'predictive-pathology',
+      'Pathology stage with response forecast.'
+    ),
+    { id: 'case-sheet', label: 'Case sheet', shortLabel: 'Case', component: 'case-sheet' },
+    ...REPERTORY_WORKFLOW_TAIL,
+    ANALYSIS_NOTES_STEP,
+    HERING_TRACKING_STEP
+  ];
+}
+
+export function buildFibonacciWorkflow(): ApproachStep[] {
+  return [
+    APPROACH_SELECT_STEP,
+    { id: 'case-sheet', label: 'Baseline case', shortLabel: 'Case', component: 'case-sheet' },
+    ...REPERTORY_WORKFLOW_TAIL.slice(0, 2),
+    structuredStep(
+      'fibonacci-potency',
+      'Fibonacci potency plan',
+      'Fibonacci',
+      'fibonacci-potency',
+      'Plan potency ladder and response checkpoints.'
+    ),
+    REPERTORY_WORKFLOW_TAIL[2],
+    REPERTORY_WORKFLOW_TAIL[3],
+    ANALYSIS_NOTES_STEP,
+    HERING_TRACKING_STEP
+  ];
+}
+
+export function buildTautopathyWorkflow(): ApproachStep[] {
+  return [
+    APPROACH_SELECT_STEP,
+    structuredStep(
+      'tautopathy-isopathy',
+      'Tautopathy / isopathy',
+      'Tautopathy',
+      'tautopathy-isopathy',
+      'Causal substance, potency, and clearing plan.'
+    ),
+    { id: 'case-sheet', label: 'Case context', shortLabel: 'Case', component: 'case-sheet' },
+    REPERTORY_WORKFLOW_TAIL[3],
+    ANALYSIS_NOTES_STEP
+  ];
+}
+
+export function buildEizayagaWorkflow(): ApproachStep[] {
+  return [
+    APPROACH_SELECT_STEP,
+    structuredStep(
+      'eizayaga-layers',
+      'Layers of health',
+      'Layers',
+      'eizayaga-layers',
+      'Lesion, functional, constitutional, and fundamental layers.'
+    ),
+    { id: 'case-sheet', label: 'Case sheet', shortLabel: 'Case', component: 'case-sheet' },
+    ...REPERTORY_WORKFLOW_TAIL,
+    ANALYSIS_NOTES_STEP
+  ];
+}
+
+export function buildVithoulkasWorkflow(): ApproachStep[] {
+  return [
+    APPROACH_SELECT_STEP,
+    structuredStep(
+      'vithoulkas-essences',
+      'Essences & levels',
+      'Essence',
+      'vithoulkas-essences',
+      'Essence theme and level of health.'
+    ),
+    { id: 'case-sheet', label: 'Case sheet', shortLabel: 'Case', component: 'case-sheet' },
+    ...REPERTORY_WORKFLOW_TAIL,
+    ANALYSIS_NOTES_STEP
+  ];
+}
+
+export function buildDrainageWorkflow(): ApproachStep[] {
+  return [
+    APPROACH_SELECT_STEP,
+    structuredStep(
+      'drainage-support',
+      'Drainage & support',
+      'Drainage',
+      'drainage-support',
+      'Drainage and organ support alongside simillimum.'
+    ),
+    { id: 'case-sheet', label: 'Case sheet', shortLabel: 'Case', component: 'case-sheet' },
+    ...REPERTORY_WORKFLOW_TAIL,
+    ANALYSIS_NOTES_STEP
+  ];
+}
+
+export function buildHeringWorkflow(): ApproachStep[] {
+  return [
+    APPROACH_SELECT_STEP,
+    { id: 'case-sheet', label: 'Case baseline', shortLabel: 'Case', component: 'case-sheet' },
+    ...REPERTORY_WORKFLOW_TAIL,
+    structuredStep(
+      'hering-tracking',
+      "Hering's law tracker",
+      'Hering',
+      'hering-tracking',
+      'Track direction of cure after prescribing.'
+    ),
+    ANALYSIS_NOTES_STEP
+  ];
+}
+
+export function buildAcuteFastTrackWorkflow(): ApproachStep[] {
+  return [
+    APPROACH_SELECT_STEP,
+    structuredStep(
+      'acute-fast-track',
+      'Acute fast-track',
+      'Fast',
+      'acute-fast-track',
+      'Minimal acute path to remedy and potency.'
+    ),
+    {
+      id: 'rubric-search',
+      label: 'Key rubrics',
+      shortLabel: 'Rubrics',
+      component: 'repertory-workspace',
+      optional: true
+    },
+    { id: 'remedy-select', label: 'Select remedy', shortLabel: 'Remedy', component: 'remedy-results' },
+    { id: 'prescribe', label: 'Prescription', shortLabel: 'Prescribe', component: 'prescription-handoff' }
+  ];
+}
+
+export function buildCombinationWorkflow(): ApproachStep[] {
+  return [
+    APPROACH_SELECT_STEP,
+    structuredStep(
+      'combination-remedy',
+      'Combination remedy',
+      'Combo',
+      'combination-remedy',
+      'Complex remedy composition and indication match.'
+    ),
+    { id: 'case-sheet', label: 'Protocol notes', shortLabel: 'Notes', component: 'case-sheet' },
+    { id: 'prescribe', label: 'Prescription', shortLabel: 'Prescribe', component: 'prescription-handoff' }
+  ];
+}
 
 export function buildRepertoryWorkflow(caseSheetComponent: ApproachStepComponent = 'case-sheet'): ApproachStep[] {
   return [
@@ -199,28 +455,23 @@ export function buildProtocolWorkflow(): ApproachStep[] {
 
 export function buildEightBoxWorkflow(): ApproachStep[] {
   return [
-    {
-      id: 'approach-select',
-      label: 'Approach',
-      shortLabel: 'Approach',
-      component: 'approach-overview',
-      description: '8-Box structured case taking before repertorization.'
-    },
+    APPROACH_SELECT_STEP,
+    structuredStep(
+      'eight-box-guided',
+      '8-box guided capture',
+      '8 Boxes',
+      'eight-box-guided',
+      'Complete each clinical box before repertorization.'
+    ),
     {
       id: 'case-sheet',
       label: '8-Box case structure',
       shortLabel: '8 Boxes',
       component: 'case-sheet',
-      description: 'Complete all eight clinical boxes: identity, complaints, history, mentals, generals, and particulars.'
+      description: 'Structured 8-box case documentation.'
     },
     ...REPERTORY_WORKFLOW_TAIL,
-    {
-      id: 'analysis-notes',
-      label: 'Notes',
-      shortLabel: 'Notes',
-      component: 'analysis-notes',
-      optional: true
-    }
+    ANALYSIS_NOTES_STEP
   ];
 }
 
@@ -356,17 +607,25 @@ export function buildIntegrativeFollowUpWorkflow(): ApproachStep[] {
 }
 
 export function buildPathologicalWorkflow(): ApproachStep[] {
-  return buildRepertoryWorkflow();
+  return [
+    APPROACH_SELECT_STEP,
+    structuredStep(
+      'pathological-anchor',
+      'Pathology anchor',
+      'Pathology',
+      'pathological-anchor',
+      'Anchor prescribing on pathology stage and investigations.'
+    ),
+    { id: 'case-sheet', label: 'Case sheet', shortLabel: 'Case', component: 'case-sheet' },
+    ...REPERTORY_WORKFLOW_TAIL,
+    ANALYSIS_NOTES_STEP,
+    HERING_TRACKING_STEP
+  ];
 }
 
 export function buildHybridWorkflow(): ApproachStep[] {
   return [
-    {
-      id: 'approach-select',
-      label: 'Approach',
-      shortLabel: 'Approach',
-      component: 'approach-overview'
-    },
+    APPROACH_SELECT_STEP,
     {
       id: 'case-sheet',
       label: 'Integration plan',
@@ -387,17 +646,8 @@ export function buildHybridWorkflow(): ApproachStep[] {
       component: 'protocol-selector',
       optional: true
     },
-    {
-      id: 'remedy-select',
-      label: 'Select remedy',
-      shortLabel: 'Remedy',
-      component: 'remedy-results'
-    },
-    {
-      id: 'prescribe',
-      label: 'Prescription',
-      shortLabel: 'Prescribe',
-      component: 'prescription-handoff'
-    }
+    { id: 'remedy-select', label: 'Select remedy', shortLabel: 'Remedy', component: 'remedy-results' },
+    { id: 'prescribe', label: 'Prescription', shortLabel: 'Prescribe', component: 'prescription-handoff' },
+    HERING_TRACKING_STEP
   ];
 }

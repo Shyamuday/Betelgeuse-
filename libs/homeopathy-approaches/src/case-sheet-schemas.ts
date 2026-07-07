@@ -148,6 +148,54 @@ const SCHOLTEN_FIELDS: CaseSheetFieldDef[] = [
   { key: 'differentialMinerals', label: 'Differential mineral remedies', rows: 2 }
 ];
 
+const FIBONACCI_FIELDS: CaseSheetFieldDef[] = [
+  { key: 'baselineTotality', label: 'Baseline totality', rows: 3, wide: true },
+  { key: 'selectedRemedy', label: 'Selected remedy', rows: 1 },
+  { key: 'sensitivityNotes', label: 'Sensitivity notes', rows: 2, wide: true }
+];
+
+const TAUTOPATHY_FIELDS: CaseSheetFieldDef[] = [
+  { key: 'causalAgent', label: 'Causal agent summary', rows: 2, wide: true },
+  { key: 'symptomPicture', label: 'Symptom picture', rows: 3, wide: true },
+  { key: 'previousInterventions', label: 'Previous interventions', rows: 2 }
+];
+
+const EIZAYAGA_FIELDS: CaseSheetFieldDef[] = [
+  { key: 'lesionSummary', label: 'Lesion layer summary', rows: 2, wide: true },
+  { key: 'functionalSummary', label: 'Functional layer summary', rows: 2, wide: true },
+  { key: 'constitutionalSummary', label: 'Constitutional summary', rows: 2, wide: true }
+];
+
+const VITHOULKAS_FIELDS: CaseSheetFieldDef[] = [
+  { key: 'essenceSummary', label: 'Essence summary', rows: 3, wide: true },
+  { key: 'levelOfHealthNotes', label: 'Level of health notes', rows: 2, wide: true },
+  { key: 'totalitySupport', label: 'Supporting totality', rows: 3, wide: true }
+];
+
+const DRAINAGE_FIELDS: CaseSheetFieldDef[] = [
+  { key: 'organImpairment', label: 'Organ impairment summary', rows: 2, wide: true },
+  { key: 'simillimumNotes', label: 'Simillimum notes', rows: 3, wide: true },
+  { key: 'supportPlan', label: 'Support plan summary', rows: 2, wide: true }
+];
+
+const HERING_FIELDS: CaseSheetFieldDef[] = [
+  { key: 'prescriptionBaseline', label: 'Prescription baseline', rows: 2, wide: true },
+  { key: 'chiefComplaintSnapshot', label: 'Chief complaint snapshot', rows: 2, wide: true },
+  { key: 'followUpFocus', label: 'Follow-up focus', rows: 2 }
+];
+
+const ACUTE_FAST_FIELDS: CaseSheetFieldDef[] = [
+  { key: 'acuteSummary', label: 'Acute summary', rows: 2, wide: true },
+  { key: 'keySymptoms', label: 'Key symptoms', rows: 2, wide: true },
+  { key: 'safetyNotes', label: 'Safety notes', rows: 2 }
+];
+
+const COMBINATION_FIELDS: CaseSheetFieldDef[] = [
+  { key: 'indicationSummary', label: 'Indication summary', rows: 3, wide: true },
+  { key: 'personalization', label: 'Personalization notes', rows: 2, wide: true },
+  { key: 'durationReview', label: 'Duration & review', rows: 2 }
+];
+
 export const CASE_SHEET_SCHEMAS: Record<CaseSheetSchemaId, CaseSheetFieldDef[]> = {
   classical: CLASSICAL_FIELDS,
   'eight-box': EIGHT_BOX_FIELDS,
@@ -165,7 +213,15 @@ export const CASE_SHEET_SCHEMAS: Record<CaseSheetSchemaId, CaseSheetFieldDef[]> 
   pathological: PATHOLOGICAL_FIELDS,
   sehgal: SEHGAL_FIELDS,
   'integrative-follow-up': INTEGRATIVE_FOLLOW_UP_FIELDS,
-  scholten: SCHOLTEN_FIELDS
+  scholten: SCHOLTEN_FIELDS,
+  fibonacci: FIBONACCI_FIELDS,
+  tautopathy: TAUTOPATHY_FIELDS,
+  eizayaga: EIZAYAGA_FIELDS,
+  vithoulkas: VITHOULKAS_FIELDS,
+  drainage: DRAINAGE_FIELDS,
+  hering: HERING_FIELDS,
+  'acute-fast': ACUTE_FAST_FIELDS,
+  combination: COMBINATION_FIELDS
 };
 
 export function caseSheetFieldsForSchema(schemaId: CaseSheetSchemaId): CaseSheetFieldDef[] {

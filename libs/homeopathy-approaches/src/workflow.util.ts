@@ -1,4 +1,5 @@
 import type { ApproachDefinition, ApproachStep, ApproachStepId } from './types';
+import { hasStructuredPanelContent, structuredPanelForComponent } from './approach-structured-panels.js';
 
 export type StepCompletionContext = {
   methodOptionId?: string | null;
@@ -43,8 +44,13 @@ export function isStepComplete(step: ApproachStep, context: StepCompletionContex
       return !!context.selectedRemedyId;
     case 'analysis-notes':
       return true;
-    default:
+    default: {
+      const binding = structuredPanelForComponent(step.component);
+      if (binding) {
+        return hasStructuredPanelContent(binding.dataKey, context.approachData);
+      }
       return false;
+    }
   }
 }
 

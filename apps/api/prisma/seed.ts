@@ -950,7 +950,15 @@ async function main() {
     'Keynote + Totality Approach',
     'Pathology-Based Prescribing',
     'Sehgal Method',
-    'Integrative Follow-up Approach'
+    'Integrative Follow-up Approach',
+    'Fibonacci Potency Method',
+    'Tautopathy / Isopathy',
+    'Eizayaga Layers of Health',
+    'Vithoulkas Essences',
+    'Drainage & Organ Support',
+    "Hering's Law Tracker",
+    'Acute Fast-Track Prescribing',
+    'Combination Remedy Mode'
   ];
 
   const defaultDiagnoses = [
