@@ -1,2 +1,1 @@
--- Standalone repertory practice sessions (no linked consultation)
-ALTER TABLE "CaseAnalysis" ALTER COLUMN "consultationId" DROP NOT NULL;
+-- Migration contents captured in 00000000000000_baseline
