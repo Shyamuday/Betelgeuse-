@@ -1,0 +1,126 @@
+.remedy-suggestion-panel {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid #c7d2fe;
+  background: linear-gradient(180deg, #f8faff 0%, #fff 100%);
+}
+
+.preview-badge {
+  margin: 0.15rem 0 0;
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+}
+
+.disclaimer {
+  margin: 0;
+  color: #334155;
+  font-size: 0.88rem;
+}
+
+.summary {
+  margin: 0;
+  font-weight: 600;
+  color: #1e3a8a;
+}
+
+.reason-block {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  padding: 0.55rem 0.65rem;
+
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #334155;
+  }
+}
+
+.reason-list {
+  margin: 0.55rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.55rem;
+
+  li {
+    display: grid;
+    gap: 0.15rem;
+  }
+}
+
+.rubric-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.weight-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #3730a3;
+  background: #eef2ff;
+  border-radius: 999px;
+  padding: 0.05rem 0.45rem;
+}
+
+.remedy-preview-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.55rem;
+}
+
+.remedy-preview-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.55rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  background: #fff;
+}
+
+.remedy-preview-card.is-top {
+  border-color: #a5b4fc;
+  background: #f5f3ff;
+}
+
+.rank-badge {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e0e7ff;
+  color: #312e81;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.reasoning {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: #475569;
+}
+
+.support-list {
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+}
+
+.preview-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}

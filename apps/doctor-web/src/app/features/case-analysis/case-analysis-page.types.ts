@@ -69,6 +69,56 @@ export type AnalysisResult = {
   remedy: RepertoryRemedyRef;
 };
 
+export type RemedySupportingRubric = {
+  rubricId: string;
+  text: string;
+  chapter: string;
+  weight: number;
+  grade: number;
+  partialScore: number;
+  sourceLabel: string;
+  sourcePhrase: string;
+};
+
+export type RemedySuggestionPreview = {
+  isSuggestionOnly: true;
+  disclaimer: string;
+  approachTitle: string;
+  repertorySourceName: string;
+  summary: string;
+  generatedAt?: string;
+  phrasesSearched: Array<{
+    phrase: string;
+    sourceKey: string;
+    sourceLabel: string;
+    priority: number;
+    reasoning: string;
+  }>;
+  suggestedRubrics: Array<{
+    rubricId: string;
+    weight: number;
+    sourceField: string;
+    sourceLabel: string;
+    sourcePhrase: string;
+    reasoning: string;
+    rubric: {
+      id: string;
+      chapter: string;
+      subchapter: string | null;
+      text: string;
+      parentPath: string | null;
+    };
+  }>;
+  results: Array<{
+    rank: number;
+    totalScore: number;
+    coverage: number;
+    remedy: RepertoryRemedyRef;
+    reasoning: string;
+    supportingRubrics: RemedySupportingRubric[];
+  }>;
+};
+
 export type CaseAnalysis = {
   id: string;
   consultationId?: string | null;
@@ -78,6 +128,8 @@ export type CaseAnalysis = {
   approachData?: Record<string, unknown> | null;
   methodOptionId?: string | null;
   methodRationale?: string | null;
+  remedySuggestionSnapshot?: RemedySuggestionPreview | null;
+  remedyOverrideRationale?: string | null;
   methodOption?: { id: string; label: string; normalizedLabel?: string } | null;
   source?: RepertorySource | null;
   selectedRemedy?: RepertoryRemedyRef | null;

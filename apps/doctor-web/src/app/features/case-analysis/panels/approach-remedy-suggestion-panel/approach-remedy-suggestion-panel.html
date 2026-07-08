@@ -1,0 +1,81 @@
+<section class="panel remedy-suggestion-panel">
+  <div class="panel-title-row">
+    <div>
+      <h3>Remedy suggestions (preview)</h3>
+      <p class="preview-badge">Not final — review before applying</p>
+    </div>
+    <button type="button" class="btn-icon" (click)="dismissRequested.emit()" title="Dismiss preview">×</button>
+  </div>
+
+  <p class="disclaimer">{{ preview.disclaimer }}</p>
+  <p class="hint">
+    Approach: <strong>{{ preview.approachTitle }}</strong> · Repertory: <strong>{{ preview.repertorySourceName }}</strong>
+  </p>
+  <p class="summary">{{ preview.summary }}</p>
+
+  <details class="reason-block" open>
+    <summary>What we searched ({{ preview.phrasesSearched.length }})</summary>
+    <ul class="reason-list">
+      @for (item of preview.phrasesSearched; track item.sourceKey + item.phrase) {
+        <li>
+          <strong>{{ item.sourceLabel }}</strong>
+          <span class="muted">“{{ item.phrase }}”</span>
+          <small>{{ item.reasoning }}</small>
+        </li>
+      }
+    </ul>
+  </details>
+
+  <details class="reason-block" open>
+    <summary>Rubrics matched ({{ preview.suggestedRubrics.length }})</summary>
+    <ul class="reason-list rubric-list">
+      @for (item of preview.suggestedRubrics; track item.rubricId) {
+        <li>
+          <div class="rubric-head">
+            <strong>{{ item.rubric.chapter }} · {{ item.rubric.text }}</strong>
+            <span class="weight-pill">w{{ item.weight }}</span>
+          </div>
+          <small class="muted">From {{ item.sourceLabel }}: “{{ item.sourcePhrase }}”</small>
+          <small>{{ item.reasoning }}</small>
+        </li>
+      }
+    </ul>
+  </details>
+
+  <details class="reason-block" open>
+    <summary>Ranked remedy suggestions ({{ preview.results.length }})</summary>
+    <div class="remedy-preview-list">
+      @for (item of preview.results; track item.remedy.id) {
+        <article class="remedy-preview-card" [class.is-top]="item.rank <= 3">
+          <div class="rank-badge">{{ item.rank }}</div>
+          <div class="remedy-preview-body">
+            <div class="result-head">
+              <strong>{{ item.remedy.name }}</strong>
+              <span class="abbrev">{{ item.remedy.abbreviation }}</span>
+            </div>
+            <small class="muted">Score {{ item.totalScore }} · covers {{ item.coverage }} rubric{{ item.coverage === 1 ? '' : 's' }}</small>
+            <p class="reasoning">{{ item.reasoning }}</p>
+            @if (item.supportingRubrics.length) {
+              <ul class="support-list">
+                @for (support of item.supportingRubrics; track support.rubricId) {
+                  <li>
+                    <span>{{ support.text }}</span>
+                    <span class="muted">grade {{ support.grade }} × w{{ support.weight }} = {{ support.partialScore }}</span>
+                    <span class="muted">← {{ support.sourceLabel }}</span>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  </details>
+
+  <div class="preview-actions">
+    <button type="button" class="btn-secondary" (click)="dismissRequested.emit()">Dismiss</button>
+    <button type="button" class="btn-primary" (click)="applyRequested.emit()" [disabled]="applying">
+      {{ applying ? 'Applying…' : 'Apply suggestions to case' }}
+    </button>
+  </div>
+</section>

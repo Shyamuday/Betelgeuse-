@@ -52,6 +52,7 @@ import { IntegrativeFollowUpPanelComponent } from '../panels/integrative-follow-
 import { ApproachStructuredPanelComponent } from '../panels/approach-structured-panel/approach-structured-panel';
 import { PatientCaseTimelinePanelComponent } from '../panels/patient-case-timeline-panel/patient-case-timeline-panel';
 import { ClinicalMediaPanelComponent } from '../panels/clinical-media-panel/clinical-media-panel';
+import { ApproachRemedySuggestionPanelComponent } from '../panels/approach-remedy-suggestion-panel/approach-remedy-suggestion-panel';
 import type {
   CaseAnalysis,
   ConsultationSummary,
@@ -59,6 +60,7 @@ import type {
   MateriaMedicaSearchResult,
   MateriaMedicaSource,
   PatientCaseHistory,
+  RemedySuggestionPreview,
   RepertoryRemedyRef,
   RepertorySource,
   RubricSearchResult,
@@ -95,7 +97,8 @@ export type WorkspaceMobileTab = 'search' | 'rubrics' | 'results';
     IntegrativeFollowUpPanelComponent,
     ApproachStructuredPanelComponent,
     PatientCaseTimelinePanelComponent,
-    ClinicalMediaPanelComponent
+    ClinicalMediaPanelComponent,
+    ApproachRemedySuggestionPanelComponent
   ],
   templateUrl: './case-analysis-page.html'
 })
@@ -166,6 +169,10 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
   readonly creatingAnalysis = signal(false);
   readonly repertorizing = signal(false);
   readonly suggestingRemedies = signal(false);
+  readonly applyingRemedySuggestions = signal(false);
+  readonly remedySuggestionPreview = signal<RemedySuggestionPreview | null>(null);
+  readonly pendingRemedySelection = signal<RepertoryRemedyRef | null>(null);
+  readonly remedyOverrideRationaleInput = signal('');
   readonly selectingRemedyId = signal('');
   readonly focusedRemedy = signal<RepertoryRemedyRef | null>(null);
   readonly materiaMedica = signal<MateriaMedicaResponse | null>(null);
@@ -226,6 +233,11 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
   });
 
   readonly repertoryEnabled = computed(() => this.activeApproach().repertory.enabled);
+
+  readonly suggestedTopRemedy = computed(() => {
+    const snapshot = this.analysis()?.remedySuggestionSnapshot ?? this.remedySuggestionPreview();
+    return snapshot?.results?.[0]?.remedy ?? null;
+  });
 
   readonly showMobileRepertorizeBar = computed(
     () =>
@@ -1264,11 +1276,42 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
     }
   }
 
-  async suggestRemediesFromCase() {
+  async previewRemedySuggestions() {
     const currentAnalysis = this.analysis();
     if (!currentAnalysis) return;
 
     this.suggestingRemedies.set(true);
+    this.error.set('');
+    this.remedySuggestionPreview.set(null);
+    try {
+      const response = await this.api.suggestRemediesFromApproach(currentAnalysis.id, { apply: false });
+      this.remedySuggestionPreview.set(response);
+      if (response.analysis) {
+        this.syncAnalysisInList(response.analysis);
+        this.hydrateFromAnalysis(response.analysis);
+      }
+      this.message.set('Remedy suggestions ready — review the reasoning before applying.');
+      if (this.isMobile()) {
+        this.workspaceTab.set('results');
+      }
+    } catch {
+      this.error.set(
+        'Could not preview remedy suggestions. Fill approach fields with symptoms, or add rubrics manually.'
+      );
+    } finally {
+      this.suggestingRemedies.set(false);
+    }
+  }
+
+  dismissRemedySuggestionPreview() {
+    this.remedySuggestionPreview.set(null);
+  }
+
+  async applyRemedySuggestionPreview() {
+    const currentAnalysis = this.analysis();
+    if (!currentAnalysis || !this.remedySuggestionPreview()) return;
+
+    this.applyingRemedySuggestions.set(true);
     this.error.set('');
     try {
       const response = await this.api.suggestRemediesFromApproach(currentAnalysis.id, { apply: true });
@@ -1276,33 +1319,78 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
         this.syncAnalysisInList(response.analysis);
         this.hydrateFromAnalysis(response.analysis);
       }
+      this.remedySuggestionPreview.set(null);
       this.setActiveStep('remedy-select');
-      this.message.set(response.summary);
+      this.message.set('Suggestions applied to case. Review ranked remedies before selecting.');
       if (this.isMobile()) {
         this.workspaceTab.set('results');
       }
     } catch {
-      this.error.set(
-        'Could not suggest remedies from case data. Fill approach fields with symptoms, or add rubrics manually.'
-      );
+      this.error.set('Could not apply remedy suggestions to the case.');
     } finally {
-      this.suggestingRemedies.set(false);
+      this.applyingRemedySuggestions.set(false);
     }
   }
 
-  async chooseRemedy(remedy: { id: string; name: string; abbreviation: string }) {
+  async chooseRemedy(remedy: RepertoryRemedyRef) {
+    if (this.remedySelectionDiffersFromSuggestion(remedy.id)) {
+      this.pendingRemedySelection.set(remedy);
+      this.remedyOverrideRationaleInput.set(this.analysis()?.remedyOverrideRationale || '');
+      this.error.set('');
+      return;
+    }
+    await this.confirmRemedySelection(remedy);
+  }
+
+  cancelPendingRemedySelection() {
+    this.pendingRemedySelection.set(null);
+    this.remedyOverrideRationaleInput.set('');
+  }
+
+  onRemedyOverrideRationaleInput(event: Event) {
+    const value = (event.target as HTMLTextAreaElement).value;
+    this.remedyOverrideRationaleInput.set(value);
+  }
+
+  remedySelectionDiffersFromSuggestion(remedyId: string) {
+    const suggested = this.suggestedTopRemedy();
+    return !!suggested && suggested.id !== remedyId;
+  }
+
+  async confirmRemedySelection(remedy: RepertoryRemedyRef, overrideRationale?: string | null) {
     const currentAnalysis = this.analysis();
     if (!currentAnalysis) return;
+
+    const differs = this.remedySelectionDiffersFromSuggestion(remedy.id);
+    const rationale =
+      overrideRationale !== undefined
+        ? overrideRationale
+        : differs
+          ? this.remedyOverrideRationaleInput().trim() || null
+          : null;
+
+    if (differs && !rationale) {
+      this.error.set('Explain why your final remedy choice differs from the system suggestion.');
+      return;
+    }
+
     this.selectingRemedyId.set(remedy.id);
     this.error.set('');
     this.message.set('');
     try {
-      const updated = await this.api.selectRemedy(currentAnalysis.id, remedy.id);
+      const updated = await this.api.selectRemedy(currentAnalysis.id, remedy.id, rationale);
       this.syncAnalysisInList(updated);
+      this.hydrateFromAnalysis(updated);
+      this.pendingRemedySelection.set(null);
+      this.remedyOverrideRationaleInput.set('');
       await this.focusRemedy(remedy);
       const nextStep = this.activeApproach().slug === 'organon-lm' ? 'lm-dosing' : 'prescribe';
       this.setActiveStep(nextStep);
-      this.message.set(`${remedy.name} selected as the case remedy.`);
+      this.message.set(
+        differs
+          ? `${remedy.name} selected as your final remedy (differs from system suggestion).`
+          : `${remedy.name} selected as the case remedy.`
+      );
     } catch {
       this.error.set('Could not select remedy.');
     } finally {

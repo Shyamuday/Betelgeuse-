@@ -12,7 +12,7 @@ import {
 } from '../../services/doctor-prescribing-preferences.js';
 import { resolvePatientLastPrescriptionMethodOptionId, loadPatientCaseHistory } from '../../services/patient-case-history.js';
 import { suggestApproachField, type FieldSuggestionRequest } from '../../services/approach-field-suggestions.js';
-import { applyApproachRemedySuggestions, suggestRemediesFromApproach } from '../../services/approach-remedy-suggestions.js';
+import { applyApproachRemedySuggestions, persistRemedySuggestionSnapshot, suggestRemediesFromApproach, topSuggestedRemedyId } from '../../services/approach-remedy-suggestions.js';
 import {
   analysisIdFromReq,
   assertDoctorConsultationAccess,
@@ -28,7 +28,7 @@ const rubricSelectionSchema = z.object({
 });
 
 const suggestRemediesSchema = z.object({
-  apply: z.boolean().optional().default(true),
+  apply: z.boolean().optional().default(false),
   maxPhrases: z.number().int().min(1).max(24).optional(),
   maxRubrics: z.number().int().min(1).max(30).optional()
 });
@@ -394,17 +394,39 @@ export function registerCaseAnalysisRoutes(router: Router) {
       const existing = await loadCaseAnalysisForDoctor(req, res, analysisId);
       if (!existing) return;
 
-      const body = z.object({ remedyId: z.string().min(1) }).parse(req.body);
+      const body = z
+        .object({
+          remedyId: z.string().min(1),
+          overrideRationale: z.string().max(2000).nullable().optional()
+        })
+        .parse(req.body);
       const remedy = await prisma.homeopathicRemedy.findUnique({ where: { id: body.remedyId } });
       if (!remedy) {
         return res.status(400).json({ message: 'Invalid remedy.' });
+      }
+
+      const snapshot = existing.remedySuggestionSnapshot as Parameters<typeof topSuggestedRemedyId>[0];
+      const suggestedRemedyId = topSuggestedRemedyId(snapshot);
+      const differsFromSuggestion = !!suggestedRemedyId && suggestedRemedyId !== body.remedyId;
+      const overrideRationale = body.overrideRationale?.trim() || null;
+
+      if (differsFromSuggestion && !overrideRationale) {
+        const suggestedRemedy = snapshot?.results?.[0]?.remedy;
+        return res.status(422).json({
+          message:
+            'Selected remedy differs from the system suggestion. Provide clinical reasoning for your final judgement.',
+          requiresOverrideRationale: true,
+          suggestedRemedy,
+          selectedRemedy: { id: remedy.id, name: remedy.name, abbreviation: remedy.abbreviation }
+        });
       }
 
       const analysis = await prisma.caseAnalysis.update({
         where: { id: analysisId },
         data: {
           selectedRemedyId: remedy.id,
-          status: CaseAnalysisStatus.FINALIZED
+          status: CaseAnalysisStatus.FINALIZED,
+          remedyOverrideRationale: differsFromSuggestion ? overrideRationale : null
         },
         include: caseAnalysisInclude
       });
@@ -483,7 +505,14 @@ export function registerCaseAnalysisRoutes(router: Router) {
             'Could not derive rubrics from approach data. Fill case sheet or approach panels with symptom text first.'
         });
       }
-      res.json(suggestion);
+
+      await persistRemedySuggestionSnapshot(analysisId, suggestion);
+
+      const analysis = await prisma.caseAnalysis.findUnique({
+        where: { id: analysisId },
+        include: caseAnalysisInclude
+      });
+      res.json({ ...suggestion, analysis });
     })
   );
 }

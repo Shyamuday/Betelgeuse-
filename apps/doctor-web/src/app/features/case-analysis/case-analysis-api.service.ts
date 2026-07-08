@@ -11,6 +11,7 @@ import type {
   MateriaMedicaSearchResult,
   MateriaMedicaSource,
   PatientCaseHistory,
+  RemedySuggestionPreview,
   RepertorySource,
   RubricSearchResult,
   RubricSuggestion
@@ -117,10 +118,11 @@ export class CaseAnalysisApiService {
     ).then((response) => response.analysis);
   }
 
-  selectRemedy(analysisId: string, remedyId: string) {
+  selectRemedy(analysisId: string, remedyId: string, overrideRationale?: string | null) {
     return firstValueFrom(
       this.http.patch<{ analysis: CaseAnalysis }>(`${this.apiBase}${API_PATHS.DOCTOR.CASE_ANALYSIS_SELECT_REMEDY(analysisId)}`, {
-        remedyId
+        remedyId,
+        ...(overrideRationale !== undefined ? { overrideRationale } : {})
       })
     ).then((response) => response.analysis);
   }
@@ -294,30 +296,10 @@ export class CaseAnalysisApiService {
     payload?: { apply?: boolean; maxPhrases?: number; maxRubrics?: number }
   ) {
     return firstValueFrom(
-      this.http.post<{
-        summary: string;
-        suggestedRubrics: Array<{
-          rubricId: string;
-          weight: number;
-          sourceField: string;
-          sourceLabel: string;
-          sourcePhrase: string;
-          rubric: {
-            id: string;
-            chapter: string;
-            subchapter: string | null;
-            text: string;
-            parentPath: string | null;
-          };
-        }>;
-        results: Array<{
-          rank: number;
-          totalScore: number;
-          coverage: number;
-          remedy: { id: string; name: string; abbreviation: string };
-        }>;
-        analysis?: CaseAnalysis;
-      }>(`${this.apiBase}${API_PATHS.DOCTOR.CASE_ANALYSIS_SUGGEST_REMEDIES(analysisId)}`, payload ?? { apply: true })
+      this.http.post<RemedySuggestionPreview & { analysis?: CaseAnalysis }>(
+        `${this.apiBase}${API_PATHS.DOCTOR.CASE_ANALYSIS_SUGGEST_REMEDIES(analysisId)}`,
+        payload ?? { apply: false }
+      )
     );
   }
 }

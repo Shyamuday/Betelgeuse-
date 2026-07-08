@@ -590,10 +590,10 @@
             <button
               type="button"
               class="btn-secondary btn-block suggest-remedies-inline"
-              (click)="suggestRemediesFromCase()"
-              [disabled]="suggestingRemedies() || repertorizing()"
+              (click)="previewRemedySuggestions()"
+              [disabled]="suggestingRemedies() || repertorizing() || applyingRemedySuggestions()"
             >
-              {{ suggestingRemedies() ? 'Matching rubrics…' : 'Suggest remedies from case data' }}
+              {{ suggestingRemedies() ? 'Building preview…' : 'Preview remedy suggestions' }}
             </button>
             <button
               type="button"
@@ -608,10 +608,10 @@
             <button
               type="button"
               class="btn-secondary btn-block suggest-remedies-inline"
-              (click)="suggestRemediesFromCase()"
-              [disabled]="suggestingRemedies()"
+              (click)="previewRemedySuggestions()"
+              [disabled]="suggestingRemedies() || applyingRemedySuggestions()"
             >
-              {{ suggestingRemedies() ? 'Matching rubrics…' : 'Suggest remedies from case data' }}
+              {{ suggestingRemedies() ? 'Building preview…' : 'Preview remedy suggestions' }}
             </button>
           }
         </section>
@@ -621,8 +621,52 @@
 
       @if (showWorkspaceResults()) {
       <div class="column results-column">
+        @if (remedySuggestionPreview(); as preview) {
+          <app-approach-remedy-suggestion-panel
+            [preview]="preview"
+            [applying]="applyingRemedySuggestions()"
+            (applyRequested)="applyRemedySuggestionPreview()"
+            (dismissRequested)="dismissRemedySuggestionPreview()"
+          />
+        }
         <section class="panel results-panel">
           <h3>Remedy analysis</h3>
+          <p class="hint doctor-final-note">Your clinical judgement is final. You may change rubrics, re-run repertorization, or select a different remedy at any time.</p>
+
+          @if (pendingRemedySelection(); as pendingRemedy) {
+            <section class="override-rationale-panel">
+              <p class="override-lead">
+                You selected <strong>{{ pendingRemedy.name }}</strong>
+                @if (suggestedTopRemedy(); as suggested) {
+                  instead of the system suggestion <strong>{{ suggested.name }}</strong>.
+                }
+                Explain your clinical reasoning for this final choice.
+              </p>
+              <label class="override-field" for="remedy-override-rationale">
+                <span class="override-label">Why this remedy instead?</span>
+                <textarea
+                  id="remedy-override-rationale"
+                  class="override-input"
+                  rows="4"
+                  maxlength="2000"
+                  [value]="remedyOverrideRationaleInput()"
+                  placeholder="e.g. Patient’s thermal state and thirst pattern fit this remedy better despite lower repertory score."
+                  (input)="onRemedyOverrideRationaleInput($event)"
+                ></textarea>
+              </label>
+              <div class="override-actions">
+                <button type="button" class="btn-secondary" (click)="cancelPendingRemedySelection()">Cancel</button>
+                <button
+                  type="button"
+                  class="btn-primary"
+                  (click)="confirmRemedySelection(pendingRemedy)"
+                  [disabled]="selectingRemedyId() === pendingRemedy.id"
+                >
+                  {{ selectingRemedyId() === pendingRemedy.id ? 'Saving…' : 'Confirm final remedy' }}
+                </button>
+              </div>
+            </section>
+          }
 
           @if (analysis.results.length) {
             <div class="results-list">
@@ -653,7 +697,13 @@
                     (click)="chooseRemedy(result.remedy)"
                     [disabled]="selectingRemedyId() === result.remedy.id"
                   >
-                    {{ analysis.selectedRemedy?.id === result.remedy.id ? 'Selected' : 'Select' }}
+                    @if (analysis.selectedRemedy?.id === result.remedy.id) {
+                      Selected
+                    } @else if (suggestedTopRemedy()?.id === result.remedy.id) {
+                      Select (suggested)
+                    } @else {
+                      Select
+                    }
                   </button>
                 </article>
               }
@@ -667,9 +717,24 @@
           @if (analysis.selectedRemedy) {
             <div class="chosen-remedy">
               <div>
-                <small class="muted">Chosen simillimum</small>
+                <small class="muted">Doctor’s final remedy</small>
                 <strong>{{ analysis.selectedRemedy.name }}</strong>
                 <span class="abbrev">{{ analysis.selectedRemedy.abbreviation }}</span>
+                @if (suggestedTopRemedy(); as suggested) {
+                  @if (analysis.selectedRemedy.id !== suggested.id) {
+                    <p class="suggestion-diff muted">
+                      System suggested <strong>{{ suggested.name }}</strong> — your choice differs.
+                    </p>
+                  } @else {
+                    <p class="suggestion-match muted">Matches the top system suggestion.</p>
+                  }
+                }
+                @if (analysis.remedyOverrideRationale) {
+                  <p class="override-recorded">
+                    <small class="muted">Your reasoning:</small>
+                    {{ analysis.remedyOverrideRationale }}
+                  </p>
+                }
               </div>
               <button type="button" class="btn-primary" (click)="openPrescriptionWithRemedy()">
                 Use in prescription →

@@ -1,13 +1,12 @@
 import { prisma } from '../db.js';
-import { RepertorySourceCode } from '@prisma/client';
+import { RepertorySourceCode, type Prisma } from '@prisma/client';
 import { applyApproachRubricWeights } from './approach-repertory-weights.js';
 import { computeRepertorization } from './repertorization.js';
 import { searchRepertoryRubrics, scoreRubricMatch, tokenizeRepertoryQuery } from './repertory-search.js';
 import {
   isOorepSourceId,
   oorepAbbrevFromSourceId,
-  searchOorepRepertory,
-  type OorepRubricResult
+  searchOorepRepertory
 } from './oorep-client.js';
 import {
   collectApproachSearchPhrases,
@@ -17,12 +16,21 @@ import {
   type ApproachSearchPhrase
 } from '@vitalis/homeopathy-approaches';
 
+export type PhraseSearchLog = {
+  phrase: string;
+  sourceKey: string;
+  sourceLabel: string;
+  priority: number;
+  reasoning: string;
+};
+
 export type SuggestedRubricMatch = {
   rubricId: string;
   weight: number;
   sourceField: string;
   sourceLabel: string;
   sourcePhrase: string;
+  reasoning: string;
   rubric: {
     id: string;
     chapter: string;
@@ -30,6 +38,17 @@ export type SuggestedRubricMatch = {
     text: string;
     parentPath: string | null;
   };
+};
+
+export type RemedySupportingRubric = {
+  rubricId: string;
+  text: string;
+  chapter: string;
+  weight: number;
+  grade: number;
+  partialScore: number;
+  sourceLabel: string;
+  sourcePhrase: string;
 };
 
 export type SuggestedRemedyResult = {
@@ -41,43 +60,108 @@ export type SuggestedRemedyResult = {
     name: string;
     abbreviation: string;
   };
+  reasoning: string;
+  supportingRubrics: RemedySupportingRubric[];
 };
 
 export type ApproachRemedySuggestionResponse = {
-  summary: string;
+  isSuggestionOnly: true;
+  disclaimer: string;
+  approachTitle: string;
+  repertorySourceName: string;
+  phrasesSearched: PhraseSearchLog[];
   suggestedRubrics: SuggestedRubricMatch[];
   results: SuggestedRemedyResult[];
+  summary: string;
+  generatedAt: string;
 };
+
+export function topSuggestedRemedyId(snapshot: ApproachRemedySuggestionResponse | null | undefined) {
+  return snapshot?.results?.[0]?.remedy?.id ?? null;
+}
+
+export async function persistRemedySuggestionSnapshot(
+  analysisId: string,
+  suggestion: ApproachRemedySuggestionResponse
+) {
+  await prisma.caseAnalysis.update({
+    where: { id: analysisId },
+    data: {
+      remedySuggestionSnapshot: suggestion as unknown as Prisma.InputJsonValue
+    }
+  });
+}
 
 type RubricCandidate = SuggestedRubricMatch & { matchScore: number };
 
-async function resolveRepertorySourceId(preferredSourceId?: string | null) {
+const SUGGESTION_DISCLAIMER =
+  'These are preliminary suggestions from automated rubric matching — not a final prescription. Review each rubric and remedy before applying to the case.';
+
+function rubricPathLabel(rubric: SuggestedRubricMatch['rubric']) {
+  return [rubric.chapter, rubric.subchapter, rubric.text].filter(Boolean).join(' · ');
+}
+
+function phraseReasoning(phrase: ApproachSearchPhrase) {
+  return `Extracted from ${phrase.sourceLabel} (${phrase.sourceKey}): “${phrase.phrase}”.`;
+}
+
+function rubricMatchReasoning(candidate: RubricCandidate, baseWeight: number, finalWeight: number) {
+  const path = rubricPathLabel(candidate.rubric);
+  const weightNote =
+    finalWeight !== baseWeight
+      ? ` Approach weight adjusted ${baseWeight} → ${finalWeight} for ${candidate.rubric.chapter} chapter.`
+      : ` Assigned weight ${finalWeight} for ${candidate.rubric.chapter} chapter.`;
+  return `Repertory match for “${candidate.sourcePhrase}” from ${candidate.sourceLabel} → ${path}.${weightNote}`;
+}
+
+function buildRemedyReasoning(
+  remedyId: string,
+  totalScore: number,
+  coverage: number,
+  rubricTotal: number,
+  supporting: RemedySupportingRubric[]
+) {
+  const top = supporting.slice(0, 3);
+  const topSummary = top
+    .map(
+      (item) =>
+        `${item.text} (grade ${item.grade} × weight ${item.weight} = ${item.partialScore}, from ${item.sourceLabel})`
+    )
+    .join('; ');
+  return `Covers ${coverage}/${rubricTotal} suggested rubrics with total score ${totalScore}. Strongest support: ${topSummary || 'no direct rubric grades found'}.`;
+}
+
+async function resolveRepertorySource(preferredSourceId?: string | null) {
   if (preferredSourceId && !isOorepSourceId(preferredSourceId)) {
     const source = await prisma.repertorySource.findUnique({
       where: { id: preferredSourceId },
-      select: { id: true, _count: { select: { rubrics: true } } }
+      select: { id: true, name: true, _count: { select: { rubrics: true } } }
     });
-    if (source && source._count.rubrics > 0) return source.id;
+    if (source && source._count.rubrics > 0) return { id: source.id, name: source.name };
   }
 
   const imported =
     (await prisma.repertorySource.findFirst({
       where: { isActive: true, code: RepertorySourceCode.OOREP_PUBLICUM },
-      select: { id: true, _count: { select: { rubrics: true } } }
+      select: { id: true, name: true, _count: { select: { rubrics: true } } }
     })) ||
     (await prisma.repertorySource.findFirst({
       where: { isActive: true, code: RepertorySourceCode.REPERTORIUM_PUBLICUM },
-      select: { id: true, _count: { select: { rubrics: true } } }
+      select: { id: true, name: true, _count: { select: { rubrics: true } } }
     }));
 
-  const importedSource = imported && '_count' in imported ? imported : null;
-  if (importedSource && importedSource._count.rubrics > 0) return importedSource.id;
+  if (imported && imported._count.rubrics > 0) {
+    return { id: imported.id, name: imported.name };
+  }
 
-  if (preferredSourceId && isOorepSourceId(preferredSourceId)) return preferredSourceId;
-  return importedSource?.id || preferredSourceId || null;
+  if (preferredSourceId && isOorepSourceId(preferredSourceId)) {
+    return { id: preferredSourceId, name: oorepAbbrevFromSourceId(preferredSourceId) };
+  }
+
+  return imported ? { id: imported.id, name: imported.name } : null;
 }
 
-async function resolveLocalRubricId(localSourceId: string, rubricId: string, oorepRubric?: OorepRubricResult) {
+async function resolveLocalRubricId(localSourceId: string, rubricId: string) {
   const existing = await prisma.repertoryRubric.findUnique({
     where: { id: rubricId },
     select: { id: true, chapter: true, subchapter: true, text: true, parentPath: true }
@@ -113,12 +197,14 @@ async function searchPhraseForRubrics(
     for (const row of rows) {
       const matchScore = scoreRubricMatch(row, tokens);
       if (matchScore < 0) continue;
+      const baseWeight = defaultRubricWeightForChapter(approach, row.chapter);
       matches.push({
         rubricId: row.id,
-        weight: defaultRubricWeightForChapter(approach, row.chapter),
+        weight: baseWeight,
         sourceField: phrase.sourceKey,
         sourceLabel: phrase.sourceLabel,
         sourcePhrase: phrase.phrase,
+        reasoning: '',
         rubric: {
           id: row.id,
           chapter: row.chapter,
@@ -139,14 +225,16 @@ async function searchPhraseForRubrics(
       limit: 3
     });
     for (const row of result.rubrics) {
-      const local = localSourceId ? await resolveLocalRubricId(localSourceId, row.id, row) : null;
+      const local = localSourceId ? await resolveLocalRubricId(localSourceId, row.id) : null;
       if (!local) continue;
+      const baseWeight = defaultRubricWeightForChapter(approach, local.chapter);
       matches.push({
         rubricId: local.id,
-        weight: defaultRubricWeightForChapter(approach, local.chapter),
+        weight: baseWeight,
         sourceField: phrase.sourceKey,
         sourceLabel: phrase.sourceLabel,
         sourcePhrase: phrase.phrase,
+        reasoning: '',
         rubric: {
           id: local.id,
           chapter: local.chapter,
@@ -188,13 +276,21 @@ export async function suggestRemediesFromApproach(input: {
 
   if (!phrases.length) return null;
 
-  const sourceId = await resolveRepertorySourceId(analysis.sourceId);
-  if (!sourceId) return null;
-  const localSourceId = isOorepSourceId(sourceId) ? await resolveRepertorySourceId(null) : sourceId;
+  const source = await resolveRepertorySource(analysis.sourceId);
+  if (!source) return null;
+  const localSourceId = isOorepSourceId(source.id) ? (await resolveRepertorySource(null))?.id || null : source.id;
+
+  const phrasesSearched: PhraseSearchLog[] = phrases.map((phrase) => ({
+    phrase: phrase.phrase,
+    sourceKey: phrase.sourceKey,
+    sourceLabel: phrase.sourceLabel,
+    priority: phrase.priority,
+    reasoning: phraseReasoning(phrase)
+  }));
 
   const rubricCandidates: RubricCandidate[] = [];
   for (const phrase of phrases) {
-    const found = await searchPhraseForRubrics(phrase, sourceId, localSourceId, approach);
+    const found = await searchPhraseForRubrics(phrase, source.id, localSourceId, approach);
     rubricCandidates.push(...found);
   }
 
@@ -206,22 +302,34 @@ export async function suggestRemediesFromApproach(input: {
     }
   }
 
-  const suggestedRubrics = [...byRubric.values()]
-    .slice(0, input.maxRubrics ?? 18)
-    .map(({ matchScore: _matchScore, ...item }) => item);
-
-  if (!suggestedRubrics.length) return null;
+  const rawRubrics = [...byRubric.values()].slice(0, input.maxRubrics ?? 18);
+  if (!rawRubrics.length) return null;
 
   const weightedRubrics = applyApproachRubricWeights(
     analysis.methodOption?.label,
-    suggestedRubrics.map((item) => ({
+    rawRubrics.map((item) => ({
       rubricId: item.rubricId,
       weight: item.weight,
       chapter: item.rubric.chapter
     }))
   );
   const weightByRubricId = new Map(weightedRubrics.map((item) => [item.rubricId, item.weight]));
+
+  const suggestedRubrics: SuggestedRubricMatch[] = rawRubrics.map((item) => {
+    const finalWeight = weightByRubricId.get(item.rubricId) || item.weight;
+    return {
+      rubricId: item.rubricId,
+      weight: finalWeight,
+      sourceField: item.sourceField,
+      sourceLabel: item.sourceLabel,
+      sourcePhrase: item.sourcePhrase,
+      reasoning: rubricMatchReasoning(item, item.weight, finalWeight),
+      rubric: item.rubric
+    };
+  });
+
   const rubricIds = suggestedRubrics.map((item) => item.rubricId);
+  const rubricById = new Map(suggestedRubrics.map((item) => [item.rubricId, item]));
 
   const remedyLinks = await prisma.repertoryRubricRemedy.findMany({
     where: { rubricId: { in: rubricIds } },
@@ -237,7 +345,7 @@ export async function suggestRemediesFromApproach(input: {
   const ranked = computeRepertorization(
     suggestedRubrics.map((item) => ({
       rubricId: item.rubricId,
-      weight: weightByRubricId.get(item.rubricId) || item.weight,
+      weight: item.weight,
       remedyGrades: linksByRubric.get(item.rubricId) || []
     }))
   ).slice(0, 25);
@@ -254,27 +362,59 @@ export async function suggestRemediesFromApproach(input: {
     .map((item, index) => {
       const remedy = remedyById.get(item.remedyId);
       if (!remedy) return null;
+
+      const supportingRubrics: RemedySupportingRubric[] = [];
+      for (const link of remedyLinks) {
+        if (link.remedyId !== item.remedyId) continue;
+        const rubric = rubricById.get(link.rubricId);
+        if (!rubric) continue;
+        const weight = rubric.weight;
+        const grade = Math.min(4, Math.max(1, link.grade));
+        supportingRubrics.push({
+          rubricId: rubric.rubricId,
+          text: rubric.rubric.text,
+          chapter: rubric.rubric.chapter,
+          weight,
+          grade,
+          partialScore: grade * weight,
+          sourceLabel: rubric.sourceLabel,
+          sourcePhrase: rubric.sourcePhrase
+        });
+      }
+      supportingRubrics.sort((a, b) => b.partialScore - a.partialScore);
+
       return {
         rank: index + 1,
         totalScore: item.totalScore,
         coverage: item.coverage,
-        remedy
+        remedy,
+        supportingRubrics,
+        reasoning: buildRemedyReasoning(
+          item.remedyId,
+          item.totalScore,
+          item.coverage,
+          suggestedRubrics.length,
+          supportingRubrics
+        )
       };
     })
     .filter((item): item is SuggestedRemedyResult => !!item);
 
   const top = results[0];
   const summary = top
-    ? `${suggestedRubrics.length} rubrics from approach data → top remedy ${top.remedy.name} (score ${top.totalScore}, covers ${top.coverage}/${suggestedRubrics.length} rubrics).`
+    ? `Preview only: ${phrases.length} phrases searched → ${suggestedRubrics.length} rubrics matched → top suggestion ${top.remedy.name} (score ${top.totalScore}, ${top.coverage}/${suggestedRubrics.length} rubrics). Doctor review required before applying.`
     : 'No remedy ranking produced.';
 
   return {
+    isSuggestionOnly: true,
+    disclaimer: SUGGESTION_DISCLAIMER,
+    approachTitle: approach.title,
+    repertorySourceName: source.name,
+    phrasesSearched,
+    suggestedRubrics,
+    results,
     summary,
-    suggestedRubrics: suggestedRubrics.map((item) => ({
-      ...item,
-      weight: weightByRubricId.get(item.rubricId) || item.weight
-    })),
-    results
+    generatedAt: new Date().toISOString()
   };
 }
 
@@ -285,6 +425,8 @@ export async function applyApproachRemedySuggestions(input: {
 }) {
   const suggestion = await suggestRemediesFromApproach(input);
   if (!suggestion) return null;
+
+  await persistRemedySuggestionSnapshot(input.analysisId, suggestion);
 
   await prisma.$transaction(async (tx) => {
     await tx.caseAnalysisRubric.deleteMany({ where: { analysisId: input.analysisId } });
