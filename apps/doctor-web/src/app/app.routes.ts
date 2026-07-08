@@ -14,6 +14,7 @@ import { SlotsPage } from './features/slots/slots-page/slots-page';
 import { EarningsPage } from './features/earnings/earnings-page/earnings-page';
 import { PatientScanPage } from './features/scan/patient-scan-page/patient-scan-page';
 import { DoctorPatientScanLauncherPage } from './features/scan/patient-scan-launcher-page/patient-scan-launcher-page';
+import { RepertoryBrowserPage } from './features/repertory-browser/repertory-browser';
 
 export const routes: Routes = [
   { path: ROUTE_PATHS.LOGIN, component: Login },
@@ -36,6 +37,7 @@ export const routes: Routes = [
         component: CaseAnalysisPage
       },
       { path: ROUTE_PATHS.PATIENTS, component: PatientsPage },
+      { path: ROUTE_PATHS.REPERTORY_BROWSER, component: RepertoryBrowserPage },
       { path: ROUTE_PATHS.PROFILE, component: ProfilePage },
       { path: ROUTE_PATHS.LEAVES, component: MyLeaves },
       { path: ROUTE_PATHS.SLOTS, component: SlotsPage },

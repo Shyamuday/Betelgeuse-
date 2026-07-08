@@ -12,6 +12,16 @@ export type RepertoryRemedyRef = {
   abbreviation: string;
 };
 
+export type RubricSuggestion = {
+  id: string;
+  chapter: string;
+  subchapter?: string | null;
+  text: string;
+  parentPath?: string | null;
+  label: string;
+  source: { id: string; name: string; code: string };
+};
+
 export type RubricSearchResult = {
   id: string;
   chapter: string;

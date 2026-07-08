@@ -4,6 +4,7 @@ import { Role } from '@prisma/client';
 import { authRequired, allowRoles } from '../../auth.js';
 import { prisma } from '../../db.js';
 import { asyncRoute, queryPositiveInt, queryText, routeParam } from '../../utils/helpers.js';
+import { searchRepertoryRubrics, toRubricSuggestion } from '../../services/repertory-search.js';
 import { normalizeRepertoryText } from '../../services/repertorization.js';
 
 export function registerRepertoryCatalogRoutes(router: Router) {
@@ -33,6 +34,36 @@ export function registerRepertoryCatalogRoutes(router: Router) {
   );
 
   router.get(
+    '/doctor/repertory/rubrics/suggest',
+    authRequired,
+    allowRoles(Role.DOCTOR, Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const query = z
+        .object({
+          q: z.string().min(1),
+          sourceId: z.string().optional(),
+          chapter: z.string().optional()
+        })
+        .parse({
+          q: queryText(req, 'q'),
+          sourceId: queryText(req, 'sourceId') || undefined,
+          chapter: queryText(req, 'chapter') || undefined
+        });
+
+      const limit = queryPositiveInt(req, 'limit', 12, 1, 20);
+      const suggestions = await searchRepertoryRubrics(prisma, {
+        q: query.q,
+        sourceId: query.sourceId,
+        chapter: query.chapter,
+        limit,
+        mode: 'suggest'
+      });
+
+      res.json({ suggestions: suggestions.map(toRubricSuggestion) });
+    })
+  );
+
+  router.get(
     '/doctor/repertory/rubrics/search',
     authRequired,
     allowRoles(Role.DOCTOR, Role.ADMIN),
@@ -50,26 +81,68 @@ export function registerRepertoryCatalogRoutes(router: Router) {
         });
 
       const limit = queryPositiveInt(req, 'limit', 25, 1, 50);
-      const normalized = normalizeRepertoryText(query.q);
-      const tokens = normalized.split(' ').filter(Boolean);
+      const rubrics = await searchRepertoryRubrics(prisma, {
+        q: query.q,
+        sourceId: query.sourceId,
+        chapter: query.chapter,
+        limit,
+        mode: 'search'
+      });
+
+      res.json({
+        rubrics: rubrics.map(({ normalizedText: _normalizedText, ...rubric }) => rubric)
+      });
+    })
+  );
+
+  router.get(
+    '/doctor/repertory/chapters',
+    authRequired,
+    allowRoles(Role.DOCTOR, Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const sourceId = queryText(req, 'sourceId') || undefined;
+      if (!sourceId) {
+        return res.status(400).json({ message: 'sourceId is required.' });
+      }
+
+      const rows = await prisma.repertoryRubric.groupBy({
+        by: ['chapter'],
+        where: { sourceId },
+        _count: { id: true },
+        orderBy: { chapter: 'asc' }
+      });
+
+      res.json({
+        chapters: rows.map((row) => ({ chapter: row.chapter, rubricCount: row._count.id }))
+      });
+    })
+  );
+
+  router.get(
+    '/doctor/repertory/chapter/rubrics',
+    authRequired,
+    allowRoles(Role.DOCTOR, Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const sourceId = queryText(req, 'sourceId') || undefined;
+      const chapter = queryText(req, 'chapter');
+      if (!sourceId || !chapter) {
+        return res.status(400).json({ message: 'sourceId and chapter are required.' });
+      }
+
+      const limit = queryPositiveInt(req, 'limit', 50, 1, 200);
+      const offset = queryPositiveInt(req, 'offset', 0, 0, 100000);
 
       const rubrics = await prisma.repertoryRubric.findMany({
-        where: {
-          ...(query.sourceId ? { sourceId: query.sourceId } : {}),
-          ...(query.chapter ? { chapter: { equals: query.chapter, mode: 'insensitive' } } : {}),
-          AND: tokens.map((token) => ({
-            normalizedText: { contains: token }
-          }))
-        },
+        where: { sourceId, chapter: { equals: chapter, mode: 'insensitive' } },
+        skip: offset,
         take: limit,
-        orderBy: [{ chapter: 'asc' }, { text: 'asc' }],
+        orderBy: { text: 'asc' },
         select: {
           id: true,
           chapter: true,
           subchapter: true,
           text: true,
           parentPath: true,
-          source: { select: { id: true, name: true, code: true } },
           remedies: {
             take: 6,
             orderBy: { grade: 'desc' },

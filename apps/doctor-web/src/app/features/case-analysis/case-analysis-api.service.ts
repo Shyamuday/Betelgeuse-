@@ -10,7 +10,8 @@ import type {
   MateriaMedicaResponse,
   PatientCaseHistory,
   RepertorySource,
-  RubricSearchResult
+  RubricSearchResult,
+  RubricSuggestion
 } from './case-analysis-page.types';
 
 @Service()
@@ -34,6 +35,17 @@ export class CaseAnalysisApiService {
         }
       })
     ).then((response) => response.rubrics);
+  }
+
+  suggestRubrics(q: string, sourceId?: string) {
+    return firstValueFrom(
+      this.http.get<{ suggestions: RubricSuggestion[] }>(`${this.apiBase}${API_PATHS.DOCTOR.REPERTORY_RUBRICS_SUGGEST}`, {
+        params: {
+          q,
+          ...(sourceId ? { sourceId } : {})
+        }
+      })
+    ).then((response) => response.suggestions);
   }
 
   loadOrCreatePracticeSession() {

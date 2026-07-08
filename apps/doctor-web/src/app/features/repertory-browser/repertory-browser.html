@@ -1,0 +1,189 @@
+<section class="page repertory-browser-page">
+  <header class="hero">
+    <h2>Repertory & Materia Medica</h2>
+    <p class="muted">Browse rubrics, chapters, and explore full remedy materia medica.</p>
+  </header>
+
+  <div class="browser-toolbar">
+    <div class="tab-row">
+      <button type="button" class="tab-btn" [class.active]="activeTab() === 'search'" (click)="switchTab('search')">Search Rubrics</button>
+      <button type="button" class="tab-btn" [class.active]="activeTab() === 'chapters'" (click)="switchTab('chapters')">Browse Chapters</button>
+      <button type="button" class="tab-btn" [class.active]="activeTab() === 'remedies'" (click)="switchTab('remedies')">Remedies & MM</button>
+    </div>
+
+    @if (sources().length) {
+      <select class="source-select" [formField]="searchForm.sourceId" (change)="onSourceChange()">
+        @for (source of sources(); track source.id) {
+          <option [value]="source.id">{{ source.name }} · {{ source.rubricCount | number }} rubrics</option>
+        }
+      </select>
+    }
+
+    @if (activeTab() !== 'chapters') {
+      <div class="search-row">
+        <input
+          [formField]="searchForm.query"
+          [placeholder]="activeTab() === 'remedies' ? 'Search remedy: Arsenicum, Pulsatilla, Ars…' : 'Search rubrics: anxiety morning, headache forehead…'"
+          (keyup.enter)="search()"
+        />
+        <button type="button" class="btn-primary" (click)="search()" [disabled]="searchModel().query.trim().length < 2">Search</button>
+      </div>
+    }
+  </div>
+
+  <!-- RUBRIC SEARCH RESULTS -->
+  @if (activeTab() === 'search') {
+    @if (searchingRubrics()) {
+      <p class="hint">Searching repertory…</p>
+    } @else if (searchedOnce() && !rubricResults().length) {
+      <p class="hint">No rubrics found. Try different keywords.</p>
+    }
+
+    @if (rubricResults().length) {
+      <div class="rubric-grid">
+        @for (rubric of rubricResults(); track rubric.id) {
+          <article class="rubric-card">
+            <nav class="rubric-breadcrumb">{{ rubricPath(rubric) }}</nav>
+            <p class="rubric-text">{{ rubric.text }}</p>
+            @if (rubric.remedies && rubric.remedies.length) {
+              <div class="remedy-chips">
+                @for (link of rubric.remedies; track link.remedy.id) {
+                  <button type="button" class="chip" [attr.data-grade]="link.grade" (click)="openMateriaMedica(link.remedy)">
+                    {{ link.remedy.abbreviation }}
+                    <small>{{ link.grade }}</small>
+                  </button>
+                }
+              </div>
+            }
+            @if (rubric.source) {
+              <span class="source-badge muted">{{ rubric.source.name }}</span>
+            }
+          </article>
+        }
+      </div>
+    }
+  }
+
+  <!-- CHAPTERS BROWSER -->
+  @if (activeTab() === 'chapters') {
+    @if (loadingChapters()) {
+      <p class="hint">Loading chapters…</p>
+    }
+
+    @if (!selectedChapter() && chapters().length) {
+      <div class="chapter-grid">
+        @for (ch of chapters(); track ch.chapter) {
+          <button type="button" class="chapter-card" (click)="openChapter(ch.chapter)">
+            <strong>{{ ch.chapter }}</strong>
+            <span class="muted">{{ ch.rubricCount | number }} rubrics</span>
+          </button>
+        }
+      </div>
+    }
+
+    @if (selectedChapter()) {
+      <div class="chapter-header">
+        <button type="button" class="btn-link" (click)="backToChapters()">← All chapters</button>
+        <h3>{{ selectedChapter() }}</h3>
+      </div>
+
+      @if (loadingChapterRubrics()) {
+        <p class="hint">Loading rubrics…</p>
+      }
+
+      @if (chapterRubrics().length) {
+        <div class="rubric-grid">
+          @for (rubric of chapterRubrics(); track rubric.id) {
+            <article class="rubric-card">
+              <nav class="rubric-breadcrumb">{{ rubric.subchapter || '' }} {{ rubric.parentPath || '' }}</nav>
+              <p class="rubric-text">{{ rubric.text }}</p>
+              @if (rubric.remedies && rubric.remedies.length) {
+                <div class="remedy-chips">
+                  @for (link of rubric.remedies; track link.remedy.id) {
+                    <button type="button" class="chip" [attr.data-grade]="link.grade" (click)="openMateriaMedica(link.remedy)">
+                      {{ link.remedy.abbreviation }}
+                      <small>{{ link.grade }}</small>
+                    </button>
+                  }
+                </div>
+              }
+            </article>
+          }
+        </div>
+      }
+    }
+  }
+
+  <!-- REMEDIES / MATERIA MEDICA -->
+  @if (activeTab() === 'remedies') {
+    @if (searchingRemedies()) {
+      <p class="hint">Searching remedies…</p>
+    } @else if (searchedOnce() && !remedyResults().length && !materiaMedica()) {
+      <p class="hint">No remedies found.</p>
+    }
+
+    @if (remedyResults().length && !materiaMedica()) {
+      <div class="remedy-grid">
+        @for (remedy of remedyResults(); track remedy.id) {
+          <button type="button" class="remedy-card" (click)="openMateriaMedica(remedy)">
+            <strong>{{ remedy.name }}</strong>
+            <span class="abbrev">{{ remedy.abbreviation }}</span>
+          </button>
+        }
+      </div>
+    }
+
+    @if (loadingMM()) {
+      <p class="hint">Loading materia medica…</p>
+    }
+  }
+
+  <!-- MATERIA MEDICA PANEL (shows in any tab when a remedy is opened) -->
+  @if (materiaMedica(); as mm) {
+    <section class="mm-panel">
+      <div class="mm-header">
+        <div>
+          <h3>{{ mm.remedy.name }}</h3>
+          <span class="abbrev">{{ mm.remedy.abbreviation }}</span>
+          @if (mm.source) {
+            <p class="muted mm-source-line">
+              {{ mm.source.name }}
+              @if (mm.source.author) { · {{ mm.source.author }} }
+              @if (mm.source.year) { · {{ mm.source.year }} }
+            </p>
+          }
+        </div>
+        <button type="button" class="btn-icon" (click)="closeMateriaMedica()" title="Close">×</button>
+      </div>
+
+      @if (mm.sections.length) {
+        <div class="mm-sections">
+          @for (section of mm.sections; track section.id) {
+            <article class="mm-section">
+              @if (section.heading) {
+                <h4>{{ section.heading }}</h4>
+              }
+              <p>{{ section.content }}</p>
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="hint">No materia medica text available for this remedy.</p>
+      }
+
+      @if (mm.keyRubrics.length) {
+        <div class="mm-rubrics">
+          <h4>Key Rubrics</h4>
+          <ul>
+            @for (item of mm.keyRubrics; track item.rubricId) {
+              <li>
+                <span class="mm-grade">{{ item.grade }}</span>
+                <span>{{ item.rubric.chapter }} · {{ item.rubric.text }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </section>
+  }
+</section>

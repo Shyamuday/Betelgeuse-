@@ -316,11 +316,45 @@
           </div>
 
           <div class="search-box">
-            <input
-              [formField]="searchForm.rubricQuery"
-              [placeholder]="activeApproach().repertory.searchPlaceholder || 'Search rubrics…'"
-              (keyup.enter)="searchRubrics()"
-            />
+            <div class="rubric-search-field">
+              <input
+                [formField]="searchForm.rubricQuery"
+                [placeholder]="activeApproach().repertory.searchPlaceholder || 'Search rubrics…'"
+                (focus)="onRubricSearchFocus()"
+                (keyup.enter)="searchRubrics()"
+              />
+
+              @if (rubricSuggestionsOpen()) {
+                <div class="rubric-suggest-panel" role="listbox" aria-label="Rubric suggestions">
+                  @if (suggesting()) {
+                    <p class="hint suggest-status">Finding matches…</p>
+                  }
+                  @for (suggestion of rubricSuggestions(); track suggestion.id) {
+                    <div class="rubric-suggest-item" [class.added]="hasRubric(suggestion.id)">
+                      <button
+                        type="button"
+                        class="rubric-suggest-main"
+                        role="option"
+                        (mousedown)="$event.preventDefault()"
+                        (click)="pickRubricSuggestion(suggestion)"
+                      >
+                        <span class="suggest-chapter">{{ suggestion.chapter }}</span>
+                        <span class="suggest-text">{{ suggestion.text }}</span>
+                      </button>
+                      <button
+                        type="button"
+                        class="rubric-suggest-add"
+                        (mousedown)="$event.preventDefault()"
+                        (click)="addRubricSuggestion(suggestion)"
+                        [disabled]="hasRubric(suggestion.id)"
+                      >
+                        {{ hasRubric(suggestion.id) ? 'Added' : '+ Add' }}
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
             @if (!standalone && consultation()?.intakeAnswers) {
               <button type="button" class="btn-secondary" (click)="suggestFromIntake()">From intake</button>
             }

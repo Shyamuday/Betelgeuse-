@@ -58,6 +58,7 @@ import type {
   RepertoryRemedyRef,
   RepertorySource,
   RubricSearchResult,
+  RubricSuggestion,
   SelectedRubric
 } from '../case-analysis-page.types';
 import { formatRubricPath, rubricPathSegments } from '../rubric-path.util';
@@ -100,6 +101,8 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
   private readonly caseSheetAutoSave = createDebouncedSaver(1200);
   private readonly notesAutoSave = createDebouncedSaver(1200);
   private readonly rubricsAutoSave = createDebouncedSaver(900);
+  private readonly rubricSuggestDebouncer = createDebouncedSaver(280);
+  private rubricSuggestRequest = 0;
   private lastPersistedCaseSheet = '';
   private lastPersistedNotes = '';
   private lastPersistedRubrics = '';
@@ -126,6 +129,8 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
   readonly approachData = signal<ApproachDataPayload>({});
 
   readonly searchResults = signal<RubricSearchResult[]>([]);
+  readonly rubricSuggestions = signal<RubricSuggestion[]>([]);
+  readonly rubricSuggestionsOpen = signal(false);
   readonly searchedOnce = signal(false);
   readonly maxResultScore = signal(0);
 
@@ -135,6 +140,7 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
 
   readonly loading = signal(false);
   readonly searching = signal(false);
+  readonly suggesting = signal(false);
   readonly saving = signal(false);
   readonly savingCaseSheet = signal(false);
   readonly savingApproachData = signal(false);
@@ -208,6 +214,11 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
       this.selectedRubrics();
       this.scheduleAutoSaveRubrics();
     });
+    effect(() => {
+      const query = this.searchModel().rubricQuery.trim();
+      const sourceId = this.searchModel().selectedSourceId || this.analysis()?.source?.id || '';
+      this.scheduleRubricSuggest(query, sourceId);
+    });
   }
 
   ngOnInit() {
@@ -240,6 +251,7 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
     this.caseSheetAutoSave.cancel();
     this.notesAutoSave.cancel();
     this.rubricsAutoSave.cancel();
+    this.rubricSuggestDebouncer.cancel();
   }
 
   showPanel(component: ApproachStepComponent) {
@@ -459,6 +471,7 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
     const q = this.searchModel().rubricQuery.trim();
     if (q.length < 2) return;
 
+    this.closeRubricSuggestions();
     this.searching.set(true);
     this.error.set('');
     this.searchedOnce.set(true);
@@ -472,6 +485,68 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
     } finally {
       this.searching.set(false);
     }
+  }
+
+  private scheduleRubricSuggest(query: string, sourceId: string) {
+    if (query.length < 2) {
+      this.rubricSuggestDebouncer.cancel();
+      this.rubricSuggestions.set([]);
+      this.rubricSuggestionsOpen.set(false);
+      this.suggesting.set(false);
+      return;
+    }
+
+    this.rubricSuggestDebouncer.schedule(() => this.loadRubricSuggestions(query, sourceId));
+  }
+
+  private async loadRubricSuggestions(query: string, sourceId: string) {
+    const requestId = ++this.rubricSuggestRequest;
+    this.suggesting.set(true);
+    try {
+      const suggestions = await this.api.suggestRubrics(query, sourceId || undefined);
+      if (requestId !== this.rubricSuggestRequest) return;
+      this.rubricSuggestions.set(suggestions);
+      this.rubricSuggestionsOpen.set(suggestions.length > 0);
+    } catch {
+      if (requestId !== this.rubricSuggestRequest) return;
+      this.rubricSuggestions.set([]);
+      this.rubricSuggestionsOpen.set(false);
+    } finally {
+      if (requestId === this.rubricSuggestRequest) {
+        this.suggesting.set(false);
+      }
+    }
+  }
+
+  onRubricSearchFocus() {
+    if (this.rubricSuggestions().length) {
+      this.rubricSuggestionsOpen.set(true);
+    }
+  }
+
+  closeRubricSuggestions() {
+    this.rubricSuggestionsOpen.set(false);
+  }
+
+  pickRubricSuggestion(suggestion: RubricSuggestion) {
+    this.searchModel.update((model) => ({ ...model, rubricQuery: suggestion.text }));
+    this.closeRubricSuggestions();
+    void this.searchRubrics();
+  }
+
+  addRubricSuggestion(suggestion: RubricSuggestion) {
+    if (this.hasRubric(suggestion.id)) return;
+    this.addRubric({
+      id: suggestion.id,
+      chapter: suggestion.chapter,
+      subchapter: suggestion.subchapter,
+      text: suggestion.text,
+      parentPath: suggestion.parentPath,
+      source: suggestion.source,
+      remedies: []
+    });
+    this.closeRubricSuggestions();
+    this.message.set('Symptom added to case.');
   }
 
   applyRubricSearchPhrase(phrase: string) {
