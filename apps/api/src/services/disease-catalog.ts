@@ -14,9 +14,11 @@ export type DiseaseListItem = {
   name: string;
   slug: string | null;
   description: string;
+  publicDescription: string | null;
   publicCategory: string | null;
   feeInPaise: number;
   isActive: boolean;
+  prescriptionOptionId?: string | null;
 };
 
 export class DiseaseCatalogError extends Error {
@@ -55,7 +57,7 @@ export async function listDiseases(filters: {
 }) {
   const q = filters.q?.trim();
 
-  return prisma.disease.findMany({
+  const rows = await prisma.disease.findMany({
     where: {
       ...(filters.activeOnly === false ? {} : { isActive: true }),
       ...(filters.category ? { publicCategory: filters.category } : {}),
@@ -66,6 +68,7 @@ export async function listDiseases(filters: {
       name: true,
       slug: true,
       description: true,
+      publicDescription: true,
       publicCategory: true,
       feeInPaise: true,
       isActive: true
@@ -73,6 +76,27 @@ export async function listDiseases(filters: {
     orderBy: [{ publicCategory: 'asc' }, { name: 'asc' }],
     take: filters.limit ?? (q ? 50 : 500)
   });
+
+  return attachPrescriptionOptionIds(rows);
+}
+
+async function attachPrescriptionOptionIds<T extends { name: string }>(diseases: T[]) {
+  if (!diseases.length) return diseases as Array<T & { prescriptionOptionId: string | null }>;
+
+  const normalizedLabels = diseases.map((disease) => normalizeOptionLabel(disease.name));
+  const options = await prisma.prescriptionOption.findMany({
+    where: {
+      type: PrescriptionOptionType.DIAGNOSED_DISEASE,
+      normalizedLabel: { in: normalizedLabels }
+    },
+    select: { id: true, normalizedLabel: true }
+  });
+  const optionByLabel = new Map(options.map((option) => [option.normalizedLabel, option.id]));
+
+  return diseases.map((disease) => ({
+    ...disease,
+    prescriptionOptionId: optionByLabel.get(normalizeOptionLabel(disease.name)) ?? null
+  }));
 }
 
 export function groupDiseasesByCategory(
@@ -221,7 +245,8 @@ export async function createDoctorDisease(input: {
 
   await syncDiagnosedDiseaseOption(name, input.createdById);
 
-  return disease;
+  const [withOption] = await attachPrescriptionOptionIds([disease]);
+  return withOption;
 }
 
 export async function syncDiseaseCatalog(defaultFeeInPaise = DEFAULT_DOCTOR_DISEASE_FEE_PAISE) {

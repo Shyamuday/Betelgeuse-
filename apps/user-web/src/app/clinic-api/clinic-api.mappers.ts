@@ -6,6 +6,7 @@ export function mapDiseaseFromApi(row: Record<string, unknown>): Disease {
       name: row['name'] as string,
       slug: (row['slug'] as string | null | undefined) ?? null,
       description: row['description'] as string,
+      publicDescription: (row['publicDescription'] as string | null | undefined) ?? null,
       feeInPaise: row['feeInPaise'] as number,
       intakeQuestions: (row['intakeQuestions'] as string[]) || [],
       publicCategory: (row['publicCategory'] as string | null | undefined) ?? null

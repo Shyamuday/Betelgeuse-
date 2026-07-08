@@ -45,6 +45,7 @@ export class ClinicApiService {
     planCode?: string;
     walletRedeemInPaise?: number;
     promoCode?: string;
+    clinicStoreId?: string | null;
   }) {
     return from(this.client.apiFetch(API_PATHS.CONSULTATIONS, {
       method: 'POST',

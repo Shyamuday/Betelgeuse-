@@ -39,6 +39,19 @@
         </select>
       </label>
 
+      <label>
+        Consultation location
+        <select [formField]="bookingForm.selectedClinicStoreId" (change)="onClinicChange()">
+          <option value="">Online consultation</option>
+          @if (clinicsLoading()) {
+            <option disabled>Loading clinics…</option>
+          }
+          @for (clinic of clinics(); track clinic.id) {
+            <option [value]="clinic.id">{{ clinic.name }}</option>
+          }
+        </select>
+      </label>
+
       @for (question of intakeQuestions(); track question) {
         <label>
           {{ question }}

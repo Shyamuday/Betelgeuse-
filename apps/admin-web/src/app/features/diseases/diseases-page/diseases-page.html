@@ -58,6 +58,10 @@
         Description
         <textarea [formField]="newDiseaseForm.description" rows="2" placeholder="Brief description shown to patients"></textarea>
       </label>
+      <label class="field">
+        Public page copy (optional)
+        <textarea [formField]="newDiseaseForm.publicDescription" rows="4" placeholder="Longer marketing copy for the treatment detail page"></textarea>
+      </label>
 
       <div class="questions-editor">
         <p class="qs-label">Intake Questions</p>
@@ -134,6 +138,9 @@
       <button type="button" class="btn-edit" (click)="startEdit(diseaseById(disease.id) || disease)">Edit</button>
     </div>
     <p class="disease-desc">{{ disease.description }}</p>
+    @if (disease.publicDescription) {
+      <p class="disease-public-desc">{{ disease.publicDescription }}</p>
+    }
     <div class="question-list-read">
       @for (q of (diseaseById(disease.id)?.intakeQuestions || []); track $index) {
         <span class="q-chip">{{ q }}</span>
@@ -163,6 +170,10 @@
     <label class="field">
       Description
       <textarea [formField]="draftForm.description" rows="2"></textarea>
+    </label>
+    <label class="field">
+      Public page copy (optional)
+      <textarea [formField]="draftForm.publicDescription" rows="4" placeholder="Shown on /treatments/:slug when synced"></textarea>
     </label>
     <label class="field checkbox-field">
       <input type="checkbox" [formField]="draftForm.isActive" />

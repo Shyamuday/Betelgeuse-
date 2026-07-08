@@ -44,7 +44,11 @@ export class DiseaseDetailComponent implements OnInit {
   readonly pageReady = computed(() => !this.loading() && (this.staticInfo() || this.liveDisease()));
   readonly displayName = computed(() => this.staticInfo()?.name || this.liveDisease()?.name || '');
   readonly displaySummary = computed(
-    () => this.staticInfo()?.summary || this.liveDisease()?.description || ''
+    () =>
+      this.staticInfo()?.summary ||
+      this.liveDisease()?.publicDescription ||
+      this.liveDisease()?.description ||
+      ''
   );
   readonly headerSubtitle = computed(() => this.staticInfo()?.shortName || this.displayName());
 

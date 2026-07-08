@@ -180,6 +180,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         ...(payload.purchaseType === PURCHASE_TYPES.PLAN ? { planCode: payload.planCode } : {}),
         ...(payload.walletRedeemInPaise ? { walletRedeemInPaise: payload.walletRedeemInPaise } : {}),
         ...(payload.promoCode ? { promoCode: payload.promoCode } : {}),
+        ...(payload.clinicStoreId !== undefined ? { clinicStoreId: payload.clinicStoreId } : {}),
       })
       .subscribe({
         next: () => {

@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 import { RoleTaskGuideComponent, NotificationBellHostComponent, ProfileAvatarDisplayComponent } from '@vitalis/platform-ui';
 import { environment } from '../../../environments/environment';
 import { AUTH_TOKEN_KEY } from '../../core/constants/auth.constants';
@@ -28,7 +29,7 @@ const NAV_ICONS: Record<string, { icon: string; shortLabel: string }> = {
   Profile: { icon: '👤', shortLabel: 'Profile' }
 };
 
-const MOBILE_BOTTOM_NAV_ORDER = ['Worklist', 'Appointments', 'Scan', 'Repertory'] as const;
+const MOBILE_BOTTOM_NAV_ORDER = ['Worklist', 'Patients', 'Scan', 'Appointments'] as const;
 const MOBILE_BOTTOM_NAV_LIMIT = 4;
 
 @Component({
@@ -48,10 +49,12 @@ export class DoctorShell implements OnInit, OnDestroy {
   doctorTypeKey: string | null = null;
   loadingSession = true;
   menuOpen = signal(false);
+  focusMode = signal(false);
   assignmentNotice = signal('');
 
   private readonly realtime = inject(DoctorRealtimeService);
   private readonly router = inject(Router);
+  private navSubscription?: { unsubscribe: () => void };
 
   readonly bellConfig = {
     apiBase: environment.apiUrl,
@@ -89,10 +92,28 @@ export class DoctorShell implements OnInit, OnDestroy {
       void this.router.navigate(['/', ROUTE_PATHS.CASE_ANALYSIS, payload.consultationId, 'case-analysis']);
       window.setTimeout(() => this.assignmentNotice.set(''), 5000);
     });
+
+    this.syncFocusMode(this.router.url);
+    this.navSubscription = this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        this.closeMenu();
+        this.syncFocusMode(event.urlAfterRedirects);
+      });
   }
 
   ngOnDestroy(): void {
     this.realtime.disconnect();
+    this.navSubscription?.unsubscribe();
+  }
+
+  private syncFocusMode(url: string) {
+    const path = url.split('?')[0];
+    const hasConsultation =
+      path.includes(`/${ROUTE_PATHS.CASE_ANALYSIS}/`) && path.endsWith('/case-analysis');
+    const inAppointmentsWithCase =
+      path.endsWith(`/${ROUTE_PATHS.APPOINTMENTS}`) && /[?&]consultationId=/.test(url);
+    this.focusMode.set(hasConsultation || inAppointmentsWithCase);
   }
 
   logout() {

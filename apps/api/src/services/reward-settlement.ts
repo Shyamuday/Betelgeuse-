@@ -163,6 +163,7 @@ export async function quoteConsultationCheckoutForPatient(input: {
   planCode?: string;
   promoCode?: string;
   walletRedeemInPaise?: number;
+  clinicStoreId?: string | null;
 }) {
   const disease = await prisma.disease.findUniqueOrThrow({ where: { id: input.diseaseId } });
   const patient = await prisma.user.findUniqueOrThrow({
@@ -171,7 +172,9 @@ export async function quoteConsultationCheckoutForPatient(input: {
   });
 
   const { resolveDiseaseConsultationFee } = await import('./consultation-pricing.js');
-  const consultFeePaise = await resolveDiseaseConsultationFee(disease.id, patient.homeClinicStoreId);
+  const clinicStoreId =
+    input.clinicStoreId === undefined ? patient.homeClinicStoreId : input.clinicStoreId;
+  const consultFeePaise = await resolveDiseaseConsultationFee(disease.id, clinicStoreId);
 
   let grossInPaise = consultFeePaise;
   if (input.purchaseType === 'PLAN') {

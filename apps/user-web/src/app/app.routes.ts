@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { ROUTE_SEO_CONTENT } from './core/constants/public-site-content.constants';
 import { AboutComponent } from './about.component';
 import { BlogComponent } from './blog.component';
+import { BlogDetailComponent } from './blog-detail.component';
 import { CareersComponent } from './careers.component';
 import { DashboardComponent } from './dashboard.component';
 import { ChronicCareComponent } from './chronic-care.component';
@@ -52,6 +53,11 @@ export const routes: Routes = [
   {
     path: 'blog',
     component: BlogComponent,
+    data: ROUTE_SEO_CONTENT.blog
+  },
+  {
+    path: 'blog/:slug',
+    component: BlogDetailComponent,
     data: ROUTE_SEO_CONTENT.blog
   },
   {

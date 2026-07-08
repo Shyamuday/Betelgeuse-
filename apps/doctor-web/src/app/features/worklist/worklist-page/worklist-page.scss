@@ -138,6 +138,27 @@
   margin-top: 0.25rem;
 }
 
+.actions-mobile .actions-primary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+}
+
+.actions-more {
+  width: 100%;
+}
+
+.actions-secondary {
+  display: grid;
+  gap: 0.4rem;
+}
+
+@media (max-width: 768px) {
+  .view-filter-select {
+    display: none;
+  }
+}
+
 button {
   border: 0;
   border-radius: var(--radius-sm);
@@ -201,6 +222,10 @@ button:disabled {
   .actions {
     flex-direction: row;
     flex-wrap: wrap;
+  }
+
+  .actions-mobile {
+    flex-direction: column;
   }
 
   .actions button {

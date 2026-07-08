@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { AppFooterComponent } from './app-footer.component';
 import { AppHeaderComponent } from './app-header.component';
 import { WhatsappLinkService } from './core/services/whatsapp-link.service';
@@ -19,7 +20,7 @@ interface BlogPost {
 
 @Component({
   selector: 'app-blog',
-  imports: [AppHeaderComponent, AppFooterComponent],
+  imports: [AppHeaderComponent, AppFooterComponent, RouterLink],
   templateUrl: './blog.component.html',
 })
 export class BlogComponent {

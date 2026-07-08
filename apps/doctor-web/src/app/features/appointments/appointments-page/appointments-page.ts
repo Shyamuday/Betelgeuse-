@@ -21,6 +21,7 @@ import type {
   PrescriptionTemplate
 } from './appointments-page.types';
 import { analyzePrescriptionSafety, type PrescriptionSafetyReport } from '../prescription-safety';
+import { DiseaseCatalogService } from '../../../core/services/disease-catalog.service';
 import {
   PatientHealthProfileComponent,
   type PatientClinicalProfile
@@ -73,6 +74,7 @@ export class AppointmentsPage {
   private readonly prescriptionPdf = inject(PrescriptionPdfService);
   private readonly session = inject(DoctorSessionService);
   private readonly consultationApi = inject(ConsultationApiService);
+  private readonly diseaseCatalog = inject(DiseaseCatalogService);
   private readonly route = inject(ActivatedRoute);
 
   defaultMethodOptionId = '';
@@ -89,7 +91,7 @@ export class AppointmentsPage {
   loadedPrescriptions: LoadedPrescription[] = [];
 
   methods: PrescriptionOption[] = [];
-  diagnosedDiseases: PrescriptionOption[] = [];
+  diagnosedDiseases: Array<{ id: string; name: string; prescriptionOptionId: string | null }> = [];
 
   message = '';
   error = '';
@@ -180,12 +182,16 @@ export class AppointmentsPage {
     this.error = '';
     try {
       const search = this.optionDraftModel().diagnosedDiseaseSearch;
-      const [methods, diagnosedDiseases] = await Promise.all([
+      const [methods, diseaseResponse] = await Promise.all([
         this.prescriptions.loadOptions('METHOD'),
-        this.prescriptions.loadOptions('DIAGNOSED_DISEASE', search)
+        this.diseaseCatalog.loadDiseases({ q: search || undefined, grouped: false })
       ]);
       this.methods = methods;
-      this.diagnosedDiseases = diagnosedDiseases;
+      this.diagnosedDiseases = (diseaseResponse.diseases || []).map((disease) => ({
+        id: disease.id,
+        name: disease.name,
+        prescriptionOptionId: disease.prescriptionOptionId ?? null
+      }));
       this.applyDefaultMethodIfEmpty();
     } catch {
       this.error = 'Could not load dropdown options. Login with API-backed doctor account.';
@@ -194,10 +200,15 @@ export class AppointmentsPage {
 
   async searchDiagnosedDiseases() {
     try {
-      this.diagnosedDiseases = await this.prescriptions.loadOptions(
-        'DIAGNOSED_DISEASE',
-        this.optionDraftModel().diagnosedDiseaseSearch
-      );
+      const diseaseResponse = await this.diseaseCatalog.loadDiseases({
+        q: this.optionDraftModel().diagnosedDiseaseSearch || undefined,
+        grouped: false
+      });
+      this.diagnosedDiseases = (diseaseResponse.diseases || []).map((disease) => ({
+        id: disease.id,
+        name: disease.name,
+        prescriptionOptionId: disease.prescriptionOptionId ?? null
+      }));
     } catch {
       this.error = 'Could not search diagnosed diseases.';
     }
@@ -214,18 +225,23 @@ export class AppointmentsPage {
     }
 
     try {
-      const response = await this.prescriptions.addOption(type, label);
-
       if (type === 'METHOD') {
+        const response = await this.prescriptions.addOption(type, label);
         this.optionDraftModel.update((model) => ({ ...model, newMethod: '' }));
         this.methods = [...this.methods, response.option].sort((a, b) => a.label.localeCompare(b.label));
         this.prescriptionModel.update((model) => ({ ...model, methodOptionId: response.option.id }));
       } else {
+        const disease = await this.diseaseCatalog.createDisease({
+          name: label,
+          publicCategory: 'miscellaneous',
+          description: `${label} — doctor-added condition`
+        });
+        await this.loadOptions();
+        const optionId = disease.prescriptionOptionId;
+        if (optionId) {
+          this.prescriptionModel.update((model) => ({ ...model, diagnosedDiseaseOptionId: optionId }));
+        }
         this.optionDraftModel.update((model) => ({ ...model, newDiagnosedDisease: '' }));
-        this.diagnosedDiseases = [...this.diagnosedDiseases, response.option].sort((a, b) =>
-          a.label.localeCompare(b.label)
-        );
-        this.prescriptionModel.update((model) => ({ ...model, diagnosedDiseaseOptionId: response.option.id }));
       }
       this.message = 'Option added successfully.';
     } catch {

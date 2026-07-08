@@ -50,6 +50,34 @@ const CONFIG_META: Record<string, { label: string; description: string }> = {
   statSatisfaction: {
     label: 'Testimonials: satisfaction score',
     description: 'Shown on the testimonials page. E.g. "4.8 / 5".'
+  },
+  contactPhone: {
+    label: 'Contact phone (display)',
+    description: 'Phone shown in the site footer. E.g. +91-98765-43210.'
+  },
+  contactPhoneTel: {
+    label: 'Contact phone (tel link)',
+    description: 'Digits for tel: links. E.g. +919876543210.'
+  },
+  contactEmail: {
+    label: 'Contact email',
+    description: 'Support email shown in the footer.'
+  },
+  clinicAddressLine1: {
+    label: 'Address line 1',
+    description: 'First line of clinic address in the footer.'
+  },
+  clinicAddressLine2: {
+    label: 'Address line 2',
+    description: 'Second address line.'
+  },
+  clinicAddressLine3: {
+    label: 'Address line 3',
+    description: 'Third address line (city/state).'
+  },
+  clinicAddressLine4: {
+    label: 'Address line 4',
+    description: 'Fourth address line (pincode/country).'
   }
 };
 
@@ -87,7 +115,7 @@ export function registerAdminSiteConfigRoutes(router: Router) {
         return res.status(400).json({ message: `Unknown config key: ${key}` });
       }
 
-      const { value } = z.object({ value: z.string().min(1).max(255) }).parse(req.body);
+      const { value } = z.object({ value: z.string().min(1).max(500) }).parse(req.body);
 
       const row = await prisma.siteConfig.upsert({
         where: { key },
@@ -121,5 +149,12 @@ const defaults: Record<string, string> = {
   statPatientsTreated: '4,800+',
   statConditionsTreated: '15+',
   statImprovement: '92%',
-  statSatisfaction: '4.8 / 5'
+  statSatisfaction: '4.8 / 5',
+  contactPhone: '+91-98765-43210',
+  contactPhoneTel: '+919876543210',
+  contactEmail: 'support@vitaliscare.in',
+  clinicAddressLine1: 'Ranchi Main Clinic',
+  clinicAddressLine2: 'Near City Centre, Main Road',
+  clinicAddressLine3: 'Ranchi, Jharkhand, India',
+  clinicAddressLine4: 'Pincode — 834001'
 };

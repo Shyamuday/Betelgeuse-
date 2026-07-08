@@ -63,3 +63,34 @@
   border-color: #4f46e5;
   background: #eef2ff;
 }
+
+@media (max-width: 768px) {
+  .consultation-context-header {
+    position: sticky;
+    top: calc(var(--shell-topbar-height) + var(--safe-top));
+    z-index: 32;
+    margin: -0.85rem -0.85rem 0.65rem;
+    padding: 0.75rem 0.85rem;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  }
+
+  .back-link {
+    display: none;
+  }
+
+  .context-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+    width: 100%;
+  }
+
+  .context-actions .btn-secondary {
+    justify-content: center;
+    min-height: var(--touch-min);
+    font-weight: 600;
+  }
+}

@@ -10,6 +10,7 @@ type Disease = {
   id: string;
   name: string;
   description: string;
+  publicDescription?: string | null;
   feeInPaise: number;
   isActive: boolean;
   intakeQuestions: string[];
@@ -29,6 +30,7 @@ function emptyDraft() {
   return {
     name: '',
     description: '',
+    publicDescription: '',
     feeRupees: 500,
     isActive: true,
     publicCategory: 'miscellaneous',
@@ -40,6 +42,7 @@ function emptyNew() {
   return {
     name: '',
     description: '',
+    publicDescription: '',
     feeRupees: 500,
     publicCategory: 'miscellaneous',
     intakeQuestions: [] as string[]
@@ -157,6 +160,7 @@ export class DiseasesPage {
     this.draftModel.set({
       name: disease.name,
       description: disease.description,
+      publicDescription: disease.publicDescription || '',
       feeRupees: Math.round(disease.feeInPaise / PAISE_PER_RUPEE),
       isActive: disease.isActive,
       publicCategory: disease.publicCategory || 'miscellaneous',
@@ -198,6 +202,7 @@ export class DiseasesPage {
       await this.api.updateDisease(this.editingId, {
         name: draft.name,
         description: draft.description,
+        publicDescription: draft.publicDescription.trim() || null,
         feeInPaise: Math.round(Number(draft.feeRupees) * PAISE_PER_RUPEE),
         isActive: draft.isActive,
         publicCategory: draft.publicCategory,
@@ -240,6 +245,7 @@ export class DiseasesPage {
       await this.api.createDisease({
         name: newDisease.name,
         description: newDisease.description,
+        publicDescription: newDisease.publicDescription.trim() || null,
         feeInPaise: Math.round(Number(newDisease.feeRupees) * PAISE_PER_RUPEE),
         publicCategory: newDisease.publicCategory,
         intakeQuestions: newDisease.intakeQuestions

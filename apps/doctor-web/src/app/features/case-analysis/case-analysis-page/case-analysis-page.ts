@@ -33,6 +33,7 @@ import { ConsultationIntakePanelComponent } from '../../../shared/consultation-i
 import { CollapsibleSectionComponent } from '../../../shared/collapsible-section/collapsible-section';
 import { CaseAnalysisApiService } from '../case-analysis-api.service';
 import { createDebouncedSaver } from '../case-analysis-autosave.util';
+import { ViewportService } from '../../../core/services/viewport.service';
 import { primaryIntakeSearchPhrase } from '../intake-rubric.util';
 import { ApproachCaseSheetPanelComponent } from '../panels/approach-case-sheet-panel/approach-case-sheet-panel';
 import { ApproachOverviewPanelComponent } from '../panels/approach-overview-panel/approach-overview-panel';
@@ -64,6 +65,8 @@ import type {
   SelectedRubric
 } from '../case-analysis-page.types';
 import { formatRubricPath, rubricPathSegments } from '../rubric-path.util';
+
+export type WorkspaceMobileTab = 'search' | 'rubrics' | 'results';
 
 @Component({
   selector: 'app-case-analysis-page',
@@ -99,6 +102,7 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
   private readonly api = inject(CaseAnalysisApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly viewport = inject(ViewportService);
 
   private readonly caseSheetAutoSave = createDebouncedSaver(1200);
   private readonly notesAutoSave = createDebouncedSaver(1200);
@@ -166,6 +170,9 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
   readonly autoSaveStatus = signal<'idle' | 'saving' | 'saved' | 'error'>('idle');
   readonly patientCaseHistory = signal<PatientCaseHistory | null>(null);
   readonly loadingPatientHistory = signal(false);
+  readonly isMobile = computed(() => this.viewport.isMobile());
+  readonly workspaceTab = signal<WorkspaceMobileTab>('search');
+  readonly mobilePatientOpen = signal(false);
 
   readonly formatRubricPath = formatRubricPath;
   readonly rubricPathSegments = rubricPathSegments;
@@ -206,6 +213,14 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
   });
 
   readonly repertoryEnabled = computed(() => this.activeApproach().repertory.enabled);
+
+  readonly showMobileRepertorizeBar = computed(
+    () =>
+      this.isMobile() &&
+      this.showRepertoryWorkspace() &&
+      this.workspaceTab() === 'rubrics' &&
+      this.selectedRubrics().length > 0
+  );
 
   constructor() {
     void this.loadSources();
@@ -287,6 +302,26 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
         component === 'organon-lm-dosing' ||
         component === 'analysis-notes')
     );
+  }
+
+  setWorkspaceTab(tab: WorkspaceMobileTab) {
+    this.workspaceTab.set(tab);
+  }
+
+  toggleMobilePatient() {
+    this.mobilePatientOpen.update((open) => !open);
+  }
+
+  showWorkspaceSearch() {
+    return !this.isMobile() || this.workspaceTab() === 'search';
+  }
+
+  showWorkspaceRubrics() {
+    return !this.isMobile() || this.workspaceTab() === 'rubrics';
+  }
+
+  showWorkspaceResults() {
+    return !this.isMobile() || this.workspaceTab() === 'results';
   }
 
   setActiveStep(stepId: ApproachStepId) {
@@ -717,6 +752,9 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
     ]);
     this.message.set('Symptom added to case.');
     this.scheduleAutoSaveRubrics();
+    if (this.isMobile()) {
+      this.workspaceTab.set('rubrics');
+    }
   }
 
   removeRubric(rubricId: string) {
@@ -1057,6 +1095,9 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
       this.hydrateFromAnalysis(updated);
       this.setActiveStep('remedy-select');
       this.message.set('Repertorization complete. Review ranked remedies on the right.');
+      if (this.isMobile()) {
+        this.workspaceTab.set('results');
+      }
     } catch {
       this.error.set('Repertorization failed. Add rubrics and try again.');
     } finally {

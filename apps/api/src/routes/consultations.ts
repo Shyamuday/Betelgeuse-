@@ -28,7 +28,8 @@ export function createConsultationsRouter(io: SocketIoServer) {
           purchaseType: z.enum(['ONE_TIME', 'PLAN']).optional().default('ONE_TIME'),
           planCode: z.string().min(2).optional(),
           promoCode: z.string().min(2).max(32).optional(),
-          walletRedeemInPaise: z.number().int().min(0).optional()
+          walletRedeemInPaise: z.number().int().min(0).optional(),
+          clinicStoreId: z.string().min(1).nullable().optional()
         })
         .parse(req.body);
 
@@ -47,7 +48,15 @@ export function createConsultationsRouter(io: SocketIoServer) {
         where: { id: req.user!.id },
         select: { homeClinicStoreId: true }
       });
-      const consultFeePaise = await resolveDiseaseConsultationFee(disease.id, patient.homeClinicStoreId);
+      const clinicStoreId =
+        body.clinicStoreId === undefined ? patient.homeClinicStoreId : body.clinicStoreId;
+      if (body.clinicStoreId !== undefined && body.clinicStoreId !== patient.homeClinicStoreId) {
+        await prisma.user.update({
+          where: { id: req.user!.id },
+          data: { homeClinicStoreId: body.clinicStoreId }
+        });
+      }
+      const consultFeePaise = await resolveDiseaseConsultationFee(disease.id, clinicStoreId);
       const grossInPaise = body.purchaseType === 'ONE_TIME' ? consultFeePaise : selectedPlan.priceInPaise;
       const checkout = await resolveConsultationCheckout({
         patientId: req.user!.id,
@@ -59,7 +68,7 @@ export function createConsultationsRouter(io: SocketIoServer) {
         data: {
           patientId: req.user!.id,
           diseaseId: disease.id,
-          clinicStoreId: patient.homeClinicStoreId,
+          clinicStoreId,
           intakeAnswers: body.intakeAnswers,
           billingPlanCode: selectedPlan.code,
           pricingSnapshot: {

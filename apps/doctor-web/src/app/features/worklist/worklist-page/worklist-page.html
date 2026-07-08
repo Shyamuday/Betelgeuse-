@@ -39,7 +39,7 @@
       [formField]="filterForm.search"
       (keyup.enter)="load()"
     />
-    <select [formField]="filterForm.view" (change)="load()">
+    <select class="view-filter-select" [formField]="filterForm.view" (change)="load()">
       <option value="ALL">All sections</option>
       <option value="ASSIGNED">Assigned only</option>
       <option value="IN_PROGRESS">In-progress only</option>
@@ -78,12 +78,21 @@
           · Follow-up {{ item.followUpDate | date: 'mediumDate' }}
         }
       </small>
-      <div class="actions">
-        <button type="button" (click)="openCaseAnalysis(item.id)">Case analysis</button>
-        <button type="button" (click)="openPrescription(item.id)">Prescribe</button>
-        <button type="button" class="ghost" (click)="openInAppointments(item.id)">Appointment</button>
-        @if (item.patient?.patientCode) {
-          <button type="button" class="ghost" (click)="scanPatient(item.patient?.patientCode)">Scan patient</button>
+      <div class="actions actions-mobile">
+        <div class="actions-primary">
+          <button type="button" (click)="openCaseAnalysis(item.id)">Case</button>
+          <button type="button" (click)="openPrescription(item.id)">Prescribe</button>
+        </div>
+        <button type="button" class="ghost actions-more" (click)="toggleCardMenu(item.id)">
+          {{ isCardMenuOpen(item.id) ? 'Less' : 'More' }}
+        </button>
+        @if (isCardMenuOpen(item.id)) {
+          <div class="actions-secondary">
+            <button type="button" class="ghost" (click)="openInAppointments(item.id)">Appointment</button>
+            @if (item.patient?.patientCode) {
+              <button type="button" class="ghost" (click)="scanPatient(item.patient?.patientCode)">Scan patient</button>
+            }
+          </div>
         }
       </div>
     </article>
@@ -103,10 +112,19 @@
       <strong>{{ item.patient?.name || 'Patient' }} — {{ item.disease?.name || 'Consultation' }}</strong>
       <vitalis-detail-rows [rows]="worklistMetaRows(item)" />
       <small class="muted">Patient {{ item.patient?.patientCode || item.patient?.id }}</small>
-      <div class="actions">
-        <button type="button" (click)="openCaseAnalysis(item.id)">Case analysis</button>
-        <button type="button" (click)="openPrescription(item.id)">Prescribe</button>
-        <button type="button" class="ghost" (click)="openInAppointments(item.id)">Appointment</button>
+      <div class="actions actions-mobile">
+        <div class="actions-primary">
+          <button type="button" (click)="openCaseAnalysis(item.id)">Case</button>
+          <button type="button" (click)="openPrescription(item.id)">Prescribe</button>
+        </div>
+        <button type="button" class="ghost actions-more" (click)="toggleCardMenu(item.id)">
+          {{ isCardMenuOpen(item.id) ? 'Less' : 'More' }}
+        </button>
+        @if (isCardMenuOpen(item.id)) {
+          <div class="actions-secondary">
+            <button type="button" class="ghost" (click)="openInAppointments(item.id)">Appointment</button>
+          </div>
+        }
       </div>
     </article>
   } @empty {
@@ -125,12 +143,21 @@
       <strong>{{ item.patient?.name || 'Patient' }} — {{ item.disease?.name || 'Consultation' }}</strong>
       <vitalis-detail-rows [rows]="worklistMetaRows(item)" />
       <small class="muted">Patient {{ item.patient?.patientCode || item.patient?.id }}</small>
-      <div class="actions">
-        <button type="button" (click)="openCaseAnalysis(item.id)">Case analysis</button>
-        <button type="button" (click)="openPrescription(item.id)">Prescribe</button>
-        <button type="button" class="ghost" (click)="openInAppointments(item.id)">Appointment</button>
-        @if (item.patient?.patientCode) {
-          <button type="button" class="ghost" (click)="scanPatient(item.patient?.patientCode)">Scan patient</button>
+      <div class="actions actions-mobile">
+        <div class="actions-primary">
+          <button type="button" (click)="openCaseAnalysis(item.id)">Case</button>
+          <button type="button" (click)="openPrescription(item.id)">Prescribe</button>
+        </div>
+        <button type="button" class="ghost actions-more" (click)="toggleCardMenu(item.id)">
+          {{ isCardMenuOpen(item.id) ? 'Less' : 'More' }}
+        </button>
+        @if (isCardMenuOpen(item.id)) {
+          <div class="actions-secondary">
+            <button type="button" class="ghost" (click)="openInAppointments(item.id)">Appointment</button>
+            @if (item.patient?.patientCode) {
+              <button type="button" class="ghost" (click)="scanPatient(item.patient?.patientCode)">Scan patient</button>
+            }
+          </div>
         }
       </div>
     </article>

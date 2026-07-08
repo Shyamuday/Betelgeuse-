@@ -42,7 +42,8 @@ export function registerPatientRewardsRoutes(router: Router) {
           purchaseType: z.enum(['ONE_TIME', 'PLAN']).default('ONE_TIME'),
           planCode: z.string().optional(),
           promoCode: z.string().optional(),
-          walletRedeemInPaise: z.number().int().min(0).optional()
+          walletRedeemInPaise: z.number().int().min(0).optional(),
+          clinicStoreId: z.string().min(1).nullable().optional()
         })
         .parse(req.body);
 

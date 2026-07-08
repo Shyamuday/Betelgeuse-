@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, Output, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, inject, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { AuthService } from './auth/auth.service';
 import {
@@ -8,6 +8,7 @@ import {
   PURCHASE_TYPES,
 } from './core/constants/billing.constants';
 import { API_PATHS } from './core/constants/api-paths.constants';
+import { ClinicApiClient } from './clinic-api/clinic-api.client';
 import { environment } from '../environments/environment';
 import { BillingPlan, Disease } from './models';
 
@@ -18,12 +19,20 @@ export type BookConsultationPayload = {
   planCode?: string;
   walletRedeemInPaise?: number;
   promoCode?: string;
+  clinicStoreId?: string | null;
+};
+
+type ClinicOption = {
+  id: string;
+  name: string;
+  address?: string | null;
 };
 
 type BookingForm = {
   purchaseType: typeof PURCHASE_TYPES.ONE_TIME | typeof PURCHASE_TYPES.PLAN;
   selectedPlanCode: string;
   selectedDiseaseId: string;
+  selectedClinicStoreId: string;
   intakeAnswers: Record<string, string>;
 };
 
@@ -42,6 +51,7 @@ function emptyBookingForm(): BookingForm {
     purchaseType: PURCHASE_TYPES.ONE_TIME,
     selectedPlanCode: '',
     selectedDiseaseId: '',
+    selectedClinicStoreId: '',
     intakeAnswers: {},
   };
 }
@@ -53,13 +63,17 @@ function emptyBookingForm(): BookingForm {
   templateUrl: './book-consultation-panel.component.html',
   styleUrl: './book-consultation-panel.component.scss',
 })
-export class BookConsultationPanelComponent implements OnChanges {
+export class BookConsultationPanelComponent implements OnChanges, OnInit {
   readonly PURCHASE_TYPES = PURCHASE_TYPES;
   readonly BILLING_PLAN_CODES = BILLING_PLAN_CODES;
   readonly CURRENCY_CODE = CURRENCY_CODE;
 
   private readonly auth = inject(AuthService);
+  private readonly apiClient = new ClinicApiClient();
   private quoteTimer: ReturnType<typeof setTimeout> | null = null;
+
+  readonly clinics = signal<ClinicOption[]>([]);
+  readonly clinicsLoading = signal(true);
 
   @Input() diseases: Disease[] = [];
   @Input() plans: BillingPlan[] = [];
@@ -73,6 +87,27 @@ export class BookConsultationPanelComponent implements OnChanges {
   readonly promoCode = signal('');
   readonly quoteLoading = signal(false);
   readonly checkoutQuote = signal<CheckoutQuote | null>(null);
+
+  ngOnInit() {
+    void this.loadClinics();
+  }
+
+  private async loadClinics() {
+    this.clinicsLoading.set(true);
+    try {
+      const res = await this.apiClient.get<{ clinics: ClinicOption[] }>(API_PATHS.CLINICS);
+      this.clinics.set(res.clinics || []);
+    } catch {
+      this.clinics.set([]);
+    } finally {
+      this.clinicsLoading.set(false);
+    }
+  }
+
+  selectedClinicStoreId() {
+    const value = this.bookingFormModel().selectedClinicStoreId;
+    return value || null;
+  }
 
   ngOnChanges() {
     const current = this.bookingFormModel();
@@ -150,6 +185,10 @@ export class BookConsultationPanelComponent implements OnChanges {
     this.onBookingOptionChange();
   }
 
+  onClinicChange() {
+    this.onBookingOptionChange();
+  }
+
   toggleWallet(checked: boolean) {
     this.useWallet.set(checked);
     this.scheduleQuoteRefresh();
@@ -189,6 +228,7 @@ export class BookConsultationPanelComponent implements OnChanges {
         ? { walletRedeemInPaise: quote.walletRedeemedInPaise }
         : {}),
       ...(this.promoCode().trim() ? { promoCode: this.promoCode().trim() } : {}),
+      clinicStoreId: this.selectedClinicStoreId(),
     });
   }
 
@@ -219,6 +259,7 @@ export class BookConsultationPanelComponent implements OnChanges {
           ...(form.purchaseType === PURCHASE_TYPES.PLAN ? { planCode: form.selectedPlanCode } : {}),
           walletRedeemInPaise: this.useWallet() ? 99_999_999 : 0,
           ...(this.promoCode().trim() ? { promoCode: this.promoCode().trim() } : {}),
+          clinicStoreId: this.selectedClinicStoreId(),
         }),
       });
       if (!res.ok) {

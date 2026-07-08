@@ -4,6 +4,13 @@ import { AdminApi } from '../../../core/services/admin-api';
 
 type ConfigEntry = { key: string; value: string; label: string; description: string };
 
+const MULTILINE_KEYS = new Set([
+  'clinicAddressLine1',
+  'clinicAddressLine2',
+  'clinicAddressLine3',
+  'clinicAddressLine4'
+]);
+
 @Component({
   selector: 'app-site-config-page',
   imports: [CommonModule],
@@ -20,6 +27,22 @@ export class SiteConfigPage {
   readonly localValues = signal<Record<string, string>>({});
 
   constructor(private readonly api: AdminApi) { void this.load(); }
+
+  isMultiline(key: string) {
+    return MULTILINE_KEYS.has(key);
+  }
+
+  sectionLabel(key: string) {
+    if (key.startsWith('clinicAddress') || key.startsWith('contact')) return 'Footer & contact';
+    if (key.startsWith('stat') || key === 'whatsappPhone' || key === 'clinicName' || key === 'doctorListLimit') {
+      return key.startsWith('statPatients') || key.startsWith('statConditions') || key.startsWith('statImprovement') || key === 'statSatisfaction'
+        ? 'Testimonials stats'
+        : key.startsWith('stat')
+          ? 'Homepage stats'
+          : 'Branding';
+    }
+    return 'General';
+  }
 
   async load() {
     this.loading.set(true);

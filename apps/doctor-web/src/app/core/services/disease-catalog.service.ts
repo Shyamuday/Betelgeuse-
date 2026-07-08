@@ -16,6 +16,7 @@ export type DiseaseListItem = {
   publicCategory: string | null;
   feeInPaise: number;
   isActive: boolean;
+  prescriptionOptionId?: string | null;
 };
 
 export type GroupedDiseaseCategory = DiseaseCategory & {

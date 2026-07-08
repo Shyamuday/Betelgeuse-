@@ -13,9 +13,11 @@ import {
   assignDiseaseSlug,
   getDiseaseBySlug,
   groupDiseasesByCategory,
+  listDiseases,
   syncDiagnosedDiseaseOption,
   syncDiseaseCatalog
 } from '../services/disease-catalog.js';
+import { resolveDiseaseConsultationFee } from '../services/consultation-pricing.js';
 
 export const router = Router();
 
@@ -54,34 +56,24 @@ router.get(
     const q = queryText(req, 'q').trim() || undefined;
     const category = queryText(req, 'category').trim() || undefined;
     const grouped = queryText(req, 'grouped') !== 'false';
+    const clinicStoreId = queryText(req, 'clinicStoreId').trim() || undefined;
 
-    const diseases = await prisma.disease.findMany({
-      where: {
-        isActive: true,
-        ...(category ? { publicCategory: category } : {}),
-        ...(q ? { name: { contains: q, mode: 'insensitive' } } : {})
-      },
-      orderBy: [{ publicCategory: 'asc' }, { name: 'asc' }]
-    });
+    const diseases = await listDiseases({ q, category, activeOnly: true });
+    const withFees = await Promise.all(
+      diseases.map(async (disease) => {
+        const feeInPaise = await resolveDiseaseConsultationFee(disease.id, clinicStoreId ?? null);
+        return { ...disease, feeInPaise, baseFeeInPaise: disease.feeInPaise };
+      })
+    );
 
     if (!grouped) {
-      res.json({ diseases });
+      res.json({ diseases: withFees });
       return;
     }
 
-    const groupedRows = diseases.map((disease) => ({
-      id: disease.id,
-      name: disease.name,
-      slug: disease.slug,
-      description: disease.description,
-      publicCategory: disease.publicCategory,
-      feeInPaise: disease.feeInPaise,
-      isActive: disease.isActive
-    }));
-
     res.json({
-      diseases,
-      ...groupDiseasesByCategory(groupedRows, { includeEmpty: !q && !category })
+      diseases: withFees,
+      ...groupDiseasesByCategory(withFees, { includeEmpty: !q && !category })
     });
   })
 );
@@ -188,13 +180,19 @@ router.post(
         description: z.string().min(3),
         feeInPaise: z.number().int().positive(),
         intakeQuestions: z.array(z.string().min(3)).min(1),
-        publicCategory: z.enum(DISEASE_PUBLIC_CATEGORY_KEYS as [string, ...string[]]).optional()
+        publicCategory: z.enum(DISEASE_PUBLIC_CATEGORY_KEYS as [string, ...string[]]).optional(),
+        publicDescription: z.string().max(20_000).nullable().optional()
       })
       .parse(req.body);
 
     const disease = await prisma.disease.create({
       data: {
-        ...body,
+        name: body.name,
+        description: body.description,
+        feeInPaise: body.feeInPaise,
+        intakeQuestions: body.intakeQuestions,
+        publicCategory: body.publicCategory,
+        publicDescription: body.publicDescription ?? null,
         slug: await assignDiseaseSlug(body.name)
       }
     });
@@ -215,7 +213,8 @@ router.put(
         feeInPaise: z.number().int().positive(),
         isActive: z.boolean(),
         intakeQuestions: z.array(z.string().min(1)).min(1),
-        publicCategory: z.enum(DISEASE_PUBLIC_CATEGORY_KEYS as [string, ...string[]]).nullable().optional()
+        publicCategory: z.enum(DISEASE_PUBLIC_CATEGORY_KEYS as [string, ...string[]]).nullable().optional(),
+        publicDescription: z.string().max(20_000).nullable().optional()
       })
       .parse(req.body);
 
@@ -228,7 +227,13 @@ router.put(
     const disease = await prisma.disease.update({
       where: { id: existing.id },
       data: {
-        ...body,
+        name: body.name,
+        description: body.description,
+        feeInPaise: body.feeInPaise,
+        isActive: body.isActive,
+        intakeQuestions: body.intakeQuestions,
+        publicCategory: body.publicCategory,
+        publicDescription: body.publicDescription,
         ...(body.name !== existing.name
           ? { slug: await assignDiseaseSlug(body.name, existing.id) }
           : existing.slug
@@ -314,18 +319,55 @@ router.get(
   })
 );
 
+router.get(
+  '/blog/:slug',
+  asyncRoute(async (req, res) => {
+    const slug = routeParam(req, 'slug').trim().toLowerCase();
+    const post = await prisma.blogPost.findFirst({
+      where: { slug, isPublished: true }
+    });
+    if (!post) {
+      res.status(404).json({ message: 'Article not found.' });
+      return;
+    }
+    res.json({ post });
+  })
+);
+
+/** Public clinic branches for online booking location selection. */
+router.get(
+  '/clinics',
+  asyncRoute(async (_req, res) => {
+    const clinics = await prisma.store.findMany({
+      where: { isActive: true, kind: 'BRANCH' },
+      select: { id: true, name: true, code: true, address: true, phone: true },
+      orderBy: { name: 'asc' }
+    });
+    res.json({ clinics });
+  })
+);
+
 /** Public endpoint — select SiteConfig keys exposed to the public website. */
 router.get(
   '/public-config',
   asyncRoute(async (_req, res) => {
     const PUBLIC_KEYS = [
       'whatsappPhone', 'clinicName',
+      'contactPhone', 'contactPhoneTel', 'contactEmail',
+      'clinicAddressLine1', 'clinicAddressLine2', 'clinicAddressLine3', 'clinicAddressLine4',
       'statConsultations', 'statDoctors', 'statRating', 'statFollowUp',
       'statPatientsTreated', 'statConditionsTreated', 'statImprovement', 'statSatisfaction'
     ];
     const DEFAULTS: Record<string, string> = {
       whatsappPhone: '919876543210',
       clinicName: 'Vitalis Care and Research Centre',
+      contactPhone: '+91-98765-43210',
+      contactPhoneTel: '+919876543210',
+      contactEmail: 'support@vitaliscare.in',
+      clinicAddressLine1: 'Ranchi Main Clinic',
+      clinicAddressLine2: 'Near City Centre, Main Road',
+      clinicAddressLine3: 'Ranchi, Jharkhand, India',
+      clinicAddressLine4: 'Pincode — 834001',
       statConsultations: '5,000+',
       statDoctors: '12+',
       statRating: '4.8★',

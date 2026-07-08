@@ -37,7 +37,9 @@
             @for (post of filteredPosts(); track post.id) {
               <article class="panel blog-card">
                 <p class="eyebrow">{{ post.category }}</p>
-                <h2>{{ post.title }}</h2>
+                <h2>
+                  <a [routerLink]="['/blog', post.slug]">{{ post.title }}</a>
+                </h2>
                 <p class="blog-excerpt">{{ post.excerpt }}</p>
                 <div class="blog-meta">
                   <span>{{ postDate(post) }}</span>

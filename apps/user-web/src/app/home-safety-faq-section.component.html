@@ -8,6 +8,11 @@
       <article class="panel">
         <h2>{{ copy.safetyFaq.faq.title }}</h2>
         <p>{{ copy.safetyFaq.faq.body }}</p>
+        @if (faqLoading()) {
+          <p class="loading-text">Loading questions…</p>
+        } @else {
+          <app-faq-accordion [items]="faqItems()" />
+        }
         <a [href]="copy.safetyFaq.faq.linkHref">{{ copy.safetyFaq.faq.linkLabel }}</a>
       </article>
     </section>

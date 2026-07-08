@@ -28,6 +28,7 @@ export type Disease = {
   name: string;
   slug?: string | null;
   description: string;
+  publicDescription?: string | null;
   feeInPaise: number;
   intakeQuestions: string[];
   publicCategory?: string | null;

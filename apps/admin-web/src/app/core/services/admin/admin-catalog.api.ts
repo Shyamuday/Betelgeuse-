@@ -144,6 +144,7 @@ export class AdminCatalogApi extends AdminApiBase {
   createDisease(payload: {
     name: string;
     description: string;
+    publicDescription?: string | null;
     feeInPaise: number;
     intakeQuestions: string[];
     publicCategory?: string;
@@ -156,6 +157,7 @@ export class AdminCatalogApi extends AdminApiBase {
     payload: {
       name: string;
       description: string;
+      publicDescription?: string | null;
       feeInPaise: number;
       isActive: boolean;
       intakeQuestions: string[];

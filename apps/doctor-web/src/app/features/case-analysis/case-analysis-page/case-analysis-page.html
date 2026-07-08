@@ -1,5 +1,5 @@
 <section class="page">
-  <header class="hero">
+  <header class="hero" [class.hero-hidden-mobile]="!standalone && consultation()">
     <div>
       @if (standalone) {
         <h2>Repertory</h2>
@@ -53,32 +53,40 @@
         activeView="case-analysis"
       />
 
-      <app-collapsible-section
-        title="Patient intake"
-        subtitle="Answers submitted when the patient booked this consultation."
-        [startCollapsed]="false"
-      >
-        <app-consultation-intake-panel [consultation]="consultation" />
-      </app-collapsible-section>
+      @if (isMobile()) {
+        <button type="button" class="mobile-patient-toggle" (click)="toggleMobilePatient()">
+          {{ mobilePatientOpen() ? 'Hide patient details' : 'Patient intake, chat & history' }}
+        </button>
+      }
 
-      <app-collapsible-section title="Patient chat" subtitle="Message the patient during case taking." [startCollapsed]="true">
-        <app-consultation-chat-panel [consultationId]="consultationId()" />
-      </app-collapsible-section>
+      @if (!isMobile() || mobilePatientOpen()) {
+        <app-collapsible-section
+          title="Patient intake"
+          subtitle="Answers submitted when the patient booked this consultation."
+          [startCollapsed]="false"
+        >
+          <app-consultation-intake-panel [consultation]="consultation" />
+        </app-collapsible-section>
 
-      <app-collapsible-section
-        title="Patient case history"
-        subtitle="Prior consultations, prescriptions, and analyses."
-        [startCollapsed]="true"
-        [badge]="historyBadge()"
-      >
-        <app-patient-case-timeline-panel
-          [history]="patientCaseHistory()"
-          [currentConsultationId]="consultationId()"
-          [loading]="loadingPatientHistory()"
-          [compact]="true"
-          (openAnalysis)="openHistoricalCaseAnalysis($event.consultationId, $event.analysisId)"
-        />
-      </app-collapsible-section>
+        <app-collapsible-section title="Patient chat" subtitle="Message the patient during case taking." [startCollapsed]="true">
+          <app-consultation-chat-panel [consultationId]="consultationId()" />
+        </app-collapsible-section>
+
+        <app-collapsible-section
+          title="Patient case history"
+          subtitle="Prior consultations, prescriptions, and analyses."
+          [startCollapsed]="true"
+          [badge]="historyBadge()"
+        >
+          <app-patient-case-timeline-panel
+            [history]="patientCaseHistory()"
+            [currentConsultationId]="consultationId()"
+            [loading]="loadingPatientHistory()"
+            [compact]="true"
+            (openAnalysis)="openHistoricalCaseAnalysis($event.consultationId, $event.analysisId)"
+          />
+        </app-collapsible-section>
+      }
 
       @if (autoSaveStatus() === 'saving') {
         <p class="autosave-hint muted">Saving draft…</p>
@@ -299,8 +307,45 @@
       />
     </app-collapsible-section>
 
-    <div class="workspace">
+    <div class="workspace" [class.workspace-mobile]="isMobile()">
+      @if (isMobile() && showRepertoryWorkspace()) {
+        <nav class="workspace-mobile-tabs" aria-label="Repertory workspace">
+          <button
+            type="button"
+            class="workspace-tab"
+            [class.active]="workspaceTab() === 'search'"
+            (click)="setWorkspaceTab('search')"
+          >
+            Search
+          </button>
+          <button
+            type="button"
+            class="workspace-tab"
+            [class.active]="workspaceTab() === 'rubrics'"
+            (click)="setWorkspaceTab('rubrics')"
+          >
+            Rubrics
+            @if (selectedRubrics().length) {
+              <span class="tab-badge">{{ selectedRubrics().length }}</span>
+            }
+          </button>
+          <button
+            type="button"
+            class="workspace-tab"
+            [class.active]="workspaceTab() === 'results'"
+            (click)="setWorkspaceTab('results')"
+          >
+            Results
+            @if (analysis.results.length) {
+              <span class="tab-badge">{{ analysis.results.length }}</span>
+            }
+          </button>
+        </nav>
+      }
+
+      @if (showWorkspaceSearch() || showWorkspaceRubrics()) {
       <div class="column">
+        @if (showWorkspaceSearch()) {
         <section class="panel">
           <div class="panel-title-row">
             <h3>Symptom search</h3>
@@ -458,7 +503,9 @@
             </section>
           }
         </section>
+        }
 
+        @if (showWorkspaceRubrics()) {
         <section class="panel">
           <div class="panel-title-row">
             <h3>Case rubrics <span class="count-pill">{{ selectedRubrics().length }}</span></h3>
@@ -507,7 +554,7 @@
             </div>
             <button
               type="button"
-              class="btn-primary btn-block"
+              class="btn-primary btn-block repertorize-inline"
               (click)="runRepertorization()"
               [disabled]="repertorizing()"
             >
@@ -517,8 +564,11 @@
             <p class="hint">Search and add symptoms that match the patient. Assign weight 1–4 by importance.</p>
           }
         </section>
+        }
       </div>
+      }
 
+      @if (showWorkspaceResults()) {
       <div class="column results-column">
         <section class="panel results-panel">
           <h3>Remedy analysis</h3>
@@ -648,7 +698,21 @@
           </section>
         }
       </div>
+      }
     </div>
+
+    @if (showMobileRepertorizeBar()) {
+      <div class="mobile-repertorize-bar">
+        <button
+          type="button"
+          class="btn-primary btn-block"
+          (click)="runRepertorization()"
+          [disabled]="repertorizing()"
+        >
+          {{ repertorizing() ? 'Repertorizing…' : 'Repertorize case' }}
+        </button>
+      </div>
+    }
       }
     </div>
   }

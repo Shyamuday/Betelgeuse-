@@ -14,6 +14,11 @@
                 <p class="eyebrow">Treatment detail</p>
                 <h1>{{ d.name }}</h1>
                 <p>{{ d.summary }}</p>
+                @if (liveDisease()?.publicDescription; as publicCopy) {
+                  <div class="disease-public-copy">
+                    <p>{{ publicCopy }}</p>
+                  </div>
+                }
                 @if (liveDisease(); as live) {
                   <p class="issue-fee-line">
                     Consultation fee:
@@ -231,7 +236,7 @@
               <div>
                 <p class="eyebrow">Treatment detail</p>
                 <h1>{{ live.name }}</h1>
-                <p>{{ live.description }}</p>
+                <p>{{ live.publicDescription || live.description }}</p>
                 <p class="issue-fee-line">
                   Consultation fee:
                   <strong>{{ live.feeInPaise / 100 | currency: currencyCode }}</strong>

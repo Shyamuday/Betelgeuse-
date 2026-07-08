@@ -134,7 +134,7 @@
   <select id="diagnosedDisease" [formField]="prescriptionForm.diagnosedDiseaseOptionId">
     <option value="">Select diagnosed disease</option>
     @for (item of diagnosedDiseases; track item.id) {
-      <option [value]="item.id">{{ item.label }}</option>
+      <option [value]="item.prescriptionOptionId || ''" [disabled]="!item.prescriptionOptionId">{{ item.name }}</option>
     }
   </select>
   <div class="inline">

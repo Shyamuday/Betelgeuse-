@@ -4,17 +4,31 @@
     <div class="site-footer__grid">
       <section class="site-footer__address">
         <h3>{{ footer.address.title }}</h3>
-        <p class="site-footer__clinic">{{ footer.address.clinicName }}</p>
-        @for (line of footer.address.lines; track line) {
-          <p class="site-footer__line">{{ line }}</p>
+        @if (contact(); as cfg) {
+          <p class="site-footer__clinic">{{ cfg.clinicName }}</p>
+          @for (line of cfg.lines; track line) {
+            <p class="site-footer__line">{{ line }}</p>
+          }
+          <p class="site-footer__contact">
+            <span>{{ cfg.phoneLabel }}:</span>
+            <a [href]="cfg.phoneHref">{{ cfg.phone }}</a>
+          </p>
+          <p class="site-footer__contact">
+            <a [href]="cfg.emailHref">{{ cfg.email }}</a>
+          </p>
+        } @else {
+          <p class="site-footer__clinic">{{ footer.address.clinicName }}</p>
+          @for (line of footer.address.lines; track line) {
+            <p class="site-footer__line">{{ line }}</p>
+          }
+          <p class="site-footer__contact">
+            <span>{{ footer.address.phoneLabel }}:</span>
+            <a [href]="footer.address.phoneHref">{{ footer.address.phone }}</a>
+          </p>
+          <p class="site-footer__contact">
+            <a [href]="footer.address.emailHref">{{ footer.address.email }}</a>
+          </p>
         }
-        <p class="site-footer__contact">
-          <span>{{ footer.address.phoneLabel }}:</span>
-          <a [href]="footer.address.phoneHref">{{ footer.address.phone }}</a>
-        </p>
-        <p class="site-footer__contact">
-          <a [href]="footer.address.emailHref">{{ footer.address.email }}</a>
-        </p>
         <a
           class="site-footer__whatsapp"
           [href]="whatsappLink"

@@ -7,15 +7,25 @@
   @for (entry of config(); track entry.key) {
     <div class="config-row">
       <div class="config-meta">
+        <span class="config-section">{{ sectionLabel(entry.key) }}</span>
         <strong>{{ entry.label }}</strong>
         <p>{{ entry.description }}</p>
       </div>
       <div class="config-input">
-        <input
-          [value]="localValues()[entry.key] ?? entry.value"
-          (input)="updateLocal(entry.key, $any($event.target).value)"
-          [disabled]="saving() === entry.key"
-        />
+        @if (isMultiline(entry.key)) {
+          <textarea
+            rows="2"
+            [value]="localValues()[entry.key] ?? entry.value"
+            (input)="updateLocal(entry.key, $any($event.target).value)"
+            [disabled]="saving() === entry.key"
+          ></textarea>
+        } @else {
+          <input
+            [value]="localValues()[entry.key] ?? entry.value"
+            (input)="updateLocal(entry.key, $any($event.target).value)"
+            [disabled]="saving() === entry.key"
+          />
+        }
         <button
           type="button"
           (click)="save(entry.key)"

@@ -4,6 +4,7 @@ import { PrescriptionOptionType, Role } from '@prisma/client';
 import { authRequired, allowRoles } from '../../auth.js';
 import { prisma } from '../../db.js';
 import { asyncRoute, normalizeOptionLabel, queryText } from '../../utils/helpers.js';
+import { syncDiagnosedDiseaseOption } from '../../services/disease-catalog.js';
 import { syncSystemMethodOptions } from '../../services/sync-system-method-options.js';
 
 export function registerPrescriptionOptionRoutes(router: Router) {
@@ -24,6 +25,10 @@ export function registerPrescriptionOptionRoutes(router: Router) {
         update: { label: body.label.trim() },
         create: { type: body.type, label: body.label.trim(), normalizedLabel: normalized, isSystem: false, createdById: req.user!.id }
       });
+
+      if (body.type === PrescriptionOptionType.DIAGNOSED_DISEASE) {
+        await syncDiagnosedDiseaseOption(body.label.trim(), req.user!.id);
+      }
 
       res.status(201).json({ option });
     })

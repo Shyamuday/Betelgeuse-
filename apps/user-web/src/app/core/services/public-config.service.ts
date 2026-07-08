@@ -1,11 +1,18 @@
 import { Injectable } from '@angular/core';
 import { ClinicApiClient } from '../../clinic-api/clinic-api.client';
 import { API_PATHS } from '../constants/api-paths.constants';
-import { WHATSAPP_CONTACT_URL } from '../constants/branding.constants';
+import { FOOTER_CONTENT } from '../constants/footer-content.constants';
 
 export type PublicConfig = {
   whatsappPhone: string;
   clinicName: string;
+  contactPhone: string;
+  contactPhoneTel: string;
+  contactEmail: string;
+  clinicAddressLine1: string;
+  clinicAddressLine2: string;
+  clinicAddressLine3: string;
+  clinicAddressLine4: string;
   statConsultations: string;
   statDoctors: string;
   statRating: string;
@@ -16,9 +23,26 @@ export type PublicConfig = {
   statSatisfaction: string;
 };
 
+export type PublicFooterContact = {
+  clinicName: string;
+  lines: string[];
+  phoneLabel: string;
+  phone: string;
+  phoneHref: string;
+  email: string;
+  emailHref: string;
+};
+
 const FALLBACK: PublicConfig = {
   whatsappPhone: '919876543210',
-  clinicName: 'Vitalis Care and Research Centre',
+  clinicName: FOOTER_CONTENT.address.clinicName,
+  contactPhone: FOOTER_CONTENT.address.phone,
+  contactPhoneTel: FOOTER_CONTENT.address.phoneHref.replace('tel:', ''),
+  contactEmail: FOOTER_CONTENT.address.email,
+  clinicAddressLine1: FOOTER_CONTENT.address.lines[0] ?? '',
+  clinicAddressLine2: FOOTER_CONTENT.address.lines[1] ?? '',
+  clinicAddressLine3: FOOTER_CONTENT.address.lines[2] ?? '',
+  clinicAddressLine4: FOOTER_CONTENT.address.lines[3] ?? '',
   statConsultations: '5,000+',
   statDoctors: '12+',
   statRating: '4.8★',
@@ -52,5 +76,24 @@ export class PublicConfigService {
   whatsappUrl(config: PublicConfig): string {
     const phone = config.whatsappPhone || FALLBACK.whatsappPhone;
     return `https://wa.me/${phone}?text=Hi%20Vitalis%20Care%2C%20I%20would%20like%20to%20know%20more%20about%20your%20services.`;
+  }
+
+  footerContact(config: PublicConfig): PublicFooterContact {
+    const lines = [
+      config.clinicAddressLine1,
+      config.clinicAddressLine2,
+      config.clinicAddressLine3,
+      config.clinicAddressLine4
+    ].filter((line) => line?.trim());
+
+    return {
+      clinicName: config.clinicName || FALLBACK.clinicName,
+      lines,
+      phoneLabel: FOOTER_CONTENT.address.phoneLabel,
+      phone: config.contactPhone || FALLBACK.contactPhone,
+      phoneHref: `tel:${config.contactPhoneTel || FALLBACK.contactPhoneTel}`,
+      email: config.contactEmail || FALLBACK.contactEmail,
+      emailHref: `mailto:${config.contactEmail || FALLBACK.contactEmail}`
+    };
   }
 }

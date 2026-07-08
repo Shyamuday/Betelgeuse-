@@ -34,6 +34,7 @@ export class WorklistPage {
   readonly assigned = signal<WorklistItem[]>([]);
   readonly inProgress = signal<WorklistItem[]>([]);
   readonly followUpDue = signal<WorklistItem[]>([]);
+  readonly expandedCardId = signal<string | null>(null);
 
   constructor() {
     void this.load();
@@ -94,5 +95,13 @@ export class WorklistPage {
 
   worklistMetaRows(item: WorklistItem) {
     return buildDetailRows(item, this.worklistMetaFieldDefs);
+  }
+
+  toggleCardMenu(consultationId: string) {
+    this.expandedCardId.update((current) => (current === consultationId ? null : consultationId));
+  }
+
+  isCardMenuOpen(consultationId: string) {
+    return this.expandedCardId() === consultationId;
   }
 }
