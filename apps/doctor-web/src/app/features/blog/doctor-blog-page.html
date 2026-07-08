@@ -1,0 +1,88 @@
+<section class="panel">
+  <h1>Write blog articles</h1>
+  <p class="lead">Draft health articles for patients. An admin reviews and publishes them on the public blog.</p>
+</section>
+
+<section class="panel">
+  <h2>New article</h2>
+  <fieldset class="form-grid" [disabled]="saving()">
+    <div class="field">
+      <label for="doc-blog-title">Title *</label>
+      <input id="doc-blog-title" [formField]="createForm.title" (blur)="autoSlug()" />
+    </div>
+    <div class="field">
+      <label for="doc-blog-slug">Slug *</label>
+      <input id="doc-blog-slug" [formField]="createForm.slug" />
+    </div>
+    <div class="field">
+      <label for="doc-blog-category">Category *</label>
+      <input id="doc-blog-category" list="doctor-blog-categories" [formField]="createForm.category" />
+    </div>
+    <div class="field">
+      <label for="doc-blog-read-time">Read time</label>
+      <input id="doc-blog-read-time" placeholder="5 min read" [formField]="createForm.readTime" />
+    </div>
+    <div class="field full">
+      <label for="doc-blog-excerpt">Excerpt *</label>
+      <textarea id="doc-blog-excerpt" rows="3" [formField]="createForm.excerpt"></textarea>
+    </div>
+    <div class="field full">
+      <label for="doc-blog-content">Article body</label>
+      <textarea id="doc-blog-content" rows="12" placeholder="Markdown supported" [formField]="createForm.content"></textarea>
+    </div>
+    <button type="button" (click)="create()" [disabled]="saving() || !createModel().title || !createModel().slug || !createModel().excerpt || !createModel().category">
+      {{ saving() ? 'Saving…' : 'Submit draft for review' }}
+    </button>
+  </fieldset>
+</section>
+
+<datalist id="doctor-blog-categories">
+  @for (cat of categories(); track cat) {
+    <option [value]="cat"></option>
+  }
+</datalist>
+
+<section class="panel">
+  <h2>Your articles ({{ posts().length }})</h2>
+  @if (loading()) { <p>Loading…</p> }
+
+  @for (p of posts(); track p.id) {
+    <article class="post-card">
+      <div class="post-head">
+        <strong>{{ p.title }}</strong>
+        <span class="status" [class.published]="p.isPublished">{{ p.isPublished ? 'Published' : 'Draft · awaiting review' }}</span>
+      </div>
+      <p class="meta">{{ p.category }} · /blog/{{ p.slug }}</p>
+      <p>{{ p.excerpt }}</p>
+
+      @if (editingId() === p.id) {
+        <fieldset class="form-grid" [disabled]="saving()">
+          <div class="field"><label>Title</label><input [formField]="editForm.title" /></div>
+          <div class="field"><label>Slug</label><input [formField]="editForm.slug" /></div>
+          <div class="field"><label>Category</label><input list="doctor-blog-categories" [formField]="editForm.category" /></div>
+          <div class="field"><label>Read time</label><input [formField]="editForm.readTime" /></div>
+          <div class="field full"><label>Excerpt</label><textarea rows="3" [formField]="editForm.excerpt"></textarea></div>
+          <div class="field full"><label>Content</label><textarea rows="10" [formField]="editForm.content"></textarea></div>
+          <div class="actions">
+            <button type="button" (click)="saveEdit()" [disabled]="saving()">Save</button>
+            <button type="button" class="ghost" (click)="cancelEdit()">Cancel</button>
+          </div>
+        </fieldset>
+      } @else {
+        <div class="actions">
+          @if (!p.isPublished) {
+            <button type="button" (click)="startEdit(p)" [disabled]="saving()">Edit</button>
+            <button type="button" class="danger" (click)="removeDraft(p.id)" [disabled]="saving()">Delete draft</button>
+          } @else {
+            <span class="note">Published articles can only be updated by admin.</span>
+          }
+        </div>
+      }
+    </article>
+  } @empty {
+    @if (!loading()) { <p>No articles yet.</p> }
+  }
+</section>
+
+@if (message()) { <p class="success">{{ message() }}</p> }
+@if (error()) { <p class="error">{{ error() }}</p> }

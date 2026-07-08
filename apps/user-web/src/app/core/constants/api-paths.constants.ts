@@ -55,7 +55,9 @@ export const API_PATHS = {
   TESTIMONIALS: '/testimonials',
   FAQ: '/faq',
   BLOG: '/blog',
+  BLOG_MOST_VIEWED: '/blog/most-viewed',
   BLOG_POST: (slug: string) => `/blog/${encodeURIComponent(slug)}`,
+  BLOG_COMMENTS: (slug: string) => `/blog/${encodeURIComponent(slug)}/comments`,
   CLINICS: '/clinics',
   PUBLIC_CONFIG: '/public-config'
 } as const;

@@ -181,6 +181,8 @@ model User {
   patientWallet        PatientWallet?
   walletLedger         WalletLedgerEntry[]    @relation("WalletLedgerPatient")
   rewardRedemptions    RewardRedemption[]     @relation("RewardRedemptionPatient")
+  blogPostsAuthored    BlogPost[]             @relation("BlogPostAuthor")
+  blogComments         BlogComment[]          @relation("BlogCommentAuthor")
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
 

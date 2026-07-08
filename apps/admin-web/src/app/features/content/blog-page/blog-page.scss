@@ -2,5 +2,54 @@
 .slug-row { display: flex; align-items: center; gap: 0.5rem; }
 .slug-preview { font-size: 0.8rem; color: #6b7280; white-space: nowrap; }
 .slug-line { font-size: 0.8rem; color: #2563eb; margin: 0.2rem 0 0; }
+.metrics-line { font-size: 0.8rem; color: #6b7280; margin: 0.2rem 0 0; }
 .excerpt-preview { font-size: 0.875rem; color: #374151; line-height: 1.6; margin: 0.35rem 0 0; }
 .expand-btn { margin-top: 0.5rem; font-size: 0.8rem; }
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background: #fafafa;
+}
+.stat strong { font-size: 1.25rem; }
+.stat span { font-size: 0.75rem; color: #6b7280; }
+.stat.warn strong { color: #b45309; }
+.badge.featured { background: #fef3c7; color: #92400e; }
+.badge.hidden { background: #fee2e2; color: #991b1b; }
+.card.is-hidden { opacity: 0.75; }
+.comment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+.filter-pills {
+  display: flex;
+  gap: 0.35rem;
+}
+.filter-pills button {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.filter-pills button.active {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+}
+.comment-card.pending { border-left: 3px solid #f59e0b; }
+.comment-meta { font-size: 0.85rem; color: #4b5563; margin-bottom: 0.35rem; }

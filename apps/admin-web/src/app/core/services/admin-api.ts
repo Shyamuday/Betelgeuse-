@@ -85,9 +85,13 @@ export class AdminApi {
   updateFaqEntry(...args: Parameters<AdminDoctorsApi['updateFaqEntry']>) { return this.doctors.updateFaqEntry(...args); }
   deleteFaqEntry(...args: Parameters<AdminDoctorsApi['deleteFaqEntry']>) { return this.doctors.deleteFaqEntry(...args); }
   listBlogPosts() { return this.doctors.listBlogPosts(); }
+  getBlogStats() { return this.doctors.getBlogStats(); }
   createBlogPost(...args: Parameters<AdminDoctorsApi['createBlogPost']>) { return this.doctors.createBlogPost(...args); }
   updateBlogPost(...args: Parameters<AdminDoctorsApi['updateBlogPost']>) { return this.doctors.updateBlogPost(...args); }
   deleteBlogPost(...args: Parameters<AdminDoctorsApi['deleteBlogPost']>) { return this.doctors.deleteBlogPost(...args); }
+  listBlogComments(...args: Parameters<AdminDoctorsApi['listBlogComments']>) { return this.doctors.listBlogComments(...args); }
+  moderateBlogComment(...args: Parameters<AdminDoctorsApi['moderateBlogComment']>) { return this.doctors.moderateBlogComment(...args); }
+  deleteBlogComment(...args: Parameters<AdminDoctorsApi['deleteBlogComment']>) { return this.doctors.deleteBlogComment(...args); }
   listChatSessions(...args: Parameters<AdminDoctorsApi['listChatSessions']>) { return this.doctors.listChatSessions(...args); }
   getChatSessionStats(...args: Parameters<AdminDoctorsApi['getChatSessionStats']>) { return this.doctors.getChatSessionStats(...args); }
   getChatSession(...args: Parameters<AdminDoctorsApi['getChatSession']>) { return this.doctors.getChatSession(...args); }

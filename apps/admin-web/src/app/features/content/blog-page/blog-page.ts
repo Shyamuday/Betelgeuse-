@@ -11,13 +11,52 @@ type BlogPost = {
   content?: string | null;
   category: string;
   readTime?: string | null;
+  authorName?: string | null;
+  authorRole?: string | null;
+  viewCount: number;
+  sortOrder: number;
+  isFeatured: boolean;
+  isHidden: boolean;
   isPublished: boolean;
   publishedAt?: string | null;
   createdAt: string;
+  _count?: { comments: number };
+};
+
+type BlogComment = {
+  id: string;
+  authorName: string;
+  body: string;
+  isApproved: boolean;
+  createdAt: string;
+  post: { id: string; slug: string; title: string };
+};
+
+type BlogStats = {
+  total: number;
+  published: number;
+  drafts: number;
+  hidden: number;
+  featured: number;
+  pendingComments: number;
+  totalViews: number;
 };
 
 function emptyModel() {
-  return { slug: '', title: '', excerpt: '', content: '', category: '', readTime: '', isPublished: false };
+  return {
+    slug: '',
+    title: '',
+    excerpt: '',
+    content: '',
+    category: '',
+    readTime: '',
+    authorName: '',
+    authorRole: '',
+    sortOrder: 0,
+    isPublished: false,
+    isHidden: false,
+    isFeatured: false
+  };
 }
 
 @Component({
@@ -28,6 +67,10 @@ function emptyModel() {
 })
 export class BlogPage {
   readonly posts = signal<BlogPost[]>([]);
+  readonly categories = signal<string[]>([]);
+  readonly stats = signal<BlogStats | null>(null);
+  readonly comments = signal<BlogComment[]>([]);
+  readonly commentFilter = signal<'pending' | 'approved' | 'all'>('pending');
   readonly loading = signal(false);
   readonly mutating = signal(false);
   readonly error = signal('');
@@ -41,19 +84,42 @@ export class BlogPage {
 
   expandedId = signal<string | null>(null);
 
-  constructor(private readonly api: AdminApi) { void this.load(); }
+  constructor(private readonly api: AdminApi) {
+    void this.load();
+  }
 
   async load() {
     this.loading.set(true);
     this.error.set('');
     try {
-      const res = await this.api.listBlogPosts();
-      this.posts.set(res.posts);
+      const [postsRes, statsRes, commentsRes] = await Promise.all([
+        this.api.listBlogPosts(),
+        this.api.getBlogStats(),
+        this.api.listBlogComments(this.commentFilter())
+      ]);
+      this.posts.set(postsRes.posts);
+      this.categories.set(postsRes.categories ?? []);
+      this.stats.set(statsRes.stats as BlogStats);
+      this.comments.set(commentsRes.comments);
     } catch {
-      this.error.set('Could not load posts.');
+      this.error.set('Could not load blog data.');
     } finally {
       this.loading.set(false);
     }
+  }
+
+  async reloadComments() {
+    try {
+      const res = await this.api.listBlogComments(this.commentFilter());
+      this.comments.set(res.comments);
+    } catch {
+      this.error.set('Could not load comments.');
+    }
+  }
+
+  async setCommentFilter(filter: 'pending' | 'approved' | 'all') {
+    this.commentFilter.set(filter);
+    await this.reloadComments();
   }
 
   autoSlug() {
@@ -67,7 +133,14 @@ export class BlogPage {
     this.mutating.set(true);
     this.message.set('');
     try {
-      await this.api.createBlogPost({ ...m, content: m.content || null, readTime: m.readTime || null });
+      await this.api.createBlogPost({
+        ...m,
+        content: m.content || null,
+        readTime: m.readTime || null,
+        authorName: m.authorName || null,
+        authorRole: m.authorRole || null,
+        sortOrder: Number(m.sortOrder) || 0
+      });
       this.message.set('Post created.');
       this.createModel.set(emptyModel());
       await this.load();
@@ -80,7 +153,20 @@ export class BlogPage {
 
   startEdit(p: BlogPost) {
     this.editingId.set(p.id);
-    this.editModel.set({ slug: p.slug, title: p.title, excerpt: p.excerpt, content: p.content || '', category: p.category, readTime: p.readTime || '', isPublished: p.isPublished });
+    this.editModel.set({
+      slug: p.slug,
+      title: p.title,
+      excerpt: p.excerpt,
+      content: p.content || '',
+      category: p.category,
+      readTime: p.readTime || '',
+      authorName: p.authorName || '',
+      authorRole: p.authorRole || '',
+      sortOrder: p.sortOrder,
+      isPublished: p.isPublished,
+      isHidden: p.isHidden,
+      isFeatured: p.isFeatured
+    });
   }
   cancelEdit() { this.editingId.set(null); }
 
@@ -91,7 +177,14 @@ export class BlogPage {
     this.mutating.set(true);
     this.message.set('');
     try {
-      await this.api.updateBlogPost(id, { ...m, content: m.content || null, readTime: m.readTime || null });
+      await this.api.updateBlogPost(id, {
+        ...m,
+        content: m.content || null,
+        readTime: m.readTime || null,
+        authorName: m.authorName || null,
+        authorRole: m.authorRole || null,
+        sortOrder: Number(m.sortOrder) || 0
+      });
       this.message.set('Post updated.');
       this.editingId.set(null);
       await this.load();
@@ -102,11 +195,11 @@ export class BlogPage {
     }
   }
 
-  async togglePublish(p: BlogPost) {
+  async quickToggle(p: BlogPost, field: 'isPublished' | 'isHidden' | 'isFeatured') {
     this.mutating.set(true);
     try {
-      await this.api.updateBlogPost(p.id, { isPublished: !p.isPublished });
-      this.message.set(p.isPublished ? 'Unpublished.' : 'Published.');
+      await this.api.updateBlogPost(p.id, { [field]: !p[field] });
+      this.message.set('Updated.');
       await this.load();
     } catch {
       this.error.set('Could not update.');
@@ -129,7 +222,53 @@ export class BlogPage {
     }
   }
 
+  async approveComment(id: string) {
+    this.mutating.set(true);
+    try {
+      await this.api.moderateBlogComment(id, true);
+      this.message.set('Comment approved.');
+      await this.load();
+    } catch {
+      this.error.set('Could not approve comment.');
+    } finally {
+      this.mutating.set(false);
+    }
+  }
+
+  async hideComment(id: string) {
+    this.mutating.set(true);
+    try {
+      await this.api.moderateBlogComment(id, false);
+      this.message.set('Comment hidden.');
+      await this.load();
+    } catch {
+      this.error.set('Could not hide comment.');
+    } finally {
+      this.mutating.set(false);
+    }
+  }
+
+  async deleteComment(id: string) {
+    if (!confirm('Delete this comment permanently?')) return;
+    this.mutating.set(true);
+    try {
+      await this.api.deleteBlogComment(id);
+      this.message.set('Comment deleted.');
+      await this.load();
+    } catch {
+      this.error.set('Could not delete comment.');
+    } finally {
+      this.mutating.set(false);
+    }
+  }
+
   toggleExpand(id: string) {
     this.expandedId.set(this.expandedId() === id ? null : id);
+  }
+
+  statusLabel(p: BlogPost): string {
+    if (p.isHidden) return 'Hidden';
+    if (p.isPublished) return 'Published';
+    return 'Draft';
   }
 }

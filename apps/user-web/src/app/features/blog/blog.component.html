@@ -10,50 +10,100 @@
           <p>{{ copy.body }}</p>
         </section>
 
-        <div class="category-pills">
-          @for (cat of categories(); track cat) {
-            <button
-              type="button"
-              class="category-pill"
-              [class.active]="selectedCategory() === cat"
-              (click)="selectCategory(cat)">
-              {{ cat }}
-            </button>
-          }
-        </div>
-
-        @if (loading()) {
-          <section class="blog-grid">
-            @for (_ of [1,2,3,4,5,6]; track $index) {
-              <article class="panel blog-card doctors-skeleton" style="min-height:8rem">
-                <div class="doctors-skeleton-line" style="width:40%;margin-bottom:.5rem"></div>
-                <div class="doctors-skeleton-line" style="width:90%"></div>
-                <div class="doctors-skeleton-line" style="width:80%;margin-top:.4rem"></div>
-              </article>
-            }
-          </section>
-        } @else {
-          <section class="blog-grid">
-            @for (post of filteredPosts(); track post.id) {
-              <article class="panel blog-card">
-                <p class="eyebrow">{{ post.category }}</p>
-                <h2>
-                  <a [routerLink]="['/blog', post.slug]">{{ post.title }}</a>
-                </h2>
-                <p class="blog-excerpt">{{ post.excerpt }}</p>
-                <div class="blog-meta">
-                  <span>{{ postDate(post) }}</span>
-                  @if (post.readTime) {
-                    <span class="blog-dot">&middot;</span>
-                    <span>{{ post.readTime }}</span>
+        @if (!loading() && featuredPosts().length) {
+          <section class="panel blog-featured">
+            <p class="eyebrow">Featured</p>
+            <div class="blog-featured-grid">
+              @for (post of featuredPosts().slice(0, 3); track post.id) {
+                <article class="blog-featured-card">
+                  <p class="eyebrow">{{ post.category }}</p>
+                  <h2><a [routerLink]="['/blog', post.slug]">{{ post.title }}</a></h2>
+                  <p class="blog-excerpt">{{ post.excerpt }}</p>
+                  @if (authorLabel(post)) {
+                    <p class="blog-author">{{ authorLabel(post) }}</p>
                   }
-                </div>
-              </article>
-            } @empty {
-              <p style="color:#526070;grid-column:1/-1">No articles in this category yet. Check back soon.</p>
-            }
+                </article>
+              }
+            </div>
           </section>
         }
+
+        <div class="blog-toolbar">
+          <div class="category-pills">
+            @for (cat of categories(); track cat) {
+              <button
+                type="button"
+                class="category-pill"
+                [class.active]="selectedCategory() === cat"
+                (click)="selectCategory(cat)">
+                {{ cat }}
+              </button>
+            }
+          </div>
+          <div class="sort-pills">
+            <button type="button" class="category-pill" [class.active]="sort() === 'recent'" (click)="changeSort('recent')">Latest</button>
+            <button type="button" class="category-pill" [class.active]="sort() === 'popular'" (click)="changeSort('popular')">Most viewed</button>
+            <button type="button" class="category-pill" [class.active]="sort() === 'featured'" (click)="changeSort('featured')">Featured</button>
+          </div>
+        </div>
+
+        <div class="blog-layout">
+          @if (loading()) {
+            <section class="blog-grid">
+              @for (_ of [1,2,3,4,5,6]; track $index) {
+                <article class="panel blog-card doctors-skeleton" style="min-height:8rem">
+                  <div class="doctors-skeleton-line" style="width:40%;margin-bottom:.5rem"></div>
+                  <div class="doctors-skeleton-line" style="width:90%"></div>
+                  <div class="doctors-skeleton-line" style="width:80%;margin-top:.4rem"></div>
+                </article>
+              }
+            </section>
+          } @else {
+            <section class="blog-grid">
+              @for (post of filteredPosts(); track post.id) {
+                <article class="panel blog-card">
+                  <p class="eyebrow">{{ post.category }}</p>
+                  <h2>
+                    <a [routerLink]="['/blog', post.slug]">{{ post.title }}</a>
+                  </h2>
+                  <p class="blog-excerpt">{{ post.excerpt }}</p>
+                  <div class="blog-meta">
+                    <span>{{ postDate(post) }}</span>
+                    @if (post.readTime) {
+                      <span class="blog-dot">&middot;</span>
+                      <span>{{ post.readTime }}</span>
+                    }
+                    @if (post.viewCount) {
+                      <span class="blog-dot">&middot;</span>
+                      <span>{{ post.viewCount }} views</span>
+                    }
+                  </div>
+                  @if (authorLabel(post)) {
+                    <p class="blog-author">{{ authorLabel(post) }}</p>
+                  }
+                </article>
+              } @empty {
+                <p style="color:#526070;grid-column:1/-1">No articles in this category yet. Check back soon.</p>
+              }
+            </section>
+          }
+
+          @if (!loading() && mostViewed().length) {
+            <aside class="panel blog-sidebar">
+              <p class="eyebrow">Most read</p>
+              <ol class="most-viewed-list">
+                @for (post of mostViewed(); track post.id) {
+                  <li>
+                    <a [routerLink]="['/blog', post.slug]">{{ post.title }}</a>
+                    @if (post.viewCount) {
+                      <span class="view-count">{{ post.viewCount }} views</span>
+                    }
+                  </li>
+                }
+              </ol>
+            </aside>
+          }
+        </div>
 
         <section class="panel about-cta">
           <div>

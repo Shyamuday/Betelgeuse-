@@ -149,8 +149,11 @@ export class AdminDoctorsApi extends AdminApiBase {
   }
 
   // ── Blog ──────────────────────────────────────────────────────────────────
+  getBlogStats() {
+    return firstValueFrom(this.http.get<{ stats: Record<string, number> }>(`${this.apiBase}${API_PATHS.ADMIN.BLOG_STATS}`));
+  }
   listBlogPosts() {
-    return firstValueFrom(this.http.get<{ posts: any[] }>(`${this.apiBase}${API_PATHS.ADMIN.BLOG}`));
+    return firstValueFrom(this.http.get<{ posts: any[]; categories: string[] }>(`${this.apiBase}${API_PATHS.ADMIN.BLOG}`));
   }
   createBlogPost(payload: any) {
     return firstValueFrom(this.http.post<{ post: any }>(`${this.apiBase}${API_PATHS.ADMIN.BLOG}`, payload));
@@ -160,6 +163,16 @@ export class AdminDoctorsApi extends AdminApiBase {
   }
   deleteBlogPost(id: string) {
     return firstValueFrom(this.http.delete(`${this.apiBase}${API_PATHS.ADMIN.BLOG_BY_ID(id)}`));
+  }
+  listBlogComments(status?: 'all' | 'pending' | 'approved') {
+    const params = status && status !== 'all' ? `?status=${status}` : '';
+    return firstValueFrom(this.http.get<{ comments: any[] }>(`${this.apiBase}${API_PATHS.ADMIN.BLOG_COMMENTS}${params}`));
+  }
+  moderateBlogComment(id: string, isApproved: boolean) {
+    return firstValueFrom(this.http.patch<{ comment: any }>(`${this.apiBase}${API_PATHS.ADMIN.BLOG_COMMENT_BY_ID(id)}`, { isApproved }));
+  }
+  deleteBlogComment(id: string) {
+    return firstValueFrom(this.http.delete(`${this.apiBase}${API_PATHS.ADMIN.BLOG_COMMENT_BY_ID(id)}`));
   }
 
   // ── Chat Inbox ────────────────────────────────────────────────────────────

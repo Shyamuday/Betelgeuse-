@@ -17,11 +17,48 @@
                 <span class="blog-dot">&middot;</span>
                 <span>{{ article.readTime }}</span>
               }
+              @if (article.viewCount) {
+                <span class="blog-dot">&middot;</span>
+                <span>{{ article.viewCount }} views</span>
+              }
             </div>
+            @if (authorLabel(article)) {
+              <p class="blog-author">By {{ authorLabel(article) }}</p>
+            }
             <p class="blog-lead">{{ article.excerpt }}</p>
             @if (article.content?.trim()) {
               <div class="blog-body" [innerHTML]="article.content | simpleMarkdown"></div>
             }
+
+            <section class="blog-comments">
+              <h2>Comments ({{ comments().length }})</h2>
+              @if (isLoggedIn()) {
+                <fieldset class="comment-form" [disabled]="commentBusy()">
+                  <label for="blog-comment-body">Share your thoughts</label>
+                  <textarea id="blog-comment-body" rows="3" placeholder="Write a comment…" [formField]="commentForm.body"></textarea>
+                  <button type="button" class="primary" (click)="submitComment()" [disabled]="commentBusy() || !commentModel().body.trim()">
+                    {{ commentBusy() ? 'Posting…' : 'Post comment' }}
+                  </button>
+                  @if (commentMessage()) { <p class="comment-note">{{ commentMessage() }}</p> }
+                  @if (commentError()) { <p class="comment-error">{{ commentError() }}</p> }
+                </fieldset>
+              } @else {
+                <p class="comment-note">Sign in to leave a comment on this article.</p>
+              }
+
+              <ul class="comment-list">
+                @for (c of comments(); track c.id) {
+                  <li class="comment-item">
+                    <strong>{{ c.authorName }}</strong>
+                    <span class="comment-date">{{ commentDate(c) }}</span>
+                    <p>{{ c.body }}</p>
+                  </li>
+                } @empty {
+                  <li class="comment-empty">No comments yet. Be the first to share your thoughts.</li>
+                }
+              </ul>
+            </section>
+
             <a class="secondary home-action" routerLink="/blog">← Back to blog</a>
           </article>
         } @else {

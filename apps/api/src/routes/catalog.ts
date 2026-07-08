@@ -393,41 +393,6 @@ router.get(
   })
 );
 
-/** Public endpoint — published blog posts with optional category filter. */
-router.get(
-  '/blog',
-  asyncRoute(async (req, res) => {
-    const category = typeof req.query['category'] === 'string' ? req.query['category'] : undefined;
-    const posts = await prisma.blogPost.findMany({
-      where: { isPublished: true, ...(category ? { category } : {}) },
-      select: { id: true, slug: true, title: true, excerpt: true, category: true, readTime: true, publishedAt: true, createdAt: true },
-      orderBy: [{ publishedAt: { sort: 'desc', nulls: 'last' } }, { createdAt: 'desc' }]
-    });
-    const categories = await prisma.blogPost.findMany({
-      where: { isPublished: true },
-      select: { category: true },
-      distinct: ['category'],
-      orderBy: { category: 'asc' }
-    });
-    res.json({ posts, categories: categories.map((c) => c.category) });
-  })
-);
-
-router.get(
-  '/blog/:slug',
-  asyncRoute(async (req, res) => {
-    const slug = routeParam(req, 'slug').trim().toLowerCase();
-    const post = await prisma.blogPost.findFirst({
-      where: { slug, isPublished: true }
-    });
-    if (!post) {
-      res.status(404).json({ message: 'Article not found.' });
-      return;
-    }
-    res.json({ post });
-  })
-);
-
 /** Public clinic branches for online booking location selection. */
 router.get(
   '/clinics',

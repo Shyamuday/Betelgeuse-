@@ -1,3 +1,15 @@
+@if (stats(); as s) {
+  <section class="panel stats-row">
+    <div class="stat"><strong>{{ s.total }}</strong><span>Total</span></div>
+    <div class="stat"><strong>{{ s.published }}</strong><span>Published</span></div>
+    <div class="stat"><strong>{{ s.drafts }}</strong><span>Drafts</span></div>
+    <div class="stat"><strong>{{ s.hidden }}</strong><span>Hidden</span></div>
+    <div class="stat"><strong>{{ s.featured }}</strong><span>Featured</span></div>
+    <div class="stat"><strong>{{ s.totalViews }}</strong><span>Total views</span></div>
+    <div class="stat warn"><strong>{{ s.pendingComments }}</strong><span>Pending comments</span></div>
+  </section>
+}
+
 <section class="panel">
   <h2>New Blog Post</h2>
   <fieldset class="form-grid" [disabled]="mutating()">
@@ -12,11 +24,23 @@
     </div>
     <div class="field">
       <label class="field-label" for="blog-create-category">Category *</label>
-      <input id="blog-create-category" placeholder="e.g. Chronic Care" [formField]="createForm.category" />
+      <input id="blog-create-category" list="blog-categories" placeholder="e.g. Chronic Care" [formField]="createForm.category" />
     </div>
     <div class="field">
       <label class="field-label" for="blog-create-read-time">Read time</label>
       <input id="blog-create-read-time" placeholder="e.g. 5 min read" [formField]="createForm.readTime" />
+    </div>
+    <div class="field">
+      <label class="field-label" for="blog-create-author">Author name</label>
+      <input id="blog-create-author" placeholder="Defaults to you" [formField]="createForm.authorName" />
+    </div>
+    <div class="field">
+      <label class="field-label" for="blog-create-author-role">Author role</label>
+      <input id="blog-create-author-role" placeholder="e.g. Doctor" [formField]="createForm.authorRole" />
+    </div>
+    <div class="field">
+      <label class="field-label" for="blog-create-sort">Sort order (lower = higher rank)</label>
+      <input id="blog-create-sort" type="number" [formField]="createForm.sortOrder" />
     </div>
     <div class="field">
       <label class="field-label" for="blog-create-excerpt">Excerpt *</label>
@@ -24,38 +48,53 @@
     </div>
     <div class="field">
       <label class="field-label" for="blog-create-content">Full content</label>
-      <textarea id="blog-create-content" rows="8" placeholder="Optional — for blog detail page" [formField]="createForm.content"></textarea>
+      <textarea id="blog-create-content" rows="8" placeholder="Markdown supported" [formField]="createForm.content"></textarea>
     </div>
     <label class="checkbox-label"><input type="checkbox" [formField]="createForm.isPublished" /> Publish immediately</label>
+    <label class="checkbox-label"><input type="checkbox" [formField]="createForm.isFeatured" /> Featured article</label>
+    <label class="checkbox-label"><input type="checkbox" [formField]="createForm.isHidden" /> Hidden (not shown on site)</label>
     <button type="button" (click)="create()" [disabled]="mutating() || !createModel().title || !createModel().slug || !createModel().excerpt || !createModel().category">
       {{ mutating() ? 'Saving…' : 'Create Post' }}
     </button>
   </fieldset>
 </section>
 
+<datalist id="blog-categories">
+  @for (cat of categories(); track cat) {
+    <option [value]="cat"></option>
+  }
+</datalist>
+
 <section class="panel">
   <h2>All Posts ({{ posts().length }})</h2>
   @if (loading()) { <p class="loading-text">Loading…</p> }
 
   @for (p of posts(); track p.id) {
-    <article class="card" [class.is-published]="p.isPublished">
+    <article class="card" [class.is-published]="p.isPublished" [class.is-hidden]="p.isHidden">
       <div class="card-header">
         <div>
           <strong>{{ p.title }}</strong>
           <span class="meta"> · {{ p.category }}</span>
           @if (p.readTime) { <span class="meta"> · {{ p.readTime }}</span> }
+          @if (p.authorName) { <span class="meta"> · {{ p.authorName }}</span> }
         </div>
         <div class="badge-row">
-          <span class="badge" [class.published]="p.isPublished" [class.draft]="!p.isPublished">
-            {{ p.isPublished ? 'Published' : 'Draft' }}
+          <span class="badge" [class.published]="p.isPublished && !p.isHidden" [class.draft]="!p.isPublished" [class.hidden]="p.isHidden">
+            {{ statusLabel(p) }}
           </span>
+          @if (p.isFeatured) { <span class="badge featured">Featured</span> }
         </div>
       </div>
       <p class="slug-line">/blog/{{ p.slug }}</p>
+      <p class="metrics-line">
+        <span>{{ p.viewCount }} views</span>
+        <span> · rank {{ p.sortOrder }}</span>
+        @if (p._count?.comments) { <span> · {{ p._count?.comments }} comments</span> }
+      </p>
       <p class="excerpt-preview">{{ p.excerpt }}</p>
 
       <button type="button" class="ghost expand-btn" (click)="toggleExpand(p.id)">
-        {{ expandedId() === p.id ? 'Collapse' : 'Edit' }}
+        {{ expandedId() === p.id ? 'Collapse' : 'Manage' }}
       </button>
 
       @if (editingId() === p.id) {
@@ -70,11 +109,19 @@
           </div>
           <div class="field">
             <label class="field-label" [attr.for]="'blog-cat-' + p.id">Category</label>
-            <input [id]="'blog-cat-' + p.id" [formField]="editForm.category" />
+            <input [id]="'blog-cat-' + p.id" list="blog-categories" [formField]="editForm.category" />
           </div>
           <div class="field">
             <label class="field-label" [attr.for]="'blog-rt-' + p.id">Read time</label>
             <input [id]="'blog-rt-' + p.id" [formField]="editForm.readTime" />
+          </div>
+          <div class="field">
+            <label class="field-label" [attr.for]="'blog-author-' + p.id">Author</label>
+            <input [id]="'blog-author-' + p.id" [formField]="editForm.authorName" />
+          </div>
+          <div class="field">
+            <label class="field-label" [attr.for]="'blog-sort-' + p.id">Sort order</label>
+            <input [id]="'blog-sort-' + p.id" type="number" [formField]="editForm.sortOrder" />
           </div>
           <div class="field">
             <label class="field-label" [attr.for]="'blog-ex-' + p.id">Excerpt</label>
@@ -85,6 +132,8 @@
             <textarea [id]="'blog-content-' + p.id" rows="8" [formField]="editForm.content"></textarea>
           </div>
           <label class="checkbox-label"><input type="checkbox" [formField]="editForm.isPublished" /> Published</label>
+          <label class="checkbox-label"><input type="checkbox" [formField]="editForm.isFeatured" /> Featured</label>
+          <label class="checkbox-label"><input type="checkbox" [formField]="editForm.isHidden" /> Hidden</label>
           <div class="actions">
             <button type="button" (click)="saveEdit()" [disabled]="mutating()">Save</button>
             <button type="button" class="ghost" (click)="cancelEdit()">Cancel</button>
@@ -93,8 +142,14 @@
       } @else if (expandedId() === p.id) {
         <div class="actions">
           <button type="button" (click)="startEdit(p)" [disabled]="mutating()">Edit fields</button>
-          <button type="button" class="ghost" (click)="togglePublish(p)" [disabled]="mutating()">
+          <button type="button" class="ghost" (click)="quickToggle(p, 'isPublished')" [disabled]="mutating()">
             {{ p.isPublished ? 'Unpublish' : 'Publish' }}
+          </button>
+          <button type="button" class="ghost" (click)="quickToggle(p, 'isHidden')" [disabled]="mutating()">
+            {{ p.isHidden ? 'Unhide' : 'Hide' }}
+          </button>
+          <button type="button" class="ghost" (click)="quickToggle(p, 'isFeatured')" [disabled]="mutating()">
+            {{ p.isFeatured ? 'Unfeature' : 'Feature' }}
           </button>
           <button type="button" class="danger" (click)="remove(p.id)" [disabled]="mutating()">Delete</button>
         </div>
@@ -102,6 +157,39 @@
     </article>
   } @empty {
     @if (!loading()) { <p class="empty-state">No blog posts yet.</p> }
+  }
+</section>
+
+<section class="panel">
+  <div class="comment-header">
+    <h2>Comment moderation</h2>
+    <div class="filter-pills">
+      <button type="button" [class.active]="commentFilter() === 'pending'" (click)="setCommentFilter('pending')">Pending</button>
+      <button type="button" [class.active]="commentFilter() === 'approved'" (click)="setCommentFilter('approved')">Approved</button>
+      <button type="button" [class.active]="commentFilter() === 'all'" (click)="setCommentFilter('all')">All</button>
+    </div>
+  </div>
+
+  @for (c of comments(); track c.id) {
+    <article class="card comment-card" [class.pending]="!c.isApproved">
+      <p class="comment-meta">
+        <strong>{{ c.authorName }}</strong>
+        on <em>{{ c.post.title }}</em>
+        · {{ c.createdAt | date:'medium' }}
+        · <span class="badge" [class.published]="c.isApproved" [class.draft]="!c.isApproved">{{ c.isApproved ? 'Approved' : 'Pending' }}</span>
+      </p>
+      <p>{{ c.body }}</p>
+      <div class="actions">
+        @if (!c.isApproved) {
+          <button type="button" (click)="approveComment(c.id)" [disabled]="mutating()">Approve</button>
+        } @else {
+          <button type="button" class="ghost" (click)="hideComment(c.id)" [disabled]="mutating()">Hide</button>
+        }
+        <button type="button" class="danger" (click)="deleteComment(c.id)" [disabled]="mutating()">Delete</button>
+      </div>
+    </article>
+  } @empty {
+    <p class="empty-state">No comments in this filter.</p>
   }
 </section>
 

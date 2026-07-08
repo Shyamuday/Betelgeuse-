@@ -13,6 +13,8 @@ export const API_PATHS = {
     DISEASES: '/doctor/diseases',
     DISEASE_CATEGORIES: '/doctor/diseases/categories',
     DISEASE_PUBLIC_PAGE: (id: string) => `/doctor/diseases/${id}/public-page`,
+    BLOG: '/doctor/blog',
+    BLOG_BY_ID: (id: string) => `/doctor/blog/${id}`,
     PRESCRIPTION_TEMPLATES: '/doctor/prescription-templates',
     PRESCRIPTIONS: '/doctor/prescriptions',
     PRESCRIPTION_PDF: (id: string) => `/patient/prescriptions/${id}/pdf`,
