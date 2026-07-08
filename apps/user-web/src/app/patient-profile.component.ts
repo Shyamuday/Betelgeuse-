@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { Component, Input, OnInit, computed, inject, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
 import { API_PATHS } from './core/constants/api-paths.constants';
@@ -16,6 +17,7 @@ import {
   emptyReminderForm,
   formToProfilePayload,
   profileToForm,
+  computeProfileCompletion,
   type PatientProfile,
   type ReminderPreferences
 } from './core/constants/patient-profile.constants';
@@ -31,7 +33,7 @@ import { AUTH_TOKEN_KEY } from './core/constants/auth.constants';
 @Component({
   selector: 'app-patient-profile',
   standalone: true,
-  imports: [CommonModule, FormField, PatientIdCardComponent, PatientAddressBookComponent, ProfileAvatarUploadComponent, PatientClinicalMediaPanelComponent],
+  imports: [CommonModule, RouterLink, FormField, PatientIdCardComponent, PatientAddressBookComponent, ProfileAvatarUploadComponent, PatientClinicalMediaPanelComponent],
   styleUrl: './patient-profile.component.scss',
   templateUrl: './patient-profile.component.html',
 })
@@ -52,6 +54,7 @@ export class PatientProfileComponent implements OnInit {
   readonly clinics = signal<Array<{ id: string; name: string; address?: string | null }>>([]);
   readonly clinicsLoading = signal(true);
   readonly hasPassword = signal(false);
+  readonly profileCompletion = computed(() => computeProfileCompletion(this.profile()));
 
   readonly profileFormModel = signal(emptyProfileForm());
   readonly profileForm = form(this.profileFormModel);

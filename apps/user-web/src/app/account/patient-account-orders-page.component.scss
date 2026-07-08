@@ -19,8 +19,18 @@
 .order-card {
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 1rem;
   background: #fff;
+}
+
+.order-link {
+  display: block;
+  padding: 1rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.order-link:hover {
+  background: #f8fafc;
 }
 
 .order-top {

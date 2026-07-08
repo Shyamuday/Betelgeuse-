@@ -59,8 +59,8 @@ export class DashboardDataService {
     return this.api.patientLabResults();
   }
 
-  loadTodayDoseEvents(): Observable<{ doseEvents: DoseEvent[] }> {
-    return this.api.todayDoseEvents();
+  loadDoseHistory(days = 30): Observable<{ doses: DoseEvent[] }> {
+    return this.api.doseHistory(days);
   }
 
   loadMedicineReminders(): Observable<{ today: DoseEvent[]; needingReason: DoseEvent[] }> {

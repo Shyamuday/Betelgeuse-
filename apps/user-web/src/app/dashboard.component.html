@@ -32,6 +32,14 @@
           }
         </section>
 
+        @if (walletBalanceInPaise() > 0) {
+          <section class="panel wallet-chip">
+            <span class="eyebrow">Rewards wallet</span>
+            <strong>{{ formatInr(walletBalanceInPaise()) }}</strong>
+            <a class="btn-link" routerLink="/patient/account/rewards">View rewards</a>
+          </section>
+        }
+
         <section class="grid two">
           <app-book-consultation-panel
             [diseases]="diseases()"
@@ -53,9 +61,22 @@
           />
         </section>
 
+        @if (activeConsultation()) {
+          <section class="grid two">
+            <app-consultation-detail
+              [consultation]="activeConsultation()"
+              [userRole]="auth.user()?.role ?? null"
+              [disabled]="isProcessing()"
+              (messageSent)="onMessageSent($event)"
+            />
+          </section>
+        }
+
         <section class="grid two">
           <app-today-medicines
             [todayDoses]="todayDoseEvents()"
+            [historyDoses]="historyDoseEvents()"
+            [historyLoading]="historyDosesLoading()"
             [needingReason]="dosesNeedingReason()"
             [disabled]="isProcessing()"
             [snoozeMinutes]="snoozeMinutes()"

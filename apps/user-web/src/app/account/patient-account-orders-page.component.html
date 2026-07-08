@@ -16,6 +16,7 @@
     <div class="order-list">
       @for (order of deliveries(); track order.id) {
         <article class="order-card" [class]="'status-' + order.status.toLowerCase()">
+          <a class="order-link" [routerLink]="['.', order.id]">
           <div class="order-top">
             <div>
               <strong>{{ order.deliveryNumber }}</strong>
@@ -40,6 +41,7 @@
           @if (order.deliveredAt) {
             <p class="delivered">Delivered {{ order.deliveredAt | date:'medium' }}</p>
           }
+          </a>
         </article>
       }
     </div>

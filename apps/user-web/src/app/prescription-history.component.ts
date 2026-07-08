@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, injectAsync, onIdle, signal } from '@angular/core';
+import { Component, Input, inject, injectAsync, onIdle, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { Prescription } from './models';
+import { ROUTE_PATHS } from './core/constants/app-routes.constants';
 
 @Component({
   selector: 'app-prescription-history',
@@ -11,6 +13,9 @@ import { Prescription } from './models';
 })
 export class PrescriptionHistoryComponent {
   @Input() prescriptions: Prescription[] = [];
+  @Input() enableFollowUpBooking = true;
+
+  private readonly router = inject(Router);
 
   private readonly pdf = injectAsync(
     () => import('./core/services/prescription-pdf.service').then((module) => module.PrescriptionPdfService),
@@ -55,6 +60,12 @@ export class PrescriptionHistoryComponent {
       const meta = await service.fetchShareMeta(prescription.id);
       const url = service.whatsAppShareUrl(meta.shareText);
       window.open(url, '_blank', 'noopener,noreferrer');
+    });
+  }
+
+  bookFollowUp(prescription: Prescription) {
+    void this.router.navigate([`/${ROUTE_PATHS.PATIENT_DASHBOARD}`], {
+      queryParams: { bookFollowUp: prescription.id },
     });
   }
 

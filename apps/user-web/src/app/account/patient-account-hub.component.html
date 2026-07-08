@@ -11,6 +11,20 @@
   @if (loading()) {
     <p class="loading-text">Loading account…</p>
   } @else if (profile(); as p) {
+    @if (profileCompletion() < 100) {
+      <div class="profile-meter panel">
+        <div class="profile-meter-head">
+          <div>
+            <p class="eyebrow">Health profile</p>
+            <strong>{{ profileCompletion() }}% complete</strong>
+          </div>
+          <a class="btn-link" routerLink="/patient/account/profile">Complete profile</a>
+        </div>
+        <div class="profile-meter-bar" role="progressbar" [attr.aria-valuenow]="profileCompletion()" aria-valuemin="0" aria-valuemax="100">
+          <span [style.width.%]="profileCompletion()"></span>
+        </div>
+      </div>
+    }
     <div class="summary-grid">
       <div class="summary-card">
         <span class="label">Mobile</span>

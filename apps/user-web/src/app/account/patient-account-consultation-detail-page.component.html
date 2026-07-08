@@ -1,0 +1,34 @@
+<section class="consult-detail-page panel">
+  <a class="back-link" routerLink="../">← Back to consultations</a>
+
+  @if (notice()) {
+    <p class="notice">{{ notice() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="loading-text">Loading consultation…</p>
+  } @else if (consultation(); as active) {
+    <div class="page-hdr">
+      <div>
+        <p class="eyebrow">Consultation</p>
+        <h1>{{ active.disease.name }}</h1>
+        <p class="page-lead">
+          Doctor: {{ active.assignedDoctor?.name || 'Not assigned yet' }}
+          · Status: {{ active.status }}
+        </p>
+      </div>
+    </div>
+
+    <app-consultation-detail
+      [consultation]="active"
+      userRole="PATIENT"
+      [disabled]="processing()"
+      (messageSent)="onMessageSent($event)"
+    />
+  } @else {
+    <div class="empty-state">
+      <h1>Consultation not found</h1>
+      <a routerLink="../">Back to consultations</a>
+    </div>
+  }
+</section>

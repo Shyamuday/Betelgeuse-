@@ -125,6 +125,39 @@
   color: #64748b;
 }
 
+.profile-meter {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.1rem;
+}
+
+.profile-meter-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.profile-meter-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.profile-meter-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #38bdf8);
+  border-radius: inherit;
+}
+
+.btn-link {
+  color: #1d4ed8;
+  font-weight: 700;
+  text-decoration: none;
+}
+
 @media (max-width: 720px) {
   .summary-grid {
     grid-template-columns: 1fr;

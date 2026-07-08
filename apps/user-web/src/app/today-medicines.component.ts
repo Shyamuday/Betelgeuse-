@@ -34,9 +34,13 @@ export class TodayMedicinesComponent implements OnChanges {
   readonly snoozeOptions = SNOOZE_OPTIONS;
 
   @Input() todayDoses: DoseEvent[] = [];
+  @Input() historyDoses: DoseEvent[] = [];
+  @Input() historyLoading = false;
   @Input() needingReason: DoseEvent[] = [];
   @Input() disabled = false;
   @Input() snoozeMinutes = 30;
+
+  readonly activeTab = signal<'today' | 'history'>('today');
 
   @Output() taken = new EventEmitter<string>();
   @Output() skipped = new EventEmitter<{ id: string; note: string }>();
@@ -128,5 +132,9 @@ export class TodayMedicinesComponent implements OnChanges {
       return true;
     }
     return !this.needingReason.some((item) => item.id === dose.id);
+  }
+
+  setTab(tab: 'today' | 'history') {
+    this.activeTab.set(tab);
   }
 }

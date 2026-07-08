@@ -254,3 +254,28 @@ export function formToProfilePayload(form: ReturnType<typeof emptyProfileForm>) 
     ...homeo
   };
 }
+
+const PROFILE_COMPLETION_FIELDS: Array<(p: PatientProfile) => unknown> = [
+  (p) => p.name,
+  (p) => p.dateOfBirth,
+  (p) => p.gender,
+  (p) => p.bloodGroup,
+  (p) => p.emergencyContactName,
+  (p) => p.emergencyContactPhone,
+  (p) => p.allergies,
+  (p) => p.chronicConditions,
+  (p) => p.dietType,
+  (p) => p.thermalPreference,
+  (p) => p.occupation,
+  (p) => p.homeClinicStore?.id,
+  ...HOMEOPATHIC_TEXT_FIELDS.map((field) => (p: PatientProfile) => p[field]),
+];
+
+export function computeProfileCompletion(profile: PatientProfile | null): number {
+  if (!profile) return 0;
+  const filled = PROFILE_COMPLETION_FIELDS.filter((getter) => {
+    const value = getter(profile);
+    return value != null && String(value).trim() !== '';
+  }).length;
+  return Math.round((filled / PROFILE_COMPLETION_FIELDS.length) * 100);
+}

@@ -11,6 +11,9 @@ export type RazorpayCheckoutResponse = {
   razorpay_signature: string;
 };
 
+import type { Socket } from 'socket.io-client';
+
 export interface RealtimeSubscription {
   unsubscribe(): void;
+  socket: Socket;
 }

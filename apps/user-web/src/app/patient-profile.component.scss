@@ -13,6 +13,37 @@
   padding: 0;
 }
 
+.profile-meter {
+  margin-bottom: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  background: #f8fbff;
+}
+
+.profile-meter-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.55rem;
+  color: #334155;
+  font-size: 0.88rem;
+}
+
+.profile-meter-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.profile-meter-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #38bdf8);
+}
+
 .id-card-panel {
   background: #fff;
   border: 1px solid #c7d2fe;

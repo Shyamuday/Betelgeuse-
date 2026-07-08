@@ -468,6 +468,10 @@ export const ROUTE_SEO_CONTENT = {
     seoTitle: 'Orders & Deliveries | Vitalis Care',
     seoDescription: 'Track medicine delivery orders and status.'
   },
+  'patient/account/lab-results': {
+    seoTitle: 'Lab Results | Vitalis Care',
+    seoDescription: 'View diagnostic referrals and completed lab test results.'
+  },
   'patient/account/card': {
     seoTitle: 'My Clinic Card | Vitalis Care',
     seoDescription: 'Your patient ID card and QR code for clinic visits.'

@@ -27,6 +27,18 @@
       }
     </div>
 
+    @if (!loading() && profile() && profileCompletion() < 100) {
+      <div class="profile-meter">
+        <div class="profile-meter-head">
+          <strong>Profile {{ profileCompletion() }}% complete</strong>
+          <span>More details help your doctor personalize care.</span>
+        </div>
+        <div class="profile-meter-bar" role="progressbar" [attr.aria-valuenow]="profileCompletion()" aria-valuemin="0" aria-valuemax="100">
+          <span [style.width.%]="profileCompletion()"></span>
+        </div>
+      </div>
+    }
+
     @if (loading()) {
       <p class="loading-text">Loading profile…</p>
     } @else if (errorMsg() && !profile()) {
@@ -401,38 +413,8 @@
     <aside class="side-panels">
       <section class="side-panel">
         <h3>Notification preferences</h3>
-        <p class="section-note">Medicine reminders and appointment alerts.</p>
-        <div class="check-grid">
-          <label class="check-row">
-            <input type="checkbox" [checked]="reminderFormModel().inApp" (change)="updateReminderField('inApp', $any($event.target).checked)" />
-            In-app notifications
-          </label>
-          <label class="check-row">
-            <input type="checkbox" [checked]="reminderFormModel().sms" (change)="updateReminderField('sms', $any($event.target).checked)" />
-            SMS
-          </label>
-          <label class="check-row">
-            <input type="checkbox" [checked]="reminderFormModel().whatsapp" (change)="updateReminderField('whatsapp', $any($event.target).checked)" />
-            WhatsApp
-          </label>
-          <label class="check-row">
-            <input type="checkbox" [checked]="reminderFormModel().push" (change)="updateReminderField('push', $any($event.target).checked)" />
-            Push notifications
-          </label>
-        </div>
-        <div class="field-grid">
-          <div class="field">
-            <label>Quiet hours from</label>
-            <input type="time" [formField]="reminderForm.quietHoursStart" />
-          </div>
-          <div class="field">
-            <label>Quiet hours until</label>
-            <input type="time" [formField]="reminderForm.quietHoursEnd" />
-          </div>
-        </div>
-        <button class="btn-secondary" type="button" (click)="saveReminderPreferences()" [disabled]="savingPrefs()">
-          {{ savingPrefs() ? 'Saving…' : 'Save notifications' }}
-        </button>
+        <p class="section-note">Manage medicine reminders and quiet hours from your care dashboard.</p>
+        <a class="btn-secondary" routerLink="/patient/dashboard">Manage reminders on dashboard</a>
       </section>
 
       <section class="side-panel">

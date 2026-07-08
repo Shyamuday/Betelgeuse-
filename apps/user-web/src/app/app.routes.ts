@@ -27,7 +27,11 @@ import { PatientAccountReferPageComponent } from './account/patient-account-refe
 import { PatientAccountRewardsPageComponent } from './account/patient-account-rewards-page.component';
 import { PatientAccountConsultationsPageComponent } from './account/patient-account-consultations-page.component';
 import { PatientAccountOrdersPageComponent } from './account/patient-account-orders-page.component';
+import { PatientAccountOrderDetailPageComponent } from './account/patient-account-order-detail-page.component';
+import { PatientAccountLabResultsPageComponent } from './account/patient-account-lab-results-page.component';
+import { PatientAccountConsultationDetailPageComponent } from './account/patient-account-consultation-detail-page.component';
 import { PatientAccountCardPageComponent } from './account/patient-account-card-page.component';
+import { NotFoundPageComponent } from './not-found-page.component';
 
 export const routes: Routes = [
   {
@@ -193,9 +197,24 @@ export const routes: Routes = [
         data: ROUTE_SEO_CONTENT['patient/account/consultations']
       },
       {
+        path: 'consultations/:id',
+        component: PatientAccountConsultationDetailPageComponent,
+        data: ROUTE_SEO_CONTENT['patient/account/consultations']
+      },
+      {
         path: 'orders',
         component: PatientAccountOrdersPageComponent,
         data: ROUTE_SEO_CONTENT['patient/account/orders']
+      },
+      {
+        path: 'orders/:id',
+        component: PatientAccountOrderDetailPageComponent,
+        data: ROUTE_SEO_CONTENT['patient/account/orders']
+      },
+      {
+        path: 'lab-results',
+        component: PatientAccountLabResultsPageComponent,
+        data: ROUTE_SEO_CONTENT['patient/account/lab-results']
       },
       {
         path: 'card',
@@ -209,5 +228,9 @@ export const routes: Routes = [
     component: HomeComponent,
     data: ROUTE_SEO_CONTENT.home
   },
-  { path: '**', redirectTo: '' }
+  {
+    path: '**',
+    component: NotFoundPageComponent,
+    data: { seoTitle: 'Page not found | Vitalis Care', seoDescription: 'The page you requested could not be found.' }
+  }
 ];

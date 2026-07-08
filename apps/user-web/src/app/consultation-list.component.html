@@ -23,7 +23,7 @@
               <p class="success">Prescription uploaded</p>
             }
             @if (enableDashboardLinks) {
-              <a class="dash-link" [routerLink]="dashboardPath" [queryParams]="dashboardQuery(consultation.id)">
+              <a class="dash-link" [routerLink]="[accountConsultationPath, consultation.id]">
                 Open chat &amp; prescription →
               </a>
             }

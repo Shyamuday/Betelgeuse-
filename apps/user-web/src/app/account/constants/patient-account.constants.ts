@@ -51,6 +51,14 @@ export const PATIENT_ACCOUNT_NAV: PatientAccountNavItem[] = [
     available: true
   },
   {
+    id: 'lab-results',
+    label: 'Lab results',
+    description: 'Diagnostic referrals and test results',
+    path: `/${ROUTE_PATHS.PATIENT_ACCOUNT_LAB_RESULTS}`,
+    icon: '🧪',
+    available: true
+  },
+  {
     id: 'card',
     label: 'Clinic card',
     description: 'Patient ID and QR for visits',

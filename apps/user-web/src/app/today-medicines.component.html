@@ -4,8 +4,13 @@
       <h2>Medicine reminders</h2>
       <p class="muted">Mark doses taken, snooze reminders, or explain missed medicines.</p>
     </div>
+    <div class="tab-row">
+      <button type="button" class="tab-btn" [class.active]="activeTab() === 'today'" (click)="setTab('today')">Today</button>
+      <button type="button" class="tab-btn" [class.active]="activeTab() === 'history'" (click)="setTab('history')">History</button>
+    </div>
   </div>
 
+  @if (activeTab() === 'today') {
   @if (needingReason.length) {
     <section class="attention-block">
       <h3>Needs your explanation</h3>
@@ -115,4 +120,27 @@
       }
     </div>
   </section>
+  } @else {
+    <section>
+      <h3>Last 30 days</h3>
+      @if (historyLoading) {
+        <p class="muted">Loading adherence history…</p>
+      } @else {
+        <div class="cards">
+          @for (dose of historyDoses; track dose.id) {
+            <article class="consult-card" [class.done]="dose.status === 'TAKEN'">
+              <strong>{{ dose.prescriptionItem.medicineName }}</strong>
+              <span>{{ dose.scheduledFor | date: 'medium' }}</span>
+              <span class="status-pill" [class]="'status-' + dose.status.toLowerCase()">{{ dose.status }}</span>
+              @if (dose.note) {
+                <small class="muted">Note: {{ dose.note }}</small>
+              }
+            </article>
+          } @empty {
+            <p class="muted">No dose history for the last 30 days.</p>
+          }
+        </div>
+      }
+    </section>
+  }
 </div>

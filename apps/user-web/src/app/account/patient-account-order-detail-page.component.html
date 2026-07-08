@@ -1,0 +1,73 @@
+<section class="order-detail panel">
+  <a class="back-link" routerLink="../">← Back to orders</a>
+
+  @if (loading()) {
+    <p class="loading-text">Loading delivery details…</p>
+  } @else if (delivery(); as order) {
+    <div class="page-hdr">
+      <div>
+        <p class="eyebrow">Delivery</p>
+        <h1>{{ order.deliveryNumber }}</h1>
+        <p class="page-lead">{{ statusText(order.status) }}</p>
+      </div>
+      <span class="status-badge">{{ statusText(order.status) }}</span>
+    </div>
+
+    <ol class="timeline">
+      @for (step of timelineSteps(); track step.key) {
+        <li [class.done]="step.done" [class.active]="step.active">
+          <span class="dot"></span>
+          <span>{{ step.label }}</span>
+        </li>
+      }
+    </ol>
+
+    <div class="detail-grid">
+      <section class="detail-card">
+        <h2>Delivery address</h2>
+        <p>{{ order.deliveryAddress }}</p>
+        <p class="muted">Phone: {{ order.deliveryPhone }}</p>
+      </section>
+      @if (order.store) {
+        <section class="detail-card">
+          <h2>Pharmacy</h2>
+          <p><strong>{{ order.store.name }}</strong></p>
+          @if (order.store.address) { <p class="muted">{{ order.store.address }}</p> }
+          @if (order.store.phone) { <p class="muted">{{ order.store.phone }}</p> }
+        </section>
+      }
+      @if (order.assignedExecutive) {
+        <section class="detail-card">
+          <h2>Delivery partner</h2>
+          <p><strong>{{ order.assignedExecutive.name }}</strong></p>
+          @if (order.assignedExecutive.mobile) {
+            <p class="muted">{{ order.assignedExecutive.mobile }}</p>
+          }
+        </section>
+      }
+    </div>
+
+    @if (order.lines?.length) {
+      <section class="detail-card">
+        <h2>Items</h2>
+        <ul class="item-list">
+          @for (line of order.lines; track $index) {
+            <li>{{ line.qty }}× {{ line.label }}</li>
+          }
+        </ul>
+      </section>
+    }
+
+    <p class="meta">
+      Placed {{ order.createdAt | date:'medium' }}
+      @if (order.deliveredAt) {
+        · Delivered {{ order.deliveredAt | date:'medium' }}
+      }
+    </p>
+  } @else {
+    <div class="empty-state">
+      <h1>Delivery not found</h1>
+      <a routerLink="../">Back to orders</a>
+    </div>
+  }
+</section>

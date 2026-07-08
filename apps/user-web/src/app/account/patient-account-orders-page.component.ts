@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { API_PATHS } from '../core/constants/api-paths.constants';
 import { AuthService } from '../auth/auth.service';
 import { environment } from '../../environments/environment';
@@ -29,7 +30,7 @@ type DeliveryRow = {
 @Component({
   selector: 'app-patient-account-orders-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './patient-account-orders-page.component.html',
   styleUrl: './patient-account-orders-page.component.scss'
 })

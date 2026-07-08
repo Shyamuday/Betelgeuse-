@@ -92,6 +92,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly patientPrescriptions = signal<Prescription[]>([]);
   readonly patientLabResults = signal<LabResult[]>([]);
   readonly todayDoseEvents = signal<DoseEvent[]>([]);
+  readonly historyDoseEvents = signal<DoseEvent[]>([]);
+  readonly historyDosesLoading = signal(false);
   readonly dosesNeedingReason = signal<DoseEvent[]>([]);
   readonly notice = signal('');
   readonly isLoading = signal(false);
@@ -105,9 +107,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (!id) return null;
     return this.diseases().find((disease) => disease.id === id) ?? null;
   });
-  private realtimeChannel?: { unsubscribe(): void };
+  private realtimeChannel?: { unsubscribe(): void; socket?: import('socket.io-client').Socket };
 
   readonly snoozeMinutes = signal(DEFAULT_SNOOZE_MINUTES);
+  readonly walletBalanceInPaise = signal(0);
+  private activeConsultationSocketId: string | null = null;
 
   readonly doctorFormModel = signal({
     name: 'Dr. New Doctor',
@@ -146,6 +150,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.pendingConsultationId = params.get('consultationId');
       this.pendingDiseaseId = params.get('diseaseId');
       const clinicStoreId = params.get('clinicStoreId');
+      if (params.get('bookFollowUp')) {
+        this.showNotice('Book your follow-up consultation below.');
+      }
       if (clinicStoreId !== this.pendingClinicStoreId) {
         this.pendingClinicStoreId = clinicStoreId;
         if (clinicStoreId) {
@@ -278,6 +285,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   setActive(consultation: Consultation) {
     this.activeConsultation.set(consultation);
+    this.subscribeToActiveConsultation(consultation.id);
+  }
+
+  formatInr(paise: number) {
+    return (paise / 100).toLocaleString('en-IN', { style: 'currency', currency: 'INR' });
+  }
+
+  private subscribeToActiveConsultation(consultationId: string) {
+    const socket = this.realtimeChannel?.socket;
+    if (!socket || this.activeConsultationSocketId === consultationId) return;
+    this.api.subscribeToConsultation(socket, consultationId);
+    this.activeConsultationSocketId = consultationId;
+  }
+
+  private loadWalletBalance() {
+    this.api.patientRewards().subscribe({
+      next: ({ balanceInPaise }) => this.walletBalanceInPaise.set(balanceInPaise ?? 0),
+      error: () => { /* wallet optional */ },
+    });
   }
 
   onMessageSent(payload: SendMessagePayload) {
@@ -454,6 +480,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadConsultations();
     if (this.dataService.isPatient()) {
       this.loadPatientMedicationData();
+      this.loadWalletBalance();
     }
     if (this.dataService.isAdmin()) {
       this.loadAdminData();
@@ -478,11 +505,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: ({ consultations }) => {
         this.consultations.set(consultations);
         const preferredId = this.pendingConsultationId || this.activeConsultation()?.id;
-        this.activeConsultation.set(
-          preferredId
-            ? consultations.find((c) => c.id === preferredId) || consultations[0] || null
-            : consultations[0] || null,
-        );
+        const active = preferredId
+          ? consultations.find((c) => c.id === preferredId) || consultations[0] || null
+          : consultations[0] || null;
+        this.activeConsultation.set(active);
+        if (active) {
+          this.subscribeToActiveConsultation(active.id);
+        }
         const current = this.assignmentModel();
         this.assignmentModel.set({
           consultationId: consultations[0]?.id || current.consultationId,
@@ -543,6 +572,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.showNotice(
           error.error?.message || error.message || 'Could not load medicine reminders.',
         ),
+    });
+    this.historyDosesLoading.set(true);
+    this.dataService.loadDoseHistory(30).subscribe({
+      next: ({ doses }) => this.historyDoseEvents.set(doses),
+      error: () => { /* history optional */ },
+      complete: () => this.historyDosesLoading.set(false),
     });
   }
 

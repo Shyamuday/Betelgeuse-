@@ -17,6 +17,11 @@
                 }
                 @if (prescription.followUpDate) {
                   <p class="muted">Follow-up: {{ prescription.followUpDate | date: 'mediumDate' }}</p>
+                  @if (enableFollowUpBooking) {
+                    <button class="btn-pdf ghost" type="button" (click)="bookFollowUp(prescription)">
+                      Book follow-up
+                    </button>
+                  }
                 }
               </div>
               <div class="rx-actions">

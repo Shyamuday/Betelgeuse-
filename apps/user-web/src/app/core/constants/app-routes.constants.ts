@@ -24,7 +24,10 @@ export const ROUTE_PATHS = {
   PATIENT_ACCOUNT_REFER: 'patient/account/refer',
   PATIENT_ACCOUNT_REWARDS: 'patient/account/rewards',
   PATIENT_ACCOUNT_CONSULTATIONS: 'patient/account/consultations',
+  PATIENT_ACCOUNT_CONSULTATION_DETAIL: 'patient/account/consultations/:id',
   PATIENT_ACCOUNT_ORDERS: 'patient/account/orders',
+  PATIENT_ACCOUNT_ORDER_DETAIL: 'patient/account/orders/:id',
+  PATIENT_ACCOUNT_LAB_RESULTS: 'patient/account/lab-results',
   PATIENT_ACCOUNT_CARD: 'patient/account/card',
   PATIENT_PROFILE: 'patient/profile',
   AUTH_RESET: 'auth/reset'

@@ -64,6 +64,30 @@ router.get(
 );
 
 router.get(
+  '/patient/dose-history',
+  authRequired,
+  allowRoles(Role.PATIENT),
+  asyncRoute(async (req, res) => {
+    const days = Math.min(Math.max(queryPositiveInt(req, 'days', 30), 1), 90);
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+    since.setHours(0, 0, 0, 0);
+
+    const doses = await prisma.medicineDoseEvent.findMany({
+      where: {
+        patientId: req.user!.id,
+        scheduledFor: { gte: since }
+      },
+      include: doseEventInclude,
+      orderBy: { scheduledFor: 'desc' },
+      take: 200
+    });
+
+    res.json({ doses });
+  })
+);
+
+router.get(
   '/patient/today-doses',
   authRequired,
   allowRoles(Role.PATIENT),

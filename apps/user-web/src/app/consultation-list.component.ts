@@ -21,6 +21,7 @@ export class ConsultationListComponent {
   @Input() enableDashboardLinks = false;
 
   readonly dashboardPath = `/${ROUTE_PATHS.PATIENT_DASHBOARD}`;
+  readonly accountConsultationPath = `/${ROUTE_PATHS.PATIENT_ACCOUNT_CONSULTATIONS}`;
 
   @Output() selected = new EventEmitter<Consultation>();
   @Output() pay = new EventEmitter<Consultation>();

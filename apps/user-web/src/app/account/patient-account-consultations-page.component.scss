@@ -36,3 +36,28 @@
 .loading-text {
   color: #64748b;
 }
+
+.consult-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.2fr);
+  gap: 1rem;
+}
+
+.detail-wrap {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.full-page-link {
+  justify-self: end;
+  color: #1d4ed8;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.86rem;
+}
+
+@media (max-width: 900px) {
+  .consult-layout {
+    grid-template-columns: 1fr;
+  }
+}

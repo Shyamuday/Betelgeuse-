@@ -7,6 +7,7 @@ import { RAZORPAY_CHECKOUT } from './core/constants/branding.constants';
 import { SOCKET_EVENTS, SOCKET_TRANSPORTS } from './core/constants/socket.constants';
 import { environment } from '../environments/environment';
 import { BillingPlan, Consultation, Doctor, GroupedDiseaseCategory, LabResult } from './models';
+import type { PatientProfile } from './core/constants/patient-profile.constants';
 import { ClinicApiClient } from './clinic-api/clinic-api.client';
 import {
   mapConsultationFromApi,
@@ -136,8 +137,12 @@ export class ClinicApiService {
     return from(this.fetchPatientLabResults());
   }
 
-  todayDoseEvents() {
-    return from(this.fetchTodayDoseEvents());
+  patientDelivery(id: string) {
+    return from(this.client.apiFetch<{ delivery: Record<string, unknown> }>(API_PATHS.PATIENT.DELIVERY(id)));
+  }
+
+  doseHistory(days = 30) {
+    return from(this.fetchDoseHistory(days));
   }
 
   medicineReminders() {
@@ -171,7 +176,7 @@ export class ClinicApiService {
 
   patientProfile() {
     return from(this.client.apiFetch<{
-      profile: { name: string; mobile?: string | null; email?: string | null; patientCode?: string | null };
+      profile: PatientProfile;
     }>(API_PATHS.PATIENT.PROFILE));
   }
 
@@ -222,7 +227,7 @@ export class ClinicApiService {
     socket.on('prescription:new', onChange);
     socket.on('payment:updated', onChange);
 
-    return { unsubscribe: () => socket.disconnect() };
+    return { unsubscribe: () => socket.disconnect(), socket };
   }
 
   subscribeToConsultation(socket: Socket, consultationId: string) {
@@ -321,13 +326,15 @@ export class ClinicApiService {
     return { referrals: response.referrals || [] };
   }
 
-  private async fetchTodayDoseEvents() {
+  private async fetchDoseHistory(days: number) {
     if (!this.client.backendToken) {
       throw new Error('Backend session missing. Please login again.');
     }
 
-    const response = await this.client.apiFetch<{ doses: Array<Record<string, unknown>> }>(API_PATHS.PATIENT.TODAY_DOSES);
-    return { doseEvents: (response.doses || []).map((row) => mapDoseEventFromApi(row)) };
+    const response = await this.client.apiFetch<{ doses: Array<Record<string, unknown>> }>(
+      `${API_PATHS.PATIENT.DOSE_HISTORY}?days=${days}`
+    );
+    return { doses: (response.doses || []).map((row) => mapDoseEventFromApi(row)) };
   }
 
   private async fetchMedicineReminders() {

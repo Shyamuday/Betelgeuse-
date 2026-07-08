@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ConsultationListComponent } from '../consultation-list.component';
+import { ConsultationDetailComponent, SendMessagePayload } from '../consultation-detail.component';
 import { PaymentStatusOverlayComponent } from '../payment-status-overlay.component';
 import { ClinicApiService } from '../clinic-api.service';
 import { DashboardPaymentService } from '../dashboard-data.service';
@@ -11,12 +12,13 @@ import { Consultation } from '../models';
 @Component({
   selector: 'app-patient-account-consultations-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, ConsultationListComponent, PaymentStatusOverlayComponent],
+  imports: [RouterLink, ConsultationListComponent, ConsultationDetailComponent, PaymentStatusOverlayComponent],
   templateUrl: './patient-account-consultations-page.component.html',
   styleUrl: './patient-account-consultations-page.component.scss'
 })
 export class PatientAccountConsultationsPageComponent implements OnInit {
   private readonly api = inject(ClinicApiService);
+  private readonly route = inject(ActivatedRoute);
   readonly paymentService = inject(DashboardPaymentService);
 
   readonly loading = signal(true);
@@ -26,8 +28,15 @@ export class PatientAccountConsultationsPageComponent implements OnInit {
   readonly notice = signal('');
 
   readonly dashboardLink = `/${ROUTE_PATHS.PATIENT_DASHBOARD}`;
+  readonly activeConsultation = computed(() => {
+    const id = this.activeId();
+    return id ? this.consultations().find((c) => c.id === id) ?? null : null;
+  });
 
   ngOnInit() {
+    this.route.queryParamMap.subscribe((params) => {
+      this.activeId.set(params.get('id'));
+    });
     this.load();
   }
 
@@ -47,6 +56,18 @@ export class PatientAccountConsultationsPageComponent implements OnInit {
 
   selectConsultation(c: Consultation) {
     this.activeId.set(c.id);
+  }
+
+  onMessageSent(payload: SendMessagePayload) {
+    this.processing.set(true);
+    this.api.sendMessage(payload.consultation.id, payload.body).subscribe({
+      next: () => this.load(),
+      error: (error) => {
+        this.processing.set(false);
+        this.notice.set(error.error?.message || error.message || 'Could not send message.');
+      },
+      complete: () => this.processing.set(false),
+    });
   }
 
   pay(consultation: Consultation) {

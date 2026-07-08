@@ -13,16 +13,30 @@
   @if (loading()) {
     <p class="loading-text">Loading consultations…</p>
   } @else {
-    <app-consultation-list
-      [consultations]="consultations()"
-      [activeId]="activeId()"
-      [enableDashboardLinks]="true"
-      userRole="PATIENT"
-      [disabled]="processing()"
-      [paymentIdle]="paymentService.paymentFlowState() === 'IDLE'"
-      (selected)="selectConsultation($event)"
-      (pay)="pay($event)"
-    />
+    <div class="consult-layout">
+      <app-consultation-list
+        [consultations]="consultations()"
+        [activeId]="activeId()"
+        [enableDashboardLinks]="true"
+        userRole="PATIENT"
+        [disabled]="processing()"
+        [paymentIdle]="paymentService.paymentFlowState() === 'IDLE'"
+        (selected)="selectConsultation($event)"
+        (pay)="pay($event)"
+      />
+
+      @if (activeConsultation(); as active) {
+        <div class="detail-wrap">
+          <a class="full-page-link" [routerLink]="[active.id]">Open full page chat →</a>
+          <app-consultation-detail
+            [consultation]="active"
+            userRole="PATIENT"
+            [disabled]="processing()"
+            (messageSent)="onMessageSent($event)"
+          />
+        </div>
+      }
+    </div>
   }
 </section>
 

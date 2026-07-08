@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
+import { Capacitor } from '@capacitor/core';
 import { DEFAULT_QUIET_HOURS } from './core/constants/timing.constants';
 
 export type ReminderPrefs = {
@@ -20,6 +21,7 @@ export type ReminderPrefs = {
 })
 export class ReminderPreferencesComponent implements OnChanges {
   readonly DEFAULT_QUIET_HOURS = DEFAULT_QUIET_HOURS;
+  readonly showPushOption = Capacitor.isNativePlatform();
   @Input() prefs: ReminderPrefs = {
     inApp: true,
     sms: false,
