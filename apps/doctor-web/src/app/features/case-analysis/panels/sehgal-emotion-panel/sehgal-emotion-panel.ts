@@ -1,50 +1,44 @@
-import { Component, Input, OnChanges, output, signal } from '@angular/core';
-import { form, FormField } from '@angular/forms/signals';
-import type { SehgalApproachData } from '@vitalis/homeopathy-approaches';
-import { installApproachPanelAutoSave } from '../../approach-panel-autosave';
-
-function emptySehgal(): SehgalApproachData {
-  return {
-    emotionalDisturbance: '',
-    emotionalTrigger: '',
-    mindBodyLinkage: '',
-    emotionalCoreRemedy: ''
-  };
-}
+import { Component, Input, output } from '@angular/core';
+import { specializedPanelDef, type SehgalApproachData } from '@vitalis/homeopathy-approaches';
+import { ApproachCapturePanelComponent } from '../approach-capture-panel/approach-capture-panel';
 
 @Component({
   selector: 'app-sehgal-emotion-panel',
-  imports: [FormField],
-  templateUrl: './sehgal-emotion-panel.html',
-  styleUrl: './sehgal-emotion-panel.scss'
+  imports: [ApproachCapturePanelComponent],
+  template: `
+    @if (panelConfig; as config) {
+      <app-approach-capture-panel
+        [config]="config"
+        [initial]="initialRecord"
+        [saving]="saving"
+        (saveRequested)="onSave($event)"
+        (autoSaveRequested)="onAutoSave($event)"
+        (rubricPhraseSelected)="rubricPhraseSelected.emit($event)"
+        (fieldSuggestRequested)="fieldSuggestRequested.emit($event)"
+      />
+    }
+  `
 })
-export class SehgalEmotionPanelComponent implements OnChanges {
-  private readonly hydrating = signal(true);
-  private readonly autoSave = installApproachPanelAutoSave(
-    () => this.model(),
-    (value) => this.autoSaveRequested.emit(value),
-    () => this.hydrating()
-  );
+export class SehgalEmotionPanelComponent {
+  readonly panelConfig = specializedPanelDef('sehgal-emotion');
 
   @Input() initial: SehgalApproachData | null = null;
   @Input() saving = false;
 
   readonly saveRequested = output<SehgalApproachData>();
   readonly autoSaveRequested = output<SehgalApproachData>();
+  readonly rubricPhraseSelected = output<string>();
+  readonly fieldSuggestRequested = output<{ field: import('@vitalis/homeopathy-approaches').ApproachFieldDef; currentValue: string }>();
 
-  readonly model = signal(emptySehgal());
-  readonly form = form(this.model);
-
-  ngOnChanges() {
-    this.hydrating.set(true);
-    const next = { ...emptySehgal(), ...(this.initial || {}) };
-    this.model.set(next);
-    this.autoSave.resetSnapshot(next);
-    this.hydrating.set(false);
+  get initialRecord() {
+    return (this.initial || null) as Record<string, string> | null;
   }
 
-  save() {
-    this.autoSave.resetSnapshot(this.model());
-    this.saveRequested.emit(this.model());
+  onSave(value: Record<string, string>) {
+    this.saveRequested.emit(value as SehgalApproachData);
+  }
+
+  onAutoSave(value: Record<string, string>) {
+    this.autoSaveRequested.emit(value as SehgalApproachData);
   }
 }

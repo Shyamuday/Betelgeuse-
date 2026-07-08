@@ -182,6 +182,8 @@
           [saving]="savingApproachData()"
           (saveRequested)="saveKentHierarchy($event)"
           (autoSaveRequested)="saveKentHierarchy($event, true)"
+          (rubricPhraseSelected)="applyRubricSearchPhrase($event)"
+          (fieldSuggestRequested)="applyApproachFieldSuggestion($event)"
         />
       }
 
@@ -191,6 +193,8 @@
           [saving]="savingApproachData()"
           (saveRequested)="saveSensation($event)"
           (autoSaveRequested)="saveSensation($event, true)"
+          (rubricPhraseSelected)="applyRubricSearchPhrase($event)"
+          (fieldSuggestRequested)="applyApproachFieldSuggestion($event)"
         />
       }
 
@@ -200,6 +204,7 @@
           [saving]="savingApproachData()"
           (saveRequested)="saveMiasm($event)"
           (autoSaveRequested)="saveMiasm($event, true)"
+          (fieldSuggestRequested)="applyApproachFieldSuggestion($event)"
         />
       }
 
@@ -209,6 +214,8 @@
           [saving]="savingApproachData()"
           (saveRequested)="saveKeynote($event)"
           (autoSaveRequested)="saveKeynote($event, true)"
+          (rubricPhraseSelected)="applyRubricSearchPhrase($event)"
+          (fieldSuggestRequested)="applyApproachFieldSuggestion($event)"
         />
       }
 
@@ -218,6 +225,8 @@
           [saving]="savingApproachData()"
           (saveRequested)="saveScholten($event)"
           (autoSaveRequested)="saveScholten($event, true)"
+          (rubricPhraseSelected)="applyRubricSearchPhrase($event)"
+          (fieldSuggestRequested)="applyApproachFieldSuggestion($event)"
         />
       }
 
@@ -227,6 +236,8 @@
           [saving]="savingApproachData()"
           (saveRequested)="saveSehgal($event)"
           (autoSaveRequested)="saveSehgal($event, true)"
+          (rubricPhraseSelected)="applyRubricSearchPhrase($event)"
+          (fieldSuggestRequested)="applyApproachFieldSuggestion($event)"
         />
       }
 
@@ -236,6 +247,7 @@
           [saving]="savingApproachData()"
           (saveRequested)="saveIntegrativeFollowUp($event)"
           (autoSaveRequested)="saveIntegrativeFollowUp($event, true)"
+          (fieldSuggestRequested)="applyApproachFieldSuggestion($event)"
         />
       }
 
@@ -247,6 +259,7 @@
           (saveRequested)="saveStructuredPanel(panel.dataKey, $event)"
           (autoSaveRequested)="saveStructuredPanel(panel.dataKey, $event, true)"
           (rubricPhraseSelected)="applyRubricSearchPhrase($event)"
+          (fieldSuggestRequested)="applyApproachFieldSuggestion($event)"
         />
       }
 
@@ -268,7 +281,10 @@
           [description]="'Schema: ' + activeApproach().caseSheetSchemaId + ' — ' + activeApproach().focus"
           [saving]="savingCaseSheet()"
           [caseSheetForm]="caseSheetForm"
+          [caseSheetValues]="caseSheetModel()"
           (saveRequested)="saveCaseSheet()"
+          (rubricPhraseSelected)="applyRubricSearchPhrase($event)"
+          (fieldSuggestRequested)="applyApproachFieldSuggestion($event)"
         />
       }
 
@@ -279,6 +295,7 @@
           [saving]="savingApproachData()"
           (saveRequested)="saveOrganonLm($event)"
           (autoSaveRequested)="saveOrganonLm($event, true)"
+          (fieldSuggestRequested)="applyApproachFieldSuggestion($event)"
         />
       }
 

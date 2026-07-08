@@ -227,6 +227,38 @@ Add SSL server blocks to `deploy/nginx/default.conf` and reload nginx.
 | `deploy/scripts/bootstrap-ec2.sh` | First-time host setup |
 | `deploy/scripts/build-static.sh` | Build and stage Angular dist |
 | `deploy/scripts/deploy.sh` | Full deploy (build, migrate, up) |
+| `deploy/scripts/configure-production-urls.sh` | Inject API URLs before build |
+| `deploy/scripts/build-android-release.sh` | Capacitor + signed AAB build |
+| `deploy/scripts/install-google-services.sh` | Firebase config for Android CI |
+| `deploy/.env.staging.example` | Staging environment template |
+| `deploy/firebase/google-services.json.example` | Firebase file shape reference |
+| `.github/workflows/deploy-cloud.yml` | Auto-deploy production (`main`) or staging (`staging`) |
+| `.github/workflows/android-release.yml` | Android AAB build + optional Play Store upload |
+
+### GitHub Actions setup
+
+1. Create **Environments** in the repo: `production` and `staging`.
+2. Add secrets to each environment (same names, different values per env):
+
+| Secret | Purpose |
+|--------|---------|
+| `EC2_HOST`, `EC2_USER`, `EC2_SSH_KEY` | SSH deploy target |
+| `API_PUBLIC_URL`, `WEB_ORIGIN`, `DOCTOR_ORIGIN`, `OPERATIONS_ORIGIN` | Frontend build URLs |
+| `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | Android signing |
+| `GOOGLE_SERVICES_JSON_USER_WEB`, `GOOGLE_SERVICES_JSON_DOCTOR_WEB`, `GOOGLE_SERVICES_JSON_OPERATIONS_WEB` | Firebase (base64 `google-services.json` per app) |
+| `PLAY_STORE_JSON` | Google Play service account for auto-upload |
+
+3. **Cloud deploy**: merge to `main` → production; merge to `staging` → staging EC2.
+4. **Android**: Actions → Android Release → enable **Publish to Play** when ready (starts on `internal` track).
+
+Firebase: create one Android app per package in [Firebase Console](https://console.firebase.google.com), download each `google-services.json`, then:
+
+```bash
+base64 -w0 google-services.json   # Linux
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("google-services.json"))  # PowerShell
+```
+
+Store each output as the matching GitHub secret.
 
 ---
 

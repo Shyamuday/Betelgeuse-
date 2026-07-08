@@ -3,7 +3,53 @@
   gap: 0.75rem;
 }
 
-.approach-grid {
+  .field-description {
+    display: block;
+    color: #475569;
+    margin-bottom: 0.15rem;
+  }
+
+  .field-hint {
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .field-label-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.2rem;
+  }
+
+  .required-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #b45309;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 999px;
+    padding: 0.05rem 0.45rem;
+  }
+
+  .btn-field-action {
+    font: inherit;
+    font-size: 0.78rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid #c7d2fe;
+    background: #eef2ff;
+    color: #3730a3;
+    cursor: pointer;
+  }
+
+  .btn-field-action.btn-ai {
+    border-color: #a5b4fc;
+    background: #f5f3ff;
+  }
+
+  .approach-grid {
   display: grid;
   gap: 0.65rem;
 }

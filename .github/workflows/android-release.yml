@@ -1,0 +1,125 @@
+name: Android Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: Capacitor app to build
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - user-web
+          - doctor-web
+          - operations-web
+      publish_to_play:
+        description: Upload AAB to Google Play after build
+        required: true
+        default: false
+        type: boolean
+      play_track:
+        description: Google Play release track
+        required: true
+        default: internal
+        type: choice
+        options:
+          - internal
+          - alpha
+          - beta
+          - production
+
+jobs:
+  resolve-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.set.outputs.apps }}
+    steps:
+      - id: set
+        run: |
+          if [ "${{ github.event.inputs.app }}" = "all" ]; then
+            echo 'apps=["user-web","doctor-web","operations-web"]' >> "$GITHUB_OUTPUT"
+          else
+            echo "apps=[\"${{ github.event.inputs.app }}\"]" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    name: Build ${{ matrix.app }}
+    needs: resolve-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.resolve-matrix.outputs.apps) }}
+
+    defaults:
+      run:
+        working-directory: apps/${{ matrix.app }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/${{ matrix.app }}/package-lock.json
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure production URLs
+        working-directory: ${{ github.workspace }}
+        env:
+          API_PUBLIC_URL: ${{ secrets.API_PUBLIC_URL }}
+          WEB_ORIGIN: ${{ secrets.WEB_ORIGIN }}
+          DOCTOR_ORIGIN: ${{ secrets.DOCTOR_ORIGIN }}
+          OPERATIONS_ORIGIN: ${{ secrets.OPERATIONS_ORIGIN }}
+        run: bash deploy/scripts/configure-production-urls.sh
+
+      - name: Build signed AAB
+        working-directory: ${{ github.workspace }}
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          GOOGLE_SERVICES_JSON_USER_WEB: ${{ secrets.GOOGLE_SERVICES_JSON_USER_WEB }}
+          GOOGLE_SERVICES_JSON_DOCTOR_WEB: ${{ secrets.GOOGLE_SERVICES_JSON_DOCTOR_WEB }}
+          GOOGLE_SERVICES_JSON_OPERATIONS_WEB: ${{ secrets.GOOGLE_SERVICES_JSON_OPERATIONS_WEB }}
+          ANDROID_VERSION_CODE: ${{ github.run_number }}
+          ANDROID_VERSION_NAME: 1.0.${{ github.run_number }}
+        run: APP=${{ matrix.app }} bash deploy/scripts/build-android-release.sh
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.app }}-release-aab
+          path: apps/${{ matrix.app }}/android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+
+      - name: Resolve Play package name
+        id: play
+        working-directory: ${{ github.workspace }}
+        run: echo "package=$(bash deploy/scripts/android-play-package.sh ${{ matrix.app }})" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to Google Play
+        if: ${{ github.event.inputs.publish_to_play == true }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_JSON }}
+          packageName: ${{ steps.play.outputs.package }}
+          releaseFiles: apps/${{ matrix.app }}/android/app/build/outputs/bundle/release/*.aab
+          track: ${{ github.event.inputs.play_track }}
+          status: completed

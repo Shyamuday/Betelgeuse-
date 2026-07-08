@@ -1,50 +1,44 @@
-import { Component, Input, OnChanges, output, signal } from '@angular/core';
-import { form, FormField } from '@angular/forms/signals';
-import type { KentHierarchyData } from '@vitalis/homeopathy-approaches';
-import { installApproachPanelAutoSave } from '../../approach-panel-autosave';
-
-function emptyKent(): KentHierarchyData {
-  return {
-    mentalGenerals: '',
-    physicalGenerals: '',
-    particularSymptoms: '',
-    strikingKeynotes: ''
-  };
-}
+import { Component, Input, output } from '@angular/core';
+import { specializedPanelDef, type KentHierarchyData } from '@vitalis/homeopathy-approaches';
+import { ApproachCapturePanelComponent } from '../approach-capture-panel/approach-capture-panel';
 
 @Component({
   selector: 'app-kent-hierarchy-panel',
-  imports: [FormField],
-  templateUrl: './kent-hierarchy-panel.html',
-  styleUrl: './kent-hierarchy-panel.scss'
+  imports: [ApproachCapturePanelComponent],
+  template: `
+    @if (panelConfig; as config) {
+      <app-approach-capture-panel
+        [config]="config"
+        [initial]="initialRecord"
+        [saving]="saving"
+        (saveRequested)="onSave($event)"
+        (autoSaveRequested)="onAutoSave($event)"
+        (rubricPhraseSelected)="rubricPhraseSelected.emit($event)"
+        (fieldSuggestRequested)="fieldSuggestRequested.emit($event)"
+      />
+    }
+  `
 })
-export class KentHierarchyPanelComponent implements OnChanges {
-  private readonly hydrating = signal(true);
-  private readonly autoSave = installApproachPanelAutoSave(
-    () => this.model(),
-    (value) => this.autoSaveRequested.emit(value),
-    () => this.hydrating()
-  );
+export class KentHierarchyPanelComponent {
+  readonly panelConfig = specializedPanelDef('kent-hierarchy');
 
   @Input() initial: KentHierarchyData | null = null;
   @Input() saving = false;
 
   readonly saveRequested = output<KentHierarchyData>();
   readonly autoSaveRequested = output<KentHierarchyData>();
+  readonly rubricPhraseSelected = output<string>();
+  readonly fieldSuggestRequested = output<{ field: import('@vitalis/homeopathy-approaches').ApproachFieldDef; currentValue: string }>();
 
-  readonly model = signal(emptyKent());
-  readonly form = form(this.model);
-
-  ngOnChanges() {
-    this.hydrating.set(true);
-    const next = { ...emptyKent(), ...(this.initial || {}) };
-    this.model.set(next);
-    this.autoSave.resetSnapshot(next);
-    this.hydrating.set(false);
+  get initialRecord() {
+    return (this.initial || null) as Record<string, string> | null;
   }
 
-  save() {
-    this.autoSave.resetSnapshot(this.model());
-    this.saveRequested.emit(this.model());
+  onSave(value: Record<string, string>) {
+    this.saveRequested.emit(value as KentHierarchyData);
+  }
+
+  onAutoSave(value: Record<string, string>) {
+    this.autoSaveRequested.emit(value as KentHierarchyData);
   }
 }

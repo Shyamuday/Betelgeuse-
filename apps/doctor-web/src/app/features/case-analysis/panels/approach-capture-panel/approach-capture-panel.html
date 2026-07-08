@@ -1,31 +1,18 @@
-<section class="panel approach-panel">
+<section class="panel approach-capture-panel">
   <div class="panel-title-row">
     <h3>{{ config.title }}</h3>
     <div class="panel-save-actions">
       <span class="autosave-note muted">Auto-saves as you type</span>
-      <button type="button" class="btn-save-now" (click)="save()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save now' }}</button>
+      <button type="button" class="btn-save-now" (click)="save()" [disabled]="saving">
+        {{ saving ? 'Saving…' : 'Save now' }}
+      </button>
     </div>
   </div>
-  <p class="hint">{{ config.hint }}</p>
 
-  @if (config.combinationCatalog) {
-    <div class="combination-catalog">
-      <h4>Combination catalog</h4>
-      <div class="combination-list">
-        @for (item of combinationCatalog; track item.id) {
-          <article class="combination-card" [class.selected]="model()['combinationName'] === item.name">
-            <div>
-              <strong>{{ item.name }}</strong>
-              <p class="muted">{{ item.componentRemedies }}</p>
-              <small>{{ item.indications }}</small>
-            </div>
-            <button type="button" (click)="selectCombination(item)">
-              {{ model()['combinationName'] === item.name ? 'Selected' : 'Use' }}
-            </button>
-          </article>
-        }
-      </div>
-    </div>
+  @if (headerExtra) {
+    <p class="hint">{{ headerExtra }}</p>
+  } @else {
+    <p class="hint">{{ config.hint }}</p>
   }
 
   <div class="approach-grid">
@@ -34,7 +21,7 @@
         <span class="field-label-row">
           <span class="field-label">
             {{ field.label }}
-            @if (field.required || config.requiredKeys?.includes(field.key)) {
+            @if (field.required) {
               <span class="required-badge">Required</span>
             }
           </span>

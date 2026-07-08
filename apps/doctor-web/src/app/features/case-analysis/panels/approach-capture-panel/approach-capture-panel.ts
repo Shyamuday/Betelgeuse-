@@ -1,20 +1,21 @@
 import { Component, Input, OnChanges, output, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
-import {
-  COMBINATION_REMEDY_CATALOG,
-  type ApproachStructuredPanelDef,
-  type CombinationRemedy,
-  type ApproachFieldDef
-} from '@vitalis/homeopathy-approaches';
+import type { ApproachFieldDef } from '@vitalis/homeopathy-approaches';
 import { installApproachPanelAutoSave } from '../../approach-panel-autosave';
 
+export type ApproachCapturePanelConfig = {
+  title: string;
+  hint: string;
+  fields: ApproachFieldDef[];
+};
+
 @Component({
-  selector: 'app-approach-structured-panel',
+  selector: 'app-approach-capture-panel',
   imports: [FormField],
-  templateUrl: './approach-structured-panel.html',
-  styleUrl: './approach-structured-panel.scss'
+  templateUrl: './approach-capture-panel.html',
+  styleUrl: './approach-capture-panel.scss'
 })
-export class ApproachStructuredPanelComponent implements OnChanges {
+export class ApproachCapturePanelComponent implements OnChanges {
   private readonly hydrating = signal(true);
   private readonly autoSave = installApproachPanelAutoSave(
     () => this.model(),
@@ -22,11 +23,10 @@ export class ApproachStructuredPanelComponent implements OnChanges {
     () => this.hydrating()
   );
 
-  readonly combinationCatalog = COMBINATION_REMEDY_CATALOG;
-
-  @Input({ required: true }) config!: ApproachStructuredPanelDef;
+  @Input({ required: true }) config!: ApproachCapturePanelConfig;
   @Input() initial: Record<string, string> | null = null;
   @Input() saving = false;
+  @Input() headerExtra = '';
 
   readonly saveRequested = output<Record<string, string>>();
   readonly autoSaveRequested = output<Record<string, string>>();
@@ -68,16 +68,5 @@ export class ApproachStructuredPanelComponent implements OnChanges {
   isMultiline(field: ApproachFieldDef) {
     if (field.fieldType === 'text' || field.fieldType === 'select') return false;
     return field.multiline !== false;
-  }
-
-  selectCombination(combination: CombinationRemedy) {
-    this.model.update((current) => ({
-      ...current,
-      combinationName: combination.name,
-      componentRemedies: combination.componentRemedies,
-      indicationMatch: combination.indications,
-      personalizationNotes: combination.notes
-    }));
-    this.autoSave.resetSnapshot(this.model());
   }
 }

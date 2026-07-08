@@ -13,6 +13,7 @@ import {
   buildPrescriptionHandoff,
   type ApproachDataPayload,
   type ApproachDefinition,
+  type ApproachFieldDef,
   type ApproachStepComponent,
   type ApproachStepId,
   type KentHierarchyData,
@@ -747,6 +748,89 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
     }
     void this.searchRubrics();
     this.message.set(`Search prefilled: "${trimmed}".`);
+  }
+
+  applyApproachFieldSuggestion(payload: { field: ApproachFieldDef; currentValue: string }) {
+    const suggestion = this.buildApproachFieldSuggestion(payload.field);
+    if (!suggestion) {
+      this.message.set('AI suggestions for this field are not available yet. Use intake answers or type manually.');
+      return;
+    }
+
+    const component = this.activeStepComponent();
+    if (component === 'case-sheet') {
+      this.caseSheetModel.update((current) => ({ ...current, [payload.field.key]: suggestion }));
+      this.message.set(`Filled "${payload.field.label}" from patient intake.`);
+      return;
+    }
+
+    const structured = this.activeStructuredPanel();
+    if (structured) {
+      const key = structured.dataKey;
+      this.approachData.update((current) => ({
+        ...current,
+        [key]: {
+          ...((current[key] as Record<string, string> | undefined) || {}),
+          [payload.field.key]: suggestion
+        }
+      }));
+      void this.saveApproachData({ [key]: this.approachData()[key] } as ApproachDataPayload, true);
+      this.message.set(`Filled "${payload.field.label}" from patient intake.`);
+      return;
+    }
+
+    const specializedKey = this.specializedApproachDataKey(component);
+    if (specializedKey) {
+      this.approachData.update((current) => ({
+        ...current,
+        [specializedKey]: {
+          ...((current[specializedKey] as Record<string, string> | undefined) || {}),
+          [payload.field.key]: suggestion
+        }
+      }));
+      void this.saveApproachData({ [specializedKey]: this.approachData()[specializedKey] } as ApproachDataPayload, true);
+      this.message.set(`Filled "${payload.field.label}" from patient intake.`);
+    }
+  }
+
+  private buildApproachFieldSuggestion(field: ApproachFieldDef): string | null {
+    if (field.suggestEndpoint === 'ai-extract-intake' || field.extractFrom?.includes('intake')) {
+      const answers = this.consultation()?.intakeAnswers;
+      if (!answers || !Object.keys(answers).length) return null;
+      const lines = Object.entries(answers)
+        .filter(([, value]) => value?.trim())
+        .map(([question, answer]) => `${question}: ${answer.trim()}`);
+      return lines.join('\n').slice(0, 1200);
+    }
+
+    if (field.suggestEndpoint === 'ai-complete') {
+      return primaryIntakeSearchPhrase(this.consultation()?.intakeAnswers) || null;
+    }
+
+    return null;
+  }
+
+  private specializedApproachDataKey(component: ApproachStepComponent | null): keyof ApproachDataPayload | null {
+    switch (component) {
+      case 'kent-hierarchy':
+        return 'kentHierarchy';
+      case 'sensation-mapper':
+        return 'sensation';
+      case 'miasm-selector':
+        return 'miasmatic';
+      case 'keynote-striking':
+        return 'keynote';
+      case 'scholten-mapper':
+        return 'scholten';
+      case 'sehgal-emotion':
+        return 'sehgal';
+      case 'integrative-follow-up':
+        return 'integrativeFollowUp';
+      case 'organon-lm-dosing':
+        return 'organonLm';
+      default:
+        return null;
+    }
   }
 
   hasRubric(rubricId: string) {

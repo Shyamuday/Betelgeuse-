@@ -12,11 +12,59 @@
   <div class="case-sheet-grid">
     @for (field of fields; track field.key) {
       <label [class.wide]="field.wide">
-        <span>{{ field.label }}</span>
-        @if (field.hint) {
-          <small class="muted">{{ field.hint }}</small>
+        <span class="field-label-row">
+          <span class="field-label">
+            {{ field.label }}
+            @if (field.required) {
+              <span class="required-badge">Required</span>
+            }
+          </span>
+          <span class="field-actions">
+            @if (field.rubricSearchable) {
+              <button
+                type="button"
+                class="btn-field-action"
+                (click)="searchRubricsFromField(field)"
+                [disabled]="!caseSheetValues[field.key]?.trim()"
+              >
+                Search rubrics
+              </button>
+            }
+            @if (field.suggestEndpoint) {
+              <button type="button" class="btn-field-action btn-ai" (click)="suggestField(field)">
+                @switch (field.suggestEndpoint) {
+                  @case ('ai-extract-intake') { From intake }
+                  @case ('ai-extract-media') { From photos }
+                  @default { Suggest }
+                }
+              </button>
+            }
+          </span>
+        </span>
+
+        @if (field.description) {
+          <small class="field-description">{{ field.description }}</small>
         }
-        <textarea rows="{{ field.rows || 2 }}" [formField]="$any(caseSheetForm)[field.key]"></textarea>
+        @if (field.hint) {
+          <small class="field-hint muted">{{ field.hint }}</small>
+        }
+
+        @if (field.fieldType === 'select') {
+          <select [formField]="$any(caseSheetForm)[field.key]">
+            <option value="">Select…</option>
+            @for (option of field.options || []; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        } @else if (isMultiline(field)) {
+          <textarea
+            [rows]="field.rows || 2"
+            [formField]="$any(caseSheetForm)[field.key]"
+            [attr.placeholder]="field.placeholder || null"
+          ></textarea>
+        } @else {
+          <input [formField]="$any(caseSheetForm)[field.key]" [attr.placeholder]="field.placeholder || null" />
+        }
       </label>
     }
   </div>

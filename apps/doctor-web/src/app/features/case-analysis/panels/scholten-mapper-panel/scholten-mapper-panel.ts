@@ -1,68 +1,44 @@
-import { Component, Input, OnChanges, output, signal } from '@angular/core';
-import { form, FormField } from '@angular/forms/signals';
-import type { ScholtenApproachData } from '@vitalis/homeopathy-approaches';
-import { installApproachPanelAutoSave } from '../../approach-panel-autosave';
-
-const SCHOLTEN_SERIES = [
-  'Hydrogen',
-  'Carbon',
-  'Silicium',
-  'Ferrum',
-  'Silver series',
-  'Gold series',
-  'Lanthanides',
-  'Uranium',
-  'Unclear / mixed'
-] as const;
-
-const STAGES = Array.from({ length: 18 }, (_, index) => String(index + 1));
-
-function emptyScholten(): ScholtenApproachData {
-  return {
-    thematicPattern: '',
-    series: '',
-    stage: '',
-    mineralShortlist: '',
-    confirmationNotes: ''
-  };
-}
+import { Component, Input, output } from '@angular/core';
+import { specializedPanelDef, type ScholtenApproachData } from '@vitalis/homeopathy-approaches';
+import { ApproachCapturePanelComponent } from '../approach-capture-panel/approach-capture-panel';
 
 @Component({
   selector: 'app-scholten-mapper-panel',
-  imports: [FormField],
-  templateUrl: './scholten-mapper-panel.html',
-  styleUrl: './scholten-mapper-panel.scss'
+  imports: [ApproachCapturePanelComponent],
+  template: `
+    @if (panelConfig; as config) {
+      <app-approach-capture-panel
+        [config]="config"
+        [initial]="initialRecord"
+        [saving]="saving"
+        (saveRequested)="onSave($event)"
+        (autoSaveRequested)="onAutoSave($event)"
+        (rubricPhraseSelected)="rubricPhraseSelected.emit($event)"
+        (fieldSuggestRequested)="fieldSuggestRequested.emit($event)"
+      />
+    }
+  `
 })
-export class ScholtenMapperPanelComponent implements OnChanges {
-  private readonly hydrating = signal(true);
-  private readonly autoSave = installApproachPanelAutoSave(
-    () => this.model(),
-    (value) => this.autoSaveRequested.emit(value),
-    () => this.hydrating()
-  );
-
-  readonly seriesOptions = SCHOLTEN_SERIES;
-  readonly stageOptions = STAGES;
+export class ScholtenMapperPanelComponent {
+  readonly panelConfig = specializedPanelDef('scholten-mapper');
 
   @Input() initial: ScholtenApproachData | null = null;
   @Input() saving = false;
 
   readonly saveRequested = output<ScholtenApproachData>();
   readonly autoSaveRequested = output<ScholtenApproachData>();
+  readonly rubricPhraseSelected = output<string>();
+  readonly fieldSuggestRequested = output<{ field: import('@vitalis/homeopathy-approaches').ApproachFieldDef; currentValue: string }>();
 
-  readonly model = signal(emptyScholten());
-  readonly form = form(this.model);
-
-  ngOnChanges() {
-    this.hydrating.set(true);
-    const next = { ...emptyScholten(), ...(this.initial || {}) };
-    this.model.set(next);
-    this.autoSave.resetSnapshot(next);
-    this.hydrating.set(false);
+  get initialRecord() {
+    return (this.initial || null) as Record<string, string> | null;
   }
 
-  save() {
-    this.autoSave.resetSnapshot(this.model());
-    this.saveRequested.emit(this.model());
+  onSave(value: Record<string, string>) {
+    this.saveRequested.emit(value as ScholtenApproachData);
+  }
+
+  onAutoSave(value: Record<string, string>) {
+    this.autoSaveRequested.emit(value as ScholtenApproachData);
   }
 }

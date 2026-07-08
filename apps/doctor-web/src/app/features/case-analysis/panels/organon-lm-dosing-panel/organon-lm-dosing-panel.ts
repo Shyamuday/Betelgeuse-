@@ -1,58 +1,52 @@
-import { Component, Input, OnChanges, output, signal } from '@angular/core';
-import { form, FormField } from '@angular/forms/signals';
-import type { OrganonLmApproachData } from '@vitalis/homeopathy-approaches';
-import { installApproachPanelAutoSave } from '../../approach-panel-autosave';
-
-const DILUTION_OPTIONS = ['1', '2', '3', '4', '5', '6', '7', '8'] as const;
-
-function emptyOrganonLm(): OrganonLmApproachData {
-  return {
-    baselineVitality: '',
-    sensitivityProfile: '',
-    selectedLmPotency: '',
-    dilutionGlass: '1',
-    repetitionSchedule: '',
-    responseMonitoring: '',
-    adjustmentNotes: ''
-  };
-}
+import { Component, Input, output } from '@angular/core';
+import { specializedPanelDef, type OrganonLmApproachData } from '@vitalis/homeopathy-approaches';
+import { ApproachCapturePanelComponent } from '../approach-capture-panel/approach-capture-panel';
 
 @Component({
   selector: 'app-organon-lm-dosing-panel',
-  imports: [FormField],
-  templateUrl: './organon-lm-dosing-panel.html',
-  styleUrl: './organon-lm-dosing-panel.scss'
+  imports: [ApproachCapturePanelComponent],
+  template: `
+    @if (panelConfig; as config) {
+      <app-approach-capture-panel
+        [config]="config"
+        [initial]="initialRecord"
+        [saving]="saving"
+        [headerExtra]="headerHint"
+        (saveRequested)="onSave($event)"
+        (autoSaveRequested)="onAutoSave($event)"
+        (fieldSuggestRequested)="fieldSuggestRequested.emit($event)"
+      />
+    }
+  `
 })
-export class OrganonLmDosingPanelComponent implements OnChanges {
-  private readonly hydrating = signal(true);
-  private readonly autoSave = installApproachPanelAutoSave(
-    () => this.model(),
-    (value) => this.autoSaveRequested.emit(value),
-    () => this.hydrating()
-  );
-
-  readonly dilutionOptions = DILUTION_OPTIONS;
+export class OrganonLmDosingPanelComponent {
+  readonly panelConfig = specializedPanelDef('organon-lm-dosing');
 
   @Input() initial: OrganonLmApproachData | null = null;
-  @Input() selectedRemedyName = '';
   @Input() saving = false;
+  @Input() selectedRemedyName = '';
 
   readonly saveRequested = output<OrganonLmApproachData>();
   readonly autoSaveRequested = output<OrganonLmApproachData>();
+  readonly fieldSuggestRequested = output<{ field: import('@vitalis/homeopathy-approaches').ApproachFieldDef; currentValue: string }>();
 
-  readonly model = signal(emptyOrganonLm());
-  readonly form = form(this.model);
-
-  ngOnChanges() {
-    this.hydrating.set(true);
-    const next = { ...emptyOrganonLm(), ...(this.initial || {}) };
-    this.model.set(next);
-    this.autoSave.resetSnapshot(next);
-    this.hydrating.set(false);
+  get initialRecord() {
+    return (this.initial || null) as Record<string, string> | null;
   }
 
-  save() {
-    this.autoSave.resetSnapshot(this.model());
-    this.saveRequested.emit(this.model());
+  get headerHint() {
+    if (!this.panelConfig) return '';
+    if (this.selectedRemedyName) {
+      return `${this.panelConfig.hint} Selected remedy: ${this.selectedRemedyName}.`;
+    }
+    return `${this.panelConfig.hint} Select a remedy first, then plan LM potency and schedule.`;
+  }
+
+  onSave(value: Record<string, string>) {
+    this.saveRequested.emit(value as OrganonLmApproachData);
+  }
+
+  onAutoSave(value: Record<string, string>) {
+    this.autoSaveRequested.emit(value as OrganonLmApproachData);
   }
 }

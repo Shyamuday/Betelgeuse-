@@ -15,6 +15,9 @@ if [ ! -f "$DEPLOY/.env" ]; then
 fi
 
 echo "==> Building static frontends..."
+if [ -n "${API_PUBLIC_URL:-}" ]; then
+  bash "$DEPLOY/scripts/configure-production-urls.sh"
+fi
 bash "$DEPLOY/scripts/build-static.sh"
 
 echo "==> Building API image..."

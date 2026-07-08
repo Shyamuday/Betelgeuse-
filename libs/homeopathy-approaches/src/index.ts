@@ -10,4 +10,8 @@ export * from './marketing-export';
 export * from './admin-clinical-summary';
 export * from './clinical-media-ontology';
 export * from './approach-structured-panels';
+export * from './approach-field-options';
+export * from './approach-field-helpers';
+export * from './specialized-panel-defs';
+export * from './approach-ai-context';
 export * from './prescription-handoff';

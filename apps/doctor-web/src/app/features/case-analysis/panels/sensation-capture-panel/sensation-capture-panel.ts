@@ -1,55 +1,44 @@
-import { Component, Input, OnChanges, output, signal } from '@angular/core';
-import { form, FormField } from '@angular/forms/signals';
-import type { SensationApproachData } from '@vitalis/homeopathy-approaches';
-import { installApproachPanelAutoSave } from '../../approach-panel-autosave';
-
-const KINGDOMS = ['Plant', 'Mineral', 'Animal', 'Nosode', 'Impossible to classify yet'] as const;
-
-function emptySensation(): SensationApproachData {
-  return {
-    patientLanguage: '',
-    coreSensation: '',
-    kingdom: '',
-    remedyFamily: '',
-    levelOfExperience: ''
-  };
-}
+import { Component, Input, output } from '@angular/core';
+import { specializedPanelDef, type SensationApproachData } from '@vitalis/homeopathy-approaches';
+import { ApproachCapturePanelComponent } from '../approach-capture-panel/approach-capture-panel';
 
 @Component({
   selector: 'app-sensation-capture-panel',
-  imports: [FormField],
-  templateUrl: './sensation-capture-panel.html',
-  styleUrl: './sensation-capture-panel.scss'
+  imports: [ApproachCapturePanelComponent],
+  template: `
+    @if (panelConfig; as config) {
+      <app-approach-capture-panel
+        [config]="config"
+        [initial]="initialRecord"
+        [saving]="saving"
+        (saveRequested)="onSave($event)"
+        (autoSaveRequested)="onAutoSave($event)"
+        (rubricPhraseSelected)="rubricPhraseSelected.emit($event)"
+        (fieldSuggestRequested)="fieldSuggestRequested.emit($event)"
+      />
+    }
+  `
 })
-export class SensationCapturePanelComponent implements OnChanges {
-  private readonly hydrating = signal(true);
-  private readonly autoSave = installApproachPanelAutoSave(
-    () => this.model(),
-    (value) => this.autoSaveRequested.emit(value),
-    () => this.hydrating()
-  );
-
-  readonly kingdoms = KINGDOMS;
+export class SensationCapturePanelComponent {
+  readonly panelConfig = specializedPanelDef('sensation-mapper');
 
   @Input() initial: SensationApproachData | null = null;
   @Input() saving = false;
 
   readonly saveRequested = output<SensationApproachData>();
   readonly autoSaveRequested = output<SensationApproachData>();
+  readonly rubricPhraseSelected = output<string>();
+  readonly fieldSuggestRequested = output<{ field: import('@vitalis/homeopathy-approaches').ApproachFieldDef; currentValue: string }>();
 
-  readonly model = signal(emptySensation());
-  readonly form = form(this.model);
-
-  ngOnChanges() {
-    this.hydrating.set(true);
-    const next = { ...emptySensation(), ...(this.initial || {}) };
-    this.model.set(next);
-    this.autoSave.resetSnapshot(next);
-    this.hydrating.set(false);
+  get initialRecord() {
+    return (this.initial || null) as Record<string, string> | null;
   }
 
-  save() {
-    this.autoSave.resetSnapshot(this.model());
-    this.saveRequested.emit(this.model());
+  onSave(value: Record<string, string>) {
+    this.saveRequested.emit(value as SensationApproachData);
+  }
+
+  onAutoSave(value: Record<string, string>) {
+    this.autoSaveRequested.emit(value as SensationApproachData);
   }
 }

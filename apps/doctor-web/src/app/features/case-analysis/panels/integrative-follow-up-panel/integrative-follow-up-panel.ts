@@ -1,52 +1,42 @@
-import { Component, Input, OnChanges, output, signal } from '@angular/core';
-import { form, FormField } from '@angular/forms/signals';
-import type { IntegrativeFollowUpApproachData } from '@vitalis/homeopathy-approaches';
-import { installApproachPanelAutoSave } from '../../approach-panel-autosave';
-
-function emptyFollowUp(): IntegrativeFollowUpApproachData {
-  return {
-    baselineMetrics: '',
-    subjectiveMarkers: '',
-    objectiveReports: '',
-    safetyRedFlags: '',
-    referralEscalation: '',
-    nextReviewPlan: ''
-  };
-}
+import { Component, Input, output } from '@angular/core';
+import { specializedPanelDef, type IntegrativeFollowUpApproachData } from '@vitalis/homeopathy-approaches';
+import { ApproachCapturePanelComponent } from '../approach-capture-panel/approach-capture-panel';
 
 @Component({
   selector: 'app-integrative-follow-up-panel',
-  imports: [FormField],
-  templateUrl: './integrative-follow-up-panel.html',
-  styleUrl: './integrative-follow-up-panel.scss'
+  imports: [ApproachCapturePanelComponent],
+  template: `
+    @if (panelConfig; as config) {
+      <app-approach-capture-panel
+        [config]="config"
+        [initial]="initialRecord"
+        [saving]="saving"
+        (saveRequested)="onSave($event)"
+        (autoSaveRequested)="onAutoSave($event)"
+        (fieldSuggestRequested)="fieldSuggestRequested.emit($event)"
+      />
+    }
+  `
 })
-export class IntegrativeFollowUpPanelComponent implements OnChanges {
-  private readonly hydrating = signal(true);
-  private readonly autoSave = installApproachPanelAutoSave(
-    () => this.model(),
-    (value) => this.autoSaveRequested.emit(value),
-    () => this.hydrating()
-  );
+export class IntegrativeFollowUpPanelComponent {
+  readonly panelConfig = specializedPanelDef('integrative-follow-up');
 
   @Input() initial: IntegrativeFollowUpApproachData | null = null;
   @Input() saving = false;
 
   readonly saveRequested = output<IntegrativeFollowUpApproachData>();
   readonly autoSaveRequested = output<IntegrativeFollowUpApproachData>();
+  readonly fieldSuggestRequested = output<{ field: import('@vitalis/homeopathy-approaches').ApproachFieldDef; currentValue: string }>();
 
-  readonly model = signal(emptyFollowUp());
-  readonly form = form(this.model);
-
-  ngOnChanges() {
-    this.hydrating.set(true);
-    const next = { ...emptyFollowUp(), ...(this.initial || {}) };
-    this.model.set(next);
-    this.autoSave.resetSnapshot(next);
-    this.hydrating.set(false);
+  get initialRecord() {
+    return (this.initial || null) as Record<string, string> | null;
   }
 
-  save() {
-    this.autoSave.resetSnapshot(this.model());
-    this.saveRequested.emit(this.model());
+  onSave(value: Record<string, string>) {
+    this.saveRequested.emit(value as IntegrativeFollowUpApproachData);
+  }
+
+  onAutoSave(value: Record<string, string>) {
+    this.autoSaveRequested.emit(value as IntegrativeFollowUpApproachData);
   }
 }

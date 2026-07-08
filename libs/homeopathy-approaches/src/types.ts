@@ -110,14 +110,32 @@ export type CaseSheetSchemaId =
   | 'acute-fast'
   | 'combination';
 
-export type CaseSheetFieldDef = {
+export type FieldSuggestEndpoint =
+  | 'rubric-search'
+  | 'ai-complete'
+  | 'ai-extract-intake'
+  | 'ai-extract-media';
+
+export type ApproachFieldDef = {
   key: string;
   label: string;
+  description?: string;
   placeholder?: string;
   rows?: number;
   hint?: string;
   wide?: boolean;
+  multiline?: boolean;
+  required?: boolean;
+  fieldType?: 'text' | 'textarea' | 'select';
+  options?: Array<{ value: string; label: string }>;
+  rubricSearchable?: boolean;
+  promptKey?: string;
+  suggestEndpoint?: FieldSuggestEndpoint;
+  suggestContext?: string[];
+  extractFrom?: Array<'intake' | 'chat' | 'media' | 'priorCase'>;
 };
+
+export type CaseSheetFieldDef = ApproachFieldDef;
 
 export type RubricChapterBoost = {
   chapterMatch: string;
