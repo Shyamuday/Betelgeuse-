@@ -10,7 +10,10 @@
   <p class="disclaimer">{{ preview.disclaimer }}</p>
   <p class="summary">{{ preview.summary }}</p>
   <p class="hint">
-    Model: <strong>{{ preview.visionModel }}</strong> · Category: <strong>{{ preview.mediaTypeLabel }}</strong>
+    Source:
+    <strong>{{ preview.extractionSource === 'local-pdf-text' ? 'Local PDF text' : 'Ollama vision' }}</strong>
+    · Model: <strong>{{ preview.visionModel }}</strong>
+    · Category: <strong>{{ preview.mediaTypeLabel }}</strong>
     · Case field: <strong>{{ preview.suggestedCaseSheetField }}</strong>
   </p>
 

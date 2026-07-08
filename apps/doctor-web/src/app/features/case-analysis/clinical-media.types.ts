@@ -52,6 +52,7 @@ export type ClinicalMediaImageAnalysis = {
   mediaType: string;
   mediaTypeLabel: string;
   visionModel: string;
+  extractionSource: 'ollama-vision' | 'local-pdf-text';
   visionAvailable: boolean;
   impression: string;
   findings: string[];

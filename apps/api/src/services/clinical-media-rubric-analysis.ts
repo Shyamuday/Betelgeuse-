@@ -6,6 +6,7 @@ import {
 } from '../lib/homeopathy-approaches.js';
 import { prisma } from '../db.js';
 import { readClinicalMediaFile } from './clinical-media-storage.js';
+import { extractTextFromPdfBuffer, pdfExtractionConfig } from './clinical-media-pdf.js';
 import {
   extractClinicalSymptomsFromImage,
   isOllamaVisionAvailable,
@@ -55,6 +56,7 @@ export type ClinicalMediaImageAnalysis = {
   mediaType: string;
   mediaTypeLabel: string;
   visionModel: string;
+  extractionSource: 'ollama-vision' | 'local-pdf-text';
   visionAvailable: boolean;
   impression: string;
   findings: string[];
@@ -111,6 +113,8 @@ function collectPhrases(input: {
   impression: string;
   findings: string[];
   existingObservations?: string | null;
+  textSourceKey?: string;
+  textSourceLabel?: string;
 }) {
   const combinedObservations = [
     input.existingObservations?.trim(),
@@ -130,7 +134,12 @@ function collectPhrases(input: {
   const entries: Array<{ phrase: string; sourceKey: string; sourceLabel: string; priority: number }> = [];
 
   for (const phrase of input.visionPhrases) {
-    entries.push({ phrase, sourceKey: 'vision', sourceLabel: 'AI vision extraction', priority: 100 });
+    entries.push({
+      phrase,
+      sourceKey: input.textSourceKey ?? 'vision',
+      sourceLabel: input.textSourceLabel ?? 'AI vision extraction',
+      priority: 100
+    });
   }
   for (const phrase of input.findings) {
     entries.push({ phrase, sourceKey: 'finding', sourceLabel: 'Structured finding', priority: 90 });
@@ -175,7 +184,8 @@ async function searchPhraseForRubrics(
   for (const row of rows) {
     const matchScore = scoreRubricMatch(row, tokens);
     if (matchScore < 0) continue;
-    const weight = phrase.sourceKey === 'vision' || phrase.sourceKey === 'finding' ? 3 : 2;
+    const weight =
+      phrase.sourceKey === 'vision' || phrase.sourceKey === 'finding' || phrase.sourceKey === 'pdf-text' ? 3 : 2;
     matches.push({
       rubricId: row.id,
       weight,
@@ -200,6 +210,7 @@ async function searchPhraseForRubrics(
 async function persistInterpretation(input: {
   mediaId: string;
   caseAnalysisId: string;
+  aiProvider: string;
   aiModel: string;
   rawAiOutput: string;
   snapshot: ClinicalMediaImageAnalysis;
@@ -208,7 +219,7 @@ async function persistInterpretation(input: {
     data: {
       mediaId: input.mediaId,
       caseAnalysisId: input.caseAnalysisId,
-      aiProvider: 'ollama',
+      aiProvider: input.aiProvider,
       aiModel: input.aiModel,
       rawAiOutput: input.rawAiOutput,
       structuredSnapshot: input.snapshot as unknown as Prisma.InputJsonValue,
@@ -242,31 +253,71 @@ export async function analyzeClinicalMediaImage(input: {
 
   if (!analysis || !media) return null;
 
-  if (media.mimeType === 'application/pdf') {
-    throw new Error('PDF_NOT_SUPPORTED');
-  }
-
-  const visionAvailable = await isOllamaVisionAvailable();
-  if (!visionAvailable) {
-    throw new Error('OLLAMA_UNAVAILABLE');
-  }
-
   const source = await resolveRepertorySource(analysis.sourceId);
   if (!source) return null;
 
   const bytes = await readClinicalMediaFile(media.storageKey);
-  const imageBase64 = bytes.toString('base64');
   const mediaType = media.mediaType as ClinicalMediaType;
   const mediaTypeLabel = CLINICAL_MEDIA_TYPE_LABELS[mediaType] ?? media.mediaType;
 
-  const vision = await extractClinicalSymptomsFromImage({
-    imageBase64,
-    mediaType,
-    bodyRegion: media.bodyRegion
-  });
+  type Extraction = {
+    rawText: string;
+    phrases: string[];
+    impression: string;
+    findings: string[];
+    model: string;
+    extractionSource: 'ollama-vision' | 'local-pdf-text';
+    aiProvider: string;
+    visionAvailable: boolean;
+    textSourceKey: string;
+    textSourceLabel: string;
+  };
+
+  let extraction: Extraction;
+
+  if (media.mimeType === 'application/pdf') {
+    const pdf = await extractTextFromPdfBuffer(bytes);
+    const pdfConfig = pdfExtractionConfig();
+    extraction = {
+      rawText: pdf.rawText,
+      phrases: pdf.phrases,
+      impression: pdf.impression,
+      findings: pdf.findings,
+      model: pdfConfig.model,
+      extractionSource: 'local-pdf-text',
+      aiProvider: pdfConfig.provider,
+      visionAvailable: false,
+      textSourceKey: 'pdf-text',
+      textSourceLabel: 'Local PDF text extraction'
+    };
+  } else {
+    const visionAvailable = await isOllamaVisionAvailable();
+    if (!visionAvailable) {
+      throw new Error('OLLAMA_UNAVAILABLE');
+    }
+
+    const vision = await extractClinicalSymptomsFromImage({
+      imageBase64: bytes.toString('base64'),
+      mediaType,
+      bodyRegion: media.bodyRegion
+    });
+    const config = ollamaVisionConfig();
+    extraction = {
+      rawText: vision.rawText,
+      phrases: vision.phrases,
+      impression: vision.impression,
+      findings: vision.findings,
+      model: config.model,
+      extractionSource: 'ollama-vision',
+      aiProvider: 'ollama',
+      visionAvailable: true,
+      textSourceKey: 'vision',
+      textSourceLabel: 'AI vision extraction'
+    };
+  }
 
   if (input.saveObservations) {
-    const merged = [media.observations?.trim(), vision.rawText].filter(Boolean).join('\n\n');
+    const merged = [media.observations?.trim(), extraction.rawText].filter(Boolean).join('\n\n');
     await prisma.clinicalMedia.update({
       where: { id: media.id },
       data: { observations: merged || null }
@@ -276,10 +327,12 @@ export async function analyzeClinicalMediaImage(input: {
   const phraseEntries = collectPhrases({
     mediaType,
     bodyRegion: media.bodyRegion,
-    visionPhrases: vision.phrases,
-    impression: vision.impression,
-    findings: vision.findings,
-    existingObservations: media.observations
+    visionPhrases: extraction.phrases,
+    impression: extraction.impression,
+    findings: extraction.findings,
+    existingObservations: media.observations,
+    textSourceKey: extraction.textSourceKey,
+    textSourceLabel: extraction.textSourceLabel
   });
 
   const phrasesSearched: ClinicalMediaPhraseSearchLog[] = phraseEntries.map((entry) => ({
@@ -288,13 +341,15 @@ export async function analyzeClinicalMediaImage(input: {
     sourceLabel: entry.sourceLabel,
     priority: entry.priority,
     reasoning:
-      entry.sourceKey === 'vision'
-        ? `Local vision model (${vision.model}) extracted “${entry.phrase}” from the image.`
-        : entry.sourceKey === 'finding'
-          ? `Structured finding mapped to repertory phrase “${entry.phrase}”.`
-          : entry.sourceKey === 'impression'
-            ? `Impression summary used as search phrase.`
-            : `Homeopathic ontology phrase for ${mediaTypeLabel}.`
+      entry.sourceKey === 'pdf-text'
+        ? `Local PDF parser extracted “${entry.phrase}” from the uploaded report.`
+        : entry.sourceKey === 'vision'
+          ? `Local vision model (${extraction.model}) extracted “${entry.phrase}” from the image.`
+          : entry.sourceKey === 'finding'
+            ? `Structured finding mapped to repertory phrase “${entry.phrase}”.`
+            : entry.sourceKey === 'impression'
+              ? `Impression summary used as search phrase.`
+              : `Homeopathic ontology phrase for ${mediaTypeLabel}.`
   }));
 
   const rubricCandidates: RubricCandidate[] = [];
@@ -323,15 +378,15 @@ export async function analyzeClinicalMediaImage(input: {
     }));
 
   const suggestedDiseases = await suggestDiseasesFromFindings({
-    phrases: vision.phrases,
-    impression: vision.impression,
-    findings: vision.findings
+    phrases: extraction.phrases,
+    impression: extraction.impression,
+    findings: extraction.findings
   });
 
   const homeopathicHints = inferHomeopathicHints({
-    phrases: vision.phrases,
-    impression: vision.impression,
-    findings: vision.findings
+    phrases: extraction.phrases,
+    impression: extraction.impression,
+    findings: extraction.findings
   });
 
   for (const hint of homeopathicHints) {
@@ -347,9 +402,11 @@ export async function analyzeClinicalMediaImage(input: {
     }
   }
 
-  const config = ollamaVisionConfig();
   const caseSheet = (analysis.caseSheet || null) as Record<string, string> | null;
   const suggestedCaseSheetField = resolveCaseSheetField(caseSheet);
+
+  const extractionLabel =
+    extraction.extractionSource === 'local-pdf-text' ? 'local PDF text' : extraction.model;
 
   const summary = [
     suggestedRubrics.length
@@ -365,26 +422,28 @@ export async function analyzeClinicalMediaImage(input: {
     mediaId: media.id,
     mediaType: media.mediaType,
     mediaTypeLabel,
-    visionModel: config.model,
-    visionAvailable: true,
-    impression: vision.impression,
-    findings: vision.findings,
-    extractedSymptoms: vision.rawText,
-    symptomPhrases: vision.phrases,
+    visionModel: extraction.model,
+    extractionSource: extraction.extractionSource,
+    visionAvailable: extraction.visionAvailable,
+    impression: extraction.impression,
+    findings: extraction.findings,
+    extractedSymptoms: extraction.rawText,
+    symptomPhrases: extraction.phrases,
     phrasesSearched,
     suggestedRubrics,
     suggestedDiseases,
     homeopathicHints,
     suggestedCaseSheetField,
-    summary: `Preview: ${summary} from ${mediaTypeLabel} via ${source.name}. Doctor review required.`,
+    summary: `Preview: ${summary} from ${mediaTypeLabel} via ${extractionLabel} → ${source.name}. Doctor review required.`,
     generatedAt: new Date().toISOString()
   };
 
   const interpretation = await persistInterpretation({
     mediaId: media.id,
     caseAnalysisId: input.analysisId,
-    aiModel: config.model,
-    rawAiOutput: vision.rawText,
+    aiProvider: extraction.aiProvider,
+    aiModel: extraction.model,
+    rawAiOutput: extraction.rawText,
     snapshot: { ...snapshotBase, interpretationId: 'pending' }
   });
 

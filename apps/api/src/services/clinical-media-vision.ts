@@ -3,6 +3,7 @@ import {
   isRadiologyOrReportMediaType,
   type ClinicalMediaType
 } from '../lib/homeopathy-approaches.js';
+import { buildExtractionFromText, splitSymptomPhrases } from './clinical-media-text-parser.js';
 
 const OLLAMA_BASE_URL = (process.env.OLLAMA_BASE_URL ?? 'http://127.0.0.1:11434').replace(/\/$/, '');
 const OLLAMA_VISION_MODEL = process.env.OLLAMA_VISION_MODEL ?? 'qwen2.5-vl:7b';
@@ -20,40 +21,8 @@ type OllamaChatResponse = {
   message?: { content?: string };
 };
 
-function splitSymptomPhrases(text: string) {
-  const chunks = text
-    .split(/[\n,;•]+/)
-    .map((part) => part.replace(/^[\s\-*]+/, '').trim())
-    .filter((part) => part.length > 2);
-
-  const unique = new Set<string>();
-  for (const chunk of chunks) {
-    unique.add(chunk);
-    const words = chunk.split(/\s+/).filter((word) => word.length > 3);
-    if (words.length >= 2) {
-      unique.add(words.slice(0, 4).join(' '));
-    }
-  }
-
-  return [...unique].slice(0, 10);
-}
-
 function parseStructuredSections(rawText: string) {
-  const impressionMatch = rawText.match(/IMPRESSION:\s*(.+?)(?:\n|$)/i);
-  const findingsBlock = rawText.match(/FINDINGS:\s*([\s\S]+?)(?:\nSYMPTOMS:|$)/i);
-  const symptomsBlock = rawText.match(/SYMPTOMS:\s*([\s\S]+)$/i);
-
-  const impression = impressionMatch?.[1]?.trim() ?? rawText.split('\n')[0]?.trim() ?? '';
-  const findings = (findingsBlock?.[1] ?? '')
-    .split(/\n|•|;/)
-    .map((line) => line.replace(/^[\s\-*]+/, '').trim())
-    .filter(Boolean)
-    .slice(0, 8);
-
-  const symptomSource = symptomsBlock?.[1]?.trim() || rawText;
-  const phrases = splitSymptomPhrases(symptomSource);
-
-  return { impression, findings, phrases };
+  return buildExtractionFromText(rawText, OLLAMA_VISION_MODEL);
 }
 
 function buildVisionPrompt(input: {

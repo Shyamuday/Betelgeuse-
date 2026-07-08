@@ -404,6 +404,12 @@ export function registerClinicalMediaRoutes(router: Router) {
             message: 'PDF analysis is not supported yet. Upload a screenshot/photo of the report or imaging slice.'
           });
         }
+        if (error instanceof Error && error.message === 'PDF_NO_TEXT') {
+          return res.status(400).json({
+            message:
+              'This PDF has no extractable text (likely a scanned image). Upload a text-based PDF or a photo/screenshot of the report.'
+          });
+        }
         throw error;
       }
     })

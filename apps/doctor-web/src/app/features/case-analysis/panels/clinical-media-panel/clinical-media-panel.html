@@ -3,7 +3,7 @@
     <div>
       <h3>Visual symptoms</h3>
       <p class="muted">
-        Attach clinical photos and analyze with local vision AI (Ollama). Rubric matches use your imported OOREP database — doctor confirms every rubric.
+        Attach clinical photos and analyze with local vision AI (Ollama) or extract text from PDF lab reports locally. Rubric matches use your imported OOREP database — doctor confirms every rubric.
       </p>
       @if (visionAvailable() === false) {
         <p class="vision-hint muted">Local vision AI offline. Run Ollama and pull <code>qwen2.5-vl:7b</code> to enable image analysis.</p>
@@ -119,14 +119,14 @@
               (change)="saveObservations(item, $any($event.target).value)"
             ></textarea>
             <div class="card-actions">
-              @if (visionAvailable()) {
+              @if (visionAvailable() || item.mimeType === 'application/pdf') {
                 <button
                   type="button"
                   class="btn-primary btn-sm"
                   (click)="analyzeImage(item)"
                   [disabled]="analyzingMediaId() === item.id"
                 >
-                  {{ analyzingMediaId() === item.id ? 'Analyzing…' : 'Analyze image' }}
+                  {{ analyzingMediaId() === item.id ? 'Analyzing…' : (item.mimeType === 'application/pdf' ? 'Analyze PDF' : 'Analyze image') }}
                 </button>
               }
               <button type="button" class="btn-secondary btn-sm" (click)="refreshSuggestions(item)">Suggest searches</button>
