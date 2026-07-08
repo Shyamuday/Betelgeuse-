@@ -111,6 +111,26 @@
 }
 
 @if (selectedPatient(); as patient) {
+<section class="panel active-consult-panel">
+  <h2>Active consultations</h2>
+  @if (activeConsultationsLoading()) {
+    <p class="muted">Checking your assigned cases for this patient…</p>
+  } @else if (activeConsultations().length) {
+    @for (entry of activeConsultations(); track entry.consultationId) {
+      <article class="card">
+        <strong>{{ entry.diseaseName }}</strong>
+        <p class="muted">{{ entry.status }} · {{ entry.consultationDate | date: 'mediumDate' }}</p>
+        <div class="actions">
+          <button type="button" (click)="openActiveConsultation(entry, 'case')">Case analysis</button>
+          <button type="button" class="btn-primary" (click)="openActiveConsultation(entry, 'prescribe')">Prescribe</button>
+        </div>
+      </article>
+    }
+  } @else {
+    <p class="muted">No active assigned consultations for this patient.</p>
+  }
+</section>
+
 <section class="panel">
   <app-doctor-patient-clinical-media-panel [patientId]="patient.id" />
 </section>

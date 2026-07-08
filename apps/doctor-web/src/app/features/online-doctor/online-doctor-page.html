@@ -50,6 +50,10 @@
         <div class="inbox-chat">
           @if (selectedConsult(); as active) {
             <p class="active-meta">Chatting with <strong>{{ active.patient.name }}</strong> — {{ active.disease.name }}</p>
+            <div class="inbox-actions">
+              <button type="button" (click)="openCaseAnalysis(active.id)">Case analysis</button>
+              <button type="button" class="btn-primary" (click)="openPrescription(active.id)">Prescribe</button>
+            </div>
           }
           <app-consultation-chat-panel [consultationId]="selectedConsultId()" />
         </div>

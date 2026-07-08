@@ -63,6 +63,12 @@
           {{ item.amountInPaise / 100 | currency: 'INR' }} | Plan: {{ item.billingPlanCode || 'ONE_TIME' }} |
           {{ item.createdAt | date: 'mediumDate' }}
         </p>
+        @if (item.consultation?.id) {
+          <div class="actions">
+            <button type="button" (click)="openPaidConsultation(item.consultation.id)">Open prescription</button>
+            <button type="button" class="ghost" (click)="consultationNav.openCaseAnalysis(item.consultation.id)">Case analysis</button>
+          </div>
+        }
       </article>
     } @empty {
       <p class="empty-state">No paid consultations yet.</p>

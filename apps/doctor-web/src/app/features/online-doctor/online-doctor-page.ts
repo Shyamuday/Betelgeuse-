@@ -3,6 +3,7 @@ import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { form, FormField } from '@angular/forms/signals';
 import { ConsultationChatPanelComponent } from '../../shared/consultation-chat-panel/consultation-chat-panel';
+import { ConsultationNavigationService } from '../../core/services/consultation-navigation.service';
 import { OnlineDoctorService } from '../../core/services/online-doctor.service';
 
 type InstantConsult = {
@@ -16,12 +17,13 @@ type InstantConsult = {
   selector: 'app-online-doctor-page',
   imports: [CommonModule, FormField, ConsultationChatPanelComponent],
   templateUrl: './online-doctor-page.html',
-  styleUrl: './online-doctor-page.scss'
+  styleUrl: './online-doctor-page.scss',
 })
 export class OnlineDoctorPage implements OnInit, OnDestroy {
   private readonly online = inject(OnlineDoctorService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly consultationNav = inject(ConsultationNavigationService);
 
   readonly loading = signal(true);
   readonly saving = signal(false);
@@ -37,7 +39,7 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
     category: 'GENERALIST' as 'GENERALIST' | 'SPECIALIST',
     specialtyDiseaseIds: [] as string[],
     acceptsChat: true,
-    acceptsVoiceCall: true
+    acceptsVoiceCall: true,
   });
   readonly settingsForm = form(this.settingsModel);
 
@@ -64,7 +66,7 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
         category: res.profile.category,
         specialtyDiseaseIds: [...res.profile.specialtyDiseaseIds],
         acceptsChat: res.profile.acceptsChat,
-        acceptsVoiceCall: res.profile.acceptsVoiceCall
+        acceptsVoiceCall: res.profile.acceptsVoiceCall,
       });
       if (this.isLive()) {
         void this.loadInbox();
@@ -96,7 +98,10 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
 
   selectConsult(id: string) {
     this.selectedConsultId.set(id);
-    void this.router.navigate([], { queryParams: { consultationId: id }, queryParamsHandling: 'merge' });
+    void this.router.navigate([], {
+      queryParams: { consultationId: id },
+      queryParamsHandling: 'merge',
+    });
   }
 
   selectedConsult() {
@@ -118,7 +123,7 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
         category: m.category,
         specialtyDiseaseIds: m.specialtyDiseaseIds,
         acceptsChat: m.acceptsChat,
-        acceptsVoiceCall: m.acceptsVoiceCall
+        acceptsVoiceCall: m.acceptsVoiceCall,
       });
       this.online.profile.set(res.profile);
       this.message.set('Settings saved.');
@@ -134,7 +139,9 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
       const has = m.specialtyDiseaseIds.includes(id);
       return {
         ...m,
-        specialtyDiseaseIds: has ? m.specialtyDiseaseIds.filter((x) => x !== id) : [...m.specialtyDiseaseIds, id]
+        specialtyDiseaseIds: has
+          ? m.specialtyDiseaseIds.filter((x) => x !== id)
+          : [...m.specialtyDiseaseIds, id],
       };
     });
   }
@@ -146,7 +153,7 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
       const res = await this.online.setLiveStatus({
         liveStatus: 'ONLINE',
         acceptsChat: this.settingsModel().acceptsChat,
-        acceptsVoiceCall: this.settingsModel().acceptsVoiceCall
+        acceptsVoiceCall: this.settingsModel().acceptsVoiceCall,
       });
       this.online.profile.set(res.profile);
       this.online.connectRealtime();
@@ -185,6 +192,14 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
   private stopInboxRefresh() {
     if (this.refreshTimer) clearInterval(this.refreshTimer);
     this.refreshTimer = null;
+  }
+
+  openCaseAnalysis(consultationId: string) {
+    void this.consultationNav.openCaseAnalysis(consultationId);
+  }
+
+  openPrescription(consultationId: string) {
+    void this.consultationNav.openPrescription(consultationId);
   }
 
   ngOnDestroy() {

@@ -17,3 +17,4 @@ export * from './approach-ai-context';
 export * from './field-guidance';
 export * from './approach-search-phrases';
 export * from './prescription-handoff';
+export * from './prescription-workflow.util';

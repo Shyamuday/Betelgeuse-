@@ -2,6 +2,9 @@
   <header class="hero">
     <h2>Repertory & Materia Medica</h2>
     <p class="muted">Search across all OOREP repertories and materia medicas — Kent, Boger, Hering, Clarke, Allen, Boericke, and more.</p>
+    @if (hasConsultationContext()) {
+      <p class="consultation-banner">Linked to active consultation — use <strong>Add to case</strong> to import rubrics into case analysis.</p>
+    }
   </header>
 
   <div class="browser-toolbar" [class.toolbar-sticky]="isMobile()">
@@ -88,6 +91,9 @@
           <article class="rubric-card">
             <nav class="rubric-breadcrumb">{{ rubricPath(rubric) }}</nav>
             <p class="rubric-text">{{ rubric.text }}</p>
+            @if (hasConsultationContext()) {
+              <button type="button" class="btn-secondary" (click)="addRubricToCase(rubric)">Add to case</button>
+            }
             @if (rubric.remedies?.length) {
               <div class="remedy-chips">
                 @for (link of rubric.remedies; track link.remedy.id) {

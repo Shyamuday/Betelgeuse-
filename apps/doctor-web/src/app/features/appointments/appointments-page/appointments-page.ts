@@ -1,10 +1,14 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { RouterLink } from '@angular/router';
 import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
+import {
+  ConsultationNavigationService,
+  type PrescriptionTab,
+} from '../../../core/services/consultation-navigation.service';
 import { ConsultationApiService } from '../../../core/services/consultation-api.service';
 import type { DoctorConsultation } from '../../../core/types/consultation.types';
 import { AppointmentsPrescriptionsService } from './appointments-prescriptions.service';
@@ -27,6 +31,10 @@ import {
   type PatientClinicalProfile,
 } from '../../../shared/patient-health-profile/patient-health-profile';
 import { ViewportService } from '@vitalis/platform-ui';
+import {
+  PrescriptionApproachWorkflowComponent,
+  type PrescriptionHandoffApply,
+} from '../panels/prescription-approach-workflow/prescription-approach-workflow';
 
 export type PrescriptionMobileTab = 'context' | 'setup' | 'remedies' | 'review';
 
@@ -68,27 +76,37 @@ function emptyPrescriptionModel() {
     ConsultationContextHeaderComponent,
     ConsultationIntakePanelComponent,
     ConsultationChatPanelComponent,
+    PrescriptionApproachWorkflowComponent,
   ],
   templateUrl: './appointments-page.html',
   styleUrl: './appointments-page.scss',
 })
-export class AppointmentsPage {
+export class AppointmentsPage implements OnInit {
   private readonly prescriptions = inject(AppointmentsPrescriptionsService);
   private readonly prescriptionPdf = inject(PrescriptionPdfService);
   private readonly session = inject(DoctorSessionService);
   private readonly consultationApi = inject(ConsultationApiService);
   private readonly diseaseCatalog = inject(DiseaseCatalogService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly consultationNav = inject(ConsultationNavigationService);
   private readonly viewport = inject(ViewportService);
 
+  private lastSyncedConsultationId = '';
+
   readonly isMobile = computed(() => this.viewport.isMobile());
+  readonly selectedDiseaseName = computed(() => {
+    const optionId = this.prescriptionModel().diagnosedDiseaseOptionId;
+    const match = this.diagnosedDiseases.find((item) => item.prescriptionOptionId === optionId);
+    return match?.name || this.consultationContext?.disease?.name || '';
+  });
   readonly mobileTab = signal<PrescriptionMobileTab>('setup');
   readonly mobileContextOpen = signal(false);
 
   defaultMethodOptionId = '';
 
   readonly caseAnalysisPath = ROUTE_PATHS.CASE_ANALYSIS;
-  readonly prescriptionModel = signal(this.createInitialPrescriptionModel());
+  readonly prescriptionModel = signal(emptyPrescriptionModel());
   readonly prescriptionForm = form(this.prescriptionModel);
   readonly templateModel = signal({ templateName: '' });
   readonly templateForm = form(this.templateModel);
@@ -147,14 +165,105 @@ export class AppointmentsPage {
     return !this.isMobile() || this.mobileTab() === 'review';
   }
 
-  constructor() {
+  ngOnInit() {
     void this.loadOptions();
     void this.loadTemplates();
     void this.loadDoctorDefaultApproach();
-    if (this.prescriptionModel().consultationId) {
-      void this.loadConsultationPrescriptions();
-      void this.loadConsultationContext();
+    this.route.paramMap.subscribe((params) => {
+      void this.syncFromRoute(params, this.route.snapshot.queryParamMap);
+    });
+    this.route.queryParamMap.subscribe((query) => {
+      void this.syncFromRoute(this.route.snapshot.paramMap, query);
+    });
+  }
+
+  private async syncFromRoute(paramMap: ParamMap, queryMap: ParamMap) {
+    const routeConsultationId = paramMap.get('consultationId')?.trim() || '';
+    const queryConsultationId = queryMap.get('consultationId')?.trim() || '';
+    const consultationId = routeConsultationId || queryConsultationId;
+
+    if (
+      !routeConsultationId &&
+      queryConsultationId &&
+      this.router.url.includes(`/${ROUTE_PATHS.APPOINTMENTS}`)
+    ) {
+      await this.consultationNav.openPrescription(queryConsultationId, {
+        caseAnalysisId: queryMap.get('caseAnalysisId'),
+        remedy: queryMap.get('remedy'),
+        companionRemedy: queryMap.get('companionRemedy'),
+        advice: queryMap.get('advice'),
+        diagnosis: queryMap.get('diagnosis'),
+        methodOptionId: queryMap.get('methodOptionId'),
+        tab: this.parsePrescriptionTab(queryMap.get('tab')),
+      });
+      return;
     }
+
+    const tab = this.parsePrescriptionTab(queryMap.get('tab'));
+    if (tab) {
+      this.mobileTab.set(tab);
+    }
+
+    const handoffPatch = this.handoffPatchFromQuery(queryMap);
+    const consultationChanged = consultationId !== this.lastSyncedConsultationId;
+
+    if (consultationId) {
+      this.prescriptionModel.update((model) => ({
+        ...model,
+        consultationId,
+        ...handoffPatch,
+      }));
+      if (consultationChanged) {
+        this.lastSyncedConsultationId = consultationId;
+        await this.loadConsultationPrescriptions();
+        await this.loadConsultationContext();
+      } else if (Object.keys(handoffPatch).length) {
+        this.prescriptionModel.update((model) => ({ ...model, ...handoffPatch }));
+      }
+      this.applyDefaultMethodIfEmpty();
+    } else if (consultationChanged) {
+      this.lastSyncedConsultationId = '';
+      this.prescriptionModel.set(emptyPrescriptionModel());
+    }
+  }
+
+  private parsePrescriptionTab(value: string | null): PrescriptionTab | null {
+    if (value === 'context' || value === 'setup' || value === 'remedies' || value === 'review') {
+      return value;
+    }
+    return null;
+  }
+
+  private handoffPatchFromQuery(queryMap: ParamMap) {
+    const patch: Partial<ReturnType<typeof emptyPrescriptionModel>> = {};
+    const caseAnalysisId = queryMap.get('caseAnalysisId');
+    const methodOptionId = queryMap.get('methodOptionId');
+    const remedy = queryMap.get('remedy');
+    const companionRemedy = queryMap.get('companionRemedy');
+    const advice = queryMap.get('advice');
+    const diagnosis = queryMap.get('diagnosis');
+
+    if (caseAnalysisId) patch.caseAnalysisId = caseAnalysisId;
+    if (methodOptionId) patch.methodOptionId = methodOptionId;
+    if (advice) patch.advice = advice;
+    if (diagnosis || remedy) patch.diagnosis = diagnosis || remedy || '';
+
+    if (remedy || companionRemedy) {
+      const medicineRows = [...this.prescriptionModel().medicineRows];
+      if (remedy) {
+        medicineRows[0] = { ...(medicineRows[0] || newMedicineRow()), medicineName: remedy };
+      }
+      if (companionRemedy) {
+        if (medicineRows.length > 1) {
+          medicineRows[1] = { ...medicineRows[1], medicineName: companionRemedy };
+        } else {
+          medicineRows.push({ ...newMedicineRow(), medicineName: companionRemedy });
+        }
+      }
+      patch.medicineRows = medicineRows;
+    }
+
+    return patch;
   }
 
   async loadConsultationContext() {
@@ -169,32 +278,6 @@ export class AppointmentsPage {
     } catch {
       this.consultationContext = null;
     }
-  }
-
-  private createInitialPrescriptionModel() {
-    const consultationId = this.route.snapshot.queryParamMap.get('consultationId') || '';
-    const caseAnalysisId = this.route.snapshot.queryParamMap.get('caseAnalysisId') || '';
-    const remedySuggestion = this.route.snapshot.queryParamMap.get('remedy') || '';
-    const companionRemedy = this.route.snapshot.queryParamMap.get('companionRemedy') || '';
-    const adviceFromCase = this.route.snapshot.queryParamMap.get('advice') || '';
-    const diagnosisSuggestion = this.route.snapshot.queryParamMap.get('diagnosis') || '';
-    const methodFromCase = this.route.snapshot.queryParamMap.get('methodOptionId') || '';
-    const medicineRows = [newMedicineRow()];
-    if (remedySuggestion) {
-      medicineRows[0].medicineName = remedySuggestion;
-    }
-    if (companionRemedy) {
-      medicineRows.push({ ...newMedicineRow(), medicineName: companionRemedy });
-    }
-    return {
-      ...emptyPrescriptionModel(),
-      consultationId,
-      caseAnalysisId,
-      methodOptionId: methodFromCase,
-      diagnosis: diagnosisSuggestion || remedySuggestion,
-      advice: adviceFromCase,
-      medicineRows,
-    };
   }
 
   async loadDoctorDefaultApproach() {
@@ -346,10 +429,50 @@ export class AppointmentsPage {
     }
   }
 
+  onCaseAnalysisIdChange(caseAnalysisId: string) {
+    this.prescriptionModel.update((model) => ({ ...model, caseAnalysisId }));
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { caseAnalysisId: caseAnalysisId || null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  applyApproachHandoff(handoff: PrescriptionHandoffApply) {
+    this.prescriptionModel.update((model) => {
+      const medicineRows = [...model.medicineRows];
+      if (handoff.remedy.trim()) {
+        medicineRows[0] = {
+          ...(medicineRows[0] || newMedicineRow()),
+          medicineName: handoff.remedy.trim(),
+        };
+      }
+      if (handoff.companionRemedy?.trim()) {
+        if (medicineRows.length > 1) {
+          medicineRows[1] = {
+            ...medicineRows[1],
+            medicineName: handoff.companionRemedy.trim(),
+          };
+        } else {
+          medicineRows.push({ ...newMedicineRow(), medicineName: handoff.companionRemedy.trim() });
+        }
+      }
+      return {
+        ...model,
+        medicineRows,
+        advice: handoff.advice?.trim() || model.advice,
+        diagnosis: handoff.remedy.trim() || model.diagnosis,
+      };
+    });
+    this.message = 'Approach data applied to remedy rows.';
+  }
+
   selectPrescription(prescription: LoadedPrescription) {
     this.prescriptionModel.update((model) => ({
       ...model,
       editingPrescriptionId: prescription.id,
+      caseAnalysisId: prescription.caseAnalysisId || model.caseAnalysisId,
       methodOptionId: prescription.methodOptionId || '',
       diagnosedDiseaseOptionId: prescription.diagnosedDiseaseOptionId || '',
       diagnosis: prescription.diagnosis || '',

@@ -46,6 +46,7 @@ export type LoadedPrescription = {
   notes: string;
   methodOptionId?: string | null;
   diagnosedDiseaseOptionId?: string | null;
+  caseAnalysisId?: string | null;
   items: Array<{
     medicineName: string;
     strength?: string | null;

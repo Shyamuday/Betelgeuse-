@@ -1,0 +1,109 @@
+.approach-workflow {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+  max-width: 920px;
+}
+
+.approach-banner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.approach-banner strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.potency-guidance {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+}
+
+.workflow-error {
+  color: #b91c1c;
+  margin: 0;
+}
+
+.panel {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  background: #fff;
+}
+
+.panel-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.panel-title-row h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.rationale-panel textarea,
+.notes-panel textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  min-height: 72px;
+}
+
+.handoff-panel {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #1d4ed8;
+  text-decoration: none;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.btn-secondary {
+  margin-top: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  cursor: pointer;
+}
+
+.btn-save-now {
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.muted {
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.hint {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}

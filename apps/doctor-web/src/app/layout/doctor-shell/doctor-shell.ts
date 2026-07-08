@@ -1,11 +1,17 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
-import { RoleTaskGuideComponent, NotificationBellHostComponent, ProfileAvatarDisplayComponent } from '@vitalis/platform-ui';
+import {
+  RoleTaskGuideComponent,
+  NotificationBellHostComponent,
+  ProfileAvatarDisplayComponent,
+} from '@vitalis/platform-ui';
 import { environment } from '../../../environments/environment';
 import { AUTH_TOKEN_KEY } from '../../core/constants/auth.constants';
 import { ROUTE_PATHS } from '../../core/constants/app-routes.constants';
+import { navItemsForDoctorType } from '../../core/constants/doctor-types.constants';
 import { Auth } from '../../core/services/auth';
+import { ConsultationNavigationService } from '../../core/services/consultation-navigation.service';
 import { DoctorRealtimeService } from '../../core/services/doctor-realtime.service';
 import { DoctorSessionService } from '../../core/services/doctor-session';
 
@@ -27,7 +33,7 @@ const NAV_ICONS: Record<string, { icon: string; shortLabel: string }> = {
   Slots: { icon: '📅', shortLabel: 'Slots' },
   Earnings: { icon: '💰', shortLabel: 'Pay' },
   Leaves: { icon: '🌴', shortLabel: 'Leave' },
-  Profile: { icon: '👤', shortLabel: 'Profile' }
+  Profile: { icon: '👤', shortLabel: 'Profile' },
 };
 
 const MOBILE_BOTTOM_NAV_ORDER = ['Worklist', 'Patients', 'Scan', 'Appointments'] as const;
@@ -35,7 +41,14 @@ const MOBILE_BOTTOM_NAV_LIMIT = 4;
 
 @Component({
   selector: 'app-doctor-shell',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, RoleTaskGuideComponent, NotificationBellHostComponent, ProfileAvatarDisplayComponent],
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    RouterOutlet,
+    RoleTaskGuideComponent,
+    NotificationBellHostComponent,
+    ProfileAvatarDisplayComponent,
+  ],
   templateUrl: './doctor-shell.html',
   styleUrl: './doctor-shell.scss',
 })
@@ -53,22 +66,27 @@ export class DoctorShell implements OnInit, OnDestroy {
   focusMode = signal(false);
   assignmentNotice = signal('');
 
+  readonly navLinkActiveOptions = { exact: false };
+
   private readonly realtime = inject(DoctorRealtimeService);
   private readonly router = inject(Router);
+  private readonly consultationNav = inject(ConsultationNavigationService);
   private navSubscription?: { unsubscribe: () => void };
 
   readonly bellConfig = {
     apiBase: environment.apiUrl,
     tokenKey: AUTH_TOKEN_KEY,
-    apiPath: '/notifications'
+    apiPath: '/notifications',
   };
   readonly apiBase = environment.apiUrl;
   readonly authTokenKey = AUTH_TOKEN_KEY;
 
   constructor(
     private readonly auth: Auth,
-    private readonly session: DoctorSessionService
-  ) {}
+    private readonly session: DoctorSessionService,
+  ) {
+    this.navItems = this.decorateNav(navItemsForDoctorType(null));
+  }
 
   async ngOnInit() {
     try {
@@ -88,14 +106,19 @@ export class DoctorShell implements OnInit, OnDestroy {
     this.realtime.connect((payload) => {
       const label = payload.patientCode
         ? `${payload.patientName ?? 'Patient'} (${payload.patientCode})`
-        : payload.patientName ?? 'New patient';
+        : (payload.patientName ?? 'New patient');
       this.assignmentNotice.set(`New case: ${label}`);
       if (payload.consultationMode === 'INSTANT_ONLINE') {
         void this.router.navigate(['/', ROUTE_PATHS.ONLINE_DOCTOR], {
-          queryParams: { consultationId: payload.consultationId }
+          queryParams: { consultationId: payload.consultationId },
         });
       } else {
-        void this.router.navigate(['/', ROUTE_PATHS.CASE_ANALYSIS, payload.consultationId, 'case-analysis']);
+        void this.router.navigate([
+          '/',
+          ROUTE_PATHS.CASE_ANALYSIS,
+          payload.consultationId,
+          'case-analysis',
+        ]);
       }
       window.setTimeout(() => this.assignmentNotice.set(''), 5000);
     });
@@ -104,7 +127,9 @@ export class DoctorShell implements OnInit, OnDestroy {
     this.navSubscription = this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => {
-        this.closeMenu();
+        if (this.menuOpen()) {
+          this.closeMenu();
+        }
         this.syncFocusMode(event.urlAfterRedirects);
       });
   }
@@ -115,12 +140,7 @@ export class DoctorShell implements OnInit, OnDestroy {
   }
 
   private syncFocusMode(url: string) {
-    const path = url.split('?')[0];
-    const hasConsultation =
-      path.includes(`/${ROUTE_PATHS.CASE_ANALYSIS}/`) && path.endsWith('/case-analysis');
-    const inAppointmentsWithCase =
-      path.endsWith(`/${ROUTE_PATHS.APPOINTMENTS}`) && /[?&]consultationId=/.test(url);
-    this.focusMode.set(hasConsultation || inAppointmentsWithCase);
+    this.focusMode.set(this.consultationNav.isConsultationWorkspaceUrl(url));
   }
 
   logout() {

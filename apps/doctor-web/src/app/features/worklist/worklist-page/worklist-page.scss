@@ -234,6 +234,12 @@ button:disabled {
   }
 }
 
+.actions-primary button.btn-primary {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
 @media (min-width: 768px) {
   .hero {
     flex-direction: row;

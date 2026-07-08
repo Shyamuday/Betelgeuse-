@@ -7,6 +7,9 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { API_PATHS } from '../../../core/constants/api-paths.constants';
 import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
+import { ConsultationNavigationService } from '../../../core/services/consultation-navigation.service';
+import { CaseAnalysisApiService } from '../../case-analysis/case-analysis-api.service';
+import type { PatientCaseHistoryEntry } from '../../case-analysis/case-analysis-page.types';
 import {
   PatientsApiService,
   type PatientIdCardData,
@@ -96,6 +99,8 @@ function emptyCreatePatientModel() {
 export class PatientsPage {
   private readonly http = inject(HttpClient);
   private readonly patientsApi = inject(PatientsApiService);
+  private readonly caseAnalysisApi = inject(CaseAnalysisApiService);
+  private readonly consultationNav = inject(ConsultationNavigationService);
   private readonly viewport = inject(ViewportService);
   private readonly apiBase = environment.apiUrl;
 
@@ -139,6 +144,8 @@ export class PatientsPage {
   readonly labReferralsLoading = signal(false);
   readonly labReferralsError = signal('');
   readonly summary = signal<AdherenceSummary | null>(null);
+  readonly activeConsultations = signal<PatientCaseHistoryEntry[]>([]);
+  readonly activeConsultationsLoading = signal(false);
 
   async searchPatients(forceGlobal = false) {
     this.patientSearchError.set('');
@@ -184,7 +191,34 @@ export class PatientsPage {
       chronicConditions: patient.chronicConditions,
     });
     void this.loadPatientCard(patient.id);
+    void this.loadActiveConsultations(patient.id);
     void this.loadTrend();
+  }
+
+  private async loadActiveConsultations(patientId: string) {
+    this.activeConsultationsLoading.set(true);
+    this.activeConsultations.set([]);
+    try {
+      const history = await this.caseAnalysisApi.loadPatientCaseHistory(patientId);
+      this.activeConsultations.set(
+        history.entries.filter(
+          (entry) => entry.status === 'ASSIGNED' || entry.status === 'IN_PROGRESS',
+        ),
+      );
+    } catch {
+      this.activeConsultations.set([]);
+    } finally {
+      this.activeConsultationsLoading.set(false);
+    }
+  }
+
+  openActiveConsultation(entry: PatientCaseHistoryEntry, target: 'case' | 'prescribe') {
+    const caseAnalysisId = entry.analyses[0]?.id || entry.prescription?.caseAnalysisId || null;
+    if (target === 'prescribe') {
+      void this.consultationNav.openPrescription(entry.consultationId, { caseAnalysisId });
+      return;
+    }
+    void this.consultationNav.openCaseAnalysis(entry.consultationId, { caseAnalysisId });
   }
 
   backToList() {
@@ -194,6 +228,7 @@ export class PatientsPage {
     this.summary.set(null);
     this.doseEvents.set([]);
     this.labReferrals.set([]);
+    this.activeConsultations.set([]);
     this.trendModel.update((model) => ({ ...model, patientId: '' }));
     this.message.set('');
     this.error.set('');

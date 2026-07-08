@@ -8,6 +8,7 @@ import {
   provideRouter,
   withExperimentalAutoCleanupInjectors,
   withExperimentalPlatformNavigation,
+  withInMemoryScrolling,
 } from '@angular/router';
 import { DEV_DEMO_PORT } from '@vitalis/platform-ui';
 import { CLINIC_API_BASE_URL, CLINIC_AUTH_TOKEN_KEY } from '@vitalis/clinic-api';
@@ -28,6 +29,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withXhr(), withInterceptors([authTokenInterceptor, authErrorInterceptor])),
     provideRouter(
       routes,
+      withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' }),
       withExperimentalPlatformNavigation(),
       withExperimentalAutoCleanupInjectors(),
     ),

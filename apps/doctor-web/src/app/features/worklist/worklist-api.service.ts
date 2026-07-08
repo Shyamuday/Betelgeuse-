@@ -34,6 +34,13 @@ export class WorklistApiService {
 
   private readonly http = inject(HttpClient);
 
+  private lastSnapshot: WorklistResponse | null = null;
+  private lastQueryKey = '';
+
+  peekSnapshot(view: WorklistView = 'ALL', q = '') {
+    return this.lastQueryKey === this.queryKey(view, q) ? this.lastSnapshot : null;
+  }
+
   loadWorklist(view: WorklistView = 'ALL', q = '') {
     let params = new HttpParams().set('view', view);
     if (q.trim()) {
@@ -41,7 +48,15 @@ export class WorklistApiService {
     }
 
     return firstValueFrom(
-      this.http.get<WorklistResponse>(`${this.apiBase}${API_PATHS.DOCTOR.WORKLIST}`, { params })
-    );
+      this.http.get<WorklistResponse>(`${this.apiBase}${API_PATHS.DOCTOR.WORKLIST}`, { params }),
+    ).then((response) => {
+      this.lastSnapshot = response;
+      this.lastQueryKey = this.queryKey(view, q);
+      return response;
+    });
+  }
+
+  private queryKey(view: WorklistView, q: string) {
+    return `${view}:${q.trim()}`;
   }
 }

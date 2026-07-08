@@ -1,0 +1,186 @@
+@if (!consultationId()) {
+  <p class="hint">Enter a consultation ID and load history to unlock approach-specific prescribing fields.</p>
+} @else if (loading()) {
+  <p class="hint">Loading approach workflow…</p>
+} @else if (!methodOptionId()) {
+  <p class="hint">Select a homeopathy method above to show approach-specific inputs.</p>
+} @else if (activeApproach(); as approach) {
+  <section class="approach-workflow">
+    @if (error()) {
+      <p class="workflow-error">{{ error() }}</p>
+    }
+
+    <header class="approach-banner">
+      <div>
+        <span class="muted">Active approach</span>
+        <strong>{{ approach.title }}</strong>
+        <p class="muted">{{ approach.shortDescription }}</p>
+        @if (approach.prescription?.potencyGuidance) {
+          <p class="potency-guidance"><strong>Potency:</strong> {{ approach.prescription.potencyGuidance }}</p>
+        }
+      </div>
+      <a
+        class="link-btn"
+        [routerLink]="['/', caseAnalysisPath, consultationId(), 'case-analysis']"
+        [queryParams]="analysis()?.id ? { caseAnalysisId: analysis()!.id } : null"
+      >
+        Full case analysis & repertory
+      </a>
+    </header>
+
+    <app-prescription-repertory-panel
+      [consultationId]="consultationId()"
+      [caseAnalysisId]="analysis()?.id || caseAnalysisId()"
+      [rubricCount]="linkedRubricCount()"
+    />
+
+    <section class="panel rationale-panel">
+      <div class="panel-title-row">
+        <h3>Why this method for this patient?</h3>
+        @if (savingMethodRationale()) {
+          <span class="muted">Saving…</span>
+        }
+      </div>
+      <textarea
+        rows="3"
+        placeholder="Explain why {{ approach.title }} fits this case — required for structured prescribing."
+        [value]="methodRationaleModel().rationale"
+        (input)="onRationaleInput($event)"
+      ></textarea>
+    </section>
+
+    @for (step of inputSteps(); track step.id) {
+      @switch (step.component) {
+        @case ('kent-hierarchy') {
+          <app-kent-hierarchy-panel
+            [initial]="kentData()"
+            [saving]="savingApproachData()"
+            (saveRequested)="saveKentHierarchy($event)"
+            (autoSaveRequested)="saveKentHierarchy($event, true)"
+          />
+        }
+        @case ('sensation-mapper') {
+          <app-sensation-capture-panel
+            [initial]="sensationData()"
+            [saving]="savingApproachData()"
+            (saveRequested)="saveSensation($event)"
+            (autoSaveRequested)="saveSensation($event, true)"
+          />
+        }
+        @case ('miasm-selector') {
+          <app-miasm-layer-panel
+            [initial]="miasmData()"
+            [saving]="savingApproachData()"
+            (saveRequested)="saveMiasm($event)"
+            (autoSaveRequested)="saveMiasm($event, true)"
+          />
+        }
+        @case ('keynote-striking') {
+          <app-keynote-striking-panel
+            [initial]="keynoteData()"
+            [saving]="savingApproachData()"
+            (saveRequested)="saveKeynote($event)"
+            (autoSaveRequested)="saveKeynote($event, true)"
+          />
+        }
+        @case ('scholten-mapper') {
+          <app-scholten-mapper-panel
+            [initial]="scholtenData()"
+            [saving]="savingApproachData()"
+            (saveRequested)="saveScholten($event)"
+            (autoSaveRequested)="saveScholten($event, true)"
+          />
+        }
+        @case ('sehgal-emotion') {
+          <app-sehgal-emotion-panel
+            [initial]="sehgalData()"
+            [saving]="savingApproachData()"
+            (saveRequested)="saveSehgal($event)"
+            (autoSaveRequested)="saveSehgal($event, true)"
+          />
+        }
+        @case ('integrative-follow-up') {
+          <app-integrative-follow-up-panel
+            [initial]="integrativeFollowUpData()"
+            [saving]="savingApproachData()"
+            (saveRequested)="saveIntegrativeFollowUp($event)"
+            (autoSaveRequested)="saveIntegrativeFollowUp($event, true)"
+          />
+        }
+        @case ('protocol-selector') {
+          <app-protocol-select-panel
+            [diseaseName]="diseaseName()"
+            [initial]="protocolData()"
+            [saving]="savingApproachData()"
+            (saveRequested)="saveProtocol($event)"
+            (autoSaveRequested)="saveProtocol($event, true)"
+            (useInPrescription)="applyHandoffFromProtocol($event)"
+          />
+        }
+        @case ('case-sheet') {
+          <app-approach-case-sheet-panel
+            [fields]="caseSheetFields()"
+            [title]="caseSheetTitle()"
+            [description]="'Schema: ' + approach.caseSheetSchemaId + ' — ' + approach.focus"
+            [saving]="savingCaseSheet()"
+            [caseSheetForm]="caseSheetForm"
+            [caseSheetValues]="caseSheetModel()"
+            (saveRequested)="saveCaseSheet()"
+          />
+        }
+        @case ('organon-lm-dosing') {
+          <app-organon-lm-dosing-panel
+            [initial]="organonLmData()"
+            [selectedRemedyName]="analysis()?.selectedRemedy?.name || ''"
+            [saving]="savingApproachData()"
+            (saveRequested)="saveOrganonLm($event)"
+            (autoSaveRequested)="saveOrganonLm($event, true)"
+          />
+        }
+        @case ('analysis-notes') {
+          <section class="panel notes-panel">
+            <div class="panel-title-row">
+              <h3>{{ step.label }}</h3>
+              <button type="button" class="btn-save-now btn-sm" (click)="saveNotes()" [disabled]="saving()">
+                {{ saving() ? 'Saving…' : 'Save now' }}
+              </button>
+            </div>
+            <p class="muted">{{ step.description }}</p>
+            <textarea
+              [formField]="notesForm.notes"
+              rows="4"
+              placeholder="Key observations, modalities, mentals, or follow-up thoughts…"
+            ></textarea>
+          </section>
+        }
+        @default {
+          @if (structuredPanelForComponent(step.component); as panel) {
+            <app-approach-structured-panel
+              [config]="panel.def"
+              [initial]="structuredPanelInitial(panel.dataKey)"
+              [saving]="savingApproachData()"
+              (saveRequested)="saveStructuredPanel(panel.dataKey, $event)"
+              (autoSaveRequested)="saveStructuredPanel(panel.dataKey, $event, true)"
+            />
+          }
+        }
+      }
+    }
+
+    @if (prescriptionHandoffPreview(); as handoff) {
+      <section class="panel handoff-panel">
+        <h3>Suggested from approach data</h3>
+        <p><strong>Remedy:</strong> {{ handoff.remedy }}</p>
+        @if (handoff.companionRemedy) {
+          <p><strong>Companion:</strong> {{ handoff.companionRemedy }}</p>
+        }
+        @if (handoff.advice) {
+          <p><strong>Advice:</strong> {{ handoff.advice }}</p>
+        }
+        <button type="button" class="btn-secondary" (click)="applyHandoffFromPreview()">
+          Apply to remedy rows
+        </button>
+      </section>
+    }
+  </section>
+}

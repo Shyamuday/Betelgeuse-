@@ -3,8 +3,8 @@
     <h2>Worklist</h2>
     <p class="muted">Your active cases — assigned, in progress, and follow-ups due.</p>
   </div>
-  <button type="button" (click)="load()" [disabled]="loading()">
-    {{ loading() ? 'Refreshing...' : 'Refresh' }}
+  <button type="button" (click)="load()" [disabled]="loading() || refreshing()">
+    {{ loading() ? 'Loading…' : refreshing() ? 'Refreshing…' : 'Refresh' }}
   </button>
 </section>
 
@@ -39,13 +39,13 @@
       [formField]="filterForm.search"
       (keyup.enter)="load()"
     />
-    <select class="view-filter-select" [formField]="filterForm.view" (change)="load()">
+    <select class="view-filter-select" [formField]="filterForm.view" (change)="setView(filterModel().view)">
       <option value="ALL">All sections</option>
       <option value="ASSIGNED">Assigned only</option>
       <option value="IN_PROGRESS">In-progress only</option>
       <option value="FOLLOW_UP_DUE">Follow-up due only</option>
     </select>
-    <button type="button" (click)="load()" [disabled]="loading()">Search</button>
+    <button type="button" (click)="load()" [disabled]="loading() || refreshing()">Search</button>
   </div>
   @if (error()) {
     <div class="error-row">
@@ -80,15 +80,20 @@
       </small>
       <div class="actions actions-mobile">
         <div class="actions-primary">
-          <button type="button" (click)="openCaseAnalysis(item.id)">Case</button>
-          <button type="button" (click)="openPrescription(item.id)">Prescribe</button>
+          @if (primaryAction('FOLLOW_UP_DUE') === 'prescribe') {
+            <button type="button" class="btn-primary" (click)="openPrescription(item.id)">Prescribe</button>
+            <button type="button" (click)="openCaseAnalysis(item.id)">Case</button>
+          } @else {
+            <button type="button" class="btn-primary" (click)="openCaseAnalysis(item.id)">Case</button>
+            <button type="button" (click)="openPrescription(item.id)">Prescribe</button>
+          }
         </div>
         <button type="button" class="ghost actions-more" (click)="toggleCardMenu(item.id)">
           {{ isCardMenuOpen(item.id) ? 'Less' : 'More' }}
         </button>
         @if (isCardMenuOpen(item.id)) {
           <div class="actions-secondary">
-            <button type="button" class="ghost" (click)="openInAppointments(item.id)">Appointment</button>
+            <button type="button" class="ghost" (click)="openConsultationContext(item.id)">Intake &amp; chat</button>
             @if (item.patient?.patientCode) {
               <button type="button" class="ghost" (click)="scanPatient(item.patient?.patientCode)">Scan patient</button>
             }
@@ -114,15 +119,20 @@
       <small class="muted">Patient {{ item.patient?.patientCode || item.patient?.id }}</small>
       <div class="actions actions-mobile">
         <div class="actions-primary">
-          <button type="button" (click)="openCaseAnalysis(item.id)">Case</button>
-          <button type="button" (click)="openPrescription(item.id)">Prescribe</button>
+          @if (primaryAction('ASSIGNED') === 'prescribe') {
+            <button type="button" class="btn-primary" (click)="openPrescription(item.id)">Prescribe</button>
+            <button type="button" (click)="openCaseAnalysis(item.id)">Case</button>
+          } @else {
+            <button type="button" class="btn-primary" (click)="openCaseAnalysis(item.id)">Case</button>
+            <button type="button" (click)="openPrescription(item.id)">Prescribe</button>
+          }
         </div>
         <button type="button" class="ghost actions-more" (click)="toggleCardMenu(item.id)">
           {{ isCardMenuOpen(item.id) ? 'Less' : 'More' }}
         </button>
         @if (isCardMenuOpen(item.id)) {
           <div class="actions-secondary">
-            <button type="button" class="ghost" (click)="openInAppointments(item.id)">Appointment</button>
+            <button type="button" class="ghost" (click)="openConsultationContext(item.id)">Intake &amp; chat</button>
           </div>
         }
       </div>
@@ -145,15 +155,20 @@
       <small class="muted">Patient {{ item.patient?.patientCode || item.patient?.id }}</small>
       <div class="actions actions-mobile">
         <div class="actions-primary">
-          <button type="button" (click)="openCaseAnalysis(item.id)">Case</button>
-          <button type="button" (click)="openPrescription(item.id)">Prescribe</button>
+          @if (primaryAction('IN_PROGRESS') === 'prescribe') {
+            <button type="button" class="btn-primary" (click)="openPrescription(item.id)">Prescribe</button>
+            <button type="button" (click)="openCaseAnalysis(item.id)">Case</button>
+          } @else {
+            <button type="button" class="btn-primary" (click)="openCaseAnalysis(item.id)">Case</button>
+            <button type="button" (click)="openPrescription(item.id)">Prescribe</button>
+          }
         </div>
         <button type="button" class="ghost actions-more" (click)="toggleCardMenu(item.id)">
           {{ isCardMenuOpen(item.id) ? 'Less' : 'More' }}
         </button>
         @if (isCardMenuOpen(item.id)) {
           <div class="actions-secondary">
-            <button type="button" class="ghost" (click)="openInAppointments(item.id)">Appointment</button>
+            <button type="button" class="ghost" (click)="openConsultationContext(item.id)">Intake &amp; chat</button>
             @if (item.patient?.patientCode) {
               <button type="button" class="ghost" (click)="scanPatient(item.patient?.patientCode)">Scan patient</button>
             }

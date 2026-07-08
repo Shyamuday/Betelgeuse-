@@ -1,0 +1,40 @@
+<section class="panel repertory-panel">
+  <div class="panel-title-row">
+    <h3>Quick repertory</h3>
+    <span class="muted">{{ rubricCount() }} rubrics in linked case</span>
+  </div>
+  <p class="muted">Search and add symptoms without leaving prescription. Repertorize in full case analysis when ready.</p>
+
+  <div class="search-row">
+    <input
+      [formField]="searchForm.query"
+      placeholder="Search rubrics (min 2 chars)"
+      (keyup.enter)="searchRubrics()"
+    />
+    <button type="button" (click)="searchRubrics()" [disabled]="searching()">
+      {{ searching() ? 'Searching…' : 'Search' }}
+    </button>
+  </div>
+
+  @if (message()) {
+    <p class="hint success-hint">{{ message() }}</p>
+  }
+  @if (error()) {
+    <p class="hint error-hint">{{ error() }}</p>
+  }
+
+  @for (rubric of results(); track rubric.id) {
+    <article class="rubric-row">
+      <div>
+        <strong>{{ rubric.text }}</strong>
+        <small class="muted">{{ rubric.chapter }}</small>
+      </div>
+      <button type="button" class="btn-secondary" (click)="addRubric(rubric)">Add</button>
+    </article>
+  }
+
+  <div class="panel-actions">
+    <button type="button" class="btn-secondary" (click)="openFullRepertory()">Open repertory browser</button>
+    <button type="button" class="btn-secondary" (click)="openCaseAnalysisForRepertorize()">Repertorize in case analysis</button>
+  </div>
+</section>

@@ -26,18 +26,27 @@ export const routes: Routes = [
     component: DoctorShell,
     canActivate: [doctorAuthGuard],
     children: [
-      { path: '', pathMatch: 'full', component: WorklistPage },
+      { path: '', pathMatch: 'full', redirectTo: ROUTE_PATHS.WORKLIST },
       { path: ROUTE_PATHS.WORKLIST, component: WorklistPage },
       { path: ROUTE_PATHS.DASHBOARD, component: DashboardHome },
+      {
+        path: `${ROUTE_PATHS.CASE_ANALYSIS}/:consultationId`,
+        pathMatch: 'full',
+        redirectTo: `${ROUTE_PATHS.CASE_ANALYSIS}/:consultationId/case-analysis`,
+      },
+      {
+        path: `${ROUTE_PATHS.CASE_ANALYSIS}/:consultationId/case-analysis`,
+        component: CaseAnalysisPage,
+      },
+      {
+        path: `${ROUTE_PATHS.CASE_ANALYSIS}/:consultationId/prescription`,
+        component: AppointmentsPage,
+      },
       { path: ROUTE_PATHS.APPOINTMENTS, component: AppointmentsPage },
       {
         path: ROUTE_PATHS.REPERTORY,
         component: CaseAnalysisPage,
-        data: { standalone: true }
-      },
-      {
-        path: `${ROUTE_PATHS.CASE_ANALYSIS}/:consultationId/case-analysis`,
-        component: CaseAnalysisPage
+        data: { standalone: true },
       },
       { path: ROUTE_PATHS.PATIENTS, component: PatientsPage },
       { path: ROUTE_PATHS.DISEASE_PAGES, component: DiseasePagesPage },
@@ -49,8 +58,8 @@ export const routes: Routes = [
       { path: ROUTE_PATHS.SLOTS, component: SlotsPage },
       { path: ROUTE_PATHS.EARNINGS, component: EarningsPage },
       { path: ROUTE_PATHS.SCAN, component: DoctorPatientScanLauncherPage },
-      { path: `${ROUTE_PATHS.PATIENT_SCAN}/:patientCode`, component: PatientScanPage }
-    ]
+      { path: `${ROUTE_PATHS.PATIENT_SCAN}/:patientCode`, component: PatientScanPage },
+    ],
   },
-  { path: '**', redirectTo: '' }
+  { path: '**', redirectTo: ROUTE_PATHS.WORKLIST },
 ];

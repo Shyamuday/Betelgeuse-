@@ -2,13 +2,14 @@ import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
-import { ROUTE_PATHS } from '../constants/app-routes.constants';
 import { AUTH_TOKEN_KEY } from '../constants/auth.constants';
 import { environment } from '../../../environments/environment';
+import { ConsultationNavigationService } from './consultation-navigation.service';
 
 @Injectable({ providedIn: 'root' })
 export class PushNotificationService {
   private readonly router = inject(Router);
+  private readonly consultationNav = inject(ConsultationNavigationService);
 
   async init(): Promise<void> {
     if (!Capacitor.isNativePlatform()) return;
@@ -38,22 +39,15 @@ export class PushNotificationService {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${authToken}`
+        Authorization: `Bearer ${authToken}`,
       },
-      body: JSON.stringify({ token, platform: Capacitor.getPlatform() })
+      body: JSON.stringify({ token, platform: Capacitor.getPlatform() }),
     }).catch(() => undefined);
   }
 
   private handleNotificationTap(data: Record<string, string>): void {
-    if (data['consultationId']) {
-      void this.router.navigate(['/', ROUTE_PATHS.ONLINE_DOCTOR], {
-        queryParams: { consultationId: data['consultationId'] }
-      });
-      return;
-    }
-
-    if (data['route']) {
-      void this.router.navigateByUrl(data['route']);
-    }
+    const target = this.consultationNav.resolveNotificationRoute(data);
+    if (!target) return;
+    void this.router.navigate(target.commands, { queryParams: target.queryParams });
   }
 }

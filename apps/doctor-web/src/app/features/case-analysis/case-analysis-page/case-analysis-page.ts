@@ -28,6 +28,7 @@ import {
   type StepCompletionContext,
 } from '@vitalis/homeopathy-approaches';
 import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
+import { ConsultationNavigationService } from '../../../core/services/consultation-navigation.service';
 import { ConsultationChatPanelComponent } from '../../../shared/consultation-chat-panel/consultation-chat-panel';
 import { ConsultationContextHeaderComponent } from '../../../shared/consultation-context-header/consultation-context-header';
 import { ConsultationIntakePanelComponent } from '../../../shared/consultation-intake-panel/consultation-intake-panel';
@@ -122,6 +123,7 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
   private lastPersistedRubrics = '';
 
   readonly appointmentsPath = ROUTE_PATHS.APPOINTMENTS;
+  readonly consultationNav = inject(ConsultationNavigationService);
   readonly worklistPath = ROUTE_PATHS.WORKLIST;
   readonly repertoryPath = ROUTE_PATHS.REPERTORY;
   readonly repertoryBrowserPath = ROUTE_PATHS.REPERTORY_BROWSER;
@@ -313,6 +315,13 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
       const selected = this.analyses().find((item) => item.id === caseAnalysisId);
       if (selected && selected.id !== this.analysis()?.id) {
         void this.switchAnalysis(caseAnalysisId);
+      }
+
+      const rubricQuery = params.get('rubricQuery');
+      if (rubricQuery?.trim()) {
+        this.searchModel.update((model) => ({ ...model, rubricQuery: rubricQuery.trim() }));
+        this.searchMode.set('repertory');
+        void this.searchRubrics();
       }
     });
   }
@@ -1491,16 +1500,13 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
     });
     if (!handoff) return;
 
-    void this.router.navigate(['/', ROUTE_PATHS.APPOINTMENTS], {
-      queryParams: {
-        consultationId: this.consultationId(),
-        caseAnalysisId: currentAnalysis?.id,
-        remedy: handoff.remedy,
-        diagnosis: handoff.remedy,
-        ...(handoff.advice ? { advice: handoff.advice } : {}),
-        ...(handoff.companionRemedy ? { companionRemedy: handoff.companionRemedy } : {}),
-        ...(this.selectedMethodOptionId() ? { methodOptionId: this.selectedMethodOptionId() } : {}),
-      },
+    void this.consultationNav.openPrescription(this.consultationId(), {
+      caseAnalysisId: currentAnalysis?.id,
+      remedy: handoff.remedy,
+      diagnosis: handoff.remedy,
+      advice: handoff.advice || null,
+      companionRemedy: handoff.companionRemedy || null,
+      methodOptionId: this.selectedMethodOptionId() || null,
     });
   }
 

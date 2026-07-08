@@ -43,7 +43,7 @@
 
       <nav class="sidebar-nav">
         @for (item of navItems; track item.path) {
-          <a [routerLink]="item.path" routerLinkActive="active">
+          <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="navLinkActiveOptions">
             <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
             <span class="nav-label">{{ item.label }}</span>
           </a>
@@ -84,7 +84,7 @@
       </div>
       <nav class="drawer-nav">
         @for (item of navItems; track item.path) {
-          <a [routerLink]="item.path" routerLinkActive="active" (click)="closeMenu()">
+          <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="navLinkActiveOptions" (click)="closeMenu()">
             <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
             <span class="nav-label">{{ item.label }}</span>
           </a>
@@ -98,7 +98,7 @@
 
   <nav class="bottom-nav" aria-label="Quick navigation" [class.is-hidden]="focusMode()">
     @for (item of bottomNavItems; track item.path) {
-      <a [routerLink]="item.path" routerLinkActive="active" class="bottom-nav-item">
+      <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="navLinkActiveOptions" class="bottom-nav-item">
         <span class="bottom-nav-icon" aria-hidden="true">{{ item.icon }}</span>
         <span class="bottom-nav-label">{{ item.shortLabel }}</span>
       </a>

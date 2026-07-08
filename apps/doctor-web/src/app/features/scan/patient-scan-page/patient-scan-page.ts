@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ROUTE_PATHS } from '../../../core/constants/app-routes.constants';
+import { ConsultationNavigationService } from '../../../core/services/consultation-navigation.service';
 import { PatientHealthProfileComponent } from '../../../shared/patient-health-profile/patient-health-profile';
 
 type ScanPatient = {
@@ -35,9 +36,10 @@ type ScanResponse = {
   selector: 'app-patient-scan-page',
   imports: [CommonModule, DatePipe, RouterLink, PatientHealthProfileComponent],
   templateUrl: './patient-scan-page.html',
-  styleUrl: './patient-scan-page.scss'
+  styleUrl: './patient-scan-page.scss',
 })
 export class PatientScanPage implements OnInit {
+  private readonly consultationNav = inject(ConsultationNavigationService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
@@ -65,7 +67,9 @@ export class PatientScanPage implements OnInit {
     this.error.set('');
     try {
       const result = await firstValueFrom(
-        this.http.get<ScanResponse>(`${environment.apiUrl}/scan/patient/${encodeURIComponent(patientCode)}`)
+        this.http.get<ScanResponse>(
+          `${environment.apiUrl}/scan/patient/${encodeURIComponent(patientCode)}`,
+        ),
       );
       this.scanResult.set(result);
       if (result.primaryConsultationId) {
@@ -75,7 +79,8 @@ export class PatientScanPage implements OnInit {
       }
     } catch (err: unknown) {
       const message =
-        (err as { error?: { message?: string } })?.error?.message || 'Could not load patient from scan.';
+        (err as { error?: { message?: string } })?.error?.message ||
+        'Could not load patient from scan.';
       this.error.set(message);
       this.scanResult.set(null);
     } finally {
@@ -91,10 +96,10 @@ export class PatientScanPage implements OnInit {
     const scan = result ?? this.scanResult();
     const status = scan?.consultations.find((c) => c.id === consultationId)?.status;
     if (status === 'ASSIGNED' || status === 'IN_PROGRESS') {
-      void this.router.navigate(['/', ROUTE_PATHS.CASE_ANALYSIS, consultationId, 'case-analysis']);
+      void this.consultationNav.openCaseAnalysis(consultationId);
       return;
     }
-    void this.router.navigate(['/', ROUTE_PATHS.APPOINTMENTS], { queryParams: { consultationId } });
+    void this.consultationNav.openPrescription(consultationId);
   }
 
   openPrescribe(): void {

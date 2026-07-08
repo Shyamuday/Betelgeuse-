@@ -18,8 +18,8 @@
       } @else if (consultationId()) {
         <a
           class="btn-secondary"
-          [routerLink]="['/', appointmentsPath]"
-          [queryParams]="analysis() ? { consultationId: consultationId(), caseAnalysisId: analysis()!.id } : { consultationId: consultationId() }"
+          [routerLink]="consultationNav.prescriptionCommands(consultationId())"
+          [queryParams]="consultationNav.prescriptionQueryParams({ caseAnalysisId: analysis()?.id || null })"
         >
           Prescription
         </a>
@@ -49,6 +49,12 @@
       <app-consultation-context-header
         [consultation]="consultation"
         [consultationId]="consultationId()"
+        [caseAnalysisId]="analysis.id"
+        [methodOptionId]="selectedMethodOptionId()"
+        [remedy]="analysis.selectedRemedy?.name || prescriptionHandoffPreview()?.remedy || ''"
+        [companionRemedy]="protocolData()?.companionRemedy || prescriptionHandoffPreview()?.companionRemedy || ''"
+        [advice]="prescriptionHandoffPreview()?.advice || ''"
+        [diagnosis]="prescriptionHandoffPreview()?.remedy || analysis.selectedRemedy?.name || ''"
         [analysisLabel]="analysis.source?.name || ''"
         activeView="case-analysis"
       />

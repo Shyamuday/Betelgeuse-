@@ -8,6 +8,12 @@
     <app-consultation-context-header
       [consultation]="consultationContext"
       [consultationId]="prescriptionModel().consultationId"
+      [caseAnalysisId]="prescriptionModel().caseAnalysisId"
+      [methodOptionId]="prescriptionModel().methodOptionId"
+      [remedy]="prescriptionModel().medicineRows[0]?.medicineName || ''"
+      [companionRemedy]="prescriptionModel().medicineRows[1]?.medicineName || ''"
+      [advice]="prescriptionModel().advice"
+      [diagnosis]="prescriptionModel().diagnosis"
       activeView="prescription"
     />
   }
@@ -143,11 +149,21 @@
           <option [value]="item.id">{{ item.label }}</option>
         }
       </select>
-      <p class="hint">Set your default in Profile → Default prescribing approach.</p>
+      <p class="hint">Set your default in Profile → Default prescribing approach. Inputs below change with the method you pick.</p>
       <div class="inline">
         <input [formField]="optionDraftForm.newMethod" placeholder="Add new method" />
         <button type="button" (click)="addOption('METHOD')">Add</button>
       </div>
+
+      <app-prescription-approach-workflow
+        [consultationId]="prescriptionModel().consultationId"
+        [methodOptionId]="prescriptionModel().methodOptionId"
+        [caseAnalysisId]="prescriptionModel().caseAnalysisId"
+        [diseaseName]="selectedDiseaseName()"
+        [methods]="methods"
+        (caseAnalysisIdChange)="onCaseAnalysisIdChange($event)"
+        (handoffApply)="applyApproachHandoff($event)"
+      />
 
       <label for="diagnosedDisease">Diagnosed Disease</label>
       <div class="inline">

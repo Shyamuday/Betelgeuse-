@@ -1,10 +1,12 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { form, FormField } from '@angular/forms/signals';
 import { environment } from '../../../environments/environment';
 import { API_PATHS } from '../../core/constants/api-paths.constants';
+import { ConsultationNavigationService } from '../../core/services/consultation-navigation.service';
 import { ViewportService } from '@vitalis/platform-ui';
 
 type RepertorySource = {
@@ -53,10 +55,15 @@ type Mode = 'repertory' | 'materia-medica';
   templateUrl: './repertory-browser.html',
   styleUrl: './repertory-browser.scss',
 })
-export class RepertoryBrowserPage {
+export class RepertoryBrowserPage implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly apiBase = environment.apiUrl;
   private readonly viewport = inject(ViewportService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly consultationNav = inject(ConsultationNavigationService);
+
+  readonly consultationId = signal('');
+  readonly caseAnalysisId = signal('');
 
   readonly isMobile = computed(() => this.viewport.isMobile());
   readonly filtersOpen = signal(false);
@@ -91,6 +98,26 @@ export class RepertoryBrowserPage {
 
   constructor() {
     void this.loadCatalog();
+  }
+
+  ngOnInit() {
+    this.route.queryParamMap.subscribe((params) => {
+      this.consultationId.set(params.get('consultationId') || '');
+      this.caseAnalysisId.set(params.get('caseAnalysisId') || '');
+    });
+  }
+
+  hasConsultationContext() {
+    return !!this.consultationId();
+  }
+
+  addRubricToCase(rubric: RubricResult) {
+    const consultationId = this.consultationId();
+    if (!consultationId) return;
+    void this.consultationNav.openCaseAnalysis(consultationId, {
+      caseAnalysisId: this.caseAnalysisId() || null,
+      rubricQuery: rubric.text,
+    });
   }
 
   async loadCatalog() {

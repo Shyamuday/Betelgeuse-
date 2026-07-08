@@ -24,15 +24,16 @@
       <a
         class="btn-secondary"
         [class.active]="activeView === 'case-analysis'"
-        [routerLink]="['/', caseAnalysisPath, consultationId, 'case-analysis']"
+        [routerLink]="caseAnalysisLink()"
+        [queryParams]="caseAnalysisQueryParams()"
       >
         Case analysis
       </a>
       <a
         class="btn-secondary"
         [class.active]="activeView === 'prescription'"
-        [routerLink]="['/', appointmentsPath]"
-        [queryParams]="{ consultationId }"
+        [routerLink]="prescriptionLink()"
+        [queryParams]="prescriptionQueryParams()"
       >
         Prescription
       </a>
