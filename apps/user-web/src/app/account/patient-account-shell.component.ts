@@ -3,7 +3,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AppFooterComponent } from '../app-footer.component';
 import { AppHeaderComponent } from '../app-header.component';
 import { AuthService } from '../auth/auth.service';
-import { WHATSAPP_CONTACT_URL } from '../core/constants/branding.constants';
+import { WhatsappLinkService } from '../core/services/whatsapp-link.service';
 import { PATIENT_ACCOUNT_NAV } from './constants/patient-account.constants';
 
 @Component({

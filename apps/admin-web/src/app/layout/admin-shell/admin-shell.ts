@@ -1,12 +1,27 @@
-import { Component, computed, inject } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Component, computed, inject, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, startWith } from 'rxjs';
 import { RoleTaskGuideComponent, NotificationBellHostComponent, ProfileAvatarDisplayComponent } from '@vitalis/platform-ui';
 import { environment } from '../../../environments/environment';
 import { AUTH_TOKEN_KEY } from '../../core/constants/auth.constants';
 import { AdminAuth } from '../../core/services/admin-auth';
 import { AdminNavTabsComponent } from '../admin-nav-tabs/admin-nav-tabs.component';
-import { NAV_ITEMS, ROUTE_PATHS, adminNavPath } from '../../core/constants/app-routes.constants';
+import { NAV_ITEMS, ROUTE_PATHS, adminNavPath, type AdminNavItem } from '../../core/constants/app-routes.constants';
 import { navItemsForUser } from '../../core/admin-navigation';
+
+const MOBILE_BOTTOM_NAV_ORDER = ['Dashboard', 'Consultations', 'Consumers', 'Doctors'] as const;
+const MOBILE_BOTTOM_NAV_LIMIT = 4;
+
+const NAV_SHORT_LABELS: Record<string, string> = {
+  Dashboard: 'Home',
+  Doctors: 'Doctors',
+  Consumers: 'Users',
+  'Scan patient': 'Scan',
+  Consultations: 'Appts',
+  Diseases: 'Disease',
+  'Clinical Records': 'Records'
+};
 
 @Component({
   selector: 'app-admin-shell',
@@ -18,6 +33,7 @@ export class AdminShell {
   readonly auth = inject(AdminAuth);
   private readonly router = inject(Router);
 
+  readonly menuOpen = signal(false);
   readonly filteredNavItems = computed(() => navItemsForUser(NAV_ITEMS, this.auth.user()));
   readonly accountPath = adminNavPath(ROUTE_PATHS.ACCOUNT);
   readonly apiBase = environment.apiUrl;
@@ -28,8 +44,76 @@ export class AdminShell {
     apiPath: '/notifications'
   };
 
+  private readonly currentPath = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects.split('?')[0]),
+      startWith(this.router.url.split('?')[0])
+    ),
+    { initialValue: this.router.url.split('?')[0] }
+  );
+
+  readonly currentPageLabel = computed(() => {
+    const path = this.currentPath();
+    const item = this.filteredNavItems().find(
+      (entry) => path === entry.path || path.startsWith(`${entry.path}/`)
+    );
+    return item?.label ?? '';
+  });
+
+  readonly bottomNavItems = computed(() => this.splitMobileNav(this.filteredNavItems()).bottom);
+  readonly hasOverflowNav = computed(() => this.splitMobileNav(this.filteredNavItems()).overflow > 0);
+
   logout() {
     this.auth.logout();
     void this.router.navigateByUrl(`/${ROUTE_PATHS.LOGIN}`);
+  }
+
+  openMenu() {
+    this.menuOpen.set(true);
+  }
+
+  closeMenu() {
+    this.menuOpen.set(false);
+  }
+
+  navIcon(item: AdminNavItem) {
+    const emoji = item.label.match(/^\p{Extended_Pictographic}/u);
+    return emoji ? emoji[0] : '•';
+  }
+
+  navShortLabel(item: AdminNavItem) {
+    const plain = item.label.replace(/^\p{Extended_Pictographic}\s*/u, '').trim();
+    return NAV_SHORT_LABELS[plain] || NAV_SHORT_LABELS[item.label] || plain.split(/\s+/)[0].slice(0, 6);
+  }
+
+  private splitMobileNav(items: readonly AdminNavItem[]) {
+    const picked: AdminNavItem[] = [];
+    const used = new Set<string>();
+
+    for (const label of MOBILE_BOTTOM_NAV_ORDER) {
+      const item = items.find((entry) => this.navPlainLabel(entry) === label || entry.label.includes(label));
+      if (item && !used.has(item.path)) {
+        picked.push(item);
+        used.add(item.path);
+      }
+      if (picked.length >= MOBILE_BOTTOM_NAV_LIMIT) {
+        return { bottom: picked, overflow: Math.max(0, items.length - picked.length) };
+      }
+    }
+
+    for (const item of items) {
+      if (picked.length >= MOBILE_BOTTOM_NAV_LIMIT) break;
+      if (!used.has(item.path)) {
+        picked.push(item);
+        used.add(item.path);
+      }
+    }
+
+    return { bottom: picked, overflow: Math.max(0, items.length - picked.length) };
+  }
+
+  private navPlainLabel(item: AdminNavItem) {
+    return item.label.replace(/^\p{Extended_Pictographic}\s*/u, '').trim();
   }
 }

@@ -1,9 +1,14 @@
 :host {
   display: flex;
-  flex: 1;
   min-width: 0;
-  align-items: center;
   overflow: visible;
+}
+
+:host-context(.sidebar),
+:host-context(.drawer) {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .admin-nav {
@@ -132,6 +137,60 @@
   font-weight: 600;
 }
 
+/* Sidebar / drawer vertical layout */
+.admin-nav.layout-sidebar {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  overflow-y: auto;
+  padding: 0.5rem 0.45rem;
+}
+
+.admin-nav.layout-sidebar .admin-nav-groups {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25rem;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+.admin-nav.layout-sidebar .nav-group {
+  width: 100%;
+}
+
+.admin-nav.layout-sidebar .group-btn {
+  width: 100%;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.84rem;
+}
+
+.admin-nav.layout-sidebar .submenu {
+  position: static;
+  margin-top: 0;
+  max-width: none;
+  max-height: none;
+  overflow: visible;
+  box-shadow: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0 0 0.35rem 0.45rem;
+}
+
+.admin-nav.layout-sidebar .submenu::before {
+  display: none;
+}
+
+.admin-nav.layout-sidebar .submenu-link {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding-left: 0.85rem;
+  font-size: 0.82rem;
+}
+
 @media (min-width: 900px) {
   .current-page {
     display: inline-flex;
@@ -141,31 +200,30 @@
 @media (max-width: 768px) {
   :host {
     width: 100%;
-    flex: 1 1 100%;
   }
 
-  .admin-nav {
+  .admin-nav:not(.layout-sidebar) {
     width: 100%;
     flex-direction: column;
     align-items: stretch;
     gap: 0.35rem;
   }
 
-  .current-page {
+  .admin-nav:not(.layout-sidebar) .current-page {
     display: inline-flex;
     align-self: flex-start;
   }
 
-  .admin-nav-groups {
+  .admin-nav:not(.layout-sidebar) .admin-nav-groups {
     width: 100%;
   }
 
-  .group-btn {
+  .admin-nav:not(.layout-sidebar) .group-btn {
     font-size: 0.78rem;
     padding: 0.38rem 0.55rem;
   }
 
-  .submenu {
+  .admin-nav:not(.layout-sidebar) .submenu {
     left: auto;
     right: 0;
   }

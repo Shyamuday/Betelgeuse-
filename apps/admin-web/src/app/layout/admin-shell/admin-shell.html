@@ -1,12 +1,40 @@
 <main class="admin-shell">
-  <header class="admin-header">
-    <div class="topbar">
-      <div class="topbar-brand">
-        <h1>Admin Console</h1>
+  <aside class="sidebar" aria-label="Admin navigation">
+    <div class="sidebar-brand">
+      <h1>Admin Console</h1>
+      @if (auth.user()?.name) {
+        <p class="sidebar-user">{{ auth.user()?.name }}</p>
+      }
+    </div>
+
+    <app-admin-nav-tabs [items]="filteredNavItems()" layout="sidebar" />
+
+    <div class="sidebar-footer">
+      <a class="sidebar-account" [routerLink]="accountPath">
+        <vitalis-profile-avatar
+          [apiBase]="apiBase"
+          [tokenKey]="authTokenKey"
+          [displayName]="auth.user()?.name || 'Admin'"
+          [profileImageUrl]="auth.user()?.profileImageUrl ?? null"
+          size="sm"
+        />
+        <span>Account</span>
+      </a>
+      <button type="button" class="sidebar-logout" (click)="logout()">Sign out</button>
+    </div>
+  </aside>
+
+  <div class="shell-main">
+    <header class="topbar">
+      <div class="topbar-start">
+        <button type="button" class="menu-btn" aria-label="Open menu" (click)="openMenu()">☰</button>
+        <div class="topbar-brand">
+          <h1>Admin Console</h1>
+          @if (currentPageLabel()) {
+            <p class="current-page">{{ currentPageLabel() }}</p>
+          }
+        </div>
       </div>
-
-      <app-admin-nav-tabs [items]="filteredNavItems()" />
-
       <div class="topbar-actions">
         <app-notification-bell-host [config]="bellConfig" />
         <a class="account-link" [routerLink]="accountPath">
@@ -16,14 +44,47 @@
             [displayName]="auth.user()?.name || 'Admin'"
             [profileImageUrl]="auth.user()?.profileImageUrl ?? null"
           />
-          <span>Account</span>
+          <span class="account-label">Account</span>
         </a>
         <button type="button" class="logout-btn" (click)="logout()">Logout</button>
-      </div>    </div>
-  </header>
+      </div>
+    </header>
 
-  <section class="content">
-    <app-role-task-guide appKey="admin-web" />
-    <router-outlet />
-  </section>
+    <section class="content">
+      <app-role-task-guide appKey="admin-web" />
+      <router-outlet />
+    </section>
+  </div>
+
+  @if (menuOpen()) {
+    <button type="button" class="overlay" aria-label="Close menu" (click)="closeMenu()"></button>
+    <aside class="drawer" aria-label="Navigation menu">
+      <div class="drawer-header">
+        <div>
+          <strong>{{ auth.user()?.name || 'Admin' }}</strong>
+          <p class="drawer-subtitle">Admin Console</p>
+        </div>
+        <button type="button" class="drawer-close" aria-label="Close menu" (click)="closeMenu()">×</button>
+      </div>
+      <app-admin-nav-tabs [items]="filteredNavItems()" layout="sidebar" (navSelected)="closeMenu()" />
+      <div class="drawer-footer">
+        <button type="button" class="drawer-logout" (click)="logout()">Sign out</button>
+      </div>
+    </aside>
+  }
+
+  <nav class="bottom-nav" aria-label="Quick navigation">
+    @for (item of bottomNavItems(); track item.path) {
+      <a [routerLink]="item.path" routerLinkActive="active" class="bottom-nav-item">
+        <span class="bottom-nav-icon" aria-hidden="true">{{ navIcon(item) }}</span>
+        <span class="bottom-nav-label">{{ navShortLabel(item) }}</span>
+      </a>
+    }
+    @if (hasOverflowNav()) {
+      <button type="button" class="bottom-nav-item bottom-nav-more" [class.active]="menuOpen()" (click)="openMenu()">
+        <span class="bottom-nav-icon" aria-hidden="true">⋯</span>
+        <span class="bottom-nav-label">More</span>
+      </button>
+    }
+  </nav>
 </main>

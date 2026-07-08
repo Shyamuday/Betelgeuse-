@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { LEGAL_HUB_CONTENT } from '../core/constants/legal-pages-content.constants';
 import { AppFooterComponent } from '../app-footer.component';
 import { AppHeaderComponent } from '../app-header.component';
-import { WHATSAPP_CONTACT_URL } from '../core/constants/branding.constants';
+import { WhatsappLinkService } from '../core/services/whatsapp-link.service';
 
 @Component({
   selector: 'app-legal-hub',
