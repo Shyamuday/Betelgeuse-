@@ -15,11 +15,20 @@ export type ClinicalMediaType =
   | 'ABDOMEN'
   | 'CHEST'
   | 'LIMBS'
+  | 'XRAY'
+  | 'CT'
+  | 'MRI'
+  | 'ULTRASOUND'
+  | 'ECG'
+  | 'LAB_REPORT'
+  | 'PATHOLOGY'
+  | 'OTHER_IMAGING'
   | 'OTHER';
 
 const lib = homeopathyApproaches as unknown as {
   CLINICAL_MEDIA_TYPE_LABELS: Record<ClinicalMediaType, string>;
   CLINICAL_MEDIA_BODY_REGIONS: Partial<Record<ClinicalMediaType, string[]>>;
+  isRadiologyOrReportMediaType: (mediaType: ClinicalMediaType) => boolean;
   clinicalMediaMetaPayload: (
     diseases: Array<{ id: string; name: string; publicCategory: string | null }>
   ) => Record<string, unknown>;
@@ -35,6 +44,7 @@ const lib = homeopathyApproaches as unknown as {
 
 export const CLINICAL_MEDIA_TYPE_LABELS = lib.CLINICAL_MEDIA_TYPE_LABELS;
 export const CLINICAL_MEDIA_BODY_REGIONS = lib.CLINICAL_MEDIA_BODY_REGIONS;
+export const isRadiologyOrReportMediaType = lib.isRadiologyOrReportMediaType;
 export const clinicalMediaMetaPayload = lib.clinicalMediaMetaPayload;
 export const observationHintsForMediaType = lib.observationHintsForMediaType;
 export const suggestRubricSearchPhrases = lib.suggestRubricSearchPhrases;

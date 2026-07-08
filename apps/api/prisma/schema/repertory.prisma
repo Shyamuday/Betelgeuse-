@@ -24,7 +24,21 @@ enum ClinicalMediaType {
   ABDOMEN
   CHEST
   LIMBS
+  XRAY
+  CT
+  MRI
+  ULTRASOUND
+  ECG
+  LAB_REPORT
+  PATHOLOGY
+  OTHER_IMAGING
   OTHER
+}
+
+enum ImagingInterpretationStatus {
+  DRAFT
+  DOCTOR_APPROVED
+  REJECTED
 }
 
 model RepertorySource {
@@ -140,7 +154,8 @@ model CaseAnalysis {
   rubrics          CaseAnalysisRubric[]
   results          CaseAnalysisResult[]
   prescriptions    Prescription[]
-  clinicalMedia    ClinicalMedia[]
+  clinicalMedia         ClinicalMedia[]
+  imagingInterpretations ImagingInterpretation[]
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
 
@@ -192,10 +207,31 @@ model ClinicalMedia {
   caseAnalysis     CaseAnalysis?      @relation(fields: [caseAnalysisId], references: [id], onDelete: Cascade)
   consultation     Consultation?      @relation(fields: [consultationId], references: [id], onDelete: SetNull)
   disease          Disease?           @relation(fields: [diseaseId], references: [id], onDelete: SetNull)
-  uploadedBy       User               @relation("ClinicalMediaUploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  uploadedBy            User                      @relation("ClinicalMediaUploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict)
+  imagingInterpretations ImagingInterpretation[]
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
 
   @@index([patientId, createdAt])
+  @@index([caseAnalysisId, createdAt])
+}
+
+model ImagingInterpretation {
+  id                      String                      @id @default(cuid())
+  mediaId                 String
+  caseAnalysisId          String?
+  status                  ImagingInterpretationStatus @default(DRAFT)
+  aiProvider              String                      @default("ollama")
+  aiModel                 String
+  rawAiOutput             String?                     @db.Text
+  structuredSnapshot      Json
+  doctorOverrideRationale String?                     @db.Text
+  appliedAt               DateTime?
+  media                   ClinicalMedia               @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  caseAnalysis            CaseAnalysis?               @relation(fields: [caseAnalysisId], references: [id], onDelete: Cascade)
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+
+  @@index([mediaId, createdAt])
   @@index([caseAnalysisId, createdAt])
 }

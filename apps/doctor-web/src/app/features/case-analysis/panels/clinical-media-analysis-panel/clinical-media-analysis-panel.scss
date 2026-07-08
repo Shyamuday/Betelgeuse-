@@ -30,6 +30,26 @@
   color: #1e3a8a;
 }
 
+.findings-list {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.84rem;
+}
+
+.impression {
+  margin: 0;
+  font-size: 0.86rem;
+}
+
+.disease-list strong {
+  display: inline;
+  margin-right: 0.35rem;
+}
+
+.phrase-list.compact {
+  margin-top: 0.35rem;
+}
+
 .extracted-text {
   margin: 0.45rem 0 0;
   white-space: pre-wrap;

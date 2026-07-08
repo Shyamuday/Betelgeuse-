@@ -14,7 +14,7 @@ export function mapClinicalMediaUploadError(error: unknown) {
     return { status: 400, message: 'Only JPEG, PNG, WebP, and GIF images are supported.' };
   }
   if (code === 'FILE_TOO_LARGE') {
-    return { status: 400, message: 'Image must be 5 MB or smaller.' };
+    return { status: 400, message: 'Image must be 15 MB or smaller.' };
   }
   return { status: 400, message: 'Could not save image.' };
 }

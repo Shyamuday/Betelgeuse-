@@ -3,8 +3,8 @@ import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const UPLOAD_ROOT = path.resolve(process.cwd(), 'uploads', 'clinical-media');
-const MAX_BYTES = 5 * 1024 * 1024;
-const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+const MAX_BYTES = 15 * 1024 * 1024;
+const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf']);
 
 function extensionForMime(mimeType: string) {
   switch (mimeType) {
@@ -16,6 +16,8 @@ function extensionForMime(mimeType: string) {
       return '.webp';
     case 'image/gif':
       return '.gif';
+    case 'application/pdf':
+      return '.pdf';
     default:
       return '';
   }

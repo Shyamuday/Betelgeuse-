@@ -25,7 +25,7 @@ import {
   resolvePatientIdForAnalysis,
   serializeClinicalMedia
 } from '../../services/clinical-media-shared.js';
-import { analyzeClinicalMediaImage } from '../../services/clinical-media-rubric-analysis.js';
+import { analyzeClinicalMediaImage, applyImagingInterpretation } from '../../services/clinical-media-rubric-analysis.js';
 import { isOllamaVisionAvailable, ollamaVisionConfig } from '../../services/clinical-media-vision.js';
 import { analysisIdFromReq, loadCaseAnalysisForDoctor } from './shared.js';
 
@@ -399,8 +399,44 @@ export function registerClinicalMediaRoutes(router: Router) {
             available: false
           });
         }
+        if (error instanceof Error && error.message === 'PDF_NOT_SUPPORTED') {
+          return res.status(400).json({
+            message: 'PDF analysis is not supported yet. Upload a screenshot/photo of the report or imaging slice.'
+          });
+        }
         throw error;
       }
+    })
+  );
+
+  router.post(
+    '/doctor/case-analyses/:analysisId/clinical-media/:mediaId/apply-interpretation',
+    authRequired,
+    allowRoles(Role.DOCTOR, Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const analysisId = analysisIdFromReq(req);
+      const mediaId = routeParam(req, 'mediaId');
+      const analysis = await loadCaseAnalysisForDoctor(req, res, analysisId);
+      if (!analysis) return;
+
+      const body = z
+        .object({
+          interpretationId: z.string().min(1),
+          overrideRationale: z.string().max(2000).nullable().optional()
+        })
+        .parse(req.body ?? {});
+
+      const result = await applyImagingInterpretation({
+        analysisId,
+        interpretationId: body.interpretationId,
+        overrideRationale: body.overrideRationale
+      });
+
+      if (!result) {
+        return res.status(404).json({ message: 'Interpretation not found or already applied.' });
+      }
+
+      res.json(result);
     })
   );
 

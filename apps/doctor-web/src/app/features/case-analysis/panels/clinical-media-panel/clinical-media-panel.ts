@@ -9,6 +9,7 @@ import {
 } from '@vitalis/homeopathy-approaches';
 import { CaseAnalysisApiService } from '../../case-analysis-api.service';
 import type { ClinicalMediaImageAnalysis, ClinicalMediaItem } from '../../clinical-media.types';
+import type { CaseAnalysis } from '../../case-analysis-page.types';
 import { DiseasePickerComponent } from '../../../../shared/disease-picker/disease-picker.component';
 import { ClinicalMediaAnalysisPanelComponent } from '../clinical-media-analysis-panel/clinical-media-analysis-panel';
 
@@ -23,6 +24,7 @@ export class ClinicalMediaPanelComponent implements OnChanges, OnDestroy {
 
   @Input({ required: true }) analysisId!: string;
   @Output() rubricPhraseSelected = new EventEmitter<string>();
+  @Output() interpretationApplied = new EventEmitter<CaseAnalysis>();
 
   readonly mediaTypes = Object.entries(CLINICAL_MEDIA_TYPE_LABELS) as Array<[ClinicalMediaType, string]>;
   readonly media = signal<ClinicalMediaItem[]>([]);
@@ -38,6 +40,7 @@ export class ClinicalMediaPanelComponent implements OnChanges, OnDestroy {
   readonly visionModel = signal('');
   readonly analyzingMediaId = signal('');
   readonly imageAnalysisPreview = signal<ClinicalMediaImageAnalysis | null>(null);
+  readonly applyingInterpretation = signal(false);
 
   readonly uploadModel = signal({
     mediaType: 'SKIN' as ClinicalMediaType,
@@ -154,7 +157,7 @@ export class ClinicalMediaPanelComponent implements OnChanges, OnDestroy {
       this.message.set('Clinical image attached.');
       await this.reload();
     } catch {
-      this.error.set('Upload failed. Use JPEG/PNG/WebP/GIF under 5 MB.');
+      this.error.set('Upload failed. Use JPEG/PNG/WebP/GIF/PDF under 15 MB.');
     } finally {
       this.uploading.set(false);
     }
@@ -254,6 +257,29 @@ export class ClinicalMediaPanelComponent implements OnChanges, OnDestroy {
       this.error.set('Could not save vision observations.');
     } finally {
       this.savingMediaId.set('');
+    }
+  }
+
+  async applyInterpretationToCase(item: ClinicalMediaItem) {
+    const preview = this.imageAnalysisPreview();
+    if (!preview || preview.mediaId !== item.id) return;
+
+    this.applyingInterpretation.set(true);
+    this.error.set('');
+    try {
+      const result = await this.api.applyImagingInterpretation(this.analysisId, item.id, {
+        interpretationId: preview.interpretationId
+      });
+      this.message.set(
+        `Applied ${result.rubricsAdded} rubric(s) and imaging findings to case sheet (${preview.suggestedCaseSheetField}).`
+      );
+      this.imageAnalysisPreview.set(null);
+      await this.reload();
+      this.interpretationApplied.emit(result.analysis);
+    } catch {
+      this.error.set('Could not apply imaging interpretation to the case.');
+    } finally {
+      this.applyingInterpretation.set(false);
     }
   }
 

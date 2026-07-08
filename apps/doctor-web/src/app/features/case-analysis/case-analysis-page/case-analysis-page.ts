@@ -1276,6 +1276,15 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
     }
   }
 
+  async onImagingInterpretationApplied(updated: CaseAnalysis) {
+    this.syncAnalysisInList(updated);
+    this.hydrateFromAnalysis(updated);
+    this.message.set('Imaging interpretation applied — rubrics and findings added to case. Review before repertorizing.');
+    if (this.isMobile()) {
+      this.workspaceTab.set('rubrics');
+    }
+  }
+
   async previewRemedySuggestions() {
     const currentAnalysis = this.analysis();
     if (!currentAnalysis) return;

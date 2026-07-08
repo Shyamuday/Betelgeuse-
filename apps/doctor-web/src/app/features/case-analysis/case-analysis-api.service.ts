@@ -293,6 +293,23 @@ export class CaseAnalysisApiService {
     );
   }
 
+  applyImagingInterpretation(
+    analysisId: string,
+    mediaId: string,
+    payload: { interpretationId: string; overrideRationale?: string | null }
+  ) {
+    return firstValueFrom(
+      this.http.post<{
+        analysis: CaseAnalysis;
+        interpretationId: string;
+        rubricsAdded: number;
+      }>(
+        `${this.apiBase}${API_PATHS.DOCTOR.CASE_ANALYSIS_CLINICAL_MEDIA_APPLY_INTERPRETATION(analysisId, mediaId)}`,
+        payload
+      )
+    );
+  }
+
   suggestApproachField(
     analysisId: string,
     payload: {

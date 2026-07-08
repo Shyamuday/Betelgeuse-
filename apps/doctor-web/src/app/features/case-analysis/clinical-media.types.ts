@@ -47,15 +47,32 @@ export type ClinicalMediaRubricMatch = {
 export type ClinicalMediaImageAnalysis = {
   isSuggestionOnly: true;
   disclaimer: string;
+  interpretationId: string;
   mediaId: string;
   mediaType: string;
   mediaTypeLabel: string;
   visionModel: string;
   visionAvailable: boolean;
+  impression: string;
+  findings: string[];
   extractedSymptoms: string;
   symptomPhrases: string[];
   phrasesSearched: ClinicalMediaPhraseSearchLog[];
   suggestedRubrics: ClinicalMediaRubricMatch[];
+  suggestedDiseases: Array<{
+    diseaseId: string;
+    name: string;
+    category: string | null;
+    confidence: number;
+    reasoning: string;
+  }>;
+  homeopathicHints: Array<{
+    theme: string;
+    reasoning: string;
+    relatedPhrases: string[];
+    repertoryChapters: string[];
+  }>;
+  suggestedCaseSheetField: string;
   summary: string;
   generatedAt: string;
 };

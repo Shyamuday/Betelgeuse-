@@ -1,4 +1,4 @@
-import { RepertorySourceCode } from '@prisma/client';
+import { ImagingInterpretationStatus, RepertorySourceCode, type Prisma } from '@prisma/client';
 import {
   CLINICAL_MEDIA_TYPE_LABELS,
   suggestRubricSearchPhrases,
@@ -11,8 +11,17 @@ import {
   isOllamaVisionAvailable,
   ollamaVisionConfig
 } from './clinical-media-vision.js';
+import {
+  formatImagingReportBlock,
+  inferHomeopathicHints,
+  resolveCaseSheetField,
+  suggestDiseasesFromFindings,
+  type HomeopathicHint,
+  type SuggestedDiseaseMatch
+} from './imaging-homeopathy-bridge.js';
 import { searchRepertoryRubrics, scoreRubricMatch, tokenizeRepertoryQuery } from './repertory-search.js';
 import { isOorepSourceId } from './oorep-client.js';
+import { caseAnalysisInclude } from '../routes/repertory/shared.js';
 
 export type ClinicalMediaPhraseSearchLog = {
   phrase: string;
@@ -41,21 +50,27 @@ export type ClinicalMediaRubricMatch = {
 export type ClinicalMediaImageAnalysis = {
   isSuggestionOnly: true;
   disclaimer: string;
+  interpretationId: string;
   mediaId: string;
   mediaType: string;
   mediaTypeLabel: string;
   visionModel: string;
   visionAvailable: boolean;
+  impression: string;
+  findings: string[];
   extractedSymptoms: string;
   symptomPhrases: string[];
   phrasesSearched: ClinicalMediaPhraseSearchLog[];
   suggestedRubrics: ClinicalMediaRubricMatch[];
+  suggestedDiseases: SuggestedDiseaseMatch[];
+  homeopathicHints: HomeopathicHint[];
+  suggestedCaseSheetField: string;
   summary: string;
   generatedAt: string;
 };
 
 const DISCLAIMER =
-  'Vision-based rubric suggestions are preliminary. Doctor review is required before adding rubrics to the case.';
+  'AI-assisted imaging interpretation for homeopathic case-taking only — not a radiology or lab report. Doctor must review all rubrics, disease hints, and findings before applying to the case.';
 
 type RubricCandidate = ClinicalMediaRubricMatch & { matchScore: number };
 
@@ -93,32 +108,43 @@ function collectPhrases(input: {
   mediaType: ClinicalMediaType;
   bodyRegion?: string | null;
   visionPhrases: string[];
+  impression: string;
+  findings: string[];
   existingObservations?: string | null;
 }) {
+  const combinedObservations = [
+    input.existingObservations?.trim(),
+    input.impression,
+    ...input.findings,
+    ...input.visionPhrases
+  ]
+    .filter(Boolean)
+    .join('\n');
+
   const ontologyPhrases = suggestRubricSearchPhrases({
     mediaType: input.mediaType,
-    observations: input.existingObservations,
+    observations: combinedObservations,
     bodyRegion: input.bodyRegion ?? undefined
   });
 
   const entries: Array<{ phrase: string; sourceKey: string; sourceLabel: string; priority: number }> = [];
 
   for (const phrase of input.visionPhrases) {
+    entries.push({ phrase, sourceKey: 'vision', sourceLabel: 'AI vision extraction', priority: 100 });
+  }
+  for (const phrase of input.findings) {
+    entries.push({ phrase, sourceKey: 'finding', sourceLabel: 'Structured finding', priority: 90 });
+  }
+  if (input.impression) {
     entries.push({
-      phrase,
-      sourceKey: 'vision',
-      sourceLabel: 'AI vision extraction',
-      priority: 100
+      phrase: input.impression,
+      sourceKey: 'impression',
+      sourceLabel: 'Impression summary',
+      priority: 85
     });
   }
-
   for (const phrase of ontologyPhrases) {
-    entries.push({
-      phrase,
-      sourceKey: 'ontology',
-      sourceLabel: 'Clinical media ontology',
-      priority: 70
-    });
+    entries.push({ phrase, sourceKey: 'ontology', sourceLabel: 'Homeopathy ontology', priority: 70 });
   }
 
   const seen = new Set<string>();
@@ -130,7 +156,7 @@ function collectPhrases(input: {
     unique.push(entry);
   }
 
-  return unique.slice(0, 12);
+  return unique.slice(0, 16);
 }
 
 async function searchPhraseForRubrics(
@@ -149,7 +175,7 @@ async function searchPhraseForRubrics(
   for (const row of rows) {
     const matchScore = scoreRubricMatch(row, tokens);
     if (matchScore < 0) continue;
-    const weight = phrase.sourceKey === 'vision' ? 3 : 2;
+    const weight = phrase.sourceKey === 'vision' || phrase.sourceKey === 'finding' ? 3 : 2;
     matches.push({
       rubricId: row.id,
       weight,
@@ -171,6 +197,26 @@ async function searchPhraseForRubrics(
   return matches;
 }
 
+async function persistInterpretation(input: {
+  mediaId: string;
+  caseAnalysisId: string;
+  aiModel: string;
+  rawAiOutput: string;
+  snapshot: ClinicalMediaImageAnalysis;
+}) {
+  return prisma.imagingInterpretation.create({
+    data: {
+      mediaId: input.mediaId,
+      caseAnalysisId: input.caseAnalysisId,
+      aiProvider: 'ollama',
+      aiModel: input.aiModel,
+      rawAiOutput: input.rawAiOutput,
+      structuredSnapshot: input.snapshot as unknown as Prisma.InputJsonValue,
+      status: ImagingInterpretationStatus.DRAFT
+    }
+  });
+}
+
 export async function analyzeClinicalMediaImage(input: {
   analysisId: string;
   mediaId: string;
@@ -179,7 +225,7 @@ export async function analyzeClinicalMediaImage(input: {
   const [analysis, media] = await Promise.all([
     prisma.caseAnalysis.findUnique({
       where: { id: input.analysisId },
-      select: { id: true, sourceId: true }
+      select: { id: true, sourceId: true, caseSheet: true }
     }),
     prisma.clinicalMedia.findFirst({
       where: { id: input.mediaId, caseAnalysisId: input.analysisId },
@@ -196,6 +242,10 @@ export async function analyzeClinicalMediaImage(input: {
 
   if (!analysis || !media) return null;
 
+  if (media.mimeType === 'application/pdf') {
+    throw new Error('PDF_NOT_SUPPORTED');
+  }
+
   const visionAvailable = await isOllamaVisionAvailable();
   if (!visionAvailable) {
     throw new Error('OLLAMA_UNAVAILABLE');
@@ -211,7 +261,7 @@ export async function analyzeClinicalMediaImage(input: {
 
   const vision = await extractClinicalSymptomsFromImage({
     imageBase64,
-    mediaTypeLabel,
+    mediaType,
     bodyRegion: media.bodyRegion
   });
 
@@ -227,6 +277,8 @@ export async function analyzeClinicalMediaImage(input: {
     mediaType,
     bodyRegion: media.bodyRegion,
     visionPhrases: vision.phrases,
+    impression: vision.impression,
+    findings: vision.findings,
     existingObservations: media.observations
   });
 
@@ -237,8 +289,12 @@ export async function analyzeClinicalMediaImage(input: {
     priority: entry.priority,
     reasoning:
       entry.sourceKey === 'vision'
-        ? `Local vision model (${vision.model}) extracted “${entry.phrase}” from the clinical image.`
-        : `Ontology phrase derived from ${mediaTypeLabel}${media.bodyRegion ? ` (${media.bodyRegion})` : ''}.`
+        ? `Local vision model (${vision.model}) extracted “${entry.phrase}” from the image.`
+        : entry.sourceKey === 'finding'
+          ? `Structured finding mapped to repertory phrase “${entry.phrase}”.`
+          : entry.sourceKey === 'impression'
+            ? `Impression summary used as search phrase.`
+            : `Homeopathic ontology phrase for ${mediaTypeLabel}.`
   }));
 
   const rubricCandidates: RubricCandidate[] = [];
@@ -255,7 +311,7 @@ export async function analyzeClinicalMediaImage(input: {
   }
 
   const suggestedRubrics: ClinicalMediaRubricMatch[] = [...byRubric.values()]
-    .slice(0, 15)
+    .slice(0, 18)
     .map((item) => ({
       rubricId: item.rubricId,
       weight: item.weight,
@@ -266,24 +322,160 @@ export async function analyzeClinicalMediaImage(input: {
       rubric: item.rubric
     }));
 
-  const config = ollamaVisionConfig();
-  const summary = suggestedRubrics.length
-    ? `Vision found ${vision.phrases.length} symptom phrase(s) → ${suggestedRubrics.length} rubric match(es) in ${source.name}. Doctor review required.`
-    : `Vision extracted symptoms but no rubric matches were found in ${source.name}. Try manual search phrases.`;
+  const suggestedDiseases = await suggestDiseasesFromFindings({
+    phrases: vision.phrases,
+    impression: vision.impression,
+    findings: vision.findings
+  });
 
-  return {
-    isSuggestionOnly: true,
+  const homeopathicHints = inferHomeopathicHints({
+    phrases: vision.phrases,
+    impression: vision.impression,
+    findings: vision.findings
+  });
+
+  for (const hint of homeopathicHints) {
+    for (const phrase of hint.relatedPhrases) {
+      if (!phraseEntries.some((entry) => entry.phrase.toLowerCase() === phrase.toLowerCase())) {
+        phraseEntries.push({
+          phrase,
+          sourceKey: 'theme',
+          sourceLabel: `Theme: ${hint.theme}`,
+          priority: 60
+        });
+      }
+    }
+  }
+
+  const config = ollamaVisionConfig();
+  const caseSheet = (analysis.caseSheet || null) as Record<string, string> | null;
+  const suggestedCaseSheetField = resolveCaseSheetField(caseSheet);
+
+  const summary = [
+    suggestedRubrics.length
+      ? `${suggestedRubrics.length} rubric match(es)`
+      : 'no rubric matches',
+    suggestedDiseases.length ? `${suggestedDiseases.length} possible disease hint(s)` : 'no disease hints',
+    `${homeopathicHints.length} homeopathic theme(s)`
+  ].join(' · ');
+
+  const snapshotBase = {
+    isSuggestionOnly: true as const,
     disclaimer: DISCLAIMER,
     mediaId: media.id,
     mediaType: media.mediaType,
     mediaTypeLabel,
     visionModel: config.model,
     visionAvailable: true,
+    impression: vision.impression,
+    findings: vision.findings,
     extractedSymptoms: vision.rawText,
     symptomPhrases: vision.phrases,
     phrasesSearched,
     suggestedRubrics,
-    summary,
+    suggestedDiseases,
+    homeopathicHints,
+    suggestedCaseSheetField,
+    summary: `Preview: ${summary} from ${mediaTypeLabel} via ${source.name}. Doctor review required.`,
     generatedAt: new Date().toISOString()
   };
+
+  const interpretation = await persistInterpretation({
+    mediaId: media.id,
+    caseAnalysisId: input.analysisId,
+    aiModel: config.model,
+    rawAiOutput: vision.rawText,
+    snapshot: { ...snapshotBase, interpretationId: 'pending' }
+  });
+
+  return {
+    ...snapshotBase,
+    interpretationId: interpretation.id
+  };
+}
+
+export async function applyImagingInterpretation(input: {
+  analysisId: string;
+  interpretationId: string;
+  overrideRationale?: string | null;
+}) {
+  const interpretation = await prisma.imagingInterpretation.findFirst({
+    where: {
+      id: input.interpretationId,
+      caseAnalysisId: input.analysisId,
+      status: ImagingInterpretationStatus.DRAFT
+    }
+  });
+  if (!interpretation) return null;
+
+  const snapshot = interpretation.structuredSnapshot as unknown as ClinicalMediaImageAnalysis;
+  const analysis = await prisma.caseAnalysis.findUnique({
+    where: { id: input.analysisId },
+    include: caseAnalysisInclude
+  });
+  if (!analysis) return null;
+
+  const media = await prisma.clinicalMedia.findUnique({
+    where: { id: snapshot.mediaId },
+    select: { id: true, mediaType: true, bodyRegion: true, observations: true, diseaseId: true }
+  });
+  if (!media) return null;
+
+  const caseSheet = { ...((analysis.caseSheet || {}) as Record<string, string>) };
+  const fieldKey = snapshot.suggestedCaseSheetField || resolveCaseSheetField(caseSheet);
+  const reportBlock = formatImagingReportBlock({
+    mediaTypeLabel: snapshot.mediaTypeLabel,
+    bodyRegion: media.bodyRegion,
+    impression: snapshot.impression,
+    findings: snapshot.findings,
+    extractedSymptoms: snapshot.extractedSymptoms,
+    suggestedDiseaseNames: snapshot.suggestedDiseases.map((item) => item.name)
+  });
+  caseSheet[fieldKey] = [caseSheet[fieldKey]?.trim(), reportBlock].filter(Boolean).join('\n\n');
+
+  const existingRubricIds = new Set(analysis.rubrics.map((item) => item.rubricId));
+  const rubricsToAdd = snapshot.suggestedRubrics.filter((item) => !existingRubricIds.has(item.rubricId));
+
+  const topDiseaseId = snapshot.suggestedDiseases[0]?.diseaseId;
+
+  await prisma.$transaction(async (tx) => {
+    if (rubricsToAdd.length) {
+      await tx.caseAnalysisRubric.createMany({
+        data: rubricsToAdd.map((item) => ({
+          analysisId: input.analysisId,
+          rubricId: item.rubricId,
+          weight: item.weight
+        }))
+      });
+    }
+
+    await tx.caseAnalysis.update({
+      where: { id: input.analysisId },
+      data: { caseSheet: caseSheet as Prisma.InputJsonValue }
+    });
+
+    await tx.clinicalMedia.update({
+      where: { id: media.id },
+      data: {
+        observations: [media.observations?.trim(), snapshot.extractedSymptoms].filter(Boolean).join('\n\n') || null,
+        ...(topDiseaseId && !media.diseaseId ? { diseaseId: topDiseaseId } : {})
+      }
+    });
+
+    await tx.imagingInterpretation.update({
+      where: { id: interpretation.id },
+      data: {
+        status: ImagingInterpretationStatus.DOCTOR_APPROVED,
+        appliedAt: new Date(),
+        doctorOverrideRationale: input.overrideRationale?.trim() || null
+      }
+    });
+  });
+
+  const updated = await prisma.caseAnalysis.findUnique({
+    where: { id: input.analysisId },
+    include: caseAnalysisInclude
+  });
+
+  return { analysis: updated, interpretationId: interpretation.id, rubricsAdded: rubricsToAdd.length };
 }

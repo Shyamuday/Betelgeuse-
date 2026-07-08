@@ -333,12 +333,13 @@
       @if (showRepertoryWorkspace()) {
     <app-collapsible-section
       title="Visual symptoms"
-      subtitle="Attach clinical images and turn observations into repertory searches."
+      subtitle="Photos, X-rays, CT/MRI screenshots, lab reports — AI drafts rubrics, disease hints, and case findings for your review."
       [startCollapsed]="false"
     >
       <app-clinical-media-panel
         [analysisId]="analysis.id"
         (rubricPhraseSelected)="applyRubricSearchPhrase($event)"
+        (interpretationApplied)="onImagingInterpretationApplied($event)"
       />
     </app-collapsible-section>
 

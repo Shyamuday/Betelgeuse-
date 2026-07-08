@@ -13,7 +13,22 @@ export type ClinicalMediaType =
   | 'ABDOMEN'
   | 'CHEST'
   | 'LIMBS'
+  | 'XRAY'
+  | 'CT'
+  | 'MRI'
+  | 'ULTRASOUND'
+  | 'ECG'
+  | 'LAB_REPORT'
+  | 'PATHOLOGY'
+  | 'OTHER_IMAGING'
   | 'OTHER';
+
+export const RADIOLOGY_MEDIA_TYPES: ClinicalMediaType[] = ['XRAY', 'CT', 'MRI', 'ULTRASOUND', 'CHEST'];
+export const REPORT_MEDIA_TYPES: ClinicalMediaType[] = ['LAB_REPORT', 'PATHOLOGY', 'ECG', 'OTHER_IMAGING'];
+
+export function isRadiologyOrReportMediaType(mediaType: ClinicalMediaType) {
+  return RADIOLOGY_MEDIA_TYPES.includes(mediaType) || REPORT_MEDIA_TYPES.includes(mediaType);
+}
 
 export const CLINICAL_MEDIA_TYPE_LABELS: Record<ClinicalMediaType, string> = {
   SKIN: 'Skin / rash',
@@ -30,7 +45,15 @@ export const CLINICAL_MEDIA_TYPE_LABELS: Record<ClinicalMediaType, string> = {
   ABDOMEN: 'Abdomen',
   CHEST: 'Chest / breathing',
   LIMBS: 'Arms / legs',
-  OTHER: 'Other'
+  XRAY: 'X-ray',
+  CT: 'CT scan',
+  MRI: 'MRI',
+  ULTRASOUND: 'Ultrasound',
+  ECG: 'ECG / EKG',
+  LAB_REPORT: 'Lab report (image)',
+  PATHOLOGY: 'Pathology / histology',
+  OTHER_IMAGING: 'Other imaging',
+  OTHER: 'Other clinical photo'
 };
 
 export const CLINICAL_MEDIA_BODY_REGIONS: Partial<Record<ClinicalMediaType, string[]>> = {
@@ -48,6 +71,14 @@ export const CLINICAL_MEDIA_BODY_REGIONS: Partial<Record<ClinicalMediaType, stri
   ABDOMEN: ['Upper abdomen', 'Lower abdomen', 'Right side', 'Left side', 'Umbilicus'],
   CHEST: ['Anterior chest', 'Back', 'Breathing pattern', 'Ribs'],
   LIMBS: ['Upper arm', 'Forearm', 'Thigh', 'Calf', 'Hand', 'Foot'],
+  XRAY: ['Chest', 'Abdomen', 'Spine', 'Pelvis', 'Skull', 'Knee', 'Ankle', 'Wrist', 'Hand', 'Foot'],
+  CT: ['Head', 'Chest', 'Abdomen', 'Pelvis', 'Spine', 'Sinuses', 'Neck'],
+  MRI: ['Brain', 'Spine', 'Knee', 'Shoulder', 'Abdomen', 'Pelvis', 'Breast'],
+  ULTRASOUND: ['Abdomen', 'Pelvis', 'Thyroid', 'Breast', 'Kidney', 'Liver', 'Pregnancy'],
+  ECG: ['12-lead', 'Rhythm strip', 'Long lead II'],
+  LAB_REPORT: ['CBC', 'LFT', 'KFT', 'Thyroid', 'Lipid', 'HbA1c', 'Urine'],
+  PATHOLOGY: ['Biopsy', 'Cytology', 'Histology slide'],
+  OTHER_IMAGING: ['PET', 'DEXA', 'Mammography', 'Angiography', 'Endoscopy still'],
   OTHER: ['General', 'Localized', 'Before treatment', 'After treatment']
 };
 
@@ -140,6 +171,54 @@ const OBSERVATION_ONTOLOGY: Record<ClinicalMediaType, OntologyEntry[]> = {
   OTHER: [
     { label: 'Inflammation', phrases: ['inflammation', 'pain swelling'] },
     { label: 'Discharge', phrases: ['discharges', 'secretions'] }
+  ],
+  XRAY: [
+    { label: 'Opacity / infiltrate', phrases: ['chest oppression', 'respiration difficult', 'lungs congestion'] },
+    { label: 'Pleural effusion', phrases: ['chest oppression', 'breathing difficult', 'chest pain'] },
+    { label: 'Cardiomegaly', phrases: ['palpitation', 'chest oppression', 'dyspnea'] },
+    { label: 'Fracture line', phrases: ['bones pain', 'limbs pain', 'injuries'] },
+    { label: 'Consolidation', phrases: ['cough', 'expectoration', 'fever'] }
+  ],
+  CT: [
+    { label: 'Mass lesion', phrases: ['tumors', 'growths', 'pain chronic'] },
+    { label: 'Edema / swelling', phrases: ['swelling', 'inflammation', 'head pain'] },
+    { label: 'Hemorrhage', phrases: ['bleeding', 'weakness', 'head pain'] },
+    { label: 'Obstruction', phrases: ['abdomen pain', 'vomiting', 'constipation'] },
+    { label: 'Effusion', phrases: ['chest oppression', 'breathing difficult'] }
+  ],
+  MRI: [
+    { label: 'Disc lesion', phrases: ['back pain', 'limbs numbness', 'spine pain'] },
+    { label: 'Demyelination pattern', phrases: ['limbs numbness', 'weakness', 'vision dim'] },
+    { label: 'Joint effusion', phrases: ['joints swelling', 'joints pain', 'stiffness'] },
+    { label: 'Soft tissue swelling', phrases: ['swelling', 'inflammation', 'pain'] }
+  ],
+  ULTRASOUND: [
+    { label: 'Gallstones', phrases: ['abdomen pain', 'nausea', 'liver affections'] },
+    { label: 'Fatty liver', phrases: ['liver enlarged', 'abdomen fullness', 'digestion weak'] },
+    { label: 'Cyst / mass', phrases: ['swelling', 'pain', 'tumors'] },
+    { label: 'Fluid collection', phrases: ['abdomen distended', 'swelling', 'dropsy'] }
+  ],
+  ECG: [
+    { label: 'Tachycardia', phrases: ['palpitation', 'anxiety', 'restlessness'] },
+    { label: 'Bradycardia', phrases: ['weakness', 'fainting', 'coldness'] },
+    { label: 'Arrhythmia', phrases: ['palpitation', 'chest oppression', 'fear'] },
+    { label: 'Ischemic changes', phrases: ['chest pain', 'dyspnea', 'weakness'] }
+  ],
+  LAB_REPORT: [
+    { label: 'Anemia pattern', phrases: ['weakness', 'pallor', 'fatigue'] },
+    { label: 'Elevated glucose', phrases: ['thirst', 'urine frequent', 'weakness'] },
+    { label: 'Thyroid abnormality', phrases: ['heat', 'cold', 'trembling', 'weight changes'] },
+    { label: 'Elevated liver enzymes', phrases: ['liver affections', 'jaundice', 'abdomen pain'] },
+    { label: 'Raised ESR/CRP', phrases: ['inflammation', 'fever', 'pain'] }
+  ],
+  PATHOLOGY: [
+    { label: 'Chronic inflammation', phrases: ['inflammation chronic', 'pain chronic'] },
+    { label: 'Malignancy suspected', phrases: ['tumors', 'emaciation', 'night sweats'] },
+    { label: 'Infection', phrases: ['fever', 'discharges', 'inflammation'] }
+  ],
+  OTHER_IMAGING: [
+    { label: 'Abnormal uptake', phrases: ['weakness', 'pain', 'inflammation'] },
+    { label: 'Structural abnormality', phrases: ['pain', 'deformity', 'weakness'] }
   ]
 };
 

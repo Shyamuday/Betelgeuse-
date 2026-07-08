@@ -56,7 +56,9 @@ export const API_PATHS = {
     CASE_ANALYSIS_CLINICAL_MEDIA_FILE: (analysisId: string, mediaId: string) =>
       `/doctor/case-analyses/${analysisId}/clinical-media/${mediaId}/file`,
     CASE_ANALYSIS_CLINICAL_MEDIA_ANALYZE: (analysisId: string, mediaId: string) =>
-      `/doctor/case-analyses/${analysisId}/clinical-media/${mediaId}/analyze-image`
+      `/doctor/case-analyses/${analysisId}/clinical-media/${mediaId}/analyze-image`,
+    CASE_ANALYSIS_CLINICAL_MEDIA_APPLY_INTERPRETATION: (analysisId: string, mediaId: string) =>
+      `/doctor/case-analyses/${analysisId}/clinical-media/${mediaId}/apply-interpretation`
   },
   HR: {
     SELF_DOCTOR_LEAVES: '/hr/self/doctor-leaves',

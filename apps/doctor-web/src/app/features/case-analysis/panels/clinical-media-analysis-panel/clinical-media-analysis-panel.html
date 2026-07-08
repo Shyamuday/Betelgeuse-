@@ -1,7 +1,7 @@
 <section class="panel clinical-media-analysis-panel">
   <div class="panel-title-row">
     <div>
-      <h4>Image analysis preview</h4>
+      <h4>Imaging intelligence preview</h4>
       <p class="preview-badge">Suggestion only — doctor confirms</p>
     </div>
     <button type="button" class="btn-icon" (click)="dismissRequested.emit()" title="Dismiss">×</button>
@@ -11,11 +11,23 @@
   <p class="summary">{{ preview.summary }}</p>
   <p class="hint">
     Model: <strong>{{ preview.visionModel }}</strong> · Category: <strong>{{ preview.mediaTypeLabel }}</strong>
+    · Case field: <strong>{{ preview.suggestedCaseSheetField }}</strong>
   </p>
 
+  @if (preview.impression) {
+    <p class="impression"><strong>Impression:</strong> {{ preview.impression }}</p>
+  }
+
   <details class="reason-block" open>
-    <summary>Vision extracted symptoms</summary>
+    <summary>Vision report & symptom phrases</summary>
     <p class="extracted-text">{{ preview.extractedSymptoms }}</p>
+    @if (preview.findings.length) {
+      <ul class="findings-list">
+        @for (finding of preview.findings; track finding) {
+          <li>{{ finding }}</li>
+        }
+      </ul>
+    }
     @if (preview.symptomPhrases.length) {
       <div class="phrase-list">
         @for (phrase of preview.symptomPhrases; track phrase) {
@@ -26,16 +38,44 @@
   </details>
 
   <details class="reason-block" open>
-    <summary>Phrases searched ({{ preview.phrasesSearched.length }})</summary>
-    <ul class="reason-list">
-      @for (item of preview.phrasesSearched; track item.sourceKey + item.phrase) {
-        <li>
-          <strong>{{ item.sourceLabel }}</strong>
-          <span class="muted">“{{ item.phrase }}”</span>
-          <small>{{ item.reasoning }}</small>
-        </li>
-      }
-    </ul>
+    <summary>Possible diseases ({{ preview.suggestedDiseases.length }})</summary>
+    @if (preview.suggestedDiseases.length) {
+      <ul class="reason-list disease-list">
+        @for (item of preview.suggestedDiseases; track item.diseaseId) {
+          <li>
+            <strong>{{ item.name }}</strong>
+            @if (item.category) {
+              <span class="muted">{{ item.category }}</span>
+            }
+            <small>{{ item.reasoning }}</small>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted">No disease profile overlap detected from findings.</p>
+    }
+  </details>
+
+  <details class="reason-block" open>
+    <summary>Homeopathic themes ({{ preview.homeopathicHints.length }})</summary>
+    @if (preview.homeopathicHints.length) {
+      <ul class="reason-list">
+        @for (hint of preview.homeopathicHints; track hint.theme) {
+          <li>
+            <strong>{{ hint.theme }}</strong>
+            <small>{{ hint.reasoning }}</small>
+            <span class="muted">Chapters: {{ hint.repertoryChapters.join(', ') }}</span>
+            <div class="phrase-list compact">
+              @for (phrase of hint.relatedPhrases; track phrase) {
+                <button type="button" class="phrase-chip" (click)="rubricPhraseSelected.emit(phrase)">{{ phrase }}</button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted">No thematic hints inferred.</p>
+    }
   </details>
 
   <details class="reason-block" open>
@@ -63,5 +103,8 @@
   <div class="preview-actions">
     <button type="button" class="btn-secondary" (click)="dismissRequested.emit()">Dismiss</button>
     <button type="button" class="btn-secondary" (click)="useObservationsRequested.emit()">Use vision text in observations</button>
+    <button type="button" class="btn-primary" (click)="applyToCaseRequested.emit()" [disabled]="applying">
+      {{ applying ? 'Applying…' : 'Apply rubrics & findings to case' }}
+    </button>
   </div>
 </section>

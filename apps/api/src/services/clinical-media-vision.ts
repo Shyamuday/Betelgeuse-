@@ -1,3 +1,9 @@
+import {
+  CLINICAL_MEDIA_TYPE_LABELS,
+  isRadiologyOrReportMediaType,
+  type ClinicalMediaType
+} from '../lib/homeopathy-approaches.js';
+
 const OLLAMA_BASE_URL = (process.env.OLLAMA_BASE_URL ?? 'http://127.0.0.1:11434').replace(/\/$/, '');
 const OLLAMA_VISION_MODEL = process.env.OLLAMA_VISION_MODEL ?? 'qwen2.5-vl:7b';
 const OLLAMA_VISION_TIMEOUT_MS = Number(process.env.OLLAMA_VISION_TIMEOUT_MS ?? 120000);
@@ -5,6 +11,8 @@ const OLLAMA_VISION_TIMEOUT_MS = Number(process.env.OLLAMA_VISION_TIMEOUT_MS ?? 
 export type VisionExtractionResult = {
   rawText: string;
   phrases: string[];
+  impression: string;
+  findings: string[];
   model: string;
 };
 
@@ -27,20 +35,66 @@ function splitSymptomPhrases(text: string) {
     }
   }
 
-  return [...unique].slice(0, 8);
+  return [...unique].slice(0, 10);
+}
+
+function parseStructuredSections(rawText: string) {
+  const impressionMatch = rawText.match(/IMPRESSION:\s*(.+?)(?:\n|$)/i);
+  const findingsBlock = rawText.match(/FINDINGS:\s*([\s\S]+?)(?:\nSYMPTOMS:|$)/i);
+  const symptomsBlock = rawText.match(/SYMPTOMS:\s*([\s\S]+)$/i);
+
+  const impression = impressionMatch?.[1]?.trim() ?? rawText.split('\n')[0]?.trim() ?? '';
+  const findings = (findingsBlock?.[1] ?? '')
+    .split(/\n|•|;/)
+    .map((line) => line.replace(/^[\s\-*]+/, '').trim())
+    .filter(Boolean)
+    .slice(0, 8);
+
+  const symptomSource = symptomsBlock?.[1]?.trim() || rawText;
+  const phrases = splitSymptomPhrases(symptomSource);
+
+  return { impression, findings, phrases };
 }
 
 function buildVisionPrompt(input: {
+  mediaType: ClinicalMediaType;
   mediaTypeLabel: string;
   bodyRegion?: string | null;
 }) {
-  const region = input.bodyRegion?.trim() ? ` Body region: ${input.bodyRegion.trim()}.` : '';
+  const region = input.bodyRegion?.trim() ? ` Region: ${input.bodyRegion.trim()}.` : '';
+
+  if (isRadiologyOrReportMediaType(input.mediaType)) {
+    return `You are assisting a homeopathic doctor reviewing a medical imaging study or diagnostic report image.
+Study type: ${input.mediaTypeLabel}.${region}
+
+Describe objective findings only. Do not name a final diagnosis or homeopathic remedy.
+
+Return exactly in this format:
+IMPRESSION: one-line summary
+FINDINGS:
+- finding one
+- finding two
+SYMPTOMS:
+homeopathic-relevant symptom phrase one
+homeopathic-relevant symptom phrase two
+
+Use clinical language suitable for repertory rubric search (e.g. chest oppression, rattling respiration, abdomen distended).`;
+  }
+
   return `You are assisting a homeopathic doctor reviewing a clinical photo.
 Image category: ${input.mediaTypeLabel}.${region}
 
-Identify the primary visible physical symptoms in this image.
-Use brief clinical keywords only (e.g. "red conjunctiva", "watery discharge", "papular eruption").
-Return 2–6 short symptom phrases, one per line. No diagnosis, no remedy names, no extra commentary.`;
+Identify visible physical signs/symptoms for homeopathic case-taking.
+Return exactly in this format:
+IMPRESSION: one-line summary
+FINDINGS:
+- visible sign one
+- visible sign two
+SYMPTOMS:
+repertory-friendly symptom phrase one
+repertory-friendly symptom phrase two
+
+No remedy names. No definitive diagnosis.`;
 }
 
 export async function isOllamaVisionAvailable() {
@@ -59,9 +113,10 @@ export async function isOllamaVisionAvailable() {
 
 export async function extractClinicalSymptomsFromImage(input: {
   imageBase64: string;
-  mediaTypeLabel: string;
+  mediaType: ClinicalMediaType;
   bodyRegion?: string | null;
-}): Promise<VisionExtractionResult> {
+}) {
+  const mediaTypeLabel = CLINICAL_MEDIA_TYPE_LABELS[input.mediaType] ?? input.mediaType;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), OLLAMA_VISION_TIMEOUT_MS);
 
@@ -75,7 +130,7 @@ export async function extractClinicalSymptomsFromImage(input: {
         messages: [
           {
             role: 'user',
-            content: buildVisionPrompt(input),
+            content: buildVisionPrompt({ ...input, mediaTypeLabel }),
             images: [input.imageBase64]
           }
         ]
@@ -94,12 +149,16 @@ export async function extractClinicalSymptomsFromImage(input: {
       throw new Error('Vision model returned no symptom text.');
     }
 
-    const phrases = splitSymptomPhrases(rawText);
+    const parsed = parseStructuredSections(rawText);
+    const phrases = parsed.phrases.length ? parsed.phrases : splitSymptomPhrases(rawText);
+
     return {
       rawText,
-      phrases: phrases.length ? phrases : [rawText.slice(0, 120)],
+      phrases,
+      impression: parsed.impression,
+      findings: parsed.findings,
       model: OLLAMA_VISION_MODEL
-    };
+    } satisfies VisionExtractionResult;
   } finally {
     clearTimeout(timeout);
   }

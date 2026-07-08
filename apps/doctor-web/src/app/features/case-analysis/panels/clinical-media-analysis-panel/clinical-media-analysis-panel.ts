@@ -8,8 +8,10 @@ import type { ClinicalMediaImageAnalysis } from '../../clinical-media.types';
 })
 export class ClinicalMediaAnalysisPanelComponent {
   @Input({ required: true }) preview!: ClinicalMediaImageAnalysis;
+  @Input() applying = false;
 
   readonly rubricPhraseSelected = output<string>();
   readonly useObservationsRequested = output<void>();
+  readonly applyToCaseRequested = output<void>();
   readonly dismissRequested = output<void>();
 }
