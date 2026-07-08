@@ -12,6 +12,8 @@ Clinic platform — Angular frontend + pure Node.js/Express/TypeScript backend.
 | Admin UI source (embedded) | `apps/admin-web` | — |
 | API | `apps/api` | 4000 |
 
+Mobile (Capacitor): patient, doctor, and operations apps. Admin is embedded in operations — no separate mobile app.
+
 For the full role/app roadmap and phasing (receptionist, clinic manager, supplier portal, etc.), see **[docs/platform-ecosystem-architecture.md](docs/platform-ecosystem-architecture.md)**.
 
 For AI-assisted case analysis (image upload, camera capture, rubric suggestions), see **[docs/case-analysis-ai-enrichment.md](docs/case-analysis-ai-enrichment.md)**.
@@ -23,8 +25,8 @@ For AWS EC2 sizing and production deployment (100–500 patients/day), see **[do
 ## Stack
 
 - Patient web app: `apps/user-web` (Angular + Capacitor)
-- Operations portal: `apps/operations-web` (staff, partners, store, embedded admin)
-- Doctor web app: `apps/doctor-web` (Angular)
+- Operations portal: `apps/operations-web` (staff, partners, store, embedded admin + Capacitor)
+- Doctor web app: `apps/doctor-web` (Angular + Capacitor)
 - Admin UI modules: `apps/admin-web` (compiled into operations-web)
 - Backend API: `apps/api` (Express 5 + TypeScript + Prisma)
 - Database: PostgreSQL (via `DATABASE_URL`)

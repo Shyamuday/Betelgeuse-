@@ -132,6 +132,25 @@ export function registerAuthProfileRoutes(router: Router) {
     })
   );
 
+  router.post(
+    '/staff/push-token',
+    authRequired,
+    asyncRoute(async (req, res) => {
+      const role = req.user!.role;
+      if (role === Role.PATIENT || role === Role.DOCTOR) {
+        return res.status(403).json({ message: 'Forbidden' });
+      }
+
+      const body = z
+        .object({
+          token: z.string().min(1),
+          platform: z.enum(['ios', 'android', 'web']).optional()
+        })
+        .parse(req.body);
+      res.json({ ok: true, token: body.token.slice(0, 8) + '…' });
+    })
+  );
+
   router.put(
     '/patient/profile',
     authRequired,

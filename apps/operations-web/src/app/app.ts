@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { PushNotificationService } from './core/services/push-notification.service';
 
 @Component({
   selector: 'app-root',
@@ -8,4 +9,10 @@ import { RouterOutlet } from '@angular/router';
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class AppComponent {}
+export class AppComponent {
+  private readonly push = inject(PushNotificationService);
+
+  constructor() {
+    void this.push.init();
+  }
+}

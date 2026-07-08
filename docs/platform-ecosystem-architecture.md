@@ -10,10 +10,10 @@ This document describes the full role and application landscape for a scalable d
 
 | Portal | App folder | Port | Primary users | Status |
 |--------|------------|------|---------------|--------|
-| **Patient** | `apps/user-web` | 4203 | Patients / families | Built |
-| **Clinical** | `apps/doctor-web` | 4202 | Consulting doctors | Built |
-| **Operations** | `apps/operations-web` | 5800 | All staff, partners, store counter, store manager, embedded admin | Built |
-| **Admin UI source** | `apps/admin-web` | — | Compiled into operations-web at `/admin/*` | Built |
+| **Patient** | `apps/user-web` | 4203 | Patients / families | Built (mobile) |
+| **Clinical** | `apps/doctor-web` | 4202 | Consulting doctors | Built (mobile) |
+| **Operations** | `apps/operations-web` | 5800 | All staff, partners, store counter, store manager, embedded admin | Built (mobile) |
+| **Admin UI source** | `apps/admin-web` | — | Compiled into operations-web at `/admin/*` | Built (embedded) |
 | **API** | `apps/api` | 4000 | All portals | Built |
 
 All portals share one PostgreSQL database, Prisma ORM, JWT auth, Socket.io (live notification push), Razorpay, and notifications. Legacy per-role apps (`hr-web`, `store`, `receptionist-web`, etc.) have been removed — `dev:*` scripts for those roles now alias to `dev:operations`.

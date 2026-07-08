@@ -1,10 +1,24 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { prisma } from '../../db.js';
 import { asyncRoute, queryPositiveInt, routeParam } from '../../utils/helpers.js';
 import { formatInAppNotification } from '../../services/in-app-notifications.js';
 import { getStoreStaff, storeAuthMiddleware } from './shared.js';
 
 export function registerStoreNotificationRoutes(router: Router) {
+  router.post(
+    '/push-token',
+    storeAuthMiddleware,
+    asyncRoute(async (req, res) => {
+      const body = z
+        .object({
+          token: z.string().min(1),
+          platform: z.enum(['ios', 'android', 'web']).optional()
+        })
+        .parse(req.body);
+      res.json({ ok: true, token: body.token.slice(0, 8) + '…' });
+    })
+  );
   router.get(
     '/notifications/unread-count',
     storeAuthMiddleware,
