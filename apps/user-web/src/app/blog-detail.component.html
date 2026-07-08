@@ -20,7 +20,7 @@
             </div>
             <p class="blog-lead">{{ article.excerpt }}</p>
             @if (article.content?.trim()) {
-              <div class="blog-body">{{ article.content }}</div>
+              <div class="blog-body" [innerHTML]="article.content | simpleMarkdown"></div>
             }
             <a class="secondary home-action" routerLink="/blog">← Back to blog</a>
           </article>

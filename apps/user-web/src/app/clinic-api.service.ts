@@ -22,12 +22,16 @@ export type { RazorpayCheckoutResponse, RazorpayOrderResponse, RealtimeSubscript
 export class ClinicApiService {
   private readonly client = new ClinicApiClient();
 
-  diseases() {
-    return from(this.fetchDiseases());
+  diseases(params?: { clinicStoreId?: string | null }) {
+    return from(this.fetchDiseases(params));
   }
 
-  diseasesGrouped(params?: { q?: string; category?: string }) {
+  diseasesGrouped(params?: { q?: string; category?: string; clinicStoreId?: string | null }) {
     return from(this.fetchDiseasesGrouped(params));
+  }
+
+  clinics() {
+    return from(this.client.apiFetch<{ clinics: Array<{ id: string; name: string; address?: string | null }> }>(API_PATHS.CLINICS));
   }
 
   diseaseBySlug(slug: string) {
@@ -240,8 +244,10 @@ export class ClinicApiService {
     });
   }
 
-  private async fetchDiseases() {
-    const response = await this.client.apiFetch<{ diseases: Array<Record<string, unknown>> }>('/diseases?grouped=false');
+  private async fetchDiseases(params?: { clinicStoreId?: string | null }) {
+    const search = new URLSearchParams({ grouped: 'false' });
+    if (params?.clinicStoreId) search.set('clinicStoreId', params.clinicStoreId);
+    const response = await this.client.apiFetch<{ diseases: Array<Record<string, unknown>> }>(`/diseases?${search.toString()}`);
     return { diseases: (response.diseases || []).map((row) => mapDiseaseFromApi(row)) };
   }
 
@@ -252,10 +258,11 @@ export class ClinicApiService {
     return { disease: mapDiseaseFromApi(response.disease) };
   }
 
-  private async fetchDiseasesGrouped(params?: { q?: string; category?: string }) {
+  private async fetchDiseasesGrouped(params?: { q?: string; category?: string; clinicStoreId?: string | null }) {
     const search = new URLSearchParams({ grouped: 'true' });
     if (params?.q?.trim()) search.set('q', params.q.trim());
     if (params?.category?.trim()) search.set('category', params.category.trim());
+    if (params?.clinicStoreId) search.set('clinicStoreId', params.clinicStoreId);
 
     const response = await this.client.apiFetch<{
       diseases: Array<Record<string, unknown>>;

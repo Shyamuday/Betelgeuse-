@@ -1,22 +1,39 @@
-<main class="admin-shell">
+<main class="admin-shell" [class.focus-mode]="focusMode()">
   <header class="admin-header">
     <div class="topbar">
       <div class="topbar-brand">
         <button type="button" class="back-btn" (click)="backToOps()">← Operations</button>
+        <button type="button" class="menu-btn" aria-label="Open menu" (click)="openMenu()">☰</button>
         <h1>Admin Console</h1>
       </div>
 
-      <app-admin-nav-tabs [items]="filteredNavItems()" />
+      <app-admin-nav-tabs class="desktop-nav" [items]="filteredNavItems()" />
 
       <div class="topbar-actions">
         <app-notification-bell-host [config]="bellConfig()" />
         <a class="account-link" [routerLink]="accountPath">Account</a>
         <button type="button" class="logout-btn" (click)="logout()">Logout</button>
-      </div>    </div>
+      </div>
+    </div>
   </header>
 
   <section class="content">
     <app-role-task-guide appKey="operations-web" theme="dark" />
     <router-outlet />
   </section>
+
+  @if (menuOpen()) {
+    <button type="button" class="overlay" aria-label="Close menu" (click)="closeMenu()"></button>
+    <aside class="drawer mobile-nav-sheet" aria-label="Admin navigation">
+      <div class="drawer-header">
+        <strong>Admin Console</strong>
+        <button type="button" class="drawer-close" aria-label="Close menu" (click)="closeMenu()">×</button>
+      </div>
+      <app-admin-nav-tabs [items]="filteredNavItems()" layout="sidebar" (navSelected)="closeMenu()" />
+      <div class="drawer-footer">
+        <a class="drawer-account" [routerLink]="accountPath" (click)="closeMenu()">Account</a>
+        <button type="button" class="drawer-logout" (click)="logout()">Sign out</button>
+      </div>
+    </aside>
+  }
 </main>

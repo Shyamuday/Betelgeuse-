@@ -35,22 +35,30 @@
         <button type="button" class="retry-btn" (click)="load()">Retry</button>
       </div>
     } @else {
-      @if (profile()?.patientCode) {
-        <section class="profile-section">
-          <h3>Clinic reference</h3>
+      <section class="profile-section">
+        <h3>Clinic reference</h3>
+        @if (profile()?.patientCode) {
           <div class="field readonly-block">
             <label>Patient ID</label>
             <p class="readonly-val patient-code-inline">{{ profile()?.patientCode }}</p>
             <span class="hint">Permanent clinic reference number.</span>
           </div>
-          @if (profile()?.homeClinicStore; as clinic) {
-            <div class="field readonly-block">
-              <label>Home clinic</label>
-              <p class="readonly-val">{{ clinic.name }} ({{ clinic.code }})</p>
-            </div>
+        }
+        <div class="field">
+          <label for="homeClinicStoreId">Preferred clinic</label>
+          @if (clinicsLoading()) {
+            <p class="loading-text">Loading clinics…</p>
+          } @else {
+            <select id="homeClinicStoreId" [formField]="profileForm.homeClinicStoreId">
+              <option value="">Not set</option>
+              @for (clinic of clinics(); track clinic.id) {
+                <option [value]="clinic.id">{{ clinic.name }}</option>
+              }
+            </select>
           }
-        </section>
-      }
+          <span class="hint">Used for consultation fees and your clinic reference.</span>
+        </div>
+      </section>
 
       <app-patient-clinical-media-panel />
 

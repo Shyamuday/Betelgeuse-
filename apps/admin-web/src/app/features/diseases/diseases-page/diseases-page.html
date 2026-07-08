@@ -9,6 +9,9 @@
       </p>
     </div>
     <div class="header-actions">
+      <button type="button" class="btn-secondary" (click)="reconcileOptions()" [disabled]="reconciling()">
+        {{ reconciling() ? 'Reconciling…' : 'Reconcile diagnosis options' }}
+      </button>
       <button type="button" class="btn-secondary" (click)="syncCatalog()" [disabled]="syncing()">
         {{ syncing() ? 'Syncing…' : 'Sync standard catalog' }}
       </button>
@@ -62,6 +65,43 @@
         Public page copy (optional)
         <textarea [formField]="newDiseaseForm.publicDescription" rows="4" placeholder="Longer marketing copy for the treatment detail page"></textarea>
       </label>
+      <div class="field-row">
+        <label class="field">
+          URL slug (optional)
+          <input [formField]="newDiseaseForm.slug" placeholder="e.g. psoriasis" />
+        </label>
+        <label class="field">
+          Hero image URL (optional)
+          <input [formField]="newDiseaseForm.publicImageUrl" placeholder="https://…" />
+        </label>
+      </div>
+      <div class="field-row">
+        <label class="field">
+          SEO title (optional)
+          <input [formField]="newDiseaseForm.seoTitle" />
+        </label>
+        <label class="field">
+          SEO description (optional)
+          <input [formField]="newDiseaseForm.seoDescription" />
+        </label>
+      </div>
+
+      <div class="questions-editor">
+        <p class="qs-label">Public FAQ (optional)</p>
+        @for (item of newDiseaseModel().publicFaq; track $index) {
+          <div class="question-row">
+            <span><strong>{{ item.question }}</strong> — {{ item.answer }}</span>
+            <button type="button" class="btn-remove" (click)="removeNewFaq($index)">✕</button>
+          </div>
+        } @empty {
+          <p class="qs-empty">No FAQ items yet.</p>
+        }
+        <div class="add-question-row">
+          <input [formField]="newFaqForm.question" placeholder="Question" />
+          <input [formField]="newFaqForm.answer" placeholder="Answer" (keyup.enter)="addNewFaq()" />
+          <button type="button" class="btn-add-q" (click)="addNewFaq()">Add FAQ</button>
+        </div>
+      </div>
 
       <div class="questions-editor">
         <p class="qs-label">Intake Questions</p>
@@ -175,6 +215,44 @@
       Public page copy (optional)
       <textarea [formField]="draftForm.publicDescription" rows="4" placeholder="Shown on /treatments/:slug when synced"></textarea>
     </label>
+    <div class="field-row">
+      <label class="field">
+        URL slug
+        <input [formField]="draftForm.slug" placeholder="e.g. psoriasis" />
+      </label>
+      <label class="field">
+        Hero image URL
+        <input [formField]="draftForm.publicImageUrl" placeholder="https://…" />
+      </label>
+    </div>
+    <div class="field-row">
+      <label class="field">
+        SEO title
+        <input [formField]="draftForm.seoTitle" />
+      </label>
+      <label class="field">
+        SEO description
+        <input [formField]="draftForm.seoDescription" />
+      </label>
+    </div>
+
+    <div class="questions-editor">
+      <p class="qs-label">Public FAQ</p>
+      @for (item of draftModel().publicFaq; track $index) {
+        <div class="question-row">
+          <span><strong>{{ item.question }}</strong> — {{ item.answer }}</span>
+          <button type="button" class="btn-remove" (click)="removeDraftFaq($index)">✕</button>
+        </div>
+      } @empty {
+        <p class="qs-empty">No FAQ items yet.</p>
+      }
+      <div class="add-question-row">
+        <input [formField]="draftFaqForm.question" placeholder="Question" />
+        <input [formField]="draftFaqForm.answer" placeholder="Answer" (keyup.enter)="addDraftFaq()" />
+        <button type="button" class="btn-add-q" (click)="addDraftFaq()">Add FAQ</button>
+      </div>
+    </div>
+
     <label class="field checkbox-field">
       <input type="checkbox" [formField]="draftForm.isActive" />
       Active (visible to patients for booking)

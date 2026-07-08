@@ -2,9 +2,9 @@
     <section class="panel hero-panel">
       <div class="home-hero home-hero--booking">
         <div class="hero-intro">
-          <p class="hero-eyebrow">{{ copy.hero.eyebrow }}</p>
-          <h1 class="hero-headline">{{ copy.hero.headline }}</h1>
-          <p class="hero-lead">{{ copy.hero.lead }}</p>
+          <p class="hero-eyebrow">{{ heroEyebrow() }}</p>
+          <h1 class="hero-headline">{{ heroHeadline() }}</h1>
+          <p class="hero-lead">{{ heroLead() }}</p>
         </div>
 
         <div class="booking-card">
@@ -14,6 +14,21 @@
               <p class="bc-sub">{{ copy.booking.formSubtitle }}</p>
 
               <div class="bc-fields">
+                <label class="bc-field">
+                  <span class="bc-label">Clinic location</span>
+                  @if (clinicsLoading()) {
+                    <p class="bc-hint">Loading clinics…</p>
+                  } @else {
+                    <select
+                      [formField]="bookingForm.clinicStoreId"
+                      (change)="onClinicChange(bookingFormModel().clinicStoreId)">
+                      @for (clinic of clinics(); track clinic.id) {
+                        <option [value]="clinic.id">{{ clinic.name }}</option>
+                      }
+                    </select>
+                  }
+                </label>
+
                 <label class="bc-field">
                   <span class="bc-label">{{ copy.booking.diseaseLabel }}</span>
                   @if (diseasesLoading()) {

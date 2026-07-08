@@ -8,7 +8,8 @@ const MULTILINE_KEYS = new Set([
   'clinicAddressLine1',
   'clinicAddressLine2',
   'clinicAddressLine3',
-  'clinicAddressLine4'
+  'clinicAddressLine4',
+  'homeHeroLead'
 ]);
 
 @Component({
@@ -33,6 +34,7 @@ export class SiteConfigPage {
   }
 
   sectionLabel(key: string) {
+    if (key.startsWith('homeHero')) return 'Homepage hero';
     if (key.startsWith('clinicAddress') || key.startsWith('contact')) return 'Footer & contact';
     if (key.startsWith('stat') || key === 'whatsappPhone' || key === 'clinicName' || key === 'doctorListLimit') {
       return key.startsWith('statPatients') || key.startsWith('statConditions') || key.startsWith('statImprovement') || key === 'statSatisfaction'

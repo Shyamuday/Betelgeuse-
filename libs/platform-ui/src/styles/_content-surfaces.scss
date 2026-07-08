@@ -1,0 +1,106 @@
+// Readable text on light panels/cards inside dark-themed apps.
+
+@mixin vitalis-light-content-surfaces() {
+  :is(
+    .panel,
+    .card,
+    .consult-card,
+    .patient-card,
+    .patient-list .patient-card,
+    .table,
+    .modal,
+    .form-surface,
+    .register-box,
+    .create-form,
+    .edit-form,
+    .fee-form,
+    .checkout-box,
+    .list.panel,
+    .detail.panel
+  ):not(.form-surface-dark):not(.dark-surface):not(.stat-card) {
+    color: #0f172a;
+
+    :is(h1, h2, h3, h4, h5, h6, strong, th) {
+      color: #0f172a;
+    }
+
+    :is(
+      .muted,
+      .sub,
+      .meta,
+      .detail,
+      .detail.subtle,
+      .empty,
+      .empty-state,
+      .loading-text,
+      .text-muted,
+      .field-hint
+    ) {
+      color: #475569;
+    }
+
+    small {
+      color: #64748b;
+    }
+
+    td {
+      color: #0f172a;
+    }
+  }
+
+  .table-wrap .table {
+    color: #0f172a;
+    background: #fff;
+
+    th {
+      color: #334155;
+      background: #f1f5f9;
+    }
+
+    td {
+      color: #0f172a;
+    }
+
+    .sub {
+      color: #64748b;
+    }
+  }
+}
+
+@mixin vitalis-dark-readable-text() {
+  :is(.cp, .ml, .sp, .visitor-leads-page) {
+    :is(.cp-sub, .ml-sub, .sp-sub) {
+      color: #94a3b8;
+    }
+  }
+
+  :is(.cp, .ml, .sp, .page, .queue-page, .walk-in-page, .visitor-leads-page) {
+    :is(.hdr, .cp-hdr, .ml-hdr, .sp-hdr) p {
+      color: #94a3b8;
+    }
+
+    .page-sub {
+      color: #94a3b8;
+    }
+  }
+
+  :is(.ml, .sp) {
+    :is(.tmpl-lbl, .manual-add span, .lc-reason, .days-badge, .empty, .close-btn) {
+      color: #94a3b8;
+    }
+  }
+
+  .page {
+    .hdr h2,
+    .hdr h1,
+    h2 {
+      color: var(--text-primary, #f0f4ff);
+    }
+
+    .hdr p,
+    .loading-text,
+    .empty {
+      color: var(--text-secondary, #b4c5dc);
+    }
+  }
+}

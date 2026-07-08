@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ReceptionApiService } from '../../services/reception-api.service';
+import { OperationsMobileLayoutService } from '../../services/operations-mobile-layout.service';
+import { ViewportService } from '../../services/viewport.service';
 import { environment } from '../../../environments/environment';
 import { API_PATHS } from '../../core/constants/api-paths.constants';
 import { ROUTE_PATHS } from '../../core/constants/app-routes.constants';
@@ -51,9 +53,16 @@ function parseStoredNotInterestedReason(stored: string | null | undefined, prese
   templateUrl: './visitor-leads.component.html',
   styleUrl: './visitor-leads.component.scss'
 })
-export class VisitorLeadsComponent {
+export class VisitorLeadsComponent implements OnDestroy {
   private readonly api = inject(ReceptionApiService);
   private readonly http = inject(HttpClient);
+  private readonly viewport = inject(ViewportService);
+  private readonly mobileLayout = inject(OperationsMobileLayoutService);
+
+  readonly isMobile = computed(() => this.viewport.isMobile());
+  readonly hasSelection = computed(() => !!this.selected());
+  readonly showListPane = computed(() => !this.isMobile() || !this.hasSelection());
+  readonly showDetailPane = computed(() => !this.isMobile() || this.hasSelection());
 
   readonly walkInPath = `/${ROUTE_PATHS.WALK_IN}`;
 
@@ -152,7 +161,25 @@ export class VisitorLeadsComponent {
   async setFilter(status: FollowUpFilter) {
     this.followUpFilter.set(status);
     this.selected.set(null);
+    this.mobileLayout.clearPageFocus();
     await this.load();
+  }
+
+  ngOnDestroy(): void {
+    this.mobileLayout.clearPageFocus();
+  }
+
+  backToList() {
+    this.selected.set(null);
+    this.mobileLayout.clearPageFocus();
+  }
+
+  private syncMobileFocus() {
+    if (this.isMobile() && this.selected()) {
+      this.mobileLayout.setPageFocus(true);
+    } else if (this.isMobile()) {
+      this.mobileLayout.clearPageFocus();
+    }
   }
 
   async selectLead(id: string) {
@@ -171,6 +198,7 @@ export class VisitorLeadsComponent {
       );
       this.notInterestedPreset = parsed.preset;
       this.notInterestedDetail = parsed.detail;
+      this.syncMobileFocus();
     } catch {
       this.error.set('Could not load lead.');
     } finally {

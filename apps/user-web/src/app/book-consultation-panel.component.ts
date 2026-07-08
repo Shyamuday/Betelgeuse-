@@ -96,7 +96,20 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
     this.clinicsLoading.set(true);
     try {
       const res = await this.apiClient.get<{ clinics: ClinicOption[] }>(API_PATHS.CLINICS);
-      this.clinics.set(res.clinics || []);
+      const clinics = res.clinics || [];
+      this.clinics.set(clinics);
+      const pendingClinic =
+        typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('pendingClinicStoreId') : null;
+      const preferred =
+        pendingClinic && clinics.some((clinic) => clinic.id === pendingClinic)
+          ? pendingClinic
+          : clinics[0]?.id || '';
+      if (preferred) {
+        this.bookingFormModel.update((m) => ({ ...m, selectedClinicStoreId: preferred }));
+        if (pendingClinic && typeof sessionStorage !== 'undefined') {
+          sessionStorage.removeItem('pendingClinicStoreId');
+        }
+      }
     } catch {
       this.clinics.set([]);
     } finally {

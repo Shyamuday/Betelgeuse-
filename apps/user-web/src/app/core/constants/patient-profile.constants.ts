@@ -137,6 +137,7 @@ function emptyHomeopathicFields(): Record<HomeopathicTextField, string> {
 export function emptyProfileForm() {
   return {
     name: '',
+    homeClinicStoreId: '',
     email: '',
     alternateMobile: '',
     dateOfBirth: '',
@@ -182,6 +183,7 @@ export function profileToForm(profile: PatientProfile) {
 
   return {
     name: profile.name || '',
+    homeClinicStoreId: profile.homeClinicStore?.id || '',
     email: profile.email || '',
     alternateMobile: profile.alternateMobile || '',
     dateOfBirth: profile.dateOfBirth || '',
@@ -225,6 +227,7 @@ export function formToProfilePayload(form: ReturnType<typeof emptyProfileForm>) 
 
   return {
     name: form.name.trim(),
+    homeClinicStoreId: form.homeClinicStoreId.trim() || null,
     email: form.email.trim() || null,
     alternateMobile: form.alternateMobile.trim() || null,
     dateOfBirth: form.dateOfBirth.trim() || null,

@@ -20,6 +20,12 @@ type TreatmentCategory = {
   diseases: Disease[];
 };
 
+type ClinicOption = {
+  id: string;
+  name: string;
+  address?: string | null;
+};
+
 @Component({
   selector: 'app-treatments',
   imports: [CommonModule, CurrencyPipe, RouterLink, AppHeaderComponent, AppFooterComponent],
@@ -37,7 +43,10 @@ export class TreatmentsComponent implements OnInit {
   readonly detailPath = diseaseDetailPath;
 
   readonly categories = signal<TreatmentCategory[]>([]);
+  readonly clinics = signal<ClinicOption[]>([]);
+  readonly selectedClinicStoreId = signal('');
   readonly loading = signal(true);
+  readonly clinicsLoading = signal(true);
   readonly error = signal('');
   readonly selectedCategoryKey = signal('');
   readonly selectedDisease = signal<Disease | null>(null);
@@ -49,14 +58,41 @@ export class TreatmentsComponent implements OnInit {
   );
 
   ngOnInit() {
-    void this.loadCatalog();
+    void this.bootstrap();
+  }
+
+  async bootstrap() {
+    await this.loadClinics();
+    await this.loadCatalog();
+  }
+
+  async loadClinics() {
+    this.clinicsLoading.set(true);
+    try {
+      const response = await firstValueFrom(this.api.clinics());
+      this.clinics.set(response.clinics || []);
+      const first = response.clinics?.[0];
+      if (first) {
+        this.selectedClinicStoreId.set(first.id);
+      }
+    } catch {
+      this.clinics.set([]);
+    } finally {
+      this.clinicsLoading.set(false);
+    }
+  }
+
+  async onClinicChange(clinicStoreId: string) {
+    this.selectedClinicStoreId.set(clinicStoreId);
+    await this.loadCatalog();
   }
 
   async loadCatalog() {
     this.loading.set(true);
     this.error.set('');
     try {
-      const response = await firstValueFrom(this.api.diseasesGrouped());
+      const clinicStoreId = this.selectedClinicStoreId() || undefined;
+      const response = await firstValueFrom(this.api.diseasesGrouped({ clinicStoreId }));
       const groups: TreatmentCategory[] = (response.categories || [])
         .filter((group) => group.diseases.length > 0)
         .map((group) => ({
@@ -95,13 +131,20 @@ export class TreatmentsComponent implements OnInit {
   }
 
   bookingQuery(diseaseId: string) {
-    return { diseaseId };
+    const query: Record<string, string> = { diseaseId };
+    if (this.selectedClinicStoreId()) {
+      query['clinicStoreId'] = this.selectedClinicStoreId();
+    }
+    return query;
   }
 
   openAuthOverlay(event: Event, diseaseId: string) {
     event.preventDefault();
     if (typeof sessionStorage !== 'undefined') {
       sessionStorage.setItem('pendingDiseaseId', diseaseId);
+      if (this.selectedClinicStoreId()) {
+        sessionStorage.setItem('pendingClinicStoreId', this.selectedClinicStoreId());
+      }
     }
     this.overlayService.open(AuthFormOverlayComponent, {
       width: '480px',

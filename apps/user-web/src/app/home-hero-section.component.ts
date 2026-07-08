@@ -9,9 +9,16 @@ import { ROUTE_PATHS } from './core/constants/app-routes.constants';
 import { HOME_CONTENT } from './core/constants/public-site-content.constants';
 import { AuthService } from './auth/auth.service';
 import { ClinicApiService } from './clinic-api.service';
+import { PublicConfigService } from './core/services/public-config.service';
 import { Disease } from './models';
 
 type BookStep = 'form' | 'otp' | 'loading' | 'done';
+
+type ClinicOption = {
+  id: string;
+  name: string;
+  address?: string | null;
+};
 
 @Component({
   selector: 'app-home-hero-section',
@@ -25,10 +32,16 @@ export class HomeHeroSectionComponent {
   readonly copy = HOME_CONTENT;
   readonly currencyCode = CURRENCY_CODE;
 
-  readonly bookingFormModel = signal({ diseaseId: '', mobile: '', otp: '' });
+  readonly heroEyebrow = signal<string>(HOME_CONTENT.hero.eyebrow);
+  readonly heroHeadline = signal<string>(HOME_CONTENT.hero.headline);
+  readonly heroLead = signal<string>(HOME_CONTENT.hero.lead);
+
+  readonly bookingFormModel = signal({ diseaseId: '', clinicStoreId: '', mobile: '', otp: '' });
   readonly bookingForm = form(this.bookingFormModel);
   readonly diseases = signal<Disease[]>([]);
+  readonly clinics = signal<ClinicOption[]>([]);
   readonly diseasesLoading = signal(true);
+  readonly clinicsLoading = signal(true);
 
   readonly step = signal<BookStep>('form');
   readonly busy = signal(false);
@@ -37,9 +50,10 @@ export class HomeHeroSectionComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly api = inject(ClinicApiService);
+  private readonly publicConfig = inject(PublicConfigService);
 
   constructor() {
-    void this.loadDiseases();
+    void this.bootstrap();
   }
 
   selectedDisease() {
@@ -47,10 +61,51 @@ export class HomeHeroSectionComponent {
     return this.diseases().find((disease) => disease.id === id) ?? null;
   }
 
-  private async loadDiseases() {
+  async onClinicChange(clinicStoreId: string) {
+    this.bookingFormModel.update((m) => ({ ...m, clinicStoreId, diseaseId: '' }));
+    await this.loadDiseases(clinicStoreId || undefined);
+  }
+
+  private async bootstrap() {
+    void this.loadHeroCopy();
+    void this.loadClinics();
+  }
+
+  private async loadHeroCopy() {
+    try {
+      const config = await this.publicConfig.get();
+      this.heroEyebrow.set(config.homeHeroEyebrow || HOME_CONTENT.hero.eyebrow);
+      this.heroHeadline.set(config.homeHeroHeadline || HOME_CONTENT.hero.headline);
+      this.heroLead.set(config.homeHeroLead || HOME_CONTENT.hero.lead);
+    } catch {
+      // Keep static fallbacks.
+    }
+  }
+
+  private async loadClinics() {
+    this.clinicsLoading.set(true);
+    try {
+      const response = await firstValueFrom(this.api.clinics());
+      this.clinics.set(response.clinics || []);
+      const first = response.clinics?.[0];
+      if (first) {
+        this.bookingFormModel.update((m) => ({ ...m, clinicStoreId: first.id }));
+        await this.loadDiseases(first.id);
+      } else {
+        await this.loadDiseases();
+      }
+    } catch {
+      this.clinics.set([]);
+      await this.loadDiseases();
+    } finally {
+      this.clinicsLoading.set(false);
+    }
+  }
+
+  private async loadDiseases(clinicStoreId?: string) {
     this.diseasesLoading.set(true);
     try {
-      const response = await firstValueFrom(this.api.diseases());
+      const response = await firstValueFrom(this.api.diseases({ clinicStoreId }));
       this.diseases.set(response.diseases);
     } catch {
       this.diseases.set([]);
@@ -113,10 +168,15 @@ export class HomeHeroSectionComponent {
           sessionStorage.setItem('pendingDiseaseId', diseaseId);
         }
         const dashboard = this.auth.dashboardFor(response.user.role);
-        const target =
-          response.user.role === 'PATIENT' && diseaseId
-            ? `${dashboard}?diseaseId=${encodeURIComponent(diseaseId)}`
-            : dashboard;
+        const params = new URLSearchParams();
+        if (response.user.role === 'PATIENT' && diseaseId) {
+          params.set('diseaseId', diseaseId);
+        }
+        if (form.clinicStoreId) {
+          params.set('clinicStoreId', form.clinicStoreId);
+        }
+        const query = params.toString();
+        const target = query ? `${dashboard}?${query}` : dashboard;
         setTimeout(() => void this.router.navigateByUrl(target), POST_LOGIN_REDIRECT_DELAY_MS);
       }
     } catch (err: any) {

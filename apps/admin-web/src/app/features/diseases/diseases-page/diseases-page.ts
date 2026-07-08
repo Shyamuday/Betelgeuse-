@@ -6,11 +6,18 @@ import { AdminApi } from '../../../core/services/admin-api';
 import { ROUTE_PATHS, adminRouteLink } from '../../../core/constants/app-routes.constants';
 import { CURRENCY_CODE, CURRENCY_LOCALE, PAISE_PER_RUPEE } from '../../../shared/constants/currency.constants';
 
+type DiseaseFaqItem = { question: string; answer: string };
+
 type Disease = {
   id: string;
   name: string;
+  slug?: string | null;
   description: string;
   publicDescription?: string | null;
+  publicImageUrl?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  publicFaq?: DiseaseFaqItem[];
   feeInPaise: number;
   isActive: boolean;
   intakeQuestions: string[];
@@ -26,6 +33,18 @@ type GroupedCategory = DiseaseCategory & {
   diseases: Disease[];
 };
 
+type DiseaseMarketingDraft = {
+  slug: string;
+  publicImageUrl: string;
+  seoTitle: string;
+  seoDescription: string;
+  publicFaq: DiseaseFaqItem[];
+};
+
+function emptyMarketingDraft(): DiseaseMarketingDraft {
+  return { slug: '', publicImageUrl: '', seoTitle: '', seoDescription: '', publicFaq: [] };
+}
+
 function emptyDraft() {
   return {
     name: '',
@@ -34,7 +53,8 @@ function emptyDraft() {
     feeRupees: 500,
     isActive: true,
     publicCategory: 'miscellaneous',
-    intakeQuestions: [] as string[]
+    intakeQuestions: [] as string[],
+    ...emptyMarketingDraft()
   };
 }
 
@@ -45,7 +65,8 @@ function emptyNew() {
     publicDescription: '',
     feeRupees: 500,
     publicCategory: 'miscellaneous',
-    intakeQuestions: [] as string[]
+    intakeQuestions: [] as string[],
+    ...emptyMarketingDraft()
   };
 }
 
@@ -64,6 +85,7 @@ export class DiseasesPage {
   readonly categoryOptions = signal<DiseaseCategory[]>([]);
   readonly loading = signal(false);
   readonly syncing = signal(false);
+  readonly reconciling = signal(false);
   readonly error = signal('');
   readonly syncMessage = signal('');
 
@@ -77,6 +99,8 @@ export class DiseasesPage {
   readonly draftForm = form(this.draftModel);
   readonly draftQuestionModel = signal({ value: '' });
   readonly draftQuestionForm = form(this.draftQuestionModel);
+  readonly draftFaqModel = signal({ question: '', answer: '' });
+  readonly draftFaqForm = form(this.draftFaqModel);
   readonly saving = signal(false);
   saveError = '';
 
@@ -85,6 +109,8 @@ export class DiseasesPage {
   readonly newDiseaseForm = form(this.newDiseaseModel);
   readonly newQuestionModel = signal({ value: '' });
   readonly newQuestionForm = form(this.newQuestionModel);
+  readonly newFaqModel = signal({ question: '', answer: '' });
+  readonly newFaqForm = form(this.newFaqModel);
   readonly creating = signal(false);
   createError = '';
 
@@ -155,6 +181,23 @@ export class DiseasesPage {
     }
   }
 
+  async reconcileOptions() {
+    if (!confirm('Sync prescription diagnosis options from the disease catalog?')) {
+      return;
+    }
+    this.reconciling.set(true);
+    this.syncMessage.set('');
+    this.error.set('');
+    try {
+      const result = await this.api.reconcileDiseaseOptions();
+      this.syncMessage.set(`Diagnosis options reconciled for ${result.synced} diseases.`);
+    } catch {
+      this.error.set('Could not reconcile diagnosis options.');
+    } finally {
+      this.reconciling.set(false);
+    }
+  }
+
   startEdit(disease: Disease) {
     this.editingId = disease.id;
     this.draftModel.set({
@@ -164,9 +207,15 @@ export class DiseasesPage {
       feeRupees: Math.round(disease.feeInPaise / PAISE_PER_RUPEE),
       isActive: disease.isActive,
       publicCategory: disease.publicCategory || 'miscellaneous',
-      intakeQuestions: [...disease.intakeQuestions]
+      intakeQuestions: [...disease.intakeQuestions],
+      slug: disease.slug || '',
+      publicImageUrl: disease.publicImageUrl || '',
+      seoTitle: disease.seoTitle || '',
+      seoDescription: disease.seoDescription || '',
+      publicFaq: [...(disease.publicFaq || [])]
     });
     this.draftQuestionModel.set({ value: '' });
+    this.draftFaqModel.set({ question: '', answer: '' });
     this.saveError = '';
   }
 
@@ -174,6 +223,7 @@ export class DiseasesPage {
     this.editingId = '';
     this.draftModel.set(emptyDraft());
     this.draftQuestionModel.set({ value: '' });
+    this.draftFaqModel.set({ question: '', answer: '' });
     this.saveError = '';
   }
 
@@ -193,21 +243,32 @@ export class DiseasesPage {
     });
   }
 
+  addDraftFaq() {
+    const { question, answer } = this.draftFaqModel();
+    if (!question.trim() || !answer.trim()) return;
+    const draft = this.draftModel();
+    this.draftModel.set({
+      ...draft,
+      publicFaq: [...draft.publicFaq, { question: question.trim(), answer: answer.trim() }]
+    });
+    this.draftFaqModel.set({ question: '', answer: '' });
+  }
+
+  removeDraftFaq(index: number) {
+    const draft = this.draftModel();
+    this.draftModel.set({
+      ...draft,
+      publicFaq: draft.publicFaq.filter((_, i) => i !== index)
+    });
+  }
+
   async saveEdit() {
     const draft = this.draftModel();
     if (!this.editingId || !draft.name || !draft.description || !draft.feeRupees) return;
     this.saving.set(true);
     this.saveError = '';
     try {
-      await this.api.updateDisease(this.editingId, {
-        name: draft.name,
-        description: draft.description,
-        publicDescription: draft.publicDescription.trim() || null,
-        feeInPaise: Math.round(Number(draft.feeRupees) * PAISE_PER_RUPEE),
-        isActive: draft.isActive,
-        publicCategory: draft.publicCategory,
-        intakeQuestions: draft.intakeQuestions
-      });
+      await this.api.updateDisease(this.editingId, this.toApiPayload(draft));
       await this.load();
       this.cancelEdit();
     } catch {
@@ -233,6 +294,25 @@ export class DiseasesPage {
     });
   }
 
+  addNewFaq() {
+    const { question, answer } = this.newFaqModel();
+    if (!question.trim() || !answer.trim()) return;
+    const newDisease = this.newDiseaseModel();
+    this.newDiseaseModel.set({
+      ...newDisease,
+      publicFaq: [...newDisease.publicFaq, { question: question.trim(), answer: answer.trim() }]
+    });
+    this.newFaqModel.set({ question: '', answer: '' });
+  }
+
+  removeNewFaq(index: number) {
+    const newDisease = this.newDiseaseModel();
+    this.newDiseaseModel.set({
+      ...newDisease,
+      publicFaq: newDisease.publicFaq.filter((_, i) => i !== index)
+    });
+  }
+
   async createDisease() {
     const newDisease = this.newDiseaseModel();
     if (!newDisease.name || !newDisease.description || !newDisease.feeRupees || !newDisease.intakeQuestions.length) {
@@ -242,16 +322,10 @@ export class DiseasesPage {
     this.creating.set(true);
     this.createError = '';
     try {
-      await this.api.createDisease({
-        name: newDisease.name,
-        description: newDisease.description,
-        publicDescription: newDisease.publicDescription.trim() || null,
-        feeInPaise: Math.round(Number(newDisease.feeRupees) * PAISE_PER_RUPEE),
-        publicCategory: newDisease.publicCategory,
-        intakeQuestions: newDisease.intakeQuestions
-      });
+      await this.api.createDisease(this.toCreatePayload(newDisease));
       this.newDiseaseModel.set(emptyNew());
       this.newQuestionModel.set({ value: '' });
+      this.newFaqModel.set({ question: '', answer: '' });
       this.showCreateForm = false;
       await this.load();
     } catch {
@@ -259,6 +333,39 @@ export class DiseasesPage {
     } finally {
       this.creating.set(false);
     }
+  }
+
+  private toApiPayload(draft: ReturnType<typeof emptyDraft>) {
+    return {
+      name: draft.name,
+      description: draft.description,
+      publicDescription: draft.publicDescription.trim() || null,
+      slug: draft.slug.trim() || null,
+      publicImageUrl: draft.publicImageUrl.trim() || null,
+      seoTitle: draft.seoTitle.trim() || null,
+      seoDescription: draft.seoDescription.trim() || null,
+      publicFaq: draft.publicFaq,
+      feeInPaise: Math.round(Number(draft.feeRupees) * PAISE_PER_RUPEE),
+      isActive: draft.isActive,
+      publicCategory: draft.publicCategory,
+      intakeQuestions: draft.intakeQuestions
+    };
+  }
+
+  private toCreatePayload(draft: ReturnType<typeof emptyNew>) {
+    return {
+      name: draft.name,
+      description: draft.description,
+      publicDescription: draft.publicDescription.trim() || null,
+      slug: draft.slug.trim() || null,
+      publicImageUrl: draft.publicImageUrl.trim() || null,
+      seoTitle: draft.seoTitle.trim() || null,
+      seoDescription: draft.seoDescription.trim() || null,
+      publicFaq: draft.publicFaq,
+      feeInPaise: Math.round(Number(draft.feeRupees) * PAISE_PER_RUPEE),
+      publicCategory: draft.publicCategory,
+      intakeQuestions: draft.intakeQuestions
+    };
   }
 
   feeToCurrency(paise: number) {

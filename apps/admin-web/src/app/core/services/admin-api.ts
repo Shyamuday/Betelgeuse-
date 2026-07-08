@@ -130,6 +130,9 @@ export class AdminApi {
   syncDiseaseCatalog(...args: Parameters<AdminCatalogApi['syncDiseaseCatalog']>) {
     return this.catalog.syncDiseaseCatalog(...(args as Parameters<AdminCatalogApi['syncDiseaseCatalog']>));
   }
+  reconcileDiseaseOptions(...args: Parameters<AdminCatalogApi['reconcileDiseaseOptions']>) {
+    return this.catalog.reconcileDiseaseOptions(...(args as Parameters<AdminCatalogApi['reconcileDiseaseOptions']>));
+  }
   createDisease(...args: Parameters<AdminCatalogApi['createDisease']>) {
     return this.catalog.createDisease(...(args as Parameters<AdminCatalogApi['createDisease']>));
   }

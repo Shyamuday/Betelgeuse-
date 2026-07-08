@@ -6,6 +6,7 @@ import { AppHeaderComponent } from './app-header.component';
 import { ClinicApiClient } from './clinic-api/clinic-api.client';
 import { API_PATHS } from './core/constants/api-paths.constants';
 import { BLOG_PAGE_CONTENT } from './core/constants/public-site-content.constants';
+import { SimpleMarkdownPipe } from './core/pipes/simple-markdown.pipe';
 import { WhatsappLinkService } from './core/services/whatsapp-link.service';
 
 type BlogPostDetail = {
@@ -22,7 +23,7 @@ type BlogPostDetail = {
 
 @Component({
   selector: 'app-blog-detail',
-  imports: [CommonModule, RouterLink, AppHeaderComponent, AppFooterComponent],
+  imports: [CommonModule, RouterLink, AppHeaderComponent, AppFooterComponent, SimpleMarkdownPipe],
   templateUrl: './blog-detail.component.html',
 })
 export class BlogDetailComponent implements OnInit {

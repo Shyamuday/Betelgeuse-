@@ -31,10 +31,10 @@
 .btn-primary { background: #0f766e; color: #fff; }
 .btn-secondary { background: #fff; border-color: #cbd5e1; }
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.75rem; }
-.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; }
+.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; color: #0f172a; }
 .card-top { display: flex; justify-content: space-between; gap: 0.75rem; }
-.name { font-weight: 700; }
-.meta, .detail.subtle { color: #64748b; font-size: 0.85rem; }
+.name { font-weight: 700; color: #0f172a; }
+.meta, .detail.subtle { color: #475569; font-size: 0.85rem; }
 .status { font-size: 0.75rem; font-weight: 700; color: #0f766e; }
 .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; align-items: flex-start; }
 .cross-links { display: flex; flex-direction: column; gap: 0.2rem; width: 100%; margin-top: 0.25rem; }

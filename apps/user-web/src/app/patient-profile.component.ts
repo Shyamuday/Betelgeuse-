@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, inject, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
+import { firstValueFrom } from 'rxjs';
 import { API_PATHS } from './core/constants/api-paths.constants';
 import {
   BLOOD_GROUP_OPTIONS,
@@ -20,6 +21,7 @@ import {
 } from './core/constants/patient-profile.constants';
 import { environment } from '../environments/environment';
 import { AuthService } from './auth/auth.service';
+import { ClinicApiService } from './clinic-api.service';
 import { PatientIdCardComponent } from './shared/patient-id-card/patient-id-card.component';
 import { PatientAddressBookComponent } from './shared/patient-address-book/patient-address-book.component';
 import { PatientClinicalMediaPanelComponent } from './shared/patient-clinical-media/patient-clinical-media-panel';
@@ -38,6 +40,7 @@ export class PatientProfileComponent implements OnInit {
   @Input() accountPage = false;
 
   private readonly auth = inject(AuthService);
+  private readonly clinicApi = inject(ClinicApiService);
 
   readonly loading = signal(true);
   readonly saving = signal(false);
@@ -46,6 +49,8 @@ export class PatientProfileComponent implements OnInit {
   readonly successMsg = signal('');
   readonly errorMsg = signal('');
   readonly profile = signal<PatientProfile | null>(null);
+  readonly clinics = signal<Array<{ id: string; name: string; address?: string | null }>>([]);
+  readonly clinicsLoading = signal(true);
   readonly hasPassword = signal(false);
 
   readonly profileFormModel = signal(emptyProfileForm());
@@ -70,6 +75,19 @@ export class PatientProfileComponent implements OnInit {
 
   ngOnInit() {
     void this.load();
+    void this.loadClinics();
+  }
+
+  private async loadClinics() {
+    this.clinicsLoading.set(true);
+    try {
+      const response = await firstValueFrom(this.clinicApi.clinics());
+      this.clinics.set(response.clinics || []);
+    } catch {
+      this.clinics.set([]);
+    } finally {
+      this.clinicsLoading.set(false);
+    }
   }
 
   private get token() {

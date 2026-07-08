@@ -1,5 +1,6 @@
-import { Component, computed, inject, OnInit } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 import { RoleTaskGuideComponent, NotificationBellHostComponent } from '@vitalis/platform-ui';
 import { environment } from '../../environments/environment';
 import { AUTH_TOKEN_KEY } from '../core/constants/auth.constants';
@@ -7,6 +8,8 @@ import { NAV_ITEMS, ROUTE_PATHS, adminNavPath } from '@vitalis/admin-console/cor
 import { AdminNavTabsComponent } from '@vitalis/admin-console/layout/admin-nav-tabs/admin-nav-tabs.component';
 import { AdminAuth } from '@vitalis/admin-console/core/services/admin-auth';
 import { PlatformAuthService } from '../services/platform-auth.service';
+import { OperationsMobileLayoutService } from '../services/operations-mobile-layout.service';
+import { AdminMobileLayoutService } from '@vitalis/admin-console/core/services/admin-mobile-layout.service';
 import { ADMIN_ROUTE_CAPABILITIES } from './admin.guards';
 
 @Component({
@@ -16,10 +19,17 @@ import { ADMIN_ROUTE_CAPABILITIES } from './admin.guards';
   templateUrl: './admin-embed-shell.component.html',
   styleUrl: './admin-embed-shell.component.scss'
 })
-export class AdminEmbedShellComponent implements OnInit {
+export class AdminEmbedShellComponent implements OnInit, OnDestroy {
   private auth = inject(PlatformAuthService);
   private adminAuth = inject(AdminAuth);
   private router = inject(Router);
+  private readonly mobileLayout = inject(OperationsMobileLayoutService);
+  private readonly adminMobileLayout = inject(AdminMobileLayoutService);
+
+  readonly menuOpen = signal(false);
+  readonly focusMode = computed(() => this.mobileLayout.pageFocus() || this.adminMobileLayout.pageFocus());
+
+  private navSubscription?: { unsubscribe: () => void };
 
   readonly bellConfig = computed(() => ({
     apiBase: environment.apiUrl,
@@ -32,6 +42,20 @@ export class AdminEmbedShellComponent implements OnInit {
   ngOnInit(): void {
     (globalThis as { __ADMIN_ROUTE_BASE__?: string }).__ADMIN_ROUTE_BASE__ = 'admin';
     void this.adminAuth.refreshSession();
+
+    this.navSubscription = this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.closeMenu();
+        this.mobileLayout.clearPageFocus();
+        this.adminMobileLayout.clearPageFocus();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.navSubscription?.unsubscribe();
+    this.mobileLayout.clearPageFocus();
+    this.adminMobileLayout.clearPageFocus();
   }
 
   readonly filteredNavItems = computed(() => {
@@ -42,6 +66,14 @@ export class AdminEmbedShellComponent implements OnInit {
       return !required || caps.has(required);
     });
   });
+
+  openMenu() {
+    this.menuOpen.set(true);
+  }
+
+  closeMenu() {
+    this.menuOpen.set(false);
+  }
 
   logout() {
     this.auth.logout();

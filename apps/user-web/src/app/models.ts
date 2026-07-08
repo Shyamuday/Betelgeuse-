@@ -23,12 +23,21 @@ export type PatientSelectionResponse = {
   patients: PatientSelectionCandidate[];
 };
 
+export type DiseaseFaqItem = {
+  question: string;
+  answer: string;
+};
+
 export type Disease = {
   id: string;
   name: string;
   slug?: string | null;
   description: string;
   publicDescription?: string | null;
+  publicImageUrl?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  publicFaq?: DiseaseFaqItem[];
   feeInPaise: number;
   intakeQuestions: string[];
   publicCategory?: string | null;

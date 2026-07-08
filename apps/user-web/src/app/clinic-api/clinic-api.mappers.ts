@@ -1,12 +1,17 @@
-import { Consultation, Disease, DoseEvent, Payment, Prescription } from '../models';
+import { Consultation, Disease, DiseaseFaqItem, DoseEvent, Payment, Prescription } from '../models';
 
 export function mapDiseaseFromApi(row: Record<string, unknown>): Disease {
+    const publicFaq = row['publicFaq'];
     return {
       id: row['id'] as string,
       name: row['name'] as string,
       slug: (row['slug'] as string | null | undefined) ?? null,
       description: row['description'] as string,
       publicDescription: (row['publicDescription'] as string | null | undefined) ?? null,
+      publicImageUrl: (row['publicImageUrl'] as string | null | undefined) ?? null,
+      seoTitle: (row['seoTitle'] as string | null | undefined) ?? null,
+      seoDescription: (row['seoDescription'] as string | null | undefined) ?? null,
+      publicFaq: Array.isArray(publicFaq) ? (publicFaq as DiseaseFaqItem[]) : [],
       feeInPaise: row['feeInPaise'] as number,
       intakeQuestions: (row['intakeQuestions'] as string[]) || [],
       publicCategory: (row['publicCategory'] as string | null | undefined) ?? null

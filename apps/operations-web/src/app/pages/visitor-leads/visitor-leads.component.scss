@@ -49,7 +49,14 @@
     display: grid;
     grid-template-columns: minmax(260px, 340px) 1fr;
     gap: 1rem;
-    min-height: 420px;
+    align-items: start;
+  }
+
+  @media (max-width: 768px) {
+    .layout {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
   }
 
   .panel {

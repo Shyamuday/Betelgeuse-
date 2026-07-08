@@ -1,0 +1,68 @@
+/* Shared mobile/responsive utilities for operations-web */
+
+.mobile-back {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    width: 100%;
+    min-height: 44px;
+    margin-bottom: 0.65rem;
+    padding: 0.45rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--accent-light);
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+  }
+
+  .mobile-pane-hidden {
+    display: none !important;
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
+
+  .page .hdr,
+  .hdr {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.65rem;
+  }
+
+  .search-row,
+  .filters,
+  .toolbar,
+  .hdr-actions {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.55rem;
+  }
+
+  .search-row input,
+  .search-row button,
+  .filters input,
+  .filters select,
+  .filters button,
+  .toolbar input,
+  .toolbar select,
+  .toolbar button {
+    width: 100%;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table {
+    min-width: 36rem;
+  }
+}

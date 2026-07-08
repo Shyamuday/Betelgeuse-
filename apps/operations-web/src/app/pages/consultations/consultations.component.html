@@ -14,7 +14,7 @@
   } @else if (!consultations().length) {
     <p class="empty">No consultations yet.</p>
   } @else {
-    <div class="table-wrap">
+    <div class="table-wrap desktop-only">
       <table class="table">
         <thead>
           <tr>
@@ -42,6 +42,28 @@
           }
         </tbody>
       </table>
+    </div>
+
+    <div class="mobile-consult-cards">
+      @for (c of consultations(); track c.id) {
+        <article class="consult-card">
+          <div class="card-head">
+            <div>
+              <strong>{{ c.patient?.name }}</strong>
+              <span class="sub">{{ c.patient?.patientCode }}</span>
+            </div>
+            <span class="status-pill">{{ c.status }}</span>
+          </div>
+          <div class="card-row">
+            <span>{{ c.disease?.name ?? '—' }}</span>
+            <span class="muted">{{ c.createdAt | date: 'short' }}</span>
+          </div>
+          <div class="card-row">
+            <span>Dr. {{ c.assignedDoctor?.name ?? '—' }}</span>
+            <span class="muted">{{ c.clinicStore?.name ?? '—' }}</span>
+          </div>
+        </article>
+      }
     </div>
   }
 </div>

@@ -49,6 +49,7 @@ export const API_PATHS = {
     DISEASES_LIST: '/admin/diseases/list',
     DISEASE_CATEGORIES: '/admin/diseases/categories',
     DISEASES_SYNC_CATALOG: '/admin/diseases/sync-catalog',
+    DISEASES_RECONCILE_OPTIONS: '/admin/diseases/reconcile-options',
     LOCATION_FEES: '/admin/pricing/location-fees',
     BILLING_PLANS: '/admin/billing/plans',
     VACANCIES: '/admin/vacancies',

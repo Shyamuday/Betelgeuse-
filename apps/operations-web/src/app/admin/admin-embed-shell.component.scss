@@ -1,5 +1,6 @@
 .admin-shell {
   min-height: 100vh;
+  min-height: 100dvh;
   background: #f4f7fb;
 }
 
@@ -19,6 +20,7 @@
   align-items: center;
   gap: 0.85rem;
   padding: 0.65rem 1.25rem;
+  padding-top: calc(0.65rem + env(safe-area-inset-top, 0px));
   min-height: 3.25rem;
   overflow: visible;
 }
@@ -37,6 +39,19 @@
   white-space: nowrap;
 }
 
+.menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 1.2rem;
+}
+
 .back-btn {
   border: 1px solid rgba(255, 255, 255, 0.25);
   background: transparent;
@@ -50,6 +65,11 @@
 
 .back-btn:hover {
   background: rgba(255, 255, 255, 0.08);
+}
+
+.desktop-nav {
+  flex: 1;
+  min-width: 0;
 }
 
 .topbar-actions {
@@ -80,6 +100,12 @@
 
 .content {
   padding: 1rem 1.25rem 2rem;
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+}
+
+.overlay,
+.drawer {
+  display: none;
 }
 
 @media (max-width: 768px) {
@@ -90,11 +116,122 @@
     gap: 0.55rem;
   }
 
+  .menu-btn {
+    display: inline-flex;
+  }
+
+  .desktop-nav {
+    display: none;
+  }
+
   .topbar-actions {
     margin-left: 0;
   }
 
+  .back-btn {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.5rem;
+  }
+
   .content {
     padding: 0.85rem 1rem 1.5rem;
+  }
+
+  .admin-shell.focus-mode .content {
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    border: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+  }
+
+  .drawer.mobile-nav-sheet {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    width: 100%;
+    max-height: min(85vh, 32rem);
+    background: #0f172a;
+    color: #fff;
+    border-radius: 1rem 1rem 0 0;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
+    animation: sheetUp 0.24s ease;
+  }
+
+  @keyframes sheetUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .drawer-close {
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+
+  .drawer app-admin-nav-tabs {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .drawer-footer {
+    padding: 0.75rem 1rem;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .drawer-account {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .drawer-logout {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fecaca;
+    font-weight: 600;
+  }
+}
+
+@media (max-width: 480px) {
+  .logout-btn {
+    display: none;
   }
 }

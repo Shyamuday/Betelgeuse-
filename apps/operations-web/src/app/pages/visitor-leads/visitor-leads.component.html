@@ -36,7 +36,7 @@
   </div>
 
   <div class="layout">
-    <div class="list panel">
+    <div class="list panel" [class.mobile-pane-hidden]="!showListPane()">
       @if (loading()) {
         <p class="muted">Loading…</p>
       } @else if (leads().length === 0) {
@@ -63,7 +63,10 @@
       }
     </div>
 
-    <div class="detail panel form-surface">
+    <div class="detail panel form-surface" [class.mobile-pane-hidden]="!showDetailPane()">
+      @if (isMobile() && hasSelection()) {
+        <button type="button" class="mobile-back" (click)="backToList()">← Back to leads</button>
+      }
       @if (!selected()) {
         <p class="muted">Select a lead to update follow-up.</p>
       } @else if (detailLoading()) {

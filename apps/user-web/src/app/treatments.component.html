@@ -8,6 +8,22 @@
           <p>{{ copy.body }}</p>
         </section>
 
+        <section class="panel clinic-picker-panel">
+          <label class="clinic-picker">
+            <span>Clinic location</span>
+            @if (clinicsLoading()) {
+              <p class="loading-text">Loading clinics…</p>
+            } @else {
+              <select [value]="selectedClinicStoreId()" (change)="onClinicChange($any($event.target).value)">
+                @for (clinic of clinics(); track clinic.id) {
+                  <option [value]="clinic.id">{{ clinic.name }}</option>
+                }
+              </select>
+            }
+          </label>
+          <p class="hint">Fees shown reflect the selected clinic location.</p>
+        </section>
+
         @if (loading()) {
           <section class="panel">
             <p class="loading-text">Loading treatments…</p>

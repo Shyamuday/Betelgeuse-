@@ -37,7 +37,9 @@
                   }
                 </div>
               </div>
-              <img [src]="d.imageUrl" [alt]="d.imageAlt" />
+              @if (heroImageUrl(); as imageUrl) {
+                <img [src]="imageUrl" [alt]="heroImageAlt()" />
+              }
             </section>
 
             @if (d.ourApproach) {
@@ -201,10 +203,10 @@
               }
             </section>
 
-            @if (d.faq?.length) {
+            @if (displayFaq().length) {
               <section class="faq-list">
                 <h2>FAQ</h2>
-                <vitalis-detail-rows variant="panel" panelHeading="h3" [rows]="faqRows(d.faq)" />
+                <vitalis-detail-rows variant="panel" panelHeading="h3" [rows]="faqRows(displayFaq())" />
               </section>
             }
 
@@ -242,7 +244,17 @@
                   <strong>{{ live.feeInPaise / 100 | currency: currencyCode }}</strong>
                 </p>
               </div>
+              @if (live.publicImageUrl) {
+                <img [src]="live.publicImageUrl" [alt]="live.name" />
+              }
             </section>
+
+            @if (displayFaq().length) {
+              <section class="faq-list">
+                <h2>FAQ</h2>
+                <vitalis-detail-rows variant="panel" panelHeading="h3" [rows]="faqRows(displayFaq())" />
+              </section>
+            }
 
             <section class="about-cta panel">
               <div>

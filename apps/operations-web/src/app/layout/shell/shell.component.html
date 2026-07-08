@@ -1,21 +1,19 @@
 
-    <div class="shell">
-      <aside class="sidebar" [class.open]="sidebarOpen()">
+    <div class="shell" [class.focus-mode]="focusMode()">
+      <aside class="sidebar" aria-label="Operations navigation">
         <div class="sidebar-header">
           <div class="logo">
             <span class="logo-icon">🏥</span>
             <span class="logo-text">Operations</span>
           </div>
-          <button class="sidebar-close" (click)="sidebarOpen.set(false)">✕</button>
         </div>
 
         <nav class="sidebar-nav">
-          @for (item of navItems(); track item.path) {
+          @for (item of navItemsList(); track item.path) {
             <a
               [routerLink]="item.path"
               routerLinkActive="active"
               class="nav-item"
-              (click)="sidebarOpen.set(false)"
             >
               <span class="nav-icon">{{ item.icon }}</span>
               <span class="nav-label">{{ item.label }}</span>
@@ -24,7 +22,7 @@
         </nav>
 
         <div class="sidebar-footer">
-          <a class="user-info" [routerLink]="accountPath" (click)="sidebarOpen.set(false)">
+          <a class="user-info" [routerLink]="accountPath">
             <vitalis-profile-avatar
               [apiBase]="apiBase"
               [tokenKey]="authTokenKey"
@@ -40,13 +38,9 @@
         </div>
       </aside>
 
-      @if (sidebarOpen()) {
-        <div class="overlay" (click)="sidebarOpen.set(false)"></div>
-      }
-
       <div class="main">
         <header class="topbar">
-          <button class="menu-btn" (click)="sidebarOpen.set(true)">☰</button>
+          <button type="button" class="menu-btn" aria-label="Open menu" (click)="openMenu()">☰</button>
           <div class="topbar-title">{{ pageTitle() }}</div>
           <div class="topbar-right">
             <app-notification-bell-host [config]="bellConfig()" />
@@ -59,7 +53,7 @@
               />
               <span class="topbar-name">{{ auth.currentUser()?.name }}</span>
             </a>
-            <button class="topbar-logout" (click)="auth.logout()" title="Logout">
+            <button type="button" class="topbar-logout" (click)="auth.logout()" title="Logout">
               <span>⏻</span>
             </button>
           </div>
@@ -70,18 +64,54 @@
           <router-outlet />
         </main>
 
-        <nav class="bottom-nav">
-          @for (item of navItems(); track item.path) {
+        <nav class="bottom-nav" aria-label="Quick navigation" [class.is-hidden]="focusMode()">
+          @for (item of bottomNavItems(); track item.path) {
             <a
               [routerLink]="item.path"
               routerLinkActive="active"
               class="bottom-nav-item"
             >
               <span class="bottom-nav-icon">{{ item.icon }}</span>
-              <span class="bottom-nav-label">{{ item.label }}</span>
+              <span class="bottom-nav-label">{{ navShortLabel(item) }}</span>
             </a>
+          }
+          @if (hasOverflowNav()) {
+            <button type="button" class="bottom-nav-item bottom-nav-more" [class.active]="menuOpen()" (click)="openMenu()">
+              <span class="bottom-nav-icon">⋯</span>
+              <span class="bottom-nav-label">More</span>
+            </button>
           }
         </nav>
       </div>
+
+      @if (menuOpen()) {
+        <button type="button" class="overlay" aria-label="Close menu" (click)="closeMenu()"></button>
+        <aside class="drawer mobile-nav-sheet" aria-label="Navigation menu">
+          <div class="drawer-header">
+            <div>
+              <strong>{{ displayName() }}</strong>
+              <p class="drawer-subtitle">{{ roleLabel() }}</p>
+            </div>
+            <button type="button" class="drawer-close" aria-label="Close menu" (click)="closeMenu()">×</button>
+          </div>
+          <nav class="drawer-nav">
+            @for (item of navItemsList(); track item.path) {
+              <a
+                [routerLink]="item.path"
+                routerLinkActive="active"
+                class="drawer-nav-item"
+                (click)="closeMenu()"
+              >
+                <span class="nav-icon">{{ item.icon }}</span>
+                <span class="nav-label">{{ item.label }}</span>
+              </a>
+            }
+          </nav>
+          <div class="drawer-footer">
+            <a class="drawer-account" [routerLink]="accountPath" (click)="closeMenu()">Account</a>
+            <button type="button" class="drawer-logout" (click)="auth.logout()">Sign out</button>
+          </div>
+        </aside>
+      }
     </div>
   

@@ -141,10 +141,21 @@ export class AdminCatalogApi extends AdminApiBase {
     );
   }
 
+  reconcileDiseaseOptions() {
+    return firstValueFrom(
+      this.http.post<{ synced: number }>(`${this.apiBase}${API_PATHS.ADMIN.DISEASES_RECONCILE_OPTIONS}`, {})
+    );
+  }
+
   createDisease(payload: {
     name: string;
     description: string;
     publicDescription?: string | null;
+    slug?: string | null;
+    publicImageUrl?: string | null;
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+    publicFaq?: Array<{ question: string; answer: string }> | null;
     feeInPaise: number;
     intakeQuestions: string[];
     publicCategory?: string;
@@ -158,6 +169,11 @@ export class AdminCatalogApi extends AdminApiBase {
       name: string;
       description: string;
       publicDescription?: string | null;
+      slug?: string | null;
+      publicImageUrl?: string | null;
+      seoTitle?: string | null;
+      seoDescription?: string | null;
+      publicFaq?: Array<{ question: string; answer: string }> | null;
       feeInPaise: number;
       isActive: boolean;
       intakeQuestions: string[];

@@ -16,6 +16,38 @@
             </div>
           }
         </section>
+
+        <section class="panel">
+          <p class="eyebrow">Conditions we treat</p>
+          <h2>Browse by category</h2>
+          @if (loading()) {
+            <p class="loading-text">Loading conditions…</p>
+          } @else if (!categories().length) {
+            <p>No conditions are listed yet. <a routerLink="/treatments">View treatments</a>.</p>
+          } @else {
+            @for (group of categories(); track group.key) {
+              <div class="chronic-category-block">
+                <h3>{{ group.label }}</h3>
+                <div class="issue-grid">
+                  @for (disease of group.diseases; track disease.id) {
+                    <article class="issue-card issue-card--link">
+                      <a [routerLink]="detailPath(disease)">
+                        <strong>{{ disease.name }}</strong>
+                        <span class="issue-fee">{{ disease.feeInPaise / 100 | currency: currencyCode }}</span>
+                      </a>
+                      <a
+                        class="secondary home-action"
+                        [routerLink]="dashboardPath"
+                        [queryParams]="{ diseaseId: disease.id }">
+                        Book
+                      </a>
+                    </article>
+                  }
+                </div>
+              </div>
+            }
+          }
+        </section>
       </main>
       <app-footer [whatsappLink]="whatsappLink()" />
     </section>
