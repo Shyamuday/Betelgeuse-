@@ -8,12 +8,16 @@ const OOREP_SQL_URL =
   'https://raw.githubusercontent.com/nondeterministic/oorep/master/oorep.sql.gz';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
-const defaultOut = resolve(scriptDir, '../../data/oorep/oorep.sql.gz');
+const defaultOut = resolve(scriptDir, '../data/oorep/oorep.sql.gz');
 
 function parseArg(flag: string) {
   const index = process.argv.indexOf(flag);
   if (index === -1) return undefined;
   return process.argv[index + 1];
+}
+
+function hasFlag(flag: string) {
+  return process.argv.includes(flag);
 }
 
 async function download(url: string, destination: string) {
@@ -38,8 +42,9 @@ async function download(url: string, destination: string) {
 
 async function main() {
   const outPath = resolve(parseArg('--out') || defaultOut);
-  if (existsSync(outPath)) {
-    console.log(`[oorep-download] already exists: ${outPath}`);
+  const force = hasFlag('--force');
+  if (existsSync(outPath) && !force) {
+    console.log(`[oorep-download] already exists: ${outPath} (use --force to re-download)`);
     return;
   }
 

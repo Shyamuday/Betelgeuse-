@@ -10,6 +10,12 @@ npm run repertory:download:oorep --prefix apps/api
 
 Source: [nondeterministic/oorep](https://github.com/nondeterministic/oorep) (`oorep.sql.gz`, GPL repertories `publicum` and `kent-de`).
 
+Re-download:
+
+```powershell
+npm run repertory:download:oorep --prefix apps/api -- --force
+```
+
 ## Import
 
 ```powershell
