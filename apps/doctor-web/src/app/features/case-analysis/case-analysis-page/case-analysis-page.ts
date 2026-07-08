@@ -125,6 +125,7 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
   readonly appointmentsPath = ROUTE_PATHS.APPOINTMENTS;
   readonly consultationNav = inject(ConsultationNavigationService);
   readonly worklistPath = ROUTE_PATHS.WORKLIST;
+  readonly caseAnalysisStudioPath = ROUTE_PATHS.CASE_ANALYSIS_STUDIO;
   readonly repertoryPath = ROUTE_PATHS.REPERTORY;
   readonly repertoryBrowserPath = ROUTE_PATHS.REPERTORY_BROWSER;
   readonly weightOptions = [1, 2, 3, 4] as const;
@@ -388,7 +389,9 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
       }));
       this.hydrateFromAnalysis(nextAnalysis);
     } catch {
-      this.error.set('Could not open repertory. Check that OOREP / repertory data is seeded.');
+      this.error.set(
+        'Could not open case analysis studio. Check that OOREP / repertory data is seeded.',
+      );
       this.analysis.set(null);
     } finally {
       this.loading.set(false);
@@ -605,6 +608,24 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
     }
   }
 
+  private resolveActiveStepId(
+    nextAnalysis: CaseAnalysis,
+    approach: ApproachDefinition,
+  ): ApproachStepId {
+    if (this.standalone && !nextAnalysis.methodOptionId && !nextAnalysis.methodRationale?.trim()) {
+      return 'approach-select';
+    }
+    return firstIncompleteStepId(approach.steps, {
+      methodOptionId: nextAnalysis.methodOptionId,
+      methodRationale: nextAnalysis.methodRationale,
+      caseSheet: nextAnalysis.caseSheet || undefined,
+      approachData: (nextAnalysis.approachData as Record<string, unknown>) || undefined,
+      rubricCount: nextAnalysis.rubrics.length,
+      resultCount: nextAnalysis.results.length,
+      selectedRemedyId: nextAnalysis.selectedRemedy?.id || null,
+    });
+  }
+
   private hydrateFromAnalysis(nextAnalysis: CaseAnalysis) {
     this.hydrating.set(true);
     this.caseSheetAutoSave.cancel();
@@ -637,17 +658,7 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
       })),
     );
     this.maxResultScore.set(nextAnalysis.results[0]?.totalScore || 0);
-    this.activeStepId.set(
-      firstIncompleteStepId(approach.steps, {
-        methodOptionId: nextAnalysis.methodOptionId,
-        methodRationale: nextAnalysis.methodRationale,
-        caseSheet: nextAnalysis.caseSheet || undefined,
-        approachData: (nextAnalysis.approachData as Record<string, unknown>) || undefined,
-        rubricCount: nextAnalysis.rubrics.length,
-        resultCount: nextAnalysis.results.length,
-        selectedRemedyId: nextAnalysis.selectedRemedy?.id || null,
-      }),
-    );
+    this.activeStepId.set(this.resolveActiveStepId(nextAnalysis, approach));
     if (
       nextAnalysis.selectedRemedy &&
       this.focusedRemedy()?.id !== nextAnalysis.selectedRemedy.id

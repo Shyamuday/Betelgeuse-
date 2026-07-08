@@ -42,15 +42,79 @@
       </div>
 
       <nav class="sidebar-nav">
-        @for (item of navItems; track item.path) {
-          <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="navLinkActiveOptions">
-            <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
-            <span class="nav-label">{{ item.label }}</span>
-          </a>
+        @for (item of navItems; track item.id) {
+          @if (showResumeCase(item)) {
+            <button
+              type="button"
+              class="nav-action"
+              (click)="handleResumeCase()"
+            >
+              <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
+              <span class="nav-label">{{ resumeCaseLabel() }}</span>
+            </button>
+          } @else if (isGroup(item)) {
+            <div class="nav-group" [class.is-expanded]="isGroupExpanded(item.id)" [class.is-active]="isGroupActive(item)">
+              <button
+                type="button"
+                class="nav-group-toggle"
+                [attr.aria-expanded]="isGroupExpanded(item.id)"
+                (click)="toggleGroup(item.id)"
+              >
+                <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
+                <span class="nav-label">{{ item.label }}</span>
+                <span class="nav-chevron" aria-hidden="true">{{ isGroupExpanded(item.id) ? '▾' : '▸' }}</span>
+              </button>
+              @if (isGroupExpanded(item.id)) {
+                <div class="nav-subitems">
+                  @for (child of visibleChildren(item); track child.id) {
+                    <a
+                      [routerLink]="child.path"
+                      [queryParams]="child.queryParams || null"
+                      [class.active]="isChildLinkActive(child)"
+                    >
+                      <span class="nav-sub-bullet" aria-hidden="true">•</span>
+                      <span class="nav-label">{{ child.label }}</span>
+                    </a>
+                  }
+                </div>
+              }
+            </div>
+          } @else if (item.path) {
+            <a
+              [routerLink]="item.path"
+              [queryParams]="item.queryParams || null"
+              [class.active]="isTopLinkActive(item)"
+            >
+              <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
+              <span class="nav-label">{{ item.label }}</span>
+            </a>
+            @if (visibleChildren(item).length) {
+              <div class="nav-subitems nav-subitems--attached">
+                @for (child of visibleChildren(item); track child.id) {
+                  <a
+                    [routerLink]="child.path"
+                    [queryParams]="child.queryParams || null"
+                    [class.active]="isChildLinkActive(child)"
+                  >
+                    <span class="nav-sub-bullet" aria-hidden="true">•</span>
+                    <span class="nav-label">{{ child.label }}</span>
+                  </a>
+                }
+              </div>
+            }
+          }
         }
       </nav>
 
       <div class="sidebar-footer">
+        <a
+          class="sidebar-profile"
+          [routerLink]="profileItem.path!"
+          [class.active]="isTopLinkActive(profileItem)"
+        >
+          <span class="nav-icon" aria-hidden="true">{{ profileItem.icon }}</span>
+          <span class="nav-label">{{ profileItem.label }}</span>
+        </a>
         <button type="button" class="sidebar-logout" (click)="logout()">Sign out</button>
       </div>
     </aside>
@@ -83,12 +147,76 @@
         <button type="button" class="drawer-close" aria-label="Close menu" (click)="closeMenu()">×</button>
       </div>
       <nav class="drawer-nav">
-        @for (item of navItems; track item.path) {
-          <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="navLinkActiveOptions" (click)="closeMenu()">
-            <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
-            <span class="nav-label">{{ item.label }}</span>
-          </a>
+        @for (item of navItems; track item.id) {
+          @if (showResumeCase(item)) {
+            <button type="button" class="nav-action" (click)="handleResumeCase()">
+              <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
+              <span class="nav-label">{{ resumeCaseLabel() }}</span>
+            </button>
+          } @else if (isGroup(item)) {
+            <div class="nav-group" [class.is-expanded]="isGroupExpanded(item.id)" [class.is-active]="isGroupActive(item)">
+              <button
+                type="button"
+                class="nav-group-toggle"
+                [attr.aria-expanded]="isGroupExpanded(item.id)"
+                (click)="toggleGroup(item.id)"
+              >
+                <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
+                <span class="nav-label">{{ item.label }}</span>
+                <span class="nav-chevron" aria-hidden="true">{{ isGroupExpanded(item.id) ? '▾' : '▸' }}</span>
+              </button>
+              @if (isGroupExpanded(item.id)) {
+                <div class="nav-subitems">
+                  @for (child of visibleChildren(item); track child.id) {
+                    <a
+                      [routerLink]="child.path"
+                      [queryParams]="child.queryParams || null"
+                      [class.active]="isChildLinkActive(child)"
+                      (click)="closeMenu()"
+                    >
+                      <span class="nav-sub-bullet" aria-hidden="true">•</span>
+                      <span class="nav-label">{{ child.label }}</span>
+                    </a>
+                  }
+                </div>
+              }
+            </div>
+          } @else if (item.path) {
+            <a
+              [routerLink]="item.path"
+              [queryParams]="item.queryParams || null"
+              [class.active]="isTopLinkActive(item)"
+              (click)="closeMenu()"
+            >
+              <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
+              <span class="nav-label">{{ item.label }}</span>
+            </a>
+            @if (visibleChildren(item).length) {
+              <div class="nav-subitems nav-subitems--attached">
+                @for (child of visibleChildren(item); track child.id) {
+                  <a
+                    [routerLink]="child.path"
+                    [queryParams]="child.queryParams || null"
+                    [class.active]="isChildLinkActive(child)"
+                    (click)="closeMenu()"
+                  >
+                    <span class="nav-sub-bullet" aria-hidden="true">•</span>
+                    <span class="nav-label">{{ child.label }}</span>
+                  </a>
+                }
+              </div>
+            }
+          }
         }
+        <a
+          class="drawer-profile"
+          [routerLink]="profileItem.path!"
+          [class.active]="isTopLinkActive(profileItem)"
+          (click)="closeMenu()"
+        >
+          <span class="nav-icon" aria-hidden="true">{{ profileItem.icon }}</span>
+          <span class="nav-label">{{ profileItem.label }}</span>
+        </a>
       </nav>
       <div class="drawer-footer">
         <button type="button" class="drawer-logout" (click)="logout()">Sign out</button>
@@ -97,8 +225,13 @@
   }
 
   <nav class="bottom-nav" aria-label="Quick navigation" [class.is-hidden]="focusMode()">
-    @for (item of bottomNavItems; track item.path) {
-      <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="navLinkActiveOptions" class="bottom-nav-item">
+    @for (item of bottomNavItems; track item.id) {
+      <a
+        [routerLink]="item.path"
+        [queryParams]="item.queryParams || null"
+        [class.active]="navLinkActive(item.path, item.queryParams)"
+        class="bottom-nav-item"
+      >
         <span class="bottom-nav-icon" aria-hidden="true">{{ item.icon }}</span>
         <span class="bottom-nav-label">{{ item.shortLabel }}</span>
       </a>

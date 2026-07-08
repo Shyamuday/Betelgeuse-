@@ -139,12 +139,12 @@ export class WorklistPage {
     void this.consultationNav.openPrescriptionContext(consultationId);
   }
 
-  openPrescription(consultationId: string) {
-    void this.consultationNav.openPrescription(consultationId);
+  openPrescription(consultationId: string, patientName?: string | null) {
+    void this.consultationNav.openPrescription(consultationId, { patientName });
   }
 
-  openCaseAnalysis(consultationId: string) {
-    void this.consultationNav.openCaseAnalysis(consultationId);
+  openCaseAnalysis(consultationId: string, patientName?: string | null) {
+    void this.consultationNav.openCaseAnalysis(consultationId, { patientName });
   }
 
   scanPatient(patientCode: string | null | undefined) {

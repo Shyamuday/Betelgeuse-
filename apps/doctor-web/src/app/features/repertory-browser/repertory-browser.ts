@@ -104,6 +104,10 @@ export class RepertoryBrowserPage implements OnInit {
     this.route.queryParamMap.subscribe((params) => {
       this.consultationId.set(params.get('consultationId') || '');
       this.caseAnalysisId.set(params.get('caseAnalysisId') || '');
+      const mode = params.get('mode');
+      if (mode === 'materia-medica') {
+        this.mode.set('materia-medica');
+      }
     });
   }
 

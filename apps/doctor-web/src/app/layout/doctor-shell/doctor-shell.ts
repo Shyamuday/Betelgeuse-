@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import {
   RoleTaskGuideComponent,
@@ -9,41 +9,36 @@ import {
 import { environment } from '../../../environments/environment';
 import { AUTH_TOKEN_KEY } from '../../core/constants/auth.constants';
 import { ROUTE_PATHS } from '../../core/constants/app-routes.constants';
-import { navItemsForDoctorType } from '../../core/constants/doctor-types.constants';
+import {
+  mobileBottomNavLabels,
+  navItemsForDoctorType,
+  profileNavItem,
+  type DoctorNavChildLink,
+  type DoctorNavItemDef,
+} from '../../core/constants/doctor-nav.constants';
 import { Auth } from '../../core/services/auth';
-import { ConsultationNavigationService } from '../../core/services/consultation-navigation.service';
+import {
+  ConsultationNavigationService,
+  type LastConsultationWorkspace,
+} from '../../core/services/consultation-navigation.service';
 import { DoctorRealtimeService } from '../../core/services/doctor-realtime.service';
 import { DoctorSessionService } from '../../core/services/doctor-session';
 
-export type DoctorNavItem = {
-  path: string;
+export type DoctorBottomNavItem = {
+  id: string;
   label: string;
+  path: string;
+  queryParams?: Record<string, string>;
   icon: string;
   shortLabel: string;
 };
 
-const NAV_ICONS: Record<string, { icon: string; shortLabel: string }> = {
-  Worklist: { icon: '📋', shortLabel: 'Work' },
-  Scan: { icon: '📷', shortLabel: 'Scan' },
-  Dashboard: { icon: '📊', shortLabel: 'Home' },
-  Appointments: { icon: '🩺', shortLabel: 'Appts' },
-  Repertory: { icon: '📖', shortLabel: 'Rep' },
-  Patients: { icon: '👥', shortLabel: 'Patients' },
-  'Treatment pages': { icon: '📝', shortLabel: 'Pages' },
-  Slots: { icon: '📅', shortLabel: 'Slots' },
-  Earnings: { icon: '💰', shortLabel: 'Pay' },
-  Leaves: { icon: '🌴', shortLabel: 'Leave' },
-  Profile: { icon: '👤', shortLabel: 'Profile' },
-};
-
-const MOBILE_BOTTOM_NAV_ORDER = ['Worklist', 'Patients', 'Scan', 'Appointments'] as const;
-const MOBILE_BOTTOM_NAV_LIMIT = 4;
+const EXPANDED_GROUPS_KEY = 'doctor:nav-expanded-groups';
 
 @Component({
   selector: 'app-doctor-shell',
   imports: [
     RouterLink,
-    RouterLinkActive,
     RouterOutlet,
     RoleTaskGuideComponent,
     NotificationBellHostComponent,
@@ -53,8 +48,9 @@ const MOBILE_BOTTOM_NAV_LIMIT = 4;
   styleUrl: './doctor-shell.scss',
 })
 export class DoctorShell implements OnInit, OnDestroy {
-  navItems: DoctorNavItem[] = [];
-  bottomNavItems: DoctorNavItem[] = [];
+  navItems: DoctorNavItemDef[] = [];
+  bottomNavItems: DoctorBottomNavItem[] = [];
+  profileItem = profileNavItem();
   private overflowNavCount = 0;
   doctorName = '';
   doctorProfileImageUrl: string | null = null;
@@ -65,8 +61,9 @@ export class DoctorShell implements OnInit, OnDestroy {
   menuOpen = signal(false);
   focusMode = signal(false);
   assignmentNotice = signal('');
-
-  readonly navLinkActiveOptions = { exact: false };
+  expandedGroupIds = signal<Set<string>>(new Set());
+  lastWorkspace = signal<LastConsultationWorkspace | null>(null);
+  currentUrl = signal('');
 
   private readonly realtime = inject(DoctorRealtimeService);
   private readonly router = inject(Router);
@@ -85,7 +82,7 @@ export class DoctorShell implements OnInit, OnDestroy {
     private readonly auth: Auth,
     private readonly session: DoctorSessionService,
   ) {
-    this.navItems = this.decorateNav(navItemsForDoctorType(null));
+    this.navItems = this.buildNav(navItemsForDoctorType(null));
   }
 
   async ngOnInit() {
@@ -96,12 +93,15 @@ export class DoctorShell implements OnInit, OnDestroy {
       this.doctorTypeLabel = profile.doctorProfile?.doctorTypeLabel || 'Doctor';
       this.specialtyLabel = profile.doctorProfile?.specialty || '';
       this.doctorTypeKey = profile.doctorProfile?.doctorType ?? null;
-      this.navItems = this.decorateNav(this.session.navItems());
+      this.navItems = this.buildNav(this.session.navItems());
     } catch {
-      this.navItems = this.decorateNav(this.session.navItems());
+      this.navItems = this.buildNav(this.session.navItems());
     } finally {
       this.loadingSession = false;
     }
+
+    this.refreshLastWorkspace();
+    this.syncExpandedGroups(this.router.url);
 
     this.realtime.connect((payload) => {
       const label = payload.patientCode
@@ -124,23 +124,27 @@ export class DoctorShell implements OnInit, OnDestroy {
     });
 
     this.syncFocusMode(this.router.url);
+    this.currentUrl.set(this.router.url);
     this.navSubscription = this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => {
         if (this.menuOpen()) {
           this.closeMenu();
         }
-        this.syncFocusMode(event.urlAfterRedirects);
+        const url = event.urlAfterRedirects;
+        this.currentUrl.set(url);
+        this.syncFocusMode(url);
+        this.syncExpandedGroups(url);
+        if (this.consultationNav.isConsultationWorkspaceUrl(url)) {
+          this.consultationNav.rememberWorkspaceFromUrl(url);
+          this.refreshLastWorkspace();
+        }
       });
   }
 
   ngOnDestroy(): void {
     this.realtime.disconnect();
     this.navSubscription?.unsubscribe();
-  }
-
-  private syncFocusMode(url: string) {
-    this.focusMode.set(this.consultationNav.isConsultationWorkspaceUrl(url));
   }
 
   logout() {
@@ -161,37 +165,213 @@ export class DoctorShell implements OnInit, OnDestroy {
     return this.overflowNavCount > 0;
   }
 
-  private decorateNav(items: Array<{ path: string; label: string }>): DoctorNavItem[] {
-    const decorated = items.map((item) => {
-      const meta = NAV_ICONS[item.label] || { icon: '•', shortLabel: item.label.slice(0, 6) };
-      return { ...item, icon: meta.icon, shortLabel: meta.shortLabel };
-    });
-    this.applyMobileNavSplit(decorated);
-    return decorated;
+  showResumeCase(item: DoctorNavItemDef) {
+    return item.action === 'resume-case' && !!this.lastWorkspace();
   }
 
-  private applyMobileNavSplit(items: DoctorNavItem[]) {
-    const picked: DoctorNavItem[] = [];
+  resumeCaseLabel() {
+    const last = this.lastWorkspace();
+    if (!last) return 'Resume case';
+    const who = last.patientName ? ` — ${last.patientName}` : '';
+    const where = last.view === 'prescription' ? 'Prescription' : 'Case analysis';
+    return `Resume ${where}${who}`;
+  }
+
+  async handleResumeCase() {
+    const resumed = await this.consultationNav.resumeLastWorkspace();
+    if (!resumed) {
+      this.refreshLastWorkspace();
+    }
+    this.closeMenu();
+  }
+
+  toggleGroup(groupId: string) {
+    this.expandedGroupIds.update((current) => {
+      const next = new Set(current);
+      if (next.has(groupId)) {
+        next.delete(groupId);
+      } else {
+        next.add(groupId);
+      }
+      this.persistExpandedGroups(next);
+      return next;
+    });
+  }
+
+  isGroupExpanded(groupId: string) {
+    return this.expandedGroupIds().has(groupId);
+  }
+
+  isGroupActive(item: DoctorNavItemDef) {
+    if (!item.children?.length) return false;
+    return item.children.some((child) => child.enabled && this.isChildLinkActive(child));
+  }
+
+  isTopLinkActive(item: DoctorNavItemDef) {
+    if (!item.path) return false;
+    return this.isPathActive(item.path, item.queryParams);
+  }
+
+  isChildLinkActive(child: DoctorNavChildLink) {
+    return this.isPathActive(child.path, child.queryParams);
+  }
+
+  navLinkActive(path: string, queryParams?: Record<string, string>) {
+    return this.isPathActive(path, queryParams);
+  }
+
+  visibleChildren(item: DoctorNavItemDef) {
+    return (item.children || []).filter((child) => child.enabled);
+  }
+
+  isGroup(item: DoctorNavItemDef) {
+    return !!item.children?.length && !item.path;
+  }
+
+  private buildNav(items: DoctorNavItemDef[]) {
+    const visible = items.filter((item) => {
+      if (item.action === 'resume-case') return true;
+      if (item.children?.length) {
+        return item.enabled && item.children.some((child) => child.enabled);
+      }
+      return item.enabled;
+    });
+    this.applyMobileNavSplit(visible);
+    return visible;
+  }
+
+  private applyMobileNavSplit(items: DoctorNavItemDef[]) {
+    const labels = mobileBottomNavLabels();
+    const picked: DoctorBottomNavItem[] = [];
     const used = new Set<string>();
 
-    for (const label of MOBILE_BOTTOM_NAV_ORDER) {
-      const item = items.find((entry) => entry.label === label);
-      if (item && !used.has(item.path)) {
-        picked.push(item);
+    const clinical = items.find((item) => item.id === 'clinical');
+    const caseAnalysisChild = clinical?.children?.find((child) => child.id === 'case-analysis');
+
+    for (const label of labels) {
+      if (label === 'Case Analysis' && caseAnalysisChild?.enabled) {
+        picked.push({
+          id: caseAnalysisChild.id,
+          label: caseAnalysisChild.label,
+          path: caseAnalysisChild.path,
+          queryParams: caseAnalysisChild.queryParams,
+          icon: '🔬',
+          shortLabel: 'Case',
+        });
+        used.add(caseAnalysisChild.path);
+        continue;
+      }
+
+      const item = items.find((entry) => entry.label === label && entry.path);
+      if (item?.path && !used.has(item.path)) {
+        picked.push({
+          id: item.id,
+          label: item.label,
+          path: item.path,
+          queryParams: item.queryParams,
+          icon: item.icon,
+          shortLabel: item.shortLabel,
+        });
         used.add(item.path);
       }
-      if (picked.length >= MOBILE_BOTTOM_NAV_LIMIT) break;
     }
 
-    for (const item of items) {
-      if (picked.length >= MOBILE_BOTTOM_NAV_LIMIT) break;
-      if (!used.has(item.path)) {
-        picked.push(item);
-        used.add(item.path);
+    this.bottomNavItems = picked.slice(0, 3);
+    this.overflowNavCount = Math.max(0, items.length - this.bottomNavItems.length);
+  }
+
+  private refreshLastWorkspace() {
+    this.lastWorkspace.set(this.consultationNav.getLastWorkspace());
+  }
+
+  private syncFocusMode(url: string) {
+    this.focusMode.set(this.consultationNav.isConsultationWorkspaceUrl(url));
+  }
+
+  private syncExpandedGroups(url: string) {
+    const next = new Set(this.readPersistedExpandedGroups());
+    for (const item of this.navItems) {
+      if (!item.children?.length) continue;
+      if (item.defaultExpanded || this.isGroupActiveForUrl(item, url)) {
+        next.add(item.id);
       }
     }
+    this.expandedGroupIds.set(next);
+  }
 
-    this.bottomNavItems = picked;
-    this.overflowNavCount = Math.max(0, items.length - picked.length);
+  private isGroupActiveForUrl(item: DoctorNavItemDef, url: string) {
+    return (item.children || []).some(
+      (child) => child.enabled && this.isPathActiveForUrl(child.path, child.queryParams, url),
+    );
+  }
+
+  private isPathActive(path: string, queryParams?: Record<string, string>) {
+    return this.isPathActiveForUrl(path, queryParams, this.currentUrl());
+  }
+
+  private isPathActiveForUrl(
+    path: string,
+    queryParams: Record<string, string> | undefined,
+    url: string,
+  ) {
+    const tree = this.router.parseUrl(url);
+    const segments = tree.root.children['primary']?.segments.map((segment) => segment.path) || [];
+    const currentPath = '/' + segments.join('/');
+
+    if (path === `/${ROUTE_PATHS.WORKLIST}`) {
+      if (currentPath !== path) return false;
+      if (!queryParams?.['view']) {
+        const view = tree.queryParams['view'];
+        return !view || view === 'ALL';
+      }
+      return tree.queryParams['view'] === queryParams['view'];
+    }
+
+    if (path === `/${ROUTE_PATHS.REPERTORY_BROWSER}`) {
+      if (currentPath !== path) return false;
+      const mode = queryParams?.['mode'];
+      if (mode === 'materia-medica') {
+        return tree.queryParams['mode'] === 'materia-medica';
+      }
+      return tree.queryParams['mode'] !== 'materia-medica';
+    }
+
+    if (path === `/${ROUTE_PATHS.CASE_ANALYSIS_STUDIO}`) {
+      if (currentPath === path) return true;
+      return (
+        currentPath.includes(`/${ROUTE_PATHS.CASE_ANALYSIS}/`) &&
+        currentPath.endsWith('/case-analysis')
+      );
+    }
+
+    if (path === `/${ROUTE_PATHS.PATIENTS}`) {
+      return currentPath === path || currentPath.startsWith(`${path}/`);
+    }
+
+    if (currentPath !== path && !currentPath.startsWith(`${path}/`)) {
+      return false;
+    }
+
+    if (!queryParams) return true;
+    return Object.entries(queryParams).every(([key, value]) => tree.queryParams[key] === value);
+  }
+
+  private readPersistedExpandedGroups() {
+    try {
+      const raw = sessionStorage.getItem(EXPANDED_GROUPS_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw) as string[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private persistExpandedGroups(ids: Set<string>) {
+    try {
+      sessionStorage.setItem(EXPANDED_GROUPS_KEY, JSON.stringify([...ids]));
+    } catch {
+      // ignore
+    }
   }
 }

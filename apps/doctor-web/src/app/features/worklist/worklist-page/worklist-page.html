@@ -81,11 +81,11 @@
       <div class="actions actions-mobile">
         <div class="actions-primary">
           @if (primaryAction('FOLLOW_UP_DUE') === 'prescribe') {
-            <button type="button" class="btn-primary" (click)="openPrescription(item.id)">Prescribe</button>
-            <button type="button" (click)="openCaseAnalysis(item.id)">Case</button>
+            <button type="button" class="btn-primary" (click)="openPrescription(item.id, item.patient?.name)">Prescribe</button>
+            <button type="button" (click)="openCaseAnalysis(item.id, item.patient?.name)">Case</button>
           } @else {
-            <button type="button" class="btn-primary" (click)="openCaseAnalysis(item.id)">Case</button>
-            <button type="button" (click)="openPrescription(item.id)">Prescribe</button>
+            <button type="button" class="btn-primary" (click)="openCaseAnalysis(item.id, item.patient?.name)">Case</button>
+            <button type="button" (click)="openPrescription(item.id, item.patient?.name)">Prescribe</button>
           }
         </div>
         <button type="button" class="ghost actions-more" (click)="toggleCardMenu(item.id)">
@@ -120,11 +120,11 @@
       <div class="actions actions-mobile">
         <div class="actions-primary">
           @if (primaryAction('ASSIGNED') === 'prescribe') {
-            <button type="button" class="btn-primary" (click)="openPrescription(item.id)">Prescribe</button>
-            <button type="button" (click)="openCaseAnalysis(item.id)">Case</button>
+            <button type="button" class="btn-primary" (click)="openPrescription(item.id, item.patient?.name)">Prescribe</button>
+            <button type="button" (click)="openCaseAnalysis(item.id, item.patient?.name)">Case</button>
           } @else {
-            <button type="button" class="btn-primary" (click)="openCaseAnalysis(item.id)">Case</button>
-            <button type="button" (click)="openPrescription(item.id)">Prescribe</button>
+            <button type="button" class="btn-primary" (click)="openCaseAnalysis(item.id, item.patient?.name)">Case</button>
+            <button type="button" (click)="openPrescription(item.id, item.patient?.name)">Prescribe</button>
           }
         </div>
         <button type="button" class="ghost actions-more" (click)="toggleCardMenu(item.id)">
@@ -156,11 +156,11 @@
       <div class="actions actions-mobile">
         <div class="actions-primary">
           @if (primaryAction('IN_PROGRESS') === 'prescribe') {
-            <button type="button" class="btn-primary" (click)="openPrescription(item.id)">Prescribe</button>
-            <button type="button" (click)="openCaseAnalysis(item.id)">Case</button>
+            <button type="button" class="btn-primary" (click)="openPrescription(item.id, item.patient?.name)">Prescribe</button>
+            <button type="button" (click)="openCaseAnalysis(item.id, item.patient?.name)">Case</button>
           } @else {
-            <button type="button" class="btn-primary" (click)="openCaseAnalysis(item.id)">Case</button>
-            <button type="button" (click)="openPrescription(item.id)">Prescribe</button>
+            <button type="button" class="btn-primary" (click)="openCaseAnalysis(item.id, item.patient?.name)">Case</button>
+            <button type="button" (click)="openPrescription(item.id, item.patient?.name)">Prescribe</button>
           }
         </div>
         <button type="button" class="ghost actions-more" (click)="toggleCardMenu(item.id)">

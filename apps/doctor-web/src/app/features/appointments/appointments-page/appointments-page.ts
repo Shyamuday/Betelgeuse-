@@ -89,7 +89,7 @@ export class AppointmentsPage implements OnInit {
   private readonly diseaseCatalog = inject(DiseaseCatalogService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly consultationNav = inject(ConsultationNavigationService);
+  readonly consultationNav = inject(ConsultationNavigationService);
   private readonly viewport = inject(ViewportService);
 
   private lastSyncedConsultationId = '';
@@ -106,6 +106,7 @@ export class AppointmentsPage implements OnInit {
   defaultMethodOptionId = '';
 
   readonly caseAnalysisPath = ROUTE_PATHS.CASE_ANALYSIS;
+  readonly worklistPath = ROUTE_PATHS.WORKLIST;
   readonly prescriptionModel = signal(emptyPrescriptionModel());
   readonly prescriptionForm = form(this.prescriptionModel);
   readonly templateModel = signal({ templateName: '' });

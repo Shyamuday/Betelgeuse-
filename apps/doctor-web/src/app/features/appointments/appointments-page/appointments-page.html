@@ -4,6 +4,22 @@
     <p class="muted intro-lead">Draft, edit, and publish multi-medicine prescriptions with follow-up versions.</p>
   </header>
 
+  @if (!prescriptionModel().consultationId) {
+    <section class="panel empty-panel">
+      <h3>Open a consultation to prescribe</h3>
+      <p class="muted">
+        Prescriptions are linked to a patient consultation. Pick a case from your worklist, or resume your last case.
+      </p>
+      <div class="empty-actions">
+        <a class="btn-primary" [routerLink]="['/', worklistPath]">Open worklist</a>
+        @if (consultationNav.getLastWorkspace(); as last) {
+          <button type="button" class="btn-secondary" (click)="consultationNav.resumeLastWorkspace()">
+            Resume {{ last.view === 'prescription' ? 'prescription' : 'case analysis' }}
+          </button>
+        }
+      </div>
+    </section>
+  } @else {
   @if (consultationContext) {
     <app-consultation-context-header
       [consultation]="consultationContext"
@@ -366,5 +382,6 @@
         {{ saving && !pendingSaveStatus ? 'Publishing…' : 'Publish' }}
       </button>
     </div>
+  }
   }
 </section>

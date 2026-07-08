@@ -15,7 +15,16 @@ export type ConsultationHandoffParams = {
   tab?: PrescriptionTab | null;
   rubricId?: string | null;
   rubricQuery?: string | null;
+  patientName?: string | null;
 };
+
+export type LastConsultationWorkspace = {
+  consultationId: string;
+  view: 'case-analysis' | 'prescription';
+  patientName?: string;
+};
+
+const LAST_WORKSPACE_KEY = 'doctor:last-consultation-workspace';
 
 export type WorklistSection = 'ASSIGNED' | 'IN_PROGRESS' | 'FOLLOW_UP_DUE';
 
@@ -52,12 +61,14 @@ export class ConsultationNavigationService {
   }
 
   async openCaseAnalysis(consultationId: string, extras?: Partial<ConsultationHandoffParams>) {
+    this.rememberWorkspace(consultationId, 'case-analysis', extras?.patientName ?? undefined);
     await this.router.navigate(this.caseAnalysisCommands(consultationId), {
       queryParams: this.caseAnalysisQueryParams(extras) ?? undefined,
     });
   }
 
   async openPrescription(consultationId: string, extras?: Partial<ConsultationHandoffParams>) {
+    this.rememberWorkspace(consultationId, 'prescription', extras?.patientName ?? undefined);
     await this.router.navigate(this.prescriptionCommands(consultationId), {
       queryParams: this.prescriptionQueryParams(extras) ?? undefined,
     });
@@ -88,6 +99,64 @@ export class ConsultationNavigationService {
       (path.includes(`/${ROUTE_PATHS.CASE_ANALYSIS}/`) && path.endsWith('/prescription')) ||
       (path.endsWith(`/${ROUTE_PATHS.APPOINTMENTS}`) && /[?&]consultationId=/.test(url))
     );
+  }
+
+  rememberWorkspace(
+    consultationId: string,
+    view: LastConsultationWorkspace['view'],
+    patientName?: string,
+  ) {
+    if (!consultationId.trim()) return;
+    const payload: LastConsultationWorkspace = {
+      consultationId: consultationId.trim(),
+      view,
+      ...(patientName?.trim() ? { patientName: patientName.trim() } : {}),
+    };
+    try {
+      sessionStorage.setItem(LAST_WORKSPACE_KEY, JSON.stringify(payload));
+    } catch {
+      // ignore storage failures
+    }
+  }
+
+  rememberWorkspaceFromUrl(url: string, patientName?: string) {
+    const path = url.split('?')[0];
+    const match = path.match(
+      new RegExp(`/${ROUTE_PATHS.CASE_ANALYSIS}/([^/]+)/(case-analysis|prescription)$`),
+    );
+    if (!match) return;
+    this.rememberWorkspace(match[1], match[2] as LastConsultationWorkspace['view'], patientName);
+  }
+
+  getLastWorkspace(): LastConsultationWorkspace | null {
+    try {
+      const raw = sessionStorage.getItem(LAST_WORKSPACE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as LastConsultationWorkspace;
+      if (!parsed?.consultationId) return null;
+      return parsed;
+    } catch {
+      return null;
+    }
+  }
+
+  async resumeLastWorkspace() {
+    const last = this.getLastWorkspace();
+    if (!last) return false;
+    if (last.view === 'prescription') {
+      await this.openPrescription(last.consultationId);
+    } else {
+      await this.openCaseAnalysis(last.consultationId);
+    }
+    return true;
+  }
+
+  clearLastWorkspace() {
+    try {
+      sessionStorage.removeItem(LAST_WORKSPACE_KEY);
+    } catch {
+      // ignore
+    }
   }
 
   resolveNotificationRoute(

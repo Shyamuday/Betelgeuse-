@@ -44,9 +44,14 @@ export const routes: Routes = [
       },
       { path: ROUTE_PATHS.APPOINTMENTS, component: AppointmentsPage },
       {
-        path: ROUTE_PATHS.REPERTORY,
+        path: ROUTE_PATHS.CASE_ANALYSIS_STUDIO,
         component: CaseAnalysisPage,
         data: { standalone: true },
+      },
+      {
+        path: ROUTE_PATHS.REPERTORY,
+        redirectTo: ROUTE_PATHS.CASE_ANALYSIS_STUDIO,
+        pathMatch: 'full',
       },
       { path: ROUTE_PATHS.PATIENTS, component: PatientsPage },
       { path: ROUTE_PATHS.DISEASE_PAGES, component: DiseasePagesPage },

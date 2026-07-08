@@ -4,7 +4,8 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { API_PATHS } from '../constants/api-paths.constants';
 import type { DoctorProfileSummary } from '../constants/doctor-types.constants';
-import { capabilitiesForDoctorType, navItemsForDoctorType } from '../constants/doctor-types.constants';
+import { capabilitiesForDoctorType } from '../constants/doctor-types.constants';
+import { navItemsForDoctorType } from '../constants/doctor-nav.constants';
 
 export type DoctorSession = {
   name: string;
@@ -33,7 +34,7 @@ export class DoctorSessionService {
           profileImageUrl?: string | null;
           doctorProfile?: DoctorProfileSummary | null;
         };
-      }>(`${this.apiBase}${API_PATHS.DOCTOR.PROFILE}`)
+      }>(`${this.apiBase}${API_PATHS.DOCTOR.PROFILE}`),
     );
 
     this.session = {
@@ -41,7 +42,7 @@ export class DoctorSessionService {
       email: response.profile.email,
       mobile: response.profile.mobile,
       profileImageUrl: response.profile.profileImageUrl ?? null,
-      doctorProfile: response.profile.doctorProfile || null
+      doctorProfile: response.profile.doctorProfile || null,
     };
 
     return this.session;

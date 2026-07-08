@@ -2,8 +2,11 @@
   <header class="hero" [class.hero-hidden-mobile]="!standalone && consultation()">
     <div>
       @if (standalone) {
-        <h2>Repertory</h2>
-        <p class="muted">Practice case taking — search rubrics, repertorize, and explore remedies (OOREP).</p>
+        <h2>Case Analysis</h2>
+        <p class="muted">
+          Select a homeopathy approach and work through the full case workflow independently — no consultation required.
+          <a [routerLink]="['/', repertoryBrowserPath]">Open repertory lookup</a> for quick rubric search.
+        </p>
       } @else {
         <a class="back-link" [routerLink]="['/', worklistPath]">← Worklist</a>
         <h2>Case Analysis</h2>
@@ -37,8 +40,8 @@
   @if (!standalone && !consultationId()) {
     <section class="panel empty-panel">
       <h3>Open a consultation first</h3>
-      <p class="muted">Go to your worklist and choose <strong>Case analysis</strong> on a case, or use <strong>Repertory</strong> in the menu for practice.</p>
-      <a class="btn-primary" [routerLink]="['/', repertoryBrowserPath]">Open Repertory</a>
+      <p class="muted">Go to your worklist and choose <strong>Case analysis</strong> on a case, or use <strong>Case Analysis</strong> in the menu for independent practice.</p>
+      <a class="btn-primary" [routerLink]="['/', caseAnalysisStudioPath]">Open Case Analysis</a>
     </section>
   } @else if (loading()) {
     <section class="panel loading-panel">
@@ -280,7 +283,7 @@
         />
       }
 
-      @if (showPanel('case-sheet') && !standalone) {
+      @if (showPanel('case-sheet')) {
         <app-approach-case-sheet-panel
           [fields]="caseSheetFields()"
           [title]="caseSheetTitle()"

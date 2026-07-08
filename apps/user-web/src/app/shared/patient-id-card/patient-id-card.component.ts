@@ -72,4 +72,15 @@ export class PatientIdCardComponent implements OnInit {
       this.loading.set(false);
     }
   }
+
+  qrImageUrl(card: PatientIdCard) {
+    const scanUrl = card.scanUrl ?? `${this.apiBase}/go/p/${encodeURIComponent(card.patientCode)}`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(scanUrl)}`;
+  }
+
+  printCard() {
+    document.body.classList.add('printing-patient-card');
+    window.print();
+    window.setTimeout(() => document.body.classList.remove('printing-patient-card'), 500);
+  }
 }
