@@ -24,7 +24,7 @@ export const routes: Routes = [
     component: DoctorShell,
     canActivate: [doctorAuthGuard],
     children: [
-      { path: '', pathMatch: 'full', redirectTo: ROUTE_PATHS.WORKLIST },
+      { path: '', pathMatch: 'full', component: WorklistPage },
       { path: ROUTE_PATHS.WORKLIST, component: WorklistPage },
       { path: ROUTE_PATHS.DASHBOARD, component: DashboardHome },
       { path: ROUTE_PATHS.APPOINTMENTS, component: AppointmentsPage },

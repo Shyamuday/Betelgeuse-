@@ -120,6 +120,7 @@ export class DoctorShell implements OnInit, OnDestroy {
   logout() {
     this.session.clear();
     this.auth.logout();
+    void this.router.navigate(['/', ROUTE_PATHS.LOGIN]);
   }
 
   openMenu() {

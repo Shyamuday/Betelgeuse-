@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { AppFooterComponent } from './app-footer.component';
-import { AppHeaderComponent } from './app-header.component';
-import { ClinicApiClient } from './clinic-api/clinic-api.client';
-import { API_PATHS } from './core/constants/api-paths.constants';
-import { BLOG_PAGE_CONTENT } from './core/constants/public-site-content.constants';
-import { SimpleMarkdownPipe } from './core/pipes/simple-markdown.pipe';
-import { WhatsappLinkService } from './core/services/whatsapp-link.service';
+import { AppFooterComponent } from '../../app-footer.component';
+import { AppHeaderComponent } from '../../app-header.component';
+import { ClinicApiClient } from '../../clinic-api/clinic-api.client';
+import { API_PATHS } from '../../core/constants/api-paths.constants';
+import { BLOG_PAGE_CONTENT } from '../../core/constants/public-site-content.constants';
+import { SimpleMarkdownPipe } from '../../core/pipes/simple-markdown.pipe';
+import { WhatsappLinkService } from '../../core/services/whatsapp-link.service';
 
 type BlogPostDetail = {
   id: string;

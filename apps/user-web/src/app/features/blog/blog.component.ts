@@ -1,11 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AppFooterComponent } from './app-footer.component';
-import { AppHeaderComponent } from './app-header.component';
-import { WhatsappLinkService } from './core/services/whatsapp-link.service';
-import { BLOG_PAGE_CONTENT } from './core/constants/public-site-content.constants';
-import { API_PATHS } from './core/constants/api-paths.constants';
-import { ClinicApiClient } from './clinic-api/clinic-api.client';
+import { AppFooterComponent } from '../../app-footer.component';
+import { AppHeaderComponent } from '../../app-header.component';
+import { WhatsappLinkService } from '../../core/services/whatsapp-link.service';
+import { BLOG_PAGE_CONTENT } from '../../core/constants/public-site-content.constants';
+import { API_PATHS } from '../../core/constants/api-paths.constants';
+import { ClinicApiClient } from '../../clinic-api/clinic-api.client';
 
 interface BlogPost {
   id: string;
