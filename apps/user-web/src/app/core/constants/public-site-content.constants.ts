@@ -85,7 +85,11 @@ export const HOME_CONTENT = {
   },
   booking: {
     formTitle: 'Book consultation',
-    formSubtitle: 'Enter your mobile number and we will send an OTP.',
+    formSubtitle: 'Choose your concern, then verify your mobile with OTP.',
+    diseaseLabel: 'Health concern',
+    diseasePlaceholder: 'Select a condition',
+    diseaseLoadingLabel: 'Loading conditions…',
+    diseaseBrowseLabel: 'Browse all treatments',
     mobileLabel: 'Mobile number',
     mobilePlaceholder: '10-digit mobile number',
     submitLabel: 'Book consultation',

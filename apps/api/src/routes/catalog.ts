@@ -9,7 +9,13 @@ import {
   DISEASE_PUBLIC_CATEGORIES,
   DISEASE_PUBLIC_CATEGORY_KEYS
 } from '../constants/disease-categories.constants.js';
-import { groupDiseasesByCategory, syncDiseaseCatalog } from '../services/disease-catalog.js';
+import {
+  assignDiseaseSlug,
+  getDiseaseBySlug,
+  groupDiseasesByCategory,
+  syncDiagnosedDiseaseOption,
+  syncDiseaseCatalog
+} from '../services/disease-catalog.js';
 
 export const router = Router();
 
@@ -66,6 +72,7 @@ router.get(
     const groupedRows = diseases.map((disease) => ({
       id: disease.id,
       name: disease.name,
+      slug: disease.slug,
       description: disease.description,
       publicCategory: disease.publicCategory,
       feeInPaise: disease.feeInPaise,
@@ -76,6 +83,18 @@ router.get(
       diseases,
       ...groupDiseasesByCategory(groupedRows, { includeEmpty: !q && !category })
     });
+  })
+);
+
+router.get(
+  '/diseases/by-slug/:slug',
+  asyncRoute(async (req, res) => {
+    const disease = await getDiseaseBySlug(routeParam(req, 'slug'));
+    if (!disease || !disease.isActive) {
+      res.status(404).json({ message: 'Disease not found.' });
+      return;
+    }
+    res.json({ disease });
   })
 );
 
@@ -125,6 +144,7 @@ router.get(
       const groupedDiseases = diseases.map((disease) => ({
         id: disease.id,
         name: disease.name,
+        slug: disease.slug,
         description: disease.description,
         publicCategory: disease.publicCategory,
         feeInPaise: disease.feeInPaise,
@@ -172,7 +192,13 @@ router.post(
       })
       .parse(req.body);
 
-    const disease = await prisma.disease.create({ data: body });
+    const disease = await prisma.disease.create({
+      data: {
+        ...body,
+        slug: await assignDiseaseSlug(body.name)
+      }
+    });
+    await syncDiagnosedDiseaseOption(body.name);
     res.status(201).json({ disease });
   })
 );
@@ -193,10 +219,24 @@ router.put(
       })
       .parse(req.body);
 
+    const existing = await prisma.disease.findUnique({ where: { id: routeParam(req, 'id') } });
+    if (!existing) {
+      res.status(404).json({ message: 'Disease not found.' });
+      return;
+    }
+
     const disease = await prisma.disease.update({
-      where: { id: routeParam(req, 'id') },
-      data: body
+      where: { id: existing.id },
+      data: {
+        ...body,
+        ...(body.name !== existing.name
+          ? { slug: await assignDiseaseSlug(body.name, existing.id) }
+          : existing.slug
+            ? {}
+            : { slug: await assignDiseaseSlug(body.name, existing.id) })
+      }
     });
+    await syncDiagnosedDiseaseOption(body.name);
     res.json({ disease });
   })
 );

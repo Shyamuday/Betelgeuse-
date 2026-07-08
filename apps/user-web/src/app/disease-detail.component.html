@@ -1,221 +1,267 @@
 
     <section class="public-shell">
-      <app-header [subtitle]="disease()?.shortName || 'Treatment'" [whatsappLink]="whatsappLink" />
+      <app-header [subtitle]="headerSubtitle()" [whatsappLink]="whatsappLink()" />
 
       <main class="content-page">
-        @if (disease(); as d) {
-          <section class="disease-hero panel">
-            <div>
-              <p class="eyebrow">Treatment detail</p>
-              <h1>{{ d.name }}</h1>
-              <p>{{ d.summary }}</p>
-              <div class="disease-meta">
-                @if (d.category) {
-                  <span>{{ d.category }}</span>
-                }
-                @if (d.diseaseType) {
-                  <span>{{ d.diseaseType }}</span>
-                }
-                @if (d.icdCode) {
-                  <span>ICD: {{ d.icdCode }}</span>
-                }
-              </div>
-            </div>
-            <img [src]="d.imageUrl" [alt]="d.imageAlt" />
+        @if (loading()) {
+          <section class="panel">
+            <p class="loading-text">Loading treatment details…</p>
           </section>
-
-          @if (d.ourApproach) {
-            <section class="panel root-cause-panel">
-              <p class="eyebrow">Our approach</p>
-              <h2>{{ d.ourApproach.title }}</h2>
-              <p>{{ d.ourApproach.intro }}</p>
-              <div class="values-list">
-                @for (point of d.ourApproach.points; track point) {
-                  <span>{{ point }}</span>
+        } @else if (pageReady()) {
+          @if (staticInfo(); as d) {
+            <section class="disease-hero panel">
+              <div>
+                <p class="eyebrow">Treatment detail</p>
+                <h1>{{ d.name }}</h1>
+                <p>{{ d.summary }}</p>
+                @if (liveDisease(); as live) {
+                  <p class="issue-fee-line">
+                    Consultation fee:
+                    <strong>{{ live.feeInPaise / 100 | currency: currencyCode }}</strong>
+                  </p>
                 }
+                <div class="disease-meta">
+                  @if (d.category) {
+                    <span>{{ d.category }}</span>
+                  }
+                  @if (d.diseaseType) {
+                    <span>{{ d.diseaseType }}</span>
+                  }
+                  @if (d.icdCode) {
+                    <span>ICD: {{ d.icdCode }}</span>
+                  }
+                </div>
               </div>
+              <img [src]="d.imageUrl" [alt]="d.imageAlt" />
             </section>
-          }
 
-          <section class="content-grid two">
-            <article class="panel">
-              <h2>About {{ d.shortName }}</h2>
-              <p>{{ d.about }}</p>
-              <div class="detail-list">
-                @for (item of d.details; track item) {
-                  <p>{{ item }}</p>
-                }
-              </div>
-            </article>
+            @if (d.ourApproach) {
+              <section class="panel root-cause-panel">
+                <p class="eyebrow">Our approach</p>
+                <h2>{{ d.ourApproach.title }}</h2>
+                <p>{{ d.ourApproach.intro }}</p>
+                <div class="values-list">
+                  @for (point of d.ourApproach.points; track point) {
+                    <span>{{ point }}</span>
+                  }
+                </div>
+              </section>
+            }
 
-            <article class="panel">
-              <h2>Common symptoms</h2>
-              <ul>
-                @for (symptom of d.symptoms; track symptom) {
-                  <li>{{ symptom }}</li>
-                }
-              </ul>
-            </article>
-          </section>
-
-          <section class="content-grid two">
-            @if (d.causes?.length) {
+            <section class="content-grid two">
               <article class="panel">
-                <h2>Possible causes</h2>
+                <h2>About {{ d.shortName }}</h2>
+                <p>{{ d.about }}</p>
+                <div class="detail-list">
+                  @for (item of d.details; track item) {
+                    <p>{{ item }}</p>
+                  }
+                </div>
+              </article>
+
+              <article class="panel">
+                <h2>Common symptoms</h2>
                 <ul>
-                  @for (cause of d.causes; track cause) {
-                    <li>{{ cause }}</li>
+                  @for (symptom of d.symptoms; track symptom) {
+                    <li>{{ symptom }}</li>
                   }
                 </ul>
               </article>
-            }
-
-            @if (d.riskFactors?.length) {
-              <article class="panel">
-                <h2>Risk factors</h2>
-                <ul>
-                  @for (risk of d.riskFactors; track risk) {
-                    <li>{{ risk }}</li>
-                  }
-                </ul>
-              </article>
-            }
-          </section>
-
-          <section class="content-grid two">
-            @if (d.diagnosis) {
-              <article class="panel">
-                <h2>Diagnosis approach</h2>
-                <p>{{ d.diagnosis }}</p>
-              </article>
-            }
-
-            @if (d.tests?.length) {
-              <article class="panel">
-                <h2>Tests, if needed</h2>
-                <ul>
-                  @for (test of d.tests; track test) {
-                    <li>{{ test }}</li>
-                  }
-                </ul>
-              </article>
-            }
-          </section>
-
-          @if (d.treatmentOptions) {
-            <section class="panel">
-              <h2>Treatment options</h2>
-              <div class="treatment-options">
-                <vitalis-detail-rows variant="blocks" [rows]="treatmentOptionRows(d)" />
-              </div>
             </section>
-          }
 
-          <section class="content-grid two">
-            @if (d.homeCare?.length) {
-              <article class="panel">
-                <h2>Home care</h2>
-                <ul>
-                  @for (item of d.homeCare; track item) {
-                    <li>{{ item }}</li>
-                  }
-                </ul>
-              </article>
-            }
-
-            @if (d.prevention?.length) {
-              <article class="panel">
-                <h2>Prevention</h2>
-                <ul>
-                  @for (item of d.prevention; track item) {
-                    <li>{{ item }}</li>
-                  }
-                </ul>
-              </article>
-            }
-          </section>
-
-          <section class="content-grid two">
-            <article class="panel">
-              <h2>Our care approach</h2>
-              <ul>
-                @for (step of d.careApproach; track step) {
-                  <li>{{ step }}</li>
-                }
-              </ul>
-            </article>
-
-            <article class="panel warning-panel">
-              <h2>Safety note</h2>
-              <p>{{ d.warning || defaultWarning }}</p>
-              @if (d.emergencySigns?.length) {
-                <h3>Emergency signs</h3>
-                <ul>
-                  @for (sign of d.emergencySigns; track sign) {
-                    <li>{{ sign }}</li>
-                  }
-                </ul>
+            <section class="content-grid two">
+              @if (d.causes?.length) {
+                <article class="panel">
+                  <h2>Possible causes</h2>
+                  <ul>
+                    @for (cause of d.causes; track cause) {
+                      <li>{{ cause }}</li>
+                    }
+                  </ul>
+                </article>
               }
-            </article>
-          </section>
 
-          @if (quickFactRows(d).length) {
-            <section class="content-grid three">
-              <vitalis-detail-rows variant="panel" [rows]="quickFactRows(d)" />
+              @if (d.riskFactors?.length) {
+                <article class="panel">
+                  <h2>Risk factors</h2>
+                  <ul>
+                    @for (risk of d.riskFactors; track risk) {
+                      <li>{{ risk }}</li>
+                    }
+                  </ul>
+                </article>
+              }
             </section>
-          }
 
-          <section class="content-grid two">
-            @if (d.stages?.length) {
+            <section class="content-grid two">
+              @if (d.diagnosis) {
+                <article class="panel">
+                  <h2>Diagnosis approach</h2>
+                  <p>{{ d.diagnosis }}</p>
+                </article>
+              }
+
+              @if (d.tests?.length) {
+                <article class="panel">
+                  <h2>Tests, if needed</h2>
+                  <ul>
+                    @for (test of d.tests; track test) {
+                      <li>{{ test }}</li>
+                    }
+                  </ul>
+                </article>
+              }
+            </section>
+
+            @if (d.treatmentOptions) {
+              <section class="panel">
+                <h2>Treatment options</h2>
+                <div class="treatment-options">
+                  <vitalis-detail-rows variant="blocks" [rows]="treatmentOptionRows(d)" />
+                </div>
+              </section>
+            }
+
+            <section class="content-grid two">
+              @if (d.homeCare?.length) {
+                <article class="panel">
+                  <h2>Home care</h2>
+                  <ul>
+                    @for (item of d.homeCare; track item) {
+                      <li>{{ item }}</li>
+                    }
+                  </ul>
+                </article>
+              }
+
+              @if (d.prevention?.length) {
+                <article class="panel">
+                  <h2>Prevention</h2>
+                  <ul>
+                    @for (item of d.prevention; track item) {
+                      <li>{{ item }}</li>
+                    }
+                  </ul>
+                </article>
+              }
+            </section>
+
+            <section class="content-grid two">
               <article class="panel">
-                <h2>Care stages</h2>
+                <h2>Our care approach</h2>
                 <ul>
-                  @for (stage of d.stages; track stage) {
-                    <li>{{ stage }}</li>
+                  @for (step of d.careApproach; track step) {
+                    <li>{{ step }}</li>
                   }
                 </ul>
               </article>
-            }
 
-            @if (d.commonIn) {
-              <article class="panel">
-                <h2>Common in</h2>
-                <vitalis-detail-rows [rows]="commonInRows(d)" />
+              <article class="panel warning-panel">
+                <h2>Safety note</h2>
+                <p>{{ d.warning || defaultWarning }}</p>
+                @if (d.emergencySigns?.length) {
+                  <h3>Emergency signs</h3>
+                  <ul>
+                    @for (sign of d.emergencySigns; track sign) {
+                      <li>{{ sign }}</li>
+                    }
+                  </ul>
+                }
               </article>
+            </section>
+
+            @if (quickFactRows(d).length) {
+              <section class="content-grid three">
+                <vitalis-detail-rows variant="panel" [rows]="quickFactRows(d)" />
+              </section>
             }
-          </section>
 
-          @if (d.faq?.length) {
-            <section class="faq-list">
-              <h2>FAQ</h2>
-              <vitalis-detail-rows variant="panel" panelHeading="h3" [rows]="faqRows(d.faq)" />
+            <section class="content-grid two">
+              @if (d.stages?.length) {
+                <article class="panel">
+                  <h2>Care stages</h2>
+                  <ul>
+                    @for (stage of d.stages; track stage) {
+                      <li>{{ stage }}</li>
+                    }
+                  </ul>
+                </article>
+              }
+
+              @if (d.commonIn) {
+                <article class="panel">
+                  <h2>Common in</h2>
+                  <vitalis-detail-rows [rows]="commonInRows(d)" />
+                </article>
+              }
+            </section>
+
+            @if (d.faq?.length) {
+              <section class="faq-list">
+                <h2>FAQ</h2>
+                <vitalis-detail-rows variant="panel" panelHeading="h3" [rows]="faqRows(d.faq)" />
+              </section>
+            }
+
+            @if (reviewRows(d).length) {
+              <section class="panel review-panel">
+                <vitalis-detail-rows [rows]="reviewRows(d)" />
+              </section>
+            }
+
+            <section class="about-cta panel">
+              <div>
+                <p class="eyebrow">Ready to begin?</p>
+                <h2>Book a consultation for {{ d.shortName }}.</h2>
+                <p>Complete a short intake and our internal doctor panel will guide the next step.</p>
+              </div>
+              @if (liveDisease(); as live) {
+                <a
+                  class="primary home-action"
+                  [routerLink]="dashboardPath"
+                  [queryParams]="{ diseaseId: live.id }">
+                  Book consultation
+                </a>
+              } @else {
+                <a class="primary home-action" href="/login" (click)="openAuthOverlay($event)">Book consultation</a>
+              }
+            </section>
+          } @else if (liveDisease(); as live) {
+            <section class="disease-hero panel">
+              <div>
+                <p class="eyebrow">Treatment detail</p>
+                <h1>{{ live.name }}</h1>
+                <p>{{ live.description }}</p>
+                <p class="issue-fee-line">
+                  Consultation fee:
+                  <strong>{{ live.feeInPaise / 100 | currency: currencyCode }}</strong>
+                </p>
+              </div>
+            </section>
+
+            <section class="about-cta panel">
+              <div>
+                <p class="eyebrow">Ready to begin?</p>
+                <h2>Book a consultation for {{ live.name }}.</h2>
+                <p>Complete a short intake and our internal doctor panel will guide the next step.</p>
+              </div>
+              <a
+                class="primary home-action"
+                [routerLink]="dashboardPath"
+                [queryParams]="{ diseaseId: live.id }">
+                Book consultation
+              </a>
             </section>
           }
-
-          @if (reviewRows(d).length) {
-            <section class="panel review-panel">
-              <vitalis-detail-rows [rows]="reviewRows(d)" />
-            </section>
-          }
-
-          <section class="about-cta panel">
-            <div>
-              <p class="eyebrow">Ready to begin?</p>
-              <h2>Book a consultation for {{ d.shortName }}.</h2>
-              <p>Complete a short intake and our internal doctor panel will guide the next step.</p>
-            </div>
-            <a class="primary home-action" href="/login" (click)="openAuthOverlay($event)">Book consultation</a>
-          </section>
         } @else {
           <section class="page-hero panel">
             <p class="eyebrow">Treatment not found</p>
             <h1>This treatment page is not available yet.</h1>
-            <p>More disease-specific pages can be added from the disease data list.</p>
+            <p>Browse our full list of conditions or contact us for help choosing the right consultation.</p>
             <a class="primary home-action" href="/treatments">View treatments</a>
           </section>
         }
       </main>
 
-      <app-footer [whatsappLink]="whatsappLink" />
+      <app-footer [whatsappLink]="whatsappLink()" />
     </section>
-  

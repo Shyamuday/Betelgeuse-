@@ -23,6 +23,7 @@ enum BillingPlanType {
 model Disease {
   id                 String         @id @default(cuid())
   name               String         @unique
+  slug               String?        @unique
   description        String
   feeInPaise         Int
   intakeQuestions    Json
@@ -36,6 +37,7 @@ model Disease {
   updatedAt          DateTime       @updatedAt
 
   @@index([publicCategory])
+  @@index([slug])
 }
 
 /// Per-clinic or online consultation fee override. `locationKey` is `ONLINE` or a store id.

@@ -5,12 +5,14 @@ import {
   DISEASE_PUBLIC_CATEGORIES
 } from '../constants/disease-categories.constants.js';
 import { DISEASE_CATALOG_TEMPLATE } from '../constants/disease-catalog-template.constants.js';
+import { resolveDiseaseSlug } from '../constants/disease-slugs.constants.js';
 import { prisma } from '../db.js';
 import { normalizeOptionLabel } from '../utils/helpers.js';
 
 export type DiseaseListItem = {
   id: string;
   name: string;
+  slug: string | null;
   description: string;
   publicCategory: string | null;
   feeInPaise: number;
@@ -62,6 +64,7 @@ export async function listDiseases(filters: {
     select: {
       id: true,
       name: true,
+      slug: true,
       description: true,
       publicCategory: true,
       feeInPaise: true,
@@ -108,6 +111,71 @@ export function groupDiseasesByCategory(
   return { categories, uncategorized };
 }
 
+export async function syncDiagnosedDiseaseOption(name: string, createdById?: string) {
+  const normalized = normalizeOptionLabel(name);
+  await prisma.prescriptionOption.upsert({
+    where: { type_normalizedLabel: { type: PrescriptionOptionType.DIAGNOSED_DISEASE, normalizedLabel: normalized } },
+    update: { label: name },
+    create: {
+      type: PrescriptionOptionType.DIAGNOSED_DISEASE,
+      label: name,
+      normalizedLabel: normalized,
+      isSystem: false,
+      createdById: createdById ?? null
+    }
+  });
+}
+
+async function ensureUniqueSlug(baseSlug: string, excludeId?: string): Promise<string> {
+  let candidate = baseSlug;
+  let suffix = 2;
+  while (true) {
+    const existing = await prisma.disease.findFirst({
+      where: {
+        slug: candidate,
+        ...(excludeId ? { NOT: { id: excludeId } } : {})
+      },
+      select: { id: true }
+    });
+    if (!existing) return candidate;
+    candidate = `${baseSlug}-${suffix}`;
+    suffix += 1;
+  }
+}
+
+export async function assignDiseaseSlug(name: string, excludeId?: string) {
+  const base = resolveDiseaseSlug(name);
+  return ensureUniqueSlug(base, excludeId);
+}
+
+export async function getDiseaseBySlug(slug: string) {
+  const normalized = slug.trim().toLowerCase();
+  if (!normalized) return null;
+
+  const direct = await prisma.disease.findFirst({
+    where: { slug: normalized, isActive: true }
+  });
+  if (direct) return direct;
+
+  return prisma.disease.findFirst({
+    where: { slug: { equals: normalized, mode: 'insensitive' }, isActive: true }
+  });
+}
+
+export async function backfillDiseaseSlugs() {
+  const diseases = await prisma.disease.findMany({ select: { id: true, name: true, slug: true } });
+  let updated = 0;
+
+  for (const disease of diseases) {
+    if (disease.slug) continue;
+    const slug = await assignDiseaseSlug(disease.name, disease.id);
+    await prisma.disease.update({ where: { id: disease.id }, data: { slug } });
+    updated += 1;
+  }
+
+  return updated;
+}
+
 export async function createDoctorDisease(input: {
   name: string;
   publicCategory: string;
@@ -129,9 +197,11 @@ export async function createDoctorDisease(input: {
     throw new DiseaseCatalogError('DISEASE_EXISTS', 'A disease with this name already exists.');
   }
 
+  const slug = await assignDiseaseSlug(name);
   const disease = await prisma.disease.create({
     data: {
       name,
+      slug,
       description: input.description?.trim() || `${name} — doctor-added condition`,
       publicCategory: input.publicCategory,
       feeInPaise: input.feeInPaise ?? DEFAULT_DOCTOR_DISEASE_FEE_PAISE,
@@ -141,6 +211,7 @@ export async function createDoctorDisease(input: {
     select: {
       id: true,
       name: true,
+      slug: true,
       description: true,
       publicCategory: true,
       feeInPaise: true,
@@ -148,18 +219,7 @@ export async function createDoctorDisease(input: {
     }
   });
 
-  const normalized = normalizeOptionLabel(name);
-  await prisma.prescriptionOption.upsert({
-    where: { type_normalizedLabel: { type: PrescriptionOptionType.DIAGNOSED_DISEASE, normalizedLabel: normalized } },
-    update: { label: name },
-    create: {
-      type: PrescriptionOptionType.DIAGNOSED_DISEASE,
-      label: name,
-      normalizedLabel: normalized,
-      isSystem: false,
-      createdById: input.createdById
-    }
-  });
+  await syncDiagnosedDiseaseOption(name, input.createdById);
 
   return disease;
 }
@@ -167,24 +227,33 @@ export async function createDoctorDisease(input: {
 export async function syncDiseaseCatalog(defaultFeeInPaise = DEFAULT_DOCTOR_DISEASE_FEE_PAISE) {
   let created = 0;
   let categorized = 0;
+  let prescriptionOptionsSynced = 0;
 
   for (const group of DISEASE_CATALOG_TEMPLATE) {
     for (const name of group.names) {
       const existing = await prisma.disease.findUnique({ where: { name } });
       if (existing) {
+        const updates: { publicCategory?: string; slug?: string } = {};
         if (!existing.publicCategory) {
-          await prisma.disease.update({
-            where: { id: existing.id },
-            data: { publicCategory: group.publicCategory }
-          });
+          updates.publicCategory = group.publicCategory;
           categorized += 1;
         }
+        if (!existing.slug) {
+          updates.slug = await assignDiseaseSlug(name, existing.id);
+        }
+        if (Object.keys(updates).length) {
+          await prisma.disease.update({ where: { id: existing.id }, data: updates });
+        }
+        await syncDiagnosedDiseaseOption(name);
+        prescriptionOptionsSynced += 1;
         continue;
       }
 
+      const slug = await assignDiseaseSlug(name);
       await prisma.disease.create({
         data: {
           name,
+          slug,
           description: `Consultation for ${name}.`,
           publicCategory: group.publicCategory,
           feeInPaise: defaultFeeInPaise,
@@ -192,10 +261,13 @@ export async function syncDiseaseCatalog(defaultFeeInPaise = DEFAULT_DOCTOR_DISE
           isActive: true
         }
       });
+      await syncDiagnosedDiseaseOption(name);
+      prescriptionOptionsSynced += 1;
       created += 1;
     }
   }
 
+  const slugsBackfilled = await backfillDiseaseSlugs();
   const total = await prisma.disease.count();
-  return { created, categorized, total };
+  return { created, categorized, slugsBackfilled, prescriptionOptionsSynced, total };
 }

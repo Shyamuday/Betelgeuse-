@@ -30,6 +30,10 @@ export class ClinicApiService {
     return from(this.fetchDiseasesGrouped(params));
   }
 
+  diseaseBySlug(slug: string) {
+    return from(this.fetchDiseaseBySlug(slug));
+  }
+
   consultations() {
     return from(this.fetchConsultations());
   }
@@ -238,6 +242,13 @@ export class ClinicApiService {
   private async fetchDiseases() {
     const response = await this.client.apiFetch<{ diseases: Array<Record<string, unknown>> }>('/diseases?grouped=false');
     return { diseases: (response.diseases || []).map((row) => mapDiseaseFromApi(row)) };
+  }
+
+  private async fetchDiseaseBySlug(slug: string) {
+    const response = await this.client.apiFetch<{ disease: Record<string, unknown> }>(
+      `/diseases/by-slug/${encodeURIComponent(slug)}`
+    );
+    return { disease: mapDiseaseFromApi(response.disease) };
   }
 
   private async fetchDiseasesGrouped(params?: { q?: string; category?: string }) {

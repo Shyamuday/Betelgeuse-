@@ -1,11 +1,15 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { CommonModule, CurrencyPipe } from '@angular/common';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { buildDetailRows, DetailRowsComponent, type DetailRow } from '@vitalis/platform-ui';
 import { AppFooterComponent } from './app-footer.component';
 import { AppHeaderComponent } from './app-header.component';
 import { AuthFormOverlayComponent } from './auth/auth-form-overlay.component';
-import { WHATSAPP_CONTACT_URL } from './core/constants/branding.constants';
+import { ClinicApiService } from './clinic-api.service';
+import { ROUTE_PATHS } from './core/constants/app-routes.constants';
+import { CURRENCY_CODE } from './core/constants/billing.constants';
+import { WhatsappLinkService } from './core/services/whatsapp-link.service';
 import {
   DISEASE_COMMON_IN_FIELDS,
   DISEASE_QUICK_FACT_FIELDS,
@@ -13,35 +17,69 @@ import {
   DISEASE_TREATMENT_OPTION_FIELDS
 } from './disease/constants/disease-detail.fields';
 import { diseaseInfos } from './disease/disease-info.constants';
-import { DiseaseInfo } from './models';
+import { Disease, DiseaseInfo } from './models';
 import { AppOverlayService } from './overlay.service';
 
 @Component({
   selector: 'app-disease-detail',
-  imports: [CommonModule, AppHeaderComponent, AppFooterComponent, DetailRowsComponent],
+  imports: [CommonModule, CurrencyPipe, RouterLink, AppHeaderComponent, AppFooterComponent, DetailRowsComponent],
   templateUrl: './disease-detail.component.html',
 })
 export class DiseaseDetailComponent implements OnInit {
-  readonly whatsappLink = WHATSAPP_CONTACT_URL;
+  private readonly route = inject(ActivatedRoute);
+  private readonly overlayService = inject(AppOverlayService);
+  private readonly api = inject(ClinicApiService);
+  private readonly whatsappSvc = inject(WhatsappLinkService);
+
+  readonly whatsappLink = this.whatsappSvc.url;
   readonly defaultWarning =
     'This service is not for emergency care. For severe, sudden, or rapidly worsening symptoms, seek immediate offline medical help.';
-  readonly disease = signal<DiseaseInfo | undefined>(undefined);
+  readonly currencyCode = CURRENCY_CODE;
+  readonly dashboardPath = `/${ROUTE_PATHS.PATIENT_DASHBOARD}`;
 
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly overlayService: AppOverlayService,
-  ) {}
+  readonly staticInfo = signal<DiseaseInfo | undefined>(undefined);
+  readonly liveDisease = signal<Disease | null>(null);
+  readonly loading = signal(true);
+
+  readonly pageReady = computed(() => !this.loading() && (this.staticInfo() || this.liveDisease()));
+  readonly displayName = computed(() => this.staticInfo()?.name || this.liveDisease()?.name || '');
+  readonly displaySummary = computed(
+    () => this.staticInfo()?.summary || this.liveDisease()?.description || ''
+  );
+  readonly headerSubtitle = computed(() => this.staticInfo()?.shortName || this.displayName());
 
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {
       const slug = params.get('slug');
-      this.disease.set(diseaseInfos.find((item) => item.slug === slug));
+      if (!slug) {
+        this.loading.set(false);
+        return;
+      }
+      void this.loadPage(slug);
       window.scrollTo(0, 0);
     });
   }
 
-  openAuthOverlay(event: Event) {
+  private async loadPage(slug: string) {
+    this.loading.set(true);
+    this.staticInfo.set(diseaseInfos.find((item) => item.slug === slug));
+    this.liveDisease.set(null);
+
+    try {
+      const response = await firstValueFrom(this.api.diseaseBySlug(slug));
+      this.liveDisease.set(response.disease);
+    } catch {
+      // Static marketing page may exist without a matching DB row.
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  openAuthOverlay(event: Event, diseaseId?: string) {
     event.preventDefault();
+    if (diseaseId && typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem('pendingDiseaseId', diseaseId);
+    }
     this.overlayService.open(AuthFormOverlayComponent, {
       width: '480px',
       panelClass: 'app-overlay-panel',

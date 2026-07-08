@@ -1,6 +1,6 @@
 ﻿
     <section class="public-shell">
-      <app-header [subtitle]="copy.headerSubtitle" [whatsappLink]="whatsappLink" />
+      <app-header [subtitle]="copy.headerSubtitle" [whatsappLink]="whatsappLink()" />
       <main class="content-page">
         <section class="page-hero panel">
           <p class="eyebrow">{{ copy.eyebrow }}</p>
@@ -74,11 +74,12 @@
                   [queryParams]="bookingQuery(disease.id)">
                   {{ copy.issueSelectionCta }}
                 </a>
+                <a class="secondary home-action" [routerLink]="detailPath(disease)">Learn more</a>
                 <a class="secondary home-action" href="/login" (click)="openAuthOverlay($event, disease.id)">Login to book</a>
               </div>
             </section>
           }
         }
       </main>
-      <app-footer [whatsappLink]="whatsappLink" />
+      <app-footer [whatsappLink]="whatsappLink()" />
     </section>

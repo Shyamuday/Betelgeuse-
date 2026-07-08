@@ -26,6 +26,7 @@ export type PatientSelectionResponse = {
 export type Disease = {
   id: string;
   name: string;
+  slug?: string | null;
   description: string;
   feeInPaise: number;
   intakeQuestions: string[];

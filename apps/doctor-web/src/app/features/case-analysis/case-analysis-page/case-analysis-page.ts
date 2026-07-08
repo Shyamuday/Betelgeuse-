@@ -104,7 +104,9 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
   private readonly notesAutoSave = createDebouncedSaver(1200);
   private readonly rubricsAutoSave = createDebouncedSaver(900);
   private readonly rubricSuggestDebouncer = createDebouncedSaver(280);
+  private readonly mmSearchDebouncer = createDebouncedSaver(450);
   private rubricSuggestRequest = 0;
+  private mmSearchRequest = 0;
   private lastPersistedCaseSheet = '';
   private lastPersistedNotes = '';
   private lastPersistedRubrics = '';
@@ -229,6 +231,12 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
       const sourceId = this.searchModel().selectedSourceId || this.analysis()?.source?.id || '';
       this.scheduleRubricSuggest(query, sourceId);
     });
+    effect(() => {
+      if (this.searchMode() !== 'materia-medica') return;
+      const query = this.searchModel().rubricQuery.trim();
+      const sourceId = this.searchModel().selectedMmSourceId;
+      this.scheduleMmSearch(query, sourceId);
+    });
   }
 
   ngOnInit() {
@@ -262,6 +270,7 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
     this.notesAutoSave.cancel();
     this.rubricsAutoSave.cancel();
     this.rubricSuggestDebouncer.cancel();
+    this.mmSearchDebouncer.cancel();
   }
 
   showPanel(component: ApproachStepComponent) {
@@ -380,6 +389,14 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
     this.selectedMmSearchResult.set(null);
     this.searchedOnce.set(false);
     this.closeRubricSuggestions();
+    this.mmSearchDebouncer.cancel();
+    if (mode === 'materia-medica') {
+      const query = this.searchModel().rubricQuery.trim();
+      const sourceId = this.searchModel().selectedMmSourceId;
+      if (query.length >= 2 && sourceId) {
+        this.scheduleMmSearch(query, sourceId);
+      }
+    }
   }
 
   async runSymptomSearch() {
@@ -394,6 +411,23 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
     const q = this.searchModel().rubricQuery.trim();
     const sourceId = this.searchModel().selectedMmSourceId;
     if (q.length < 2 || !sourceId) return;
+    await this.loadMmSearch(q, sourceId);
+  }
+
+  private scheduleMmSearch(query: string, sourceId: string) {
+    if (query.length < 2 || !sourceId) {
+      this.mmSearchDebouncer.cancel();
+      this.mmSearchResults.set([]);
+      this.selectedMmSearchResult.set(null);
+      this.searchedOnce.set(false);
+      this.searching.set(false);
+      return;
+    }
+
+    this.mmSearchDebouncer.schedule(() => this.loadMmSearch(query, sourceId));
+  }
+
+  private async loadMmSearch(query: string, sourceId: string) {
     if (!sourceId.startsWith('oorep-mm:')) {
       this.error.set('Materia medica search uses online OOREP sources. Pick a source like Boericke or Clarke.');
       this.mmSearchResults.set([]);
@@ -401,20 +435,25 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
       return;
     }
 
+    const requestId = ++this.mmSearchRequest;
     this.closeRubricSuggestions();
     this.searching.set(true);
     this.error.set('');
     this.searchedOnce.set(true);
     this.selectedMmSearchResult.set(null);
     try {
-      const response = await this.api.searchMateriaMedica(q, sourceId);
+      const response = await this.api.searchMateriaMedica(query, sourceId);
+      if (requestId !== this.mmSearchRequest) return;
       this.mmSearchResults.set(response.results);
       this.searchResults.set([]);
     } catch {
+      if (requestId !== this.mmSearchRequest) return;
       this.error.set('Materia medica search failed.');
       this.mmSearchResults.set([]);
     } finally {
-      this.searching.set(false);
+      if (requestId === this.mmSearchRequest) {
+        this.searching.set(false);
+      }
     }
   }
 

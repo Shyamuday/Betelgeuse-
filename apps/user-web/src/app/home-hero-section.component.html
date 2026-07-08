@@ -15,6 +15,23 @@
 
               <div class="bc-fields">
                 <label class="bc-field">
+                  <span class="bc-label">{{ copy.booking.diseaseLabel }}</span>
+                  @if (diseasesLoading()) {
+                    <p class="bc-hint">{{ copy.booking.diseaseLoadingLabel }}</p>
+                  } @else {
+                    <select [formField]="bookingForm.diseaseId">
+                      <option value="">{{ copy.booking.diseasePlaceholder }}</option>
+                      @for (disease of diseases(); track disease.id) {
+                        <option [value]="disease.id">
+                          {{ disease.name }} — {{ disease.feeInPaise / 100 | currency: currencyCode }}
+                        </option>
+                      }
+                    </select>
+                    <a class="bc-hint bc-hint-link" [href]="browseTreatmentsHref()">{{ copy.booking.diseaseBrowseLabel }}</a>
+                  }
+                </label>
+
+                <label class="bc-field">
                   <span class="bc-label">{{ copy.booking.mobileLabel }}</span>
                   <div class="bc-input-wrap">
                     <span class="bc-prefix">+91</span>
