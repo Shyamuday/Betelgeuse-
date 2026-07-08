@@ -17,7 +17,7 @@
   } @else if (!claims().length) {
     <p class="empty">No claims yet.</p>
   } @else {
-    <div class="table-wrap">
+    <div class="table-wrap desktop-only">
       <table class="table">
         <thead>
           <tr>
@@ -40,6 +40,20 @@
           }
         </tbody>
       </table>
+    </div>
+
+    <div class="mobile-row-cards">
+      @for (c of claims(); track c.id) {
+        <article class="mobile-row-card">
+          <div class="card-head">
+            <strong>{{ c.claimNumber }}</strong>
+            <span class="status">{{ c.status }}</span>
+          </div>
+          <div class="card-row"><span>{{ c.patient?.name }}</span><span>{{ c.patient?.patientCode }}</span></div>
+          <div class="card-row"><span>Amount</span><strong>₹{{ formatPaise(c.claimAmountInPaise) }}</strong></div>
+          <p class="muted">{{ c.description ?? '—' }}</p>
+        </article>
+      }
     </div>
   }
 

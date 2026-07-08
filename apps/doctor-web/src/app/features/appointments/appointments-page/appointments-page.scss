@@ -403,7 +403,125 @@ button {
   color: #b91c1c;
 }
 
+.appointments-page {
+  padding-bottom: 0.5rem;
+}
+
+.page-intro .intro-lead {
+  margin: 0 0 1rem;
+}
+
+.rx-mobile-tabs {
+  display: none;
+}
+
+.mobile-context-toggle {
+  display: none;
+}
+
+.rx-mobile-bar {
+  display: none;
+}
+
+.rx-mobile-alerts {
+  display: none;
+}
+
 @media (max-width: 768px) {
+  .appointments-page {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .page-intro .intro-lead {
+    display: none;
+  }
+
+  .rx-mobile-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+    position: sticky;
+    top: calc(var(--shell-topbar-height, 3rem) + var(--safe-top, 0px));
+    z-index: 5;
+    padding: 0.35rem 0;
+    background: var(--shell-bg, #0f172a);
+  }
+
+  .rx-tab {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.5rem 0.35rem;
+    min-height: 44px;
+    background: #fff;
+    color: #334155;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    &.active {
+      border-color: #4f46e5;
+      background: #eef2ff;
+      color: #312e81;
+    }
+  }
+
+  .mobile-context-toggle {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    margin-bottom: 0.65rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #4f46e5;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .rx-mobile-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr;
+    gap: 0.45rem;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--shell-bottom-nav-height, 3.5rem) + env(safe-area-inset-bottom, 0px));
+    z-index: 20;
+    padding: 0.55rem 0.75rem;
+    background: #fff;
+    border-top: 1px solid #e5e7eb;
+    box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.08);
+
+    button {
+      min-height: 44px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .btn-publish {
+      grid-column: span 1;
+    }
+  }
+
+  .rx-mobile-alerts {
+    display: block;
+    position: fixed;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: calc(var(--shell-bottom-nav-height, 3.5rem) + 3.75rem + env(safe-area-inset-bottom, 0px));
+    z-index: 21;
+
+    p {
+      margin: 0 0 0.35rem;
+      padding: 0.5rem 0.65rem;
+      border-radius: 8px;
+      background: #fff;
+      font-size: 0.85rem;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+    }
+  }
+
   .inline {
     display: grid;
     grid-template-columns: 1fr;

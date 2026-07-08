@@ -1,10 +1,11 @@
-<section class="panel">
-  <p class="muted">
-    For assigned cases and follow-ups, use the <a [routerLink]="worklistPath">Worklist</a>.
-  </p>
-</section>
+<section class="patients-page">
+  <section class="panel" [class.mobile-pane-hidden]="!showListPane()">
+    <p class="muted">
+      For assigned cases and follow-ups, use the <a [routerLink]="worklistPath">Worklist</a>.
+    </p>
+  </section>
 
-<section class="panel">
+  <section class="panel" [class.mobile-pane-hidden]="!showListPane()">
   <h2>Find Patient</h2>
   <p class="muted">Search your clinic branch first (e.g. Ranchi). One mobile can have multiple family members — pick the right profile.</p>
   <div class="toolbar column form-grid">
@@ -59,7 +60,7 @@
   }
 </section>
 
-@if (showCreatePatient) {
+@if (showCreatePatient && showListPane()) {
 <section class="panel">
   <h3>Register walk-in patient</h3>
   <p class="muted">Email and mobile are optional. A unique patient code is assigned automatically.</p>
@@ -85,6 +86,11 @@
   }
 </section>
 }
+
+@if (showDetailPane()) {
+  @if (isMobile() && hasSelection()) {
+    <button type="button" class="mobile-back" (click)="backToList()">← Back to search</button>
+  }
 
 @if (patientCardLoading()) {
 <section class="panel">
@@ -233,3 +239,5 @@
 @if (error()) {
   <p class="error">{{ error() }}</p>
 }
+}
+</section>

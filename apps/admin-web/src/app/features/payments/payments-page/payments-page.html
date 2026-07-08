@@ -36,7 +36,7 @@
   } @else if (!payments().length) {
     <p class="empty-state">No payments match your filters.</p>
   } @else {
-    <div class="table-wrap">
+    <div class="table-wrap desktop-only">
       <table>
         <thead>
           <tr>
@@ -65,6 +65,24 @@
           }
         </tbody>
       </table>
+    </div>
+
+    <div class="mobile-row-cards">
+      @for (p of payments(); track p.id) {
+        <article class="mobile-row-card">
+          <div class="card-head">
+            <div>
+              <strong>{{ p.consultation?.patient?.name ?? '—' }}</strong>
+              <div class="muted">{{ p.createdAt | date:'short' }}</div>
+            </div>
+            <span class="badge" [style.background]="statusStyles[p.status]?.bg" [style.color]="statusStyles[p.status]?.color">
+              {{ p.status }}
+            </span>
+          </div>
+          <div class="card-row"><span>{{ p.consultation?.disease?.name ?? '—' }}</span><strong>₹{{ formatPaise(p.amountInPaise) }}</strong></div>
+          <div class="card-row"><span>Doctor</span><span>{{ p.consultation?.assignedDoctor?.name ?? 'Unassigned' }}</span></div>
+        </article>
+      }
     </div>
 
     <div class="pager">

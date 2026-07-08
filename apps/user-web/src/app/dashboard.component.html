@@ -37,8 +37,10 @@
             [diseases]="diseases()"
             [plans]="billingPlans()"
             [initialDiseaseId]="pendingDiseaseIdValue()"
+            [initialClinicStoreId]="selectedClinicStoreId()"
             [disabled]="isProcessing()"
             (booked)="onBooked($event)"
+            (clinicStoreChange)="onClinicStoreChange($event)"
           />
           <app-consultation-list
             [consultations]="consultations()"

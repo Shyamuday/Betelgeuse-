@@ -29,21 +29,31 @@
       @if (!r.doctors.length) {
         <p class="empty">No doctors assigned to this branch.</p>
       } @else {
-        <table class="table">
-          <thead>
-            <tr><th>Name</th><th>Shift</th><th>Status</th><th>Attendance</th></tr>
-          </thead>
-          <tbody>
-            @for (row of r.doctors; track row.id) {
-              <tr>
-                <td>{{ row.name }}</td>
-                <td>{{ row.shift }}</td>
-                <td>{{ row.employeeStatus }}</td>
-                <td><span class="badge" [class.leave]="row.attendance === 'ON_LEAVE'">{{ attendanceLabel(row.attendance) }}</span></td>
-              </tr>
-            }
-          </tbody>
-        </table>
+        <div class="table-wrap desktop-only">
+          <table class="table">
+            <thead>
+              <tr><th>Name</th><th>Shift</th><th>Status</th><th>Attendance</th></tr>
+            </thead>
+            <tbody>
+              @for (row of r.doctors; track row.id) {
+                <tr>
+                  <td>{{ row.name }}</td>
+                  <td>{{ row.shift }}</td>
+                  <td>{{ row.employeeStatus }}</td>
+                  <td><span class="badge" [class.leave]="row.attendance === 'ON_LEAVE'">{{ attendanceLabel(row.attendance) }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="mobile-row-cards">
+          @for (row of r.doctors; track row.id) {
+            <article class="mobile-row-card">
+              <div class="card-head"><strong>{{ row.name }}</strong><span class="badge" [class.leave]="row.attendance === 'ON_LEAVE'">{{ attendanceLabel(row.attendance) }}</span></div>
+              <div class="card-row"><span>{{ row.shift }}</span><span>{{ row.employeeStatus }}</span></div>
+            </article>
+          }
+        </div>
       }
     </section>
 
@@ -52,21 +62,31 @@
       @if (!r.storeStaff.length) {
         <p class="empty">No store staff at this branch.</p>
       } @else {
-        <table class="table">
-          <thead>
-            <tr><th>Name</th><th>Shift</th><th>Status</th><th>Attendance</th></tr>
-          </thead>
-          <tbody>
-            @for (row of r.storeStaff; track row.id) {
-              <tr>
-                <td>{{ row.name }}</td>
-                <td>{{ row.shift }}</td>
-                <td>{{ row.employeeStatus }}</td>
-                <td><span class="badge" [class.leave]="row.attendance === 'ON_LEAVE'">{{ attendanceLabel(row.attendance) }}</span></td>
-              </tr>
-            }
-          </tbody>
-        </table>
+        <div class="table-wrap desktop-only">
+          <table class="table">
+            <thead>
+              <tr><th>Name</th><th>Shift</th><th>Status</th><th>Attendance</th></tr>
+            </thead>
+            <tbody>
+              @for (row of r.storeStaff; track row.id) {
+                <tr>
+                  <td>{{ row.name }}</td>
+                  <td>{{ row.shift }}</td>
+                  <td>{{ row.employeeStatus }}</td>
+                  <td><span class="badge" [class.leave]="row.attendance === 'ON_LEAVE'">{{ attendanceLabel(row.attendance) }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="mobile-row-cards">
+          @for (row of r.storeStaff; track row.id) {
+            <article class="mobile-row-card">
+              <div class="card-head"><strong>{{ row.name }}</strong><span class="badge" [class.leave]="row.attendance === 'ON_LEAVE'">{{ attendanceLabel(row.attendance) }}</span></div>
+              <div class="card-row"><span>{{ row.shift }}</span><span>{{ row.employeeStatus }}</span></div>
+            </article>
+          }
+        </div>
       }
     </section>
   }

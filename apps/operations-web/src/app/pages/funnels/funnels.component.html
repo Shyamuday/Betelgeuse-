@@ -30,7 +30,7 @@
 
     <section class="section">
       <h3>Funnel steps ({{ d.windowDays }} days)</h3>
-      <div class="table-wrap">
+      <div class="table-wrap desktop-only">
         <table class="table">
           <thead>
             <tr>
@@ -53,6 +53,16 @@
             }
           </tbody>
         </table>
+      </div>
+      <div class="mobile-row-cards">
+        @for (step of d.funnel; track step.key) {
+          <article class="mobile-row-card">
+            <div class="card-head"><strong>{{ step.label }}</strong><span>{{ step.total }} events</span></div>
+            <div class="card-row"><span>Unique users</span><span>{{ step.uniqueActors }}</span></div>
+            <div class="card-row"><span>From start</span><span>{{ step.conversionFromStart }}%</span></div>
+            <div class="card-row"><span>From prev</span><span>{{ step.conversionFromPrevious }}%</span></div>
+          </article>
+        }
       </div>
     </section>
   }

@@ -79,7 +79,9 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
   @Input() plans: BillingPlan[] = [];
   @Input() disabled = false;
   @Input() initialDiseaseId = '';
+  @Input() initialClinicStoreId = '';
   @Output() booked = new EventEmitter<BookConsultationPayload>();
+  @Output() clinicStoreChange = new EventEmitter<string>();
 
   readonly bookingFormModel = signal<BookingForm>(emptyBookingForm());
   readonly bookingForm = form(this.bookingFormModel);
@@ -98,17 +100,17 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
       const res = await this.apiClient.get<{ clinics: ClinicOption[] }>(API_PATHS.CLINICS);
       const clinics = res.clinics || [];
       this.clinics.set(clinics);
-      const pendingClinic =
-        typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('pendingClinicStoreId') : null;
-      const preferred =
-        pendingClinic && clinics.some((clinic) => clinic.id === pendingClinic)
-          ? pendingClinic
-          : clinics[0]?.id || '';
-      if (preferred) {
-        this.bookingFormModel.update((m) => ({ ...m, selectedClinicStoreId: preferred }));
-        if (pendingClinic && typeof sessionStorage !== 'undefined') {
-          sessionStorage.removeItem('pendingClinicStoreId');
-        }
+      const preferred = this.resolvePreferredClinicId(clinics);
+      this.bookingFormModel.update((m) => ({ ...m, selectedClinicStoreId: preferred }));
+      if (
+        preferred &&
+        typeof sessionStorage !== 'undefined' &&
+        sessionStorage.getItem('pendingClinicStoreId') === preferred
+      ) {
+        sessionStorage.removeItem('pendingClinicStoreId');
+      }
+      if (preferred && !this.initialClinicStoreId) {
+        this.clinicStoreChange.emit(preferred);
       }
     } catch {
       this.clinics.set([]);
@@ -120,6 +122,24 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
   selectedClinicStoreId() {
     const value = this.bookingFormModel().selectedClinicStoreId;
     return value || null;
+  }
+
+  private resolvePreferredClinicId(clinics: ClinicOption[]) {
+    const pending =
+      typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('pendingClinicStoreId') : null;
+    const candidates = [this.initialClinicStoreId, pending, clinics[0]?.id || ''];
+    for (const candidate of candidates) {
+      if (candidate && clinics.some((clinic) => clinic.id === candidate)) {
+        return candidate;
+      }
+    }
+    return '';
+  }
+
+  private applyInitialClinicStoreId() {
+    if (!this.initialClinicStoreId || !this.clinics().length) return;
+    if (!this.clinics().some((clinic) => clinic.id === this.initialClinicStoreId)) return;
+    this.bookingFormModel.update((m) => ({ ...m, selectedClinicStoreId: this.initialClinicStoreId }));
   }
 
   ngOnChanges() {
@@ -143,6 +163,7 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
     if (Object.keys(updates).length) {
       this.bookingFormModel.update((m) => ({ ...m, ...updates }));
     }
+    this.applyInitialClinicStoreId();
     this.scheduleQuoteRefresh();
   }
 
@@ -199,6 +220,7 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
   }
 
   onClinicChange() {
+    this.clinicStoreChange.emit(this.bookingFormModel().selectedClinicStoreId);
     this.onBookingOptionChange();
   }
 

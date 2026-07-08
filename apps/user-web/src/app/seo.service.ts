@@ -3,10 +3,21 @@ import { inject, Service } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
+import { ClinicApiClient } from './clinic-api/clinic-api.client';
 import { PUBLIC_SITE_BRAND } from './core/constants/public-site-content.constants';
 import { SEO_DEFAULTS } from './core/constants/branding.constants';
 import { diseaseInfos } from './disease/disease-info.constants';
 import { homeopathyApproaches } from './treatment-approach/homeopathy-approaches.constants';
+
+type DiseaseSeo = {
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  canonicalPath?: string;
+};
 
 @Service()
 export class SeoService {
@@ -15,6 +26,7 @@ export class SeoService {
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
   private readonly document = inject(DOCUMENT);
+  private readonly apiClient = new ClinicApiClient();
 
   private readonly siteUrl = SEO_DEFAULTS.SITE_URL;
   private readonly defaultTitle = PUBLIC_SITE_BRAND.seo.defaultTitle;
@@ -25,37 +37,41 @@ export class SeoService {
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe(() => {
-        const routeData = this.getLeafRoute(this.activatedRoute).snapshot.data;
-        const diseaseSeo = this.getDiseaseSeoFromUrl();
-        const approachSeo = this.getApproachSeoFromPage();
-
-        const seoTitle = diseaseSeo.metaTitle || approachSeo.metaTitle || routeData['seoTitle'] || this.defaultTitle;
-        const seoDescription =
-          diseaseSeo.metaDescription || approachSeo.metaDescription || routeData['seoDescription'] || this.defaultDescription;
-        const seoKeywords = diseaseSeo.keywords || approachSeo.keywords || routeData['seoKeywords'] || [];
-        const canonicalPath = diseaseSeo.canonicalPath || this.router.url;
-        const canonicalUrl = `${this.siteUrl}${canonicalPath === '/' ? '' : canonicalPath}`;
-        const ogTitle = diseaseSeo.ogTitle || approachSeo.ogTitle || seoTitle;
-        const ogDescription = diseaseSeo.ogDescription || approachSeo.ogDescription || seoDescription;
-        const ogImage = diseaseSeo.ogImage || this.defaultImage;
-
-        this.title.setTitle(seoTitle);
-        this.meta.updateTag({ name: 'description', content: seoDescription });
-        this.meta.updateTag({ name: 'keywords', content: Array.isArray(seoKeywords) ? seoKeywords.join(', ') : '' });
-
-        this.meta.updateTag({ property: 'og:type', content: 'website' });
-        this.meta.updateTag({ property: 'og:title', content: ogTitle });
-        this.meta.updateTag({ property: 'og:description', content: ogDescription });
-        this.meta.updateTag({ property: 'og:url', content: canonicalUrl });
-        this.meta.updateTag({ property: 'og:image', content: ogImage });
-
-        this.meta.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
-        this.meta.updateTag({ name: 'twitter:title', content: ogTitle });
-        this.meta.updateTag({ name: 'twitter:description', content: ogDescription });
-        this.meta.updateTag({ name: 'twitter:image', content: ogImage });
-
-        this.upsertCanonical(canonicalUrl);
+        void this.applyRouteSeo();
       });
+  }
+
+  private async applyRouteSeo() {
+    const routeData = this.getLeafRoute(this.activatedRoute).snapshot.data;
+    const diseaseSeo = await this.getDiseaseSeoFromUrl();
+    const approachSeo = this.getApproachSeoFromPage();
+
+    const seoTitle = diseaseSeo.metaTitle || approachSeo.metaTitle || routeData['seoTitle'] || this.defaultTitle;
+    const seoDescription =
+      diseaseSeo.metaDescription || approachSeo.metaDescription || routeData['seoDescription'] || this.defaultDescription;
+    const seoKeywords = diseaseSeo.keywords || approachSeo.keywords || routeData['seoKeywords'] || [];
+    const canonicalPath = diseaseSeo.canonicalPath || this.router.url;
+    const canonicalUrl = `${this.siteUrl}${canonicalPath === '/' ? '' : canonicalPath}`;
+    const ogTitle = diseaseSeo.ogTitle || approachSeo.ogTitle || seoTitle;
+    const ogDescription = diseaseSeo.ogDescription || approachSeo.ogDescription || seoDescription;
+    const ogImage = diseaseSeo.ogImage || this.defaultImage;
+
+    this.title.setTitle(seoTitle);
+    this.meta.updateTag({ name: 'description', content: seoDescription });
+    this.meta.updateTag({ name: 'keywords', content: Array.isArray(seoKeywords) ? seoKeywords.join(', ') : '' });
+
+    this.meta.updateTag({ property: 'og:type', content: 'website' });
+    this.meta.updateTag({ property: 'og:title', content: ogTitle });
+    this.meta.updateTag({ property: 'og:description', content: ogDescription });
+    this.meta.updateTag({ property: 'og:url', content: canonicalUrl });
+    this.meta.updateTag({ property: 'og:image', content: ogImage });
+
+    this.meta.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
+    this.meta.updateTag({ name: 'twitter:title', content: ogTitle });
+    this.meta.updateTag({ name: 'twitter:description', content: ogDescription });
+    this.meta.updateTag({ name: 'twitter:image', content: ogImage });
+
+    this.upsertCanonical(canonicalUrl);
   }
 
   private getLeafRoute(route: ActivatedRoute): ActivatedRoute {
@@ -76,14 +92,43 @@ export class SeoService {
     link.setAttribute('href', url);
   }
 
-  private getDiseaseSeoFromUrl() {
+  private async getDiseaseSeoFromUrl(): Promise<DiseaseSeo> {
     const match = this.router.url.match(/^\/treatments\/([^/?#]+)/);
     if (!match) {
       return {};
     }
 
     const slug = decodeURIComponent(match[1]);
-    return diseaseInfos.find((item) => item.slug === slug)?.seo || {};
+    const staticInfo = diseaseInfos.find((item) => item.slug === slug);
+    const staticSeo = staticInfo?.seo || {};
+    const canonicalPath = staticSeo.canonicalPath || `/treatments/${slug}`;
+
+    try {
+      const response = await this.apiClient.get<{
+        disease: {
+          seoTitle?: string | null;
+          seoDescription?: string | null;
+          publicImageUrl?: string | null;
+          name: string;
+        };
+      }>(`/diseases/by-slug/${encodeURIComponent(slug)}`);
+
+      const live = response.disease;
+      const metaTitle = live.seoTitle || staticSeo.metaTitle || `${live.name} — Vitalis Care`;
+      const metaDescription = live.seoDescription || staticSeo.metaDescription || '';
+
+      return {
+        metaTitle,
+        metaDescription,
+        keywords: staticSeo.keywords,
+        ogTitle: staticSeo.ogTitle || metaTitle,
+        ogDescription: staticSeo.ogDescription || metaDescription,
+        ogImage: live.publicImageUrl || staticSeo.ogImage,
+        canonicalPath
+      };
+    } catch {
+      return { ...staticSeo, canonicalPath };
+    }
   }
 
   private getApproachSeoFromPage() {

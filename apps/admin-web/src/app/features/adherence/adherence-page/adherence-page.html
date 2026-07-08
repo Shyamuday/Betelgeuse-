@@ -75,7 +75,7 @@
 
     <section class="trend-block">
       <h3>Platform trend ({{ report.windowDays }} days)</h3>
-      <div class="table-wrap">
+      <div class="table-wrap desktop-only">
         <table>
           <thead>
             <tr>
@@ -101,6 +101,16 @@
           </tbody>
         </table>
       </div>
+      <div class="mobile-row-cards">
+        @for (day of report.platformTrend; track day.date) {
+          <article class="mobile-row-card">
+            <div class="card-head"><strong>{{ day.date }}</strong><span>{{ day.adherencePercent }}%</span></div>
+            <div class="card-row"><span>Taken</span><span>{{ day.taken }}</span></div>
+            <div class="card-row"><span>Missed</span><span>{{ day.missed }}</span></div>
+            <div class="card-row"><span>Skipped</span><span>{{ day.skipped }}</span></div>
+          </article>
+        }
+      </div>
     </section>
 
     <section class="cohorts-block">
@@ -119,7 +129,7 @@
       @if (!activeCohort().length) {
         <p class="empty-state">No patients in this cohort for the selected window.</p>
       } @else {
-        <div class="table-wrap">
+        <div class="table-wrap desktop-only">
           <table>
             <thead>
               <tr>
@@ -150,6 +160,19 @@
               }
             </tbody>
           </table>
+        </div>
+        <div class="mobile-row-cards">
+          @for (row of activeCohort(); track row.patientId) {
+            <article class="mobile-row-card">
+              <div class="card-head">
+                <strong>{{ row.name }}</strong>
+                <span>{{ row.adherencePercent }}%</span>
+              </div>
+              <div class="card-row"><span>{{ row.patientCode || '—' }}</span><span>{{ trendLabel(row.trendDelta) }}</span></div>
+              <div class="card-row"><span>T/M/S</span><span>{{ row.stats.taken }}/{{ row.stats.missed }}/{{ row.stats.skipped }}</span></div>
+              <a class="link-btn small" [routerLink]="consumerLink(row.patientId)" [queryParams]="consumerQuery(row.patientId)">View consumer</a>
+            </article>
+          }
         </div>
       }
     </section>

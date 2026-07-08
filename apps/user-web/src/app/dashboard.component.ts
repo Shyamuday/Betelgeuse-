@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { RoleTaskGuideComponent } from '@vitalis/platform-ui';
 import { AppFooterComponent } from './app-footer.component';
 import { AppHeaderComponent } from './app-header.component';
@@ -76,8 +77,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private pendingConsultationId: string | null = null;
   private pendingDiseaseId: string | null = null;
+  private pendingClinicStoreId: string | null = null;
 
   readonly diseases = signal<Disease[]>([]);
+  readonly selectedClinicStoreId = signal('');
   readonly billingPlans = signal<BillingPlan[]>([]);
   readonly consultations = signal<Consultation[]>([]);
   readonly doctors = signal<Doctor[]>([]);
@@ -139,13 +142,55 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.pendingConsultationId = this.route.snapshot.queryParamMap.get('consultationId');
     this.pendingDiseaseId = this.route.snapshot.queryParamMap.get('diseaseId');
+    this.pendingClinicStoreId = this.route.snapshot.queryParamMap.get('clinicStoreId');
     this.route.queryParamMap.subscribe((params) => {
       this.pendingConsultationId = params.get('consultationId');
       this.pendingDiseaseId = params.get('diseaseId');
+      const clinicStoreId = params.get('clinicStoreId');
+      if (clinicStoreId !== this.pendingClinicStoreId) {
+        this.pendingClinicStoreId = clinicStoreId;
+        if (clinicStoreId) {
+          this.selectedClinicStoreId.set(clinicStoreId);
+          this.reloadDiseases(clinicStoreId);
+        }
+      }
       this.applyPendingConsultation();
     });
-    this.loadBaseData();
+    void this.bootstrap();
     this.realtimeChannel = this.dataService.watchChanges(() => this.loadConsultations());
+  }
+
+  private async bootstrap() {
+    const clinicStoreId = await this.resolveClinicStoreId();
+    if (clinicStoreId) {
+      this.selectedClinicStoreId.set(clinicStoreId);
+    }
+    this.loadBaseData(clinicStoreId || undefined);
+  }
+
+  private async resolveClinicStoreId(): Promise<string | null> {
+    if (this.pendingClinicStoreId) {
+      return this.pendingClinicStoreId;
+    }
+
+    if (typeof sessionStorage !== 'undefined') {
+      const pending = sessionStorage.getItem('pendingClinicStoreId');
+      if (pending) {
+        sessionStorage.removeItem('pendingClinicStoreId');
+        return pending;
+      }
+    }
+
+    try {
+      return await firstValueFrom(this.dataService.loadPatientHomeClinicStoreId());
+    } catch {
+      return null;
+    }
+  }
+
+  onClinicStoreChange(clinicStoreId: string) {
+    this.selectedClinicStoreId.set(clinicStoreId);
+    this.reloadDiseases(clinicStoreId || undefined);
   }
 
   pendingDiseaseIdValue() {
@@ -398,18 +443,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.router.navigateByUrl(`/${ROUTE_PATHS.LOGIN}`);
   }
 
-  private loadBaseData() {
+  private loadBaseData(clinicStoreId?: string) {
     this.isLoading.set(true);
-    this.dataService.loadDiseases().subscribe({
-      next: ({ diseases }) => {
-        this.diseases.set(diseases);
-        this.isLoading.set(false);
-      },
-      error: (error) => {
-        this.isLoading.set(false);
-        this.showNotice(error.error?.message || error.message || 'Could not load diseases.');
-      },
-    });
+    this.reloadDiseases(clinicStoreId);
     this.dataService.loadBillingPlans().subscribe({
       next: ({ plans }) => this.billingPlans.set(plans || []),
       error: () => {
@@ -423,6 +459,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.dataService.isAdmin()) {
       this.loadAdminData();
     }
+  }
+
+  private reloadDiseases(clinicStoreId?: string) {
+    this.dataService.loadDiseases({ clinicStoreId: clinicStoreId || null }).subscribe({
+      next: ({ diseases }) => {
+        this.diseases.set(diseases);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.isLoading.set(false);
+        this.showNotice(error.error?.message || error.message || 'Could not load diseases.');
+      },
+    });
   }
 
   private loadConsultations() {

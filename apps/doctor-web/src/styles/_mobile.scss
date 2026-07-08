@@ -1,5 +1,9 @@
 /* Shared mobile/responsive utilities for doctor-web */
 
+.mobile-back {
+  display: none;
+}
+
 .table-scroll,
 .table-wrap {
   overflow-x: auto;
@@ -8,6 +12,31 @@
 }
 
 @media (max-width: 768px) {
+  .mobile-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    width: 100%;
+    min-height: 44px;
+    margin-bottom: 0.65rem;
+    padding: 0.45rem 0.65rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #4f46e5;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+  }
+
+  .mobile-pane-hidden {
+    display: none !important;
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
+
   .earn-page,
   .sp,
   .ml,

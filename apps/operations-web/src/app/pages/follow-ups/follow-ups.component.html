@@ -62,7 +62,7 @@
       @if (!activeCohortRows().length) {
         <p class="empty">No patients in this cohort.</p>
       } @else {
-        <div class="table-wrap">
+        <div class="table-wrap desktop-only">
           <table class="table">
             <thead>
               <tr>
@@ -99,6 +99,33 @@
               }
             </tbody>
           </table>
+        </div>
+
+        <div class="mobile-row-cards">
+          @for (row of activeCohortRows(); track row.patientId) {
+            <article class="mobile-row-card">
+              <div class="card-head">
+                <strong>{{ row.name }}</strong>
+                <span>{{ row.adherencePercent }}%</span>
+              </div>
+              <div class="card-row"><span>{{ row.patientCode ?? '—' }}</span><span>{{ row.mobile ?? '—' }}</span></div>
+              <div class="card-row">
+                <span>Trend</span>
+                <span>
+                  @if (row.trendDelta !== null) {
+                    {{ row.trendDelta > 0 ? '+' : '' }}{{ row.trendDelta }}%
+                  } @else { — }
+                </span>
+              </div>
+              <div class="card-actions">
+                <a class="cross-link" [routerLink]="consumersPath" [queryParams]="consumerQuery(row.patientId)">Consumer</a>
+                <a class="cross-link" [routerLink]="clinicalRecordsPath" [queryParams]="clinicalQuery(row.patientId)">Clinical</a>
+                @if (row.patientCode) {
+                  <a class="cross-link" [routerLink]="scanPath" [queryParams]="scanQuery(row.patientCode)">Scan</a>
+                }
+              </div>
+            </article>
+          }
         </div>
       }
     }

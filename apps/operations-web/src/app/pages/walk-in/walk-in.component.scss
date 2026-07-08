@@ -7,6 +7,26 @@
     p { margin: 0 0 1rem; color: var(--text-secondary); }
   }
 }
+
+@media (max-width: 768px) {
+  .walk-in-page {
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .lookup-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form .btn-primary {
+    position: fixed;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: calc(var(--shell-bottom-nav-height, 3.5rem) + env(safe-area-inset-bottom, 0px));
+    z-index: 15;
+    min-height: 48px;
+    box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.12);
+  }
+}
 .mode-tabs {
   display: flex;
   gap: 0.5rem;

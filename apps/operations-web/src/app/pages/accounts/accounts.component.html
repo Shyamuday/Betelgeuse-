@@ -14,7 +14,7 @@
   } @else if (!accounts().length) {
     <p class="empty">No corporate accounts.</p>
   } @else {
-    <div class="table-wrap">
+    <div class="table-wrap desktop-only">
       <table class="table">
         <thead>
           <tr>
@@ -37,6 +37,19 @@
           }
         </tbody>
       </table>
+    </div>
+
+    <div class="mobile-row-cards">
+      @for (a of accounts(); track a.id) {
+        <article class="mobile-row-card">
+          <div class="card-head">
+            <strong>{{ a.name }}</strong>
+            <span>{{ a.code }}</span>
+          </div>
+          <div class="card-row"><span>{{ a.contactEmail ?? '—' }}</span><span>{{ a.enrollmentCount }} enrolled</span></div>
+          <button type="button" class="link-btn" (click)="openAccount(a.id)">View enrollments</button>
+        </article>
+      }
     </div>
   }
 

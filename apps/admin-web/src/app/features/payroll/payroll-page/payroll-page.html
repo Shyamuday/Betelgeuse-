@@ -60,7 +60,7 @@
             <input class="search-sm" [formField]="searchForm.q" placeholder="🔍 Search…" />
           </div>
 
-          <div class="table-wrap">
+          <div class="table-wrap desktop-only">
             <table class="pt">
               <thead>
                 <tr>
@@ -120,6 +120,26 @@
                 </tr>
               </tfoot>
             </table>
+          </div>
+
+          <div class="mobile-row-cards">
+            @for (r of filtered(); track r.id) {
+              <article class="mobile-row-card">
+                <div class="card-head">
+                  <div>
+                    <strong>{{ r.name }}</strong>
+                    <span class="status-dot" [style.color]="statusColor(r.employeeStatus)">● {{ r.employeeStatus }}</span>
+                  </div>
+                  <span class="type-badge" [class.doc]="r.empType === 'DOCTOR'">
+                    {{ r.empType === 'DOCTOR' ? '🩺' : '🏪' }}
+                  </span>
+                </div>
+                <div class="card-row"><span>{{ r.designation ?? '—' }}</span><span>{{ r.department ?? '—' }}</span></div>
+                <div class="card-row"><span>Gross</span><strong>₹{{ fmt(r.grossPaise) }}</strong></div>
+                <div class="card-row"><span>Net</span><strong>₹{{ fmt(r.netPaise) }}</strong></div>
+                <div class="card-row"><span>Total est.</span><strong>₹{{ fmt(r.totalEstimatedPayPaise ?? r.netPaise) }}</strong></div>
+              </article>
+            }
           </div>
           @if (filtered().length === 0) {
             <div class="empty"><div>💰</div><p>No payroll data found</p></div>

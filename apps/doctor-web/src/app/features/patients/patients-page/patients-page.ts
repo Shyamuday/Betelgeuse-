@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -21,6 +21,7 @@ import {
   adherenceDayTotalsText,
   adherenceTotalsText
 } from '../constants/adherence-detail.fields';
+import { ViewportService } from '../../../core/services/viewport.service';
 
 type DoseEvent = {
   id: string;
@@ -82,7 +83,13 @@ function emptyCreatePatientModel() {
 export class PatientsPage {
   private readonly http = inject(HttpClient);
   private readonly patientsApi = inject(PatientsApiService);
+  private readonly viewport = inject(ViewportService);
   private readonly apiBase = environment.apiUrl;
+
+  readonly isMobile = computed(() => this.viewport.isMobile());
+  readonly hasSelection = computed(() => !!this.selectedPatient());
+  readonly showListPane = computed(() => !this.isMobile() || !this.hasSelection());
+  readonly showDetailPane = computed(() => !this.isMobile() || this.hasSelection());
 
   readonly worklistPath = `/${ROUTE_PATHS.WORKLIST}`;
 
@@ -162,6 +169,18 @@ export class PatientsPage {
     });
     void this.loadPatientCard(patient.id);
     void this.loadTrend();
+  }
+
+  backToList() {
+    this.selectedPatient.set(null);
+    this.patientCard.set(null);
+    this.patientClinical.set(null);
+    this.summary.set(null);
+    this.doseEvents.set([]);
+    this.labReferrals.set([]);
+    this.trendModel.update((model) => ({ ...model, patientId: '' }));
+    this.message.set('');
+    this.error.set('');
   }
 
   private async loadPatientClinical(patientId: string) {

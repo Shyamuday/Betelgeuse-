@@ -1,298 +1,354 @@
-<h2>Create Prescription</h2>
-<p>Draft, edit, and publish multi-medicine prescriptions with follow-up versions.</p>
+<section class="appointments-page">
+  <header class="page-intro">
+    <h2>Create Prescription</h2>
+    <p class="muted intro-lead">Draft, edit, and publish multi-medicine prescriptions with follow-up versions.</p>
+  </header>
 
-@if (consultationContext) {
-  <app-consultation-context-header
-    [consultation]="consultationContext"
-    [consultationId]="prescriptionModel().consultationId"
-    activeView="prescription"
-  />
-  <div class="consultation-context-grid">
-    <app-consultation-intake-panel [consultation]="consultationContext" />
-    <app-consultation-chat-panel [consultationId]="prescriptionModel().consultationId" />
-  </div>
-}
-
-@if (patientClinical) {
-  <app-patient-health-profile [profile]="patientClinical" />
-}
-
-<div class="templates-bar">
-  <span class="templates-label">Templates</span>
-  @if (templatesLoading) {
-    <span class="hint">Loading…</span>
-  }
-  @for (t of templates; track t.id) {
-    <button type="button" class="btn-template" (click)="applyTemplate(t)" title="Apply template: {{ t.name }}">
-      {{ t.name }}
-    </button>
-    <button type="button" class="btn-template-del" (click)="deleteTemplate(t.id)"
-      [disabled]="deletingTemplateId === t.id" title="Delete template">&#x2715;</button>
-  }
-  @if (!templates.length && !templatesLoading) {
-    <span class="hint">No templates yet — save your first below.</span>
-  }
-
-  <button type="button" class="btn-save-tpl" (click)="showSaveTemplateForm = !showSaveTemplateForm">
-    {{ showSaveTemplateForm ? 'Cancel' : '+ Save current as template' }}
-  </button>
-  @if (showSaveTemplateForm) {
-    <div class="save-tpl-form">
-      <input [formField]="templateForm.templateName" placeholder="Template name (e.g. Hair Fall — Acute)" />
-      <button type="button" (click)="saveAsTemplate()" [disabled]="savingTemplate">
-        {{ savingTemplate ? 'Saving…' : 'Save' }}
-      </button>
-      @if (savingTemplateError) {
-        <span class="hint error-hint">{{ savingTemplateError }}</span>
-      }
-    </div>
-  }
-</div>
-
-<div class="grid">
-  <label for="consultationId">Consultation ID</label>
-  <input id="consultationId" [formField]="prescriptionForm.consultationId" />
-  <div class="actions">
-    <button type="button" (click)="loadConsultationPrescriptions()">Load history</button>
-    <button type="button" (click)="resetEditorForFollowUp()">New follow-up version</button>
-    @if (prescriptionModel().consultationId) {
-      <a
-        class="link-btn"
-        [routerLink]="['/', caseAnalysisPath, prescriptionModel().consultationId, 'case-analysis']"
-        [queryParams]="prescriptionModel().caseAnalysisId ? { caseAnalysisId: prescriptionModel().caseAnalysisId } : null"
-      >
-        Case analysis
-      </a>
-    }
-  </div>
-
-  @if (loadedPrescriptions.length) {
-    <div class="timeline">
-      @for (item of loadedPrescriptions; track item.id) {
-        <article class="timeline-card" [class.active]="prescriptionModel().editingPrescriptionId === item.id">
-          <div class="timeline-head">
-            <strong>v{{ item.version }}</strong>
-            <span [class]="versionBadgeClass(item.status)">{{ item.status }}</span>
-          </div>
-          <p>{{ item.diagnosis || 'No diagnosis summary' }}</p>
-          <small>{{ item.createdAt ? (item.createdAt | date: 'medium') : '' }}</small>
-          @if (item.followUpDate) {
-            <small>Follow-up: {{ item.followUpDate | date: 'mediumDate' }}</small>
-          }
-          <div class="actions">
-            <button type="button" (click)="openVersion(item)">Open</button>
-            <button type="button" [disabled]="!canEditVersion(item)" (click)="openVersion(item)">Edit</button>
-            <button type="button" (click)="startFollowUpFrom(item)">Follow-up</button>
-            @if (item.status === 'PUBLISHED') {
-              <button type="button" class="ghost" [disabled]="isPdfBusy(item.id)" (click)="viewPublishedPdf(item.id)">View PDF</button>
-              <button type="button" class="ghost" [disabled]="isPdfBusy(item.id)" (click)="downloadPublishedPdf(item.id)">Download</button>
-              <button type="button" class="ghost" [disabled]="isPdfBusy(item.id)" (click)="sharePublishedPdf(item.id)">Share</button>
-            }
-          </div>
-        </article>
-      }
-    </div>
-
-    <label for="existingVersion">Existing Versions</label>
-    <select
-      id="existingVersion"
-      [formField]="prescriptionForm.editingPrescriptionId"
-      (change)="selectPrescriptionById(prescriptionModel().editingPrescriptionId)"
-    >
-      <option value="">Select version</option>
-      @for (item of loadedPrescriptions; track item.id) {
-        <option [value]="item.id">
-          v{{ item.version }} - {{ item.status }}
-        </option>
-      }
-    </select>
-  }
-
-  <label for="method">Homeopathy Method</label>
-  <select id="method" [formField]="prescriptionForm.methodOptionId">
-    <option value="">Select method</option>
-    @for (item of methods; track item.id) {
-      <option [value]="item.id">{{ item.label }}</option>
-    }
-  </select>
-  <p class="hint">Set your default in Profile → Default prescribing approach.</p>
-  <div class="inline">
-    <input [formField]="optionDraftForm.newMethod" placeholder="Add new method" />
-    <button type="button" (click)="addOption('METHOD')">Add</button>
-  </div>
-
-  <label for="diagnosedDisease">Diagnosed Disease</label>
-  <div class="inline">
-    <input
-      type="search"
-      [formField]="optionDraftForm.diagnosedDiseaseSearch"
-      placeholder="Search diagnosed diseases"
-      (keyup.enter)="searchDiagnosedDiseases()"
+  @if (consultationContext) {
+    <app-consultation-context-header
+      [consultation]="consultationContext"
+      [consultationId]="prescriptionModel().consultationId"
+      activeView="prescription"
     />
-    <button type="button" (click)="searchDiagnosedDiseases()">Search</button>
-  </div>
-  <select id="diagnosedDisease" [formField]="prescriptionForm.diagnosedDiseaseOptionId">
-    <option value="">Select diagnosed disease</option>
-    @for (item of diagnosedDiseases; track item.id) {
-      <option [value]="item.prescriptionOptionId || ''" [disabled]="!item.prescriptionOptionId">{{ item.name }}</option>
+  }
+
+  @if (isMobile()) {
+    <nav class="rx-mobile-tabs" aria-label="Prescription sections">
+      <button type="button" class="rx-tab" [class.active]="mobileTab() === 'context'" (click)="setMobileTab('context')">Context</button>
+      <button type="button" class="rx-tab" [class.active]="mobileTab() === 'setup'" (click)="setMobileTab('setup')">Setup</button>
+      <button type="button" class="rx-tab" [class.active]="mobileTab() === 'remedies'" (click)="setMobileTab('remedies')">Remedies</button>
+      <button type="button" class="rx-tab" [class.active]="mobileTab() === 'review'" (click)="setMobileTab('review')">Review</button>
+    </nav>
+  }
+
+  @if (showContextPane()) {
+    @if (consultationContext) {
+      @if (isMobile()) {
+        <button type="button" class="mobile-context-toggle" (click)="toggleMobileContext()">
+          {{ mobileContextOpen() ? 'Hide intake & chat' : 'Patient intake & chat' }}
+        </button>
+      }
+
+      @if (!isMobile() || mobileContextOpen()) {
+        <div class="consultation-context-grid">
+          <app-consultation-intake-panel [consultation]="consultationContext" />
+          <app-consultation-chat-panel [consultationId]="prescriptionModel().consultationId" />
+        </div>
+      }
     }
-  </select>
-  <div class="inline">
-    <input [formField]="optionDraftForm.newDiagnosedDisease" placeholder="Add diagnosed disease" />
-    <button type="button" (click)="addOption('DIAGNOSED_DISEASE')">Add</button>
-  </div>
 
-  <label for="diagnosis">Diagnosis Summary</label>
-  <input id="diagnosis" [formField]="prescriptionForm.diagnosis" />
+    @if (patientClinical) {
+      <app-patient-health-profile [profile]="patientClinical" />
+    }
 
-  <label for="advice">Advice (optional)</label>
-  <textarea id="advice" [formField]="prescriptionForm.advice"></textarea>
+    <div class="templates-bar">
+      <span class="templates-label">Templates</span>
+      @if (templatesLoading) {
+        <span class="hint">Loading…</span>
+      }
+      @for (t of templates; track t.id) {
+        <button type="button" class="btn-template" (click)="applyTemplate(t)" title="Apply template: {{ t.name }}">
+          {{ t.name }}
+        </button>
+        <button type="button" class="btn-template-del" (click)="deleteTemplate(t.id)"
+          [disabled]="deletingTemplateId === t.id" title="Delete template">&#x2715;</button>
+      }
+      @if (!templates.length && !templatesLoading) {
+        <span class="hint">No templates yet — save your first below.</span>
+      }
 
-  <label for="notes">Prescription Notes</label>
-  <textarea id="notes" [formField]="prescriptionForm.notes"></textarea>
+      <button type="button" class="btn-save-tpl" (click)="showSaveTemplateForm = !showSaveTemplateForm">
+        {{ showSaveTemplateForm ? 'Cancel' : '+ Save current as template' }}
+      </button>
+      @if (showSaveTemplateForm) {
+        <div class="save-tpl-form">
+          <input [formField]="templateForm.templateName" placeholder="Template name (e.g. Hair Fall — Acute)" />
+          <button type="button" (click)="saveAsTemplate()" [disabled]="savingTemplate">
+            {{ savingTemplate ? 'Saving…' : 'Save' }}
+          </button>
+          @if (savingTemplateError) {
+            <span class="hint error-hint">{{ savingTemplateError }}</span>
+          }
+        </div>
+      }
+    </div>
 
-  <label for="followUpDate">Follow-up Date (optional)</label>
-  <input id="followUpDate" type="date" [formField]="prescriptionForm.followUpDate" />
-
-  <h3>Remedies</h3>
-  <p class="safety-intro muted">In homeopathy, the same remedy at different potencies is normal. Warnings apply only when the same potency is repeated or dose/frequency conflicts.</p>
-  @let safety = prescriptionSafetyReport();
-  @if (safety.multiplePotencies.length) {
-    <div class="safety-info" role="status">
-      <p><strong>Multiple potencies</strong> (allowed — review only):</p>
-      <ul>
-        @for (item of safety.multiplePotencies; track item.medicineName) {
-          <li>{{ item.medicineName }}: {{ item.strengths.join(', ') }}</li>
+    <div class="grid context-grid">
+      <label for="consultationId">Consultation ID</label>
+      <input id="consultationId" [formField]="prescriptionForm.consultationId" />
+      <div class="actions">
+        <button type="button" (click)="loadConsultationPrescriptions()">Load history</button>
+        <button type="button" (click)="resetEditorForFollowUp()">New follow-up version</button>
+        @if (prescriptionModel().consultationId) {
+          <a
+            class="link-btn"
+            [routerLink]="['/', caseAnalysisPath, prescriptionModel().consultationId, 'case-analysis']"
+            [queryParams]="prescriptionModel().caseAnalysisId ? { caseAnalysisId: prescriptionModel().caseAnalysisId } : null"
+          >
+            Case analysis
+          </a>
         }
-      </ul>
+      </div>
+
+      @if (loadedPrescriptions.length) {
+        <div class="timeline">
+          @for (item of loadedPrescriptions; track item.id) {
+            <article class="timeline-card" [class.active]="prescriptionModel().editingPrescriptionId === item.id">
+              <div class="timeline-head">
+                <strong>v{{ item.version }}</strong>
+                <span [class]="versionBadgeClass(item.status)">{{ item.status }}</span>
+              </div>
+              <p>{{ item.diagnosis || 'No diagnosis summary' }}</p>
+              <small>{{ item.createdAt ? (item.createdAt | date: 'medium') : '' }}</small>
+              @if (item.followUpDate) {
+                <small>Follow-up: {{ item.followUpDate | date: 'mediumDate' }}</small>
+              }
+              <div class="actions">
+                <button type="button" (click)="openVersion(item)">Open</button>
+                <button type="button" [disabled]="!canEditVersion(item)" (click)="openVersion(item)">Edit</button>
+                <button type="button" (click)="startFollowUpFrom(item)">Follow-up</button>
+                @if (item.status === 'PUBLISHED') {
+                  <button type="button" class="ghost" [disabled]="isPdfBusy(item.id)" (click)="viewPublishedPdf(item.id)">View PDF</button>
+                  <button type="button" class="ghost" [disabled]="isPdfBusy(item.id)" (click)="downloadPublishedPdf(item.id)">Download</button>
+                  <button type="button" class="ghost" [disabled]="isPdfBusy(item.id)" (click)="sharePublishedPdf(item.id)">Share</button>
+                }
+              </div>
+            </article>
+          }
+        </div>
+
+        <label for="existingVersion">Existing Versions</label>
+        <select
+          id="existingVersion"
+          [formField]="prescriptionForm.editingPrescriptionId"
+          (change)="selectPrescriptionById(prescriptionModel().editingPrescriptionId)"
+        >
+          <option value="">Select version</option>
+          @for (item of loadedPrescriptions; track item.id) {
+            <option [value]="item.id">
+              v{{ item.version }} - {{ item.status }}
+            </option>
+          }
+        </select>
+      }
     </div>
   }
-  @if (safety.duplicatePotencyLines.length || safety.conflictingDose.length) {
-    <div class="safety-warnings" role="status">
-      @for (item of safety.duplicatePotencyLines; track item.medicineName + item.strength) {
-        <p>
-          <strong>Repeated line</strong> — {{ item.medicineName }} at {{ item.strength }} appears {{ item.count }} times.
+
+  @if (showSetupPane()) {
+    <div class="grid setup-grid">
+      <label for="method">Homeopathy Method</label>
+      <select id="method" [formField]="prescriptionForm.methodOptionId">
+        <option value="">Select method</option>
+        @for (item of methods; track item.id) {
+          <option [value]="item.id">{{ item.label }}</option>
+        }
+      </select>
+      <p class="hint">Set your default in Profile → Default prescribing approach.</p>
+      <div class="inline">
+        <input [formField]="optionDraftForm.newMethod" placeholder="Add new method" />
+        <button type="button" (click)="addOption('METHOD')">Add</button>
+      </div>
+
+      <label for="diagnosedDisease">Diagnosed Disease</label>
+      <div class="inline">
+        <input
+          type="search"
+          [formField]="optionDraftForm.diagnosedDiseaseSearch"
+          placeholder="Search diagnosed diseases"
+          (keyup.enter)="searchDiagnosedDiseases()"
+        />
+        <button type="button" (click)="searchDiagnosedDiseases()">Search</button>
+      </div>
+      <select id="diagnosedDisease" [formField]="prescriptionForm.diagnosedDiseaseOptionId">
+        <option value="">Select diagnosed disease</option>
+        @for (item of diagnosedDiseases; track item.id) {
+          <option [value]="item.prescriptionOptionId || ''" [disabled]="!item.prescriptionOptionId">{{ item.name }}</option>
+        }
+      </select>
+      <div class="inline">
+        <input [formField]="optionDraftForm.newDiagnosedDisease" placeholder="Add diagnosed disease" />
+        <button type="button" (click)="addOption('DIAGNOSED_DISEASE')">Add</button>
+      </div>
+
+      <label for="diagnosis">Diagnosis Summary</label>
+      <input id="diagnosis" [formField]="prescriptionForm.diagnosis" />
+
+      <label for="advice">Advice (optional)</label>
+      <textarea id="advice" [formField]="prescriptionForm.advice"></textarea>
+
+      <label for="notes">Prescription Notes</label>
+      <textarea id="notes" [formField]="prescriptionForm.notes"></textarea>
+
+      <label for="followUpDate">Follow-up Date (optional)</label>
+      <input id="followUpDate" type="date" [formField]="prescriptionForm.followUpDate" />
+    </div>
+  }
+
+  @if (showRemediesPane()) {
+    <div class="grid remedies-grid">
+      <h3>Remedies</h3>
+      <p class="safety-intro muted">In homeopathy, the same remedy at different potencies is normal. Warnings apply only when the same potency is repeated or dose/frequency conflicts.</p>
+      @let safety = prescriptionSafetyReport();
+      @if (safety.multiplePotencies.length) {
+        <div class="safety-info" role="status">
+          <p><strong>Multiple potencies</strong> (allowed — review only):</p>
+          <ul>
+            @for (item of safety.multiplePotencies; track item.medicineName) {
+              <li>{{ item.medicineName }}: {{ item.strengths.join(', ') }}</li>
+            }
+          </ul>
+        </div>
+      }
+      @if (safety.duplicatePotencyLines.length || safety.conflictingDose.length) {
+        <div class="safety-warnings" role="status">
+          @for (item of safety.duplicatePotencyLines; track item.medicineName + item.strength) {
+            <p>
+              <strong>Repeated line</strong> — {{ item.medicineName }} at {{ item.strength }} appears {{ item.count }} times.
+            </p>
+          }
+          @for (item of safety.conflictingDose; track item.medicineName + item.strength) {
+            <p>
+              <strong>Dose/frequency mismatch</strong> — {{ item.medicineName }} at {{ item.strength }}:
+              {{ item.details.join(' vs ') }}
+            </p>
+          }
+          <p class="safety-hint">Save or publish will ask you to confirm before proceeding.</p>
+        </div>
+      }
+      @for (row of prescriptionModel().medicineRows; track $index) {
+        <div class="medicine-card">
+          <label>Remedy name</label>
+          <input [formField]="prescriptionForm.medicineRows[$index].medicineName" />
+
+          <label>Potency (e.g. 30C, 200C, 1M)</label>
+          <input [formField]="prescriptionForm.medicineRows[$index].strength" placeholder="30C" />
+
+          <label>Dose</label>
+          <input [formField]="prescriptionForm.medicineRows[$index].dose" />
+
+          <label>Frequency</label>
+          <input [formField]="prescriptionForm.medicineRows[$index].frequency" placeholder="e.g. twice daily" />
+
+          <label>Duration text</label>
+          <input [formField]="prescriptionForm.medicineRows[$index].duration" placeholder="e.g. 2 weeks" />
+
+          <label>Duration days</label>
+          <input [formField]="prescriptionForm.medicineRows[$index].durationDays" type="number" />
+
+          <label>Intake times (comma separated HH:mm)</label>
+          <input [formField]="prescriptionForm.medicineRows[$index].intakeTimesText" placeholder="09:00,21:00" />
+
+          <label>Instructions</label>
+          <textarea [formField]="prescriptionForm.medicineRows[$index].instructions"></textarea>
+
+          <button type="button" (click)="removeMedicineRow($index)">Remove medicine</button>
+        </div>
+      }
+
+      <button type="button" (click)="addMedicineRow()">Add medicine</button>
+    </div>
+  }
+
+  @if (showReviewPane()) {
+    @if (pendingSaveStatus) {
+      @let safety = prescriptionSafetyReport();
+      <div class="safety-confirm" role="alert">
+        <div class="safety-confirm-header">
+          <strong>Confirm homeopathy prescription warnings</strong>
+        </div>
+        <p class="safety-confirm-note">
+          Same remedy at different potencies is fine. Please confirm only if the repeated lines below are intentional.
         </p>
-      }
-      @for (item of safety.conflictingDose; track item.medicineName + item.strength) {
-        <p>
-          <strong>Dose/frequency mismatch</strong> — {{ item.medicineName }} at {{ item.strength }}:
-          {{ item.details.join(' vs ') }}
+        <ul class="safety-confirm-list">
+          @for (item of safety.duplicatePotencyLines; track item.medicineName + item.strength) {
+            <li>
+              <span class="warn-type">Repeated:</span>
+              {{ item.medicineName }} at {{ item.strength }} ({{ item.count }} lines)
+            </li>
+          }
+          @for (item of safety.conflictingDose; track item.medicineName + item.strength) {
+            <li>
+              <span class="warn-type">Conflict:</span>
+              {{ item.medicineName }} at {{ item.strength }} — {{ item.details.join(' vs ') }}
+            </li>
+          }
+        </ul>
+        <p class="safety-confirm-question">
+          Are you sure you want to
+          <strong>{{ pendingSaveStatus === 'PUBLISHED' ? 'publish' : 'save as draft' }}</strong>
+          with these issues?
         </p>
-      }
-      <p class="safety-hint">Save or publish will ask you to confirm before proceeding.</p>
-    </div>
-  }
-  @for (row of prescriptionModel().medicineRows; track $index) {
-    <div class="medicine-card">
-      <label>Remedy name</label>
-      <input [formField]="prescriptionForm.medicineRows[$index].medicineName" />
-
-      <label>Potency (e.g. 30C, 200C, 1M)</label>
-      <input [formField]="prescriptionForm.medicineRows[$index].strength" placeholder="30C" />
-
-      <label>Dose</label>
-      <input [formField]="prescriptionForm.medicineRows[$index].dose" />
-
-      <label>Frequency</label>
-      <input [formField]="prescriptionForm.medicineRows[$index].frequency" placeholder="e.g. twice daily" />
-
-      <label>Duration text</label>
-      <input [formField]="prescriptionForm.medicineRows[$index].duration" placeholder="e.g. 2 weeks" />
-
-      <label>Duration days</label>
-      <input [formField]="prescriptionForm.medicineRows[$index].durationDays" type="number" />
-
-      <label>Intake times (comma separated HH:mm)</label>
-      <input [formField]="prescriptionForm.medicineRows[$index].intakeTimesText" placeholder="09:00,21:00" />
-
-      <label>Instructions</label>
-      <textarea [formField]="prescriptionForm.medicineRows[$index].instructions"></textarea>
-
-      <button type="button" (click)="removeMedicineRow($index)">Remove medicine</button>
-    </div>
-  }
-
-  <button type="button" (click)="addMedicineRow()">Add medicine</button>
-</div>
-
-@if (pendingSaveStatus) {
-  @let safety = prescriptionSafetyReport();
-  <div class="safety-confirm" role="alert">
-    <div class="safety-confirm-header">
-      <strong>Confirm homeopathy prescription warnings</strong>
-    </div>
-    <p class="safety-confirm-note">
-      Same remedy at different potencies is fine. Please confirm only if the repeated lines below are intentional.
-    </p>
-    <ul class="safety-confirm-list">
-      @for (item of safety.duplicatePotencyLines; track item.medicineName + item.strength) {
-        <li>
-          <span class="warn-type">Repeated:</span>
-          {{ item.medicineName }} at {{ item.strength }} ({{ item.count }} lines)
-        </li>
-      }
-      @for (item of safety.conflictingDose; track item.medicineName + item.strength) {
-        <li>
-          <span class="warn-type">Conflict:</span>
-          {{ item.medicineName }} at {{ item.strength }} — {{ item.details.join(' vs ') }}
-        </li>
-      }
-    </ul>
-    <p class="safety-confirm-question">
-      Are you sure you want to
-      <strong>{{ pendingSaveStatus === 'PUBLISHED' ? 'publish' : 'save as draft' }}</strong>
-      with these issues?
-    </p>
-    <div class="safety-confirm-actions">
-      <button type="button" class="btn-proceed" (click)="confirmAndSave()" [disabled]="saving">
-        {{ saving ? 'Saving...' : 'Yes, ' + (pendingSaveStatus === 'PUBLISHED' ? 'publish anyway' : 'save draft anyway') }}
-      </button>
-      <button type="button" class="btn-cancel-confirm" (click)="dismissSafetyConfirm()" [disabled]="saving">
-        Cancel — go back and fix
-      </button>
-    </div>
-  </div>
-}
-
-<div class="actions">
-  <button type="button" (click)="loadOptions()" [disabled]="saving">Reload options</button>
-  <button type="button" (click)="savePrescription('DRAFT')" [disabled]="saving || !!pendingSaveStatus">
-    {{ saving && !pendingSaveStatus ? 'Saving...' : 'Save Draft' }}
-  </button>
-  <button type="button" class="btn-publish" (click)="savePrescription('PUBLISHED')" [disabled]="saving || !!pendingSaveStatus">
-    {{ saving && !pendingSaveStatus ? 'Publishing...' : 'Publish' }}
-  </button>
-</div>
-
-@if (prescriptionModel().consultationId && consultationStatus && consultationStatus !== 'COMPLETED') {
-  <div class="close-consultation-row">
-    <span class="status-badge">Status: {{ consultationStatus }}</span>
-    @if (!confirmingClose) {
-      <button type="button" class="btn-close-consult" (click)="confirmingClose = true" [disabled]="saving">
-        Mark as Completed
-      </button>
-    } @else {
-      <span class="close-warning">This will permanently close the consultation.</span>
-      <button type="button" class="btn-confirm-close" (click)="closeConsultation()" [disabled]="saving">
-        {{ saving ? 'Closing…' : 'Yes, close it' }}
-      </button>
-      <button type="button" (click)="confirmingClose = false" [disabled]="saving">Cancel</button>
+        <div class="safety-confirm-actions">
+          <button type="button" class="btn-proceed" (click)="confirmAndSave()" [disabled]="saving">
+            {{ saving ? 'Saving...' : 'Yes, ' + (pendingSaveStatus === 'PUBLISHED' ? 'publish anyway' : 'save draft anyway') }}
+          </button>
+          <button type="button" class="btn-cancel-confirm" (click)="dismissSafetyConfirm()" [disabled]="saving">
+            Cancel — go back and fix
+          </button>
+        </div>
+      </div>
     }
-  </div>
-}
-@if (consultationStatus === 'COMPLETED') {
-  <div class="close-consultation-row">
-    <span class="status-badge completed">✓ Consultation closed</span>
-  </div>
-}
 
-@if (pdfError) {
-  <p class="error">{{ pdfError }}</p>
-}
-@if (message) {
-  <p class="message">{{ message }}</p>
-}
-@if (error) {
-  <p class="error">{{ error }}</p>
-}
+    @if (prescriptionModel().consultationId && consultationStatus && consultationStatus !== 'COMPLETED') {
+      <div class="close-consultation-row">
+        <span class="status-badge">Status: {{ consultationStatus }}</span>
+        @if (!confirmingClose) {
+          <button type="button" class="btn-close-consult" (click)="confirmingClose = true" [disabled]="saving">
+            Mark as Completed
+          </button>
+        } @else {
+          <span class="close-warning">This will permanently close the consultation.</span>
+          <button type="button" class="btn-confirm-close" (click)="closeConsultation()" [disabled]="saving">
+            {{ saving ? 'Closing…' : 'Yes, close it' }}
+          </button>
+          <button type="button" (click)="confirmingClose = false" [disabled]="saving">Cancel</button>
+        }
+      </div>
+    }
+    @if (consultationStatus === 'COMPLETED') {
+      <div class="close-consultation-row">
+        <span class="status-badge completed">✓ Consultation closed</span>
+      </div>
+    }
+
+    @if (pdfError) {
+      <p class="error">{{ pdfError }}</p>
+    }
+    @if (message) {
+      <p class="message">{{ message }}</p>
+    }
+    @if (error) {
+      <p class="error">{{ error }}</p>
+    }
+
+    @if (!isMobile()) {
+      <div class="actions">
+        <button type="button" (click)="loadOptions()" [disabled]="saving">Reload options</button>
+        <button type="button" (click)="savePrescription('DRAFT')" [disabled]="saving || !!pendingSaveStatus">
+          {{ saving && !pendingSaveStatus ? 'Saving...' : 'Save Draft' }}
+        </button>
+        <button type="button" class="btn-publish" (click)="savePrescription('PUBLISHED')" [disabled]="saving || !!pendingSaveStatus">
+          {{ saving && !pendingSaveStatus ? 'Publishing...' : 'Publish' }}
+        </button>
+      </div>
+    }
+  }
+
+  @if (isMobile()) {
+    @if (message || error) {
+      <div class="rx-mobile-alerts">
+        @if (message) { <p class="message">{{ message }}</p> }
+        @if (error) { <p class="error">{{ error }}</p> }
+      </div>
+    }
+    <div class="rx-mobile-bar" role="toolbar" aria-label="Save prescription">
+      <button type="button" (click)="loadOptions()" [disabled]="saving">Reload</button>
+      <button type="button" (click)="savePrescription('DRAFT')" [disabled]="saving || !!pendingSaveStatus">
+        {{ saving && !pendingSaveStatus ? 'Saving…' : 'Draft' }}
+      </button>
+      <button type="button" class="btn-publish" (click)="savePrescription('PUBLISHED')" [disabled]="saving || !!pendingSaveStatus">
+        {{ saving && !pendingSaveStatus ? 'Publishing…' : 'Publish' }}
+      </button>
+    </div>
+  }
+</section>

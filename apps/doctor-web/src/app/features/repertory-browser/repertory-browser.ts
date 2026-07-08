@@ -1,10 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { form, FormField } from '@angular/forms/signals';
 import { environment } from '../../../environments/environment';
 import { API_PATHS } from '../../core/constants/api-paths.constants';
+import { ViewportService } from '../../core/services/viewport.service';
 
 type RepertorySource = {
   id: string;
@@ -55,6 +56,12 @@ type Mode = 'repertory' | 'materia-medica';
 export class RepertoryBrowserPage {
   private readonly http = inject(HttpClient);
   private readonly apiBase = environment.apiUrl;
+  private readonly viewport = inject(ViewportService);
+
+  readonly isMobile = computed(() => this.viewport.isMobile());
+  readonly filtersOpen = signal(false);
+  readonly showMmList = computed(() => !this.isMobile() || !this.selectedMmResult());
+  readonly showMmDetail = computed(() => !this.isMobile() || !!this.selectedMmResult());
 
   readonly mode = signal<Mode>('repertory');
   readonly sources = signal<RepertorySource[]>([]);
@@ -77,6 +84,10 @@ export class RepertoryBrowserPage {
   readonly totalResults = signal(0);
   readonly currentPage = signal(0);
   readonly totalPages = signal(0);
+
+  toggleFilters() {
+    this.filtersOpen.update((open) => !open);
+  }
 
   constructor() {
     void this.loadCatalog();

@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import { RouterLink } from '@angular/router';
@@ -26,6 +26,9 @@ import {
   PatientHealthProfileComponent,
   type PatientClinicalProfile
 } from '../../../shared/patient-health-profile/patient-health-profile';
+import { ViewportService } from '../../../core/services/viewport.service';
+
+export type PrescriptionMobileTab = 'context' | 'setup' | 'remedies' | 'review';
 
 function newMedicineRow(): MedicineRow {
   return {
@@ -76,6 +79,11 @@ export class AppointmentsPage {
   private readonly consultationApi = inject(ConsultationApiService);
   private readonly diseaseCatalog = inject(DiseaseCatalogService);
   private readonly route = inject(ActivatedRoute);
+  private readonly viewport = inject(ViewportService);
+
+  readonly isMobile = computed(() => this.viewport.isMobile());
+  readonly mobileTab = signal<PrescriptionMobileTab>('setup');
+  readonly mobileContextOpen = signal(false);
 
   defaultMethodOptionId = '';
 
@@ -110,6 +118,30 @@ export class AppointmentsPage {
   consultationContext: DoctorConsultation | null = null;
   pdfBusyId = '';
   pdfError = '';
+
+  setMobileTab(tab: PrescriptionMobileTab) {
+    this.mobileTab.set(tab);
+  }
+
+  toggleMobileContext() {
+    this.mobileContextOpen.update((open) => !open);
+  }
+
+  showContextPane() {
+    return !this.isMobile() || this.mobileTab() === 'context';
+  }
+
+  showSetupPane() {
+    return !this.isMobile() || this.mobileTab() === 'setup';
+  }
+
+  showRemediesPane() {
+    return !this.isMobile() || this.mobileTab() === 'remedies';
+  }
+
+  showReviewPane() {
+    return !this.isMobile() || this.mobileTab() === 'review';
+  }
 
   constructor() {
     void this.loadOptions();

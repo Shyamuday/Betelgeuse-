@@ -1,10 +1,11 @@
 import { CommonModule, NgTemplateOutlet } from '@angular/common';
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { form, FormField } from '@angular/forms/signals';
 import { AdminApi } from '../../../core/services/admin-api';
 import { ROUTE_PATHS, adminRouteLink } from '../../../core/constants/app-routes.constants';
 import { CURRENCY_CODE, CURRENCY_LOCALE, PAISE_PER_RUPEE } from '../../../shared/constants/currency.constants';
+import { ViewportService } from '../../../core/services/viewport.service';
 
 type DiseaseFaqItem = { question: string; answer: string };
 
@@ -77,6 +78,9 @@ function emptyNew() {
   styleUrl: './diseases-page.scss'
 })
 export class DiseasesPage {
+  private readonly viewport = inject(ViewportService);
+
+  readonly isMobile = computed(() => this.viewport.isMobile());
   readonly ratesLink = adminRouteLink(ROUTE_PATHS.RATES);
 
   readonly diseases = signal<Disease[]>([]);
@@ -225,6 +229,14 @@ export class DiseasesPage {
     this.draftQuestionModel.set({ value: '' });
     this.draftFaqModel.set({ question: '', answer: '' });
     this.saveError = '';
+  }
+
+  hideCategoryOnMobile(diseases: Disease[]) {
+    return this.isMobile() && !!this.editingId && !diseases.some((d) => d.id === this.editingId);
+  }
+
+  hideDiseaseCardOnMobile(diseaseId: string) {
+    return this.isMobile() && !!this.editingId && this.editingId !== diseaseId;
   }
 
   addDraftQuestion() {

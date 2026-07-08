@@ -28,7 +28,7 @@
           <input class="search-sm" [formField]="filterForm.q" placeholder="🔍 Name…" />
         </div>
 
-        <div class="table-wrap">
+        <div class="table-wrap desktop-only">
           <table class="pt">
             <thead>
               <tr>
@@ -63,6 +63,25 @@
               </tr>
             </tfoot>
           </table>
+        </div>
+
+        <div class="mobile-row-cards">
+          @for (r of filtered(); track r.id) {
+            <article class="mobile-row-card">
+              <div class="card-head">
+                <div>
+                  <strong>{{ r.name }}</strong>
+                  <div class="dot" [style.color]="sc(r.employeeStatus)">● {{ r.employeeStatus }}</div>
+                </div>
+                <span class="type" [class.doc]="r.empType==='DOCTOR'">{{ r.empType==='DOCTOR'?'🩺 Doctor':'🏪 Staff' }}</span>
+              </div>
+              <div class="card-row"><span>{{ r.designation ?? '—' }}</span></div>
+              <div class="card-row"><span>Gross</span><strong>₹{{ fmt(r.grossPaise) }}</strong></div>
+              <div class="card-row"><span>Leave days</span><span class="lv">{{ r.leaveDays }}</span></div>
+              <div class="card-row"><span>Deduction</span><span class="ded">₹{{ fmt(r.grossPaise - r.netPaise) }}</span></div>
+              <div class="card-row"><span>Net</span><strong class="net">₹{{ fmt(r.netPaise) }}</strong></div>
+            </article>
+          }
         </div>
         @if (filtered().length === 0) { <div class="empty">💰<p>No data</p></div> }
       }

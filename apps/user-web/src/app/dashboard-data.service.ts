@@ -1,6 +1,8 @@
 import { inject, signal, Service } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, from } from 'rxjs';
 import { ClinicApiService } from './clinic-api.service';
+import { ClinicApiClient } from './clinic-api/clinic-api.client';
+import { API_PATHS } from './core/constants/api-paths.constants';
 import { ProductAnalyticsService } from './core/services/product-analytics.service';
 import { PRODUCT_ANALYTICS_EVENTS } from './core/constants/analytics.constants';
 import { AuthService } from './auth/auth.service';
@@ -11,9 +13,22 @@ import { ReminderPrefs } from './reminder-preferences.component';
 export class DashboardDataService {
   private readonly api = inject(ClinicApiService);
   private readonly auth = inject(AuthService);
+  private readonly apiClient = new ClinicApiClient();
 
-  loadDiseases(): Observable<{ diseases: Disease[] }> {
-    return this.api.diseases();
+  loadDiseases(params?: { clinicStoreId?: string | null }): Observable<{ diseases: Disease[] }> {
+    return this.api.diseases(params);
+  }
+
+  loadPatientHomeClinicStoreId(): Observable<string | null> {
+    if (!this.isPatient()) {
+      return from(Promise.resolve(null));
+    }
+    return from(
+      this.apiClient
+        .get<{ profile: { homeClinicStore?: { id: string } | null } }>(API_PATHS.PATIENT.PROFILE)
+        .then((res) => res.profile?.homeClinicStore?.id ?? null)
+        .catch(() => null)
+    );
   }
 
   loadBillingPlans(): Observable<{ plans: BillingPlan[] }> {

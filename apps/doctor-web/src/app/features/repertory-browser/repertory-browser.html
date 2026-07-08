@@ -4,7 +4,7 @@
     <p class="muted">Search across all OOREP repertories and materia medicas — Kent, Boger, Hering, Clarke, Allen, Boericke, and more.</p>
   </header>
 
-  <div class="browser-toolbar">
+  <div class="browser-toolbar" [class.toolbar-sticky]="isMobile()">
     <div class="mode-row">
       <button type="button" class="mode-btn" [class.active]="mode() === 'repertory'" (click)="switchMode('repertory')">Repertory</button>
       <button type="button" class="mode-btn" [class.active]="mode() === 'materia-medica'" (click)="switchMode('materia-medica')">Materia Medica</button>
@@ -39,20 +39,27 @@
     </div>
 
     @if (mode() === 'repertory') {
-      <div class="filters-row">
-        <label>
-          Min grade
-          <select [formField]="searchForm.minWeight">
-            <option value="1">1+</option>
-            <option value="2">2+</option>
-            <option value="3">3+</option>
-            <option value="4">4 only</option>
-          </select>
-        </label>
-        <p class="syntax-hint muted">
-          Wildcards: <code>cough*</code> · Exclude: <code>-abdomen</code> · Exact: <code>"gums swollen"</code>
-        </p>
-      </div>
+      @if (isMobile()) {
+        <button type="button" class="filters-toggle" (click)="toggleFilters()">
+          {{ filtersOpen() ? 'Hide filters' : 'Filters & syntax help' }}
+        </button>
+      }
+      @if (!isMobile() || filtersOpen()) {
+        <div class="filters-row">
+          <label>
+            Min grade
+            <select [formField]="searchForm.minWeight">
+              <option value="1">1+</option>
+              <option value="2">2+</option>
+              <option value="3">3+</option>
+              <option value="4">4 only</option>
+            </select>
+          </label>
+          <p class="syntax-hint muted">
+            Wildcards: <code>cough*</code> · Exclude: <code>-abdomen</code> · Exact: <code>"gums swollen"</code>
+          </p>
+        </div>
+      }
     }
   </div>
 
@@ -110,7 +117,7 @@
     }
 
     @if (mmResults().length && !selectedMmResult()) {
-      <div class="mm-result-list">
+      <div class="mm-result-list" [class.mobile-pane-hidden]="!showMmList()">
         @for (result of mmResults(); track result.remedyId) {
           <button type="button" class="mm-result-card" (click)="openMmResult(result)">
             <strong>{{ result.remedyName }}</strong>
@@ -122,7 +129,10 @@
     }
 
     @if (selectedMmResult(); as mm) {
-      <section class="mm-panel">
+      <section class="mm-panel" [class.mobile-pane-hidden]="!showMmDetail()">
+        @if (isMobile()) {
+          <button type="button" class="mobile-back" (click)="closeMmResult()">← Back to results</button>
+        }
         <div class="mm-header">
           <div>
             <h3>{{ mm.remedyName }}</h3>

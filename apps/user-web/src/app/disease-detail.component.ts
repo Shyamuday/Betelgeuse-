@@ -1,7 +1,6 @@
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Meta, Title } from '@angular/platform-browser';
 import { firstValueFrom } from 'rxjs';
 import { buildDetailRows, DetailRowsComponent } from '@vitalis/platform-ui';
 import { AppFooterComponent } from './app-footer.component';
@@ -31,8 +30,6 @@ export class DiseaseDetailComponent implements OnInit {
   private readonly overlayService = inject(AppOverlayService);
   private readonly api = inject(ClinicApiService);
   private readonly whatsappSvc = inject(WhatsappLinkService);
-  private readonly title = inject(Title);
-  private readonly meta = inject(Meta);
 
   readonly whatsappLink = this.whatsappSvc.url;
   readonly defaultWarning =
@@ -76,17 +73,6 @@ export class DiseaseDetailComponent implements OnInit {
     });
   }
 
-  private applySeo(live: Disease | null, staticInfo?: DiseaseInfo) {
-    const pageTitle = live?.seoTitle || staticInfo?.seo?.metaTitle || `${this.displayName()} — Vitalis Care`;
-    const description =
-      live?.seoDescription ||
-      staticInfo?.seo?.metaDescription ||
-      this.displaySummary().slice(0, 160);
-
-    this.title.setTitle(pageTitle);
-    this.meta.updateTag({ name: 'description', content: description });
-  }
-
   private async loadPage(slug: string) {
     this.loading.set(true);
     const staticInfo = diseaseInfos.find((item) => item.slug === slug);
@@ -96,9 +82,8 @@ export class DiseaseDetailComponent implements OnInit {
     try {
       const response = await firstValueFrom(this.api.diseaseBySlug(slug));
       this.liveDisease.set(response.disease);
-      this.applySeo(response.disease, staticInfo);
     } catch {
-      this.applySeo(null, staticInfo);
+      // Static marketing page may exist without a matching DB row.
     } finally {
       this.loading.set(false);
     }

@@ -59,7 +59,7 @@
       @if (!branchPnl().length) {
         <p class="empty">No branch data for this month.</p>
       } @else {
-        <div class="table-wrap">
+        <div class="table-wrap desktop-only">
           <table class="table">
             <thead>
               <tr>
@@ -102,6 +102,26 @@
               }
             </tbody>
           </table>
+        </div>
+        <div class="mobile-row-cards">
+          @for (row of branchPnl(); track row.storeId ?? row.storeCode) {
+            <article class="mobile-row-card">
+              <div class="card-head">
+                <div>
+                  <strong>{{ row.storeName }}</strong>
+                  <div class="branch-code">{{ row.storeCode }}</div>
+                </div>
+                <span [class.positive]="row.netEstimateInPaise >= 0" [class.negative]="row.netEstimateInPaise < 0">
+                  ₹{{ formatPaise(row.netEstimateInPaise) }}
+                </span>
+              </div>
+              <div class="card-row"><span>Consultation</span><span>₹{{ formatPaise(row.consultationRevenueInPaise) }}</span></div>
+              <div class="card-row"><span>Medicine</span><span>₹{{ formatPaise(row.medicineRevenueInPaise) }}</span></div>
+              <div class="card-row"><span>Payroll</span><span>₹{{ formatPaise(row.payrollCostInPaise) }}</span></div>
+              <div class="card-row"><span>Store exp.</span><span>₹{{ formatPaise(row.storeExpensesInPaise) }}</span></div>
+              <div class="card-row"><span>Clinic exp.</span><span>₹{{ formatPaise(row.clinicExpensesInPaise) }}</span></div>
+            </article>
+          }
         </div>
       }
     </section>
