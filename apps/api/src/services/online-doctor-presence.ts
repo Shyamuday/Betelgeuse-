@@ -75,7 +75,7 @@ export function mapLiveDoctor(session: {
   };
 }) {
   const profileImageUrl = enrichWithProfileImageUrl(
-    { profileImageKey: session.user.profileImageKey },
+    { id: session.user.id, profileImageKey: session.user.profileImageKey },
     userProfileImagePath
   ).profileImageUrl;
 
@@ -189,7 +189,7 @@ export function broadcastPresence(
   }
 }
 
-export async function markDoctorBusy(userId: string, status: LivePresenceStatus.BUSY | LivePresenceStatus.ON_CALL) {
+export async function markDoctorBusy(userId: string, status: 'BUSY' | 'ON_CALL') {
   const session = await prisma.doctorOnlineSession.findUnique({ where: { userId } });
   if (!session) return;
   await prisma.doctorOnlineSession.update({

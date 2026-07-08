@@ -90,8 +90,10 @@ export async function listDiseases(filters: {
   return attachPrescriptionOptionIds(rows);
 }
 
-async function attachPrescriptionOptionIds<T extends { name: string }>(diseases: T[]) {
-  if (!diseases.length) return diseases as Array<T & { prescriptionOptionId: string | null }>;
+async function attachPrescriptionOptionIds<T extends { name: string; publicFaq?: unknown }>(
+  diseases: T[]
+): Promise<Array<Omit<T, 'publicFaq'> & { publicFaq: DiseaseFaqItem[]; prescriptionOptionId: string | null }>> {
+  if (!diseases.length) return [];
 
   const normalizedLabels = diseases.map((disease) => normalizeOptionLabel(disease.name));
   const options = await prisma.prescriptionOption.findMany({

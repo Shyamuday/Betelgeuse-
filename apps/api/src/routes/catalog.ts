@@ -177,6 +177,11 @@ router.get(
         name: disease.name,
         slug: disease.slug,
         description: disease.description,
+        publicDescription: disease.publicDescription,
+        publicImageUrl: disease.publicImageUrl,
+        seoTitle: disease.seoTitle,
+        seoDescription: disease.seoDescription,
+        publicFaq: parsePublicFaq(disease.publicFaq),
         publicCategory: disease.publicCategory,
         feeInPaise: disease.feeInPaise,
         isActive: disease.isActive

@@ -2,7 +2,7 @@ import type { StaticDiseasePageImport } from '../types/disease-public-page.js';
 
 export async function loadStaticDiseasePageImports(): Promise<StaticDiseasePageImport[]> {
   const { diseaseInfos } = await import(
-    '../../../user-web/src/app/disease/disease-info.constants.ts'
+    '../../../user-web/src/app/disease/disease-info.constants.js'
   );
 
   return diseaseInfos.map((info) => ({

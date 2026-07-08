@@ -1,4 +1,4 @@
-import type { RoleTaskGuide } from './types';
+import type { RoleTaskGuide } from './types.js';
 
 const doctorBase = (variantKey: string | undefined, roleTitle: string, tagline: string, extras: Partial<RoleTaskGuide>): RoleTaskGuide => ({
   appKey: 'doctor-web',
