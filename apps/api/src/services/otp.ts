@@ -1,4 +1,5 @@
 import { SERVER_CONFIG } from '../constants/config.constants.js';
+import { sendFast2SmsOtp } from './fast2sms.js';
 import { storeOtpEntry, verifyOtpEntry } from './otp-store.js';
 
 export const devOtp = SERVER_CONFIG.DEV_OTP;
@@ -17,21 +18,5 @@ export async function verifyOtp(mobile: string, otp: string): Promise<boolean> {
 }
 
 export async function sendOtpSms(mobile: string, otp: string): Promise<void> {
-  const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID || '';
-  const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN || '';
-  const twilioSmsFrom = process.env.TWILIO_SMS_FROM || '';
-
-  if (!twilioAccountSid || !twilioAuthToken || !twilioSmsFrom) {
-    console.info(`[otp] DEV — OTP for ${mobile}: ${otp}`);
-    return;
-  }
-
-  const { default: twilio } = await import('twilio');
-  const client = twilio(twilioAccountSid, twilioAuthToken);
-  const to = mobile.startsWith('+') ? mobile : `+${mobile.replace(/\D/g, '')}`;
-  await client.messages.create({
-    to,
-    from: twilioSmsFrom,
-    body: `Your Vitalis Care OTP is: ${otp}. Valid for 10 minutes. Do not share it with anyone.`
-  });
+  await sendFast2SmsOtp(mobile, otp);
 }
