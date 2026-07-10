@@ -4,7 +4,7 @@
 
       @if (patientSelection(); as selection) {
         <h2>Who is logging in?</h2>
-        <p class="muted">Multiple patient profiles use this mobile number. Choose yours to continue.</p>
+        <p class="muted">Multiple patient profiles use this email. Choose yours to continue.</p>
         <div class="patient-pick-list">
           @for (patient of selection.patients; track patient.id) {
             <button type="button" class="patient-pick" (click)="selectPatient(patient.id)">
@@ -48,7 +48,7 @@
         </form>
       } @else if (authView() === 'signup') {
         <h2>Create patient account</h2>
-        <p class="muted">Sign up with your details to manage consultations, prescriptions, and care reminders.</p>
+        <p class="muted">Sign up with your email OTP. You can add your mobile number later from profile.</p>
 
         <form (ngSubmit)="registerPatient()">
           <label>
@@ -59,89 +59,43 @@
             Email
             <input [formField]="signupForm.email" type="email" placeholder="Enter Gmail" autocomplete="email" />
           </label>
-          <label>
-            Mobile number
-            <input [formField]="signupForm.mobile" placeholder="Enter mobile number" inputmode="tel" autocomplete="tel" />
-          </label>
-          <label>
-            Password
-            <input [formField]="signupForm.password" type="password" placeholder="Min 8 characters" autocomplete="new-password" />
-          </label>
-          <label>
-            Confirm password
-            <input [formField]="signupForm.confirmPassword" type="password" placeholder="Confirm password" autocomplete="new-password" />
-          </label>
-          @if (signupModel().password && signupModel().confirmPassword && signupModel().password !== signupModel().confirmPassword) {
-            <p class="error-text">Passwords do not match</p>
-          }
+          <div class="otp-row">
+            <label class="otp-field">
+              Email OTP
+              <input [formField]="signupForm.otp" placeholder="6-digit OTP" inputmode="numeric" autocomplete="one-time-code" />
+            </label>
+            <button type="button" class="secondary otp-send" [disabled]="isProcessing()" (click)="requestOtp(signupModel().email)">Send OTP</button>
+          </div>
           <button class="primary" type="submit" [disabled]="isProcessing() || !canRegisterPatient()">Create account</button>
         </form>
 
         <p class="mode-switch-wrap">
           <button type="button" class="mode-switch" (click)="setAuthView('login')">Already have an account? Login</button>
         </p>
-      } @else if (loginMode() === 'password') {
-        <h2>Login to continue</h2>
-        <p class="muted">Sign in with your email or mobile and password.</p>
-
-        <form (ngSubmit)="loginPatientWithPassword()">
-          <label>
-            Email or mobile number
-            <input
-              [formField]="patientCredentialsForm.identifier"
-              placeholder="Enter Gmail or mobile number"
-            />
-          </label>
-          <label>
-            Password
-            <input
-              [formField]="patientCredentialsForm.password"
-              type="password"
-              placeholder="Enter your password"
-            />
-          </label>
-          <button class="primary" type="submit" [disabled]="isProcessing()">Login</button>
-        </form>
-
-        <div class="divider-text">or</div>
-        <form (ngSubmit)="loginWithGoogle()">
-          <button class="secondary" type="submit" [disabled]="isProcessing()">Continue with Gmail</button>
-        </form>
-
-        <p class="mode-switch-wrap">
-          <button type="button" class="mode-switch" (click)="setLoginMode('otp')">Login with mobile OTP</button>
-        </p>
-        <p class="mode-switch-wrap">
-          <button type="button" class="mode-switch" (click)="startForgotPassword()">Forgot password?</button>
-        </p>
-        <p class="mode-switch-wrap">
-          <button type="button" class="mode-switch" (click)="setAuthView('signup')">New patient? Create account</button>
-        </p>
-
-        <app-dev-login-panel (loggedIn)="onDevLoggedIn()" (fillAccount)="applyDevFill($event)" />
       } @else {
-        <button type="button" class="back-btn" (click)="setLoginMode('password')">← Back</button>
-        <h2>Login with OTP</h2>
-        <p class="muted">We will send a one-time code to your mobile. No password needed.</p>
+        <h2>Login to continue</h2>
+        <p class="muted">Sign in securely with an OTP sent to your email.</p>
 
         <form (ngSubmit)="loginPatientWithOtp()">
           <label>
-            Mobile number
-            <input [formField]="patientOtpForm.mobile" placeholder="Enter 10-digit mobile number" inputmode="tel" />
+            Email
+            <input
+              [formField]="patientOtpForm.email"
+              type="email"
+              placeholder="Enter Gmail"
+              autocomplete="email"
+            />
           </label>
           <div class="otp-row">
             <label class="otp-field">
-              OTP
+              Email OTP
               <input [formField]="patientOtpForm.otp" placeholder="6-digit OTP" inputmode="numeric" autocomplete="one-time-code" />
             </label>
-            <button type="button" class="secondary otp-send" [disabled]="isProcessing()" (click)="requestOtp()">Send OTP</button>
+            <button type="button" class="secondary otp-send" [disabled]="isProcessing()" (click)="requestOtp(patientOtpModel().email)">Send OTP</button>
           </div>
-          <button class="primary" type="submit" [disabled]="isProcessing()">Continue</button>
+          <button class="primary" type="submit" [disabled]="isProcessing() || !canLoginWithEmailOtp()">Continue</button>
         </form>
 
-        <p class="mode-switch-wrap">
-          <button type="button" class="mode-switch" (click)="setLoginMode('password')">Login with password or Gmail</button>
-        </p>
         <p class="mode-switch-wrap">
           <button type="button" class="mode-switch" (click)="setAuthView('signup')">New patient? Create account</button>
         </p>

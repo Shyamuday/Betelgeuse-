@@ -19,7 +19,7 @@ export type PatientSelectionCandidate = {
 
 export type PatientSelectionResponse = {
   requiresPatientSelection: true;
-  mobile?: string;
+  email?: string;
   patients: PatientSelectionCandidate[];
 };
 

@@ -36,7 +36,7 @@ export class HomeHeroSectionComponent {
   readonly heroHeadline = signal<string>(HOME_CONTENT.hero.headline);
   readonly heroLead = signal<string>(HOME_CONTENT.hero.lead);
 
-  readonly bookingFormModel = signal({ diseaseId: '', clinicStoreId: '', mobile: '', otp: '' });
+  readonly bookingFormModel = signal({ diseaseId: '', clinicStoreId: '', email: '', otp: '' });
   readonly bookingForm = form(this.bookingFormModel);
   readonly diseases = signal<Disease[]>([]);
   readonly clinics = signal<ClinicOption[]>([]);
@@ -115,14 +115,14 @@ export class HomeHeroSectionComponent {
   }
 
   async sendOtp() {
-    const { mobile: rawMobile, diseaseId } = this.bookingFormModel();
-    const mobile = rawMobile.trim().replace(/\s+/g, '');
+    const { email: rawEmail, diseaseId } = this.bookingFormModel();
+    const email = rawEmail.trim().toLowerCase();
     if (!diseaseId) {
       this.error.set('Select a health concern to continue.');
       return;
     }
-    if (!/^\d{10}$/.test(mobile)) {
-      this.error.set('Enter a valid 10-digit mobile number.');
+    if (!/.+@.+\..+/.test(email)) {
+      this.error.set('Enter a valid email address.');
       return;
     }
 
@@ -130,12 +130,12 @@ export class HomeHeroSectionComponent {
     this.busy.set(true);
     try {
       await firstValueFrom(
-        this.auth.requestOtp(mobile, {
+        this.auth.requestOtp(email, {
           source: 'HOME_BOOKING',
-          entryPage: typeof window !== 'undefined' ? window.location.pathname : undefined
-        })
+          entryPage: typeof window !== 'undefined' ? window.location.pathname : undefined,
+        }),
       );
-      this.bookingFormModel.update((m) => ({ ...m, mobile }));
+      this.bookingFormModel.update((m) => ({ ...m, email }));
       this.step.set('otp');
     } catch (err: any) {
       this.error.set(err?.error?.message || 'Could not send OTP. Please try again.');
@@ -157,7 +157,7 @@ export class HomeHeroSectionComponent {
       const form = this.bookingFormModel();
       const response = await firstValueFrom(
         this.auth.patientLogin({
-          mobile: form.mobile,
+          email: form.email,
           otp: form.otp.trim(),
         }),
       );

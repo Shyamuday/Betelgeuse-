@@ -34,8 +34,8 @@ export class AuthService {
     try {
       const response = await firstValueFrom(
         this.http.get<{ user: User }>(`${this.apiBase}${AUTH_PATHS.ME}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       );
       this.patientAuth.setAuthenticatedUser(response.user);
       return response.user;
@@ -51,61 +51,70 @@ export class AuthService {
   }
 
   requestOtp(
-    mobile: string,
+    email: string,
     lead?: {
       source: 'HOME_BOOKING' | 'PROMO_POPUP';
       visitorName?: string;
       visitorKey?: string;
       entryPage?: string;
-    }
+    },
   ) {
     return this.http.post<{ devOtp?: string }>(`${this.apiBase}${AUTH_PATHS.REQUEST_OTP}`, {
-      mobile,
+      email,
       ...(lead
         ? {
             leadSource: lead.source,
             visitorName: lead.visitorName,
             visitorKey: lead.visitorKey,
-            entryPage: lead.entryPage ?? (typeof window !== 'undefined' ? window.location.pathname : undefined)
+            entryPage:
+              lead.entryPage ??
+              (typeof window !== 'undefined' ? window.location.pathname : undefined),
           }
-        : {})
+        : {}),
     });
   }
 
-  patientLogin(payload: { mobile: string; otp: string; name?: string; referralCode?: string }) {
+  patientLogin(payload: { email: string; otp: string; name?: string; referralCode?: string }) {
     return this.http
-      .post<AuthResponse | PatientSelectionResponse>(`${this.apiBase}${AUTH_PATHS.PATIENT_LOGIN}`, payload)
+      .post<AuthResponse | PatientSelectionResponse>(
+        `${this.apiBase}${AUTH_PATHS.PATIENT_LOGIN}`,
+        payload,
+      )
       .pipe(tap((response) => this.persistIfAuthenticated(response)));
   }
 
-  patientLoginSelect(payload: { mobile: string; otp: string; patientId: string }) {
-    return this.http.post<AuthResponse>(`${this.apiBase}${AUTH_PATHS.PATIENT_LOGIN_SELECT}`, payload).pipe(
-      tap((response) => this.persistSession(response))
-    );
+  patientLoginSelect(payload: { email: string; otp: string; patientId: string }) {
+    return this.http
+      .post<AuthResponse>(`${this.apiBase}${AUTH_PATHS.PATIENT_LOGIN_SELECT}`, payload)
+      .pipe(tap((response) => this.persistSession(response)));
   }
 
   patientPasswordLogin(payload: { identifier: string; password: string }) {
     return from(this.patientAuth.signInWithPassword(payload.identifier, payload.password)).pipe(
-      tap((response) => this.persistIfAuthenticated(response))
+      tap((response) => this.persistIfAuthenticated(response)),
     );
   }
 
   patientPasswordLoginSelect(payload: { identifier: string; password: string; patientId: string }) {
     return from(
-      this.patientAuth.signInWithPasswordSelect(payload.identifier, payload.password, payload.patientId)
+      this.patientAuth.signInWithPasswordSelect(
+        payload.identifier,
+        payload.password,
+        payload.patientId,
+      ),
     ).pipe(tap((response) => this.persistSession(response)));
   }
 
   patientRegister(payload: { name: string; email?: string; mobile?: string; password: string }) {
     return from(this.patientAuth.register(payload)).pipe(
-      tap((response) => this.persistSession(response))
+      tap((response) => this.persistSession(response)),
     );
   }
 
   googleLogin(idToken: string) {
-    return this.http.post<AuthResponse>(`${this.apiBase}${AUTH_PATHS.GOOGLE}`, { idToken }).pipe(
-      tap((response) => this.persistSession(response))
-    );
+    return this.http
+      .post<AuthResponse>(`${this.apiBase}${AUTH_PATHS.GOOGLE}`, { idToken })
+      .pipe(tap((response) => this.persistSession(response)));
   }
 
   forgotPassword(email: string) {
@@ -114,7 +123,7 @@ export class AuthService {
 
   resetPassword(payload: { token: string; password: string }) {
     return from(this.patientAuth.resetPassword(payload.token, payload.password)).pipe(
-      tap((response) => this.persistSession(response))
+      tap((response) => this.persistSession(response)),
     );
   }
 

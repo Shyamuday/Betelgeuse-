@@ -4,11 +4,11 @@
   <p class="promo-eyebrow">Limited offer</p>
   <h2>Get a FREE consultation</h2>
   <p class="promo-lead">
-  Register with your mobile number and book your first online consultation at no cost.
+  Register with your email and book your first online consultation at no cost.
   </p>
 
   @if (patientSelection(); as patients) {
-    <p class="promo-muted">Multiple profiles use this number. Choose yours:</p>
+    <p class="promo-muted">Multiple profiles use this email. Choose yours:</p>
     <div class="patient-pick-list">
       @for (patient of patients; track patient.id) {
         <button type="button" class="patient-pick" (click)="selectPatient(patient.id)" [disabled]="busy()">
@@ -19,17 +19,16 @@
         </button>
       }
     </div>
-    <button type="button" class="link-btn" (click)="backToMobile()">← Change mobile number</button>
+    <button type="button" class="link-btn" (click)="backToEmail()">← Change email</button>
   } @else if (step() === 'register') {
     <form (ngSubmit)="sendOtp()">
       <label>
-        Mobile number
+        Email
         <input
-          [formField]="form.mobile"
-          type="tel"
-          inputmode="numeric"
-          placeholder="10-digit mobile number"
-          autocomplete="tel"
+          [formField]="form.email"
+          type="email"
+          placeholder="Enter your Gmail"
+          autocomplete="email"
         />
       </label>
       @if (error()) {
@@ -42,8 +41,8 @@
   } @else if (step() === 'otp') {
     <form (ngSubmit)="verifyAndRegister()">
       <p class="promo-muted">
-        OTP sent to <strong>{{ formModel().mobile }}</strong>
-        <button type="button" class="link-btn inline" (click)="backToMobile()">Edit</button>
+        OTP sent to <strong>{{ formModel().email }}</strong>
+        <button type="button" class="link-btn inline" (click)="backToEmail()">Edit</button>
       </p>
       <label>
         Enter OTP

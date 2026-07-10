@@ -1,15 +1,64 @@
-<nav class="approach-stepper" aria-label="Case analysis workflow">
-  @for (step of steps; track step.id; let index = $index) {
-    <button
-      type="button"
-      class="step-chip"
-      [class.active]="isActive(step)"
-      [class.done]="isDone(step)"
-      [class.optional]="step.optional"
-      (click)="select(step)"
-    >
-      <span class="step-index">{{ index + 1 }}</span>
-      <span class="step-label">{{ step.shortLabel }}</span>
-    </button>
-  }
-</nav>
+<section class="approach-stepper-shell" aria-label="Case taking workflow">
+  <div class="stepper-top-row">
+    <div class="stepper-current">
+      <span class="stepper-kicker">Step {{ activeIndex() + 1 }} of {{ steps.length }}</span>
+      @if (activeStep(); as current) {
+        <strong>{{ current.label }}</strong>
+        @if (current.description) {
+          <span class="stepper-description">{{ current.description }}</span>
+        }
+      }
+    </div>
+
+    <div class="stepper-actions">
+      <button
+        type="button"
+        class="step-nav-btn"
+        (click)="selectPrevious()"
+        [disabled]="!previousStep()"
+      >
+        Previous
+      </button>
+
+      <label class="quick-switch">
+        <span>Jump to</span>
+        <select [value]="activeStepId" (change)="selectById($event)">
+          @for (step of steps; track step.id; let index = $index) {
+            <option [value]="step.id">
+              {{ index + 1 }}. {{ step.shortLabel }}
+            </option>
+          }
+        </select>
+      </label>
+
+      <button
+        type="button"
+        class="step-nav-btn step-nav-btn-primary"
+        (click)="selectNext()"
+        [disabled]="!nextStep()"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+
+  <div class="stepper-progress" aria-hidden="true">
+    <span [style.width.%]="progressPercent()"></span>
+  </div>
+
+  <nav class="approach-stepper" aria-label="Quick switch case taking step">
+    @for (step of steps; track step.id; let index = $index) {
+      <button
+        type="button"
+        class="step-chip"
+        [class.active]="isActive(step)"
+        [class.done]="isDone(step)"
+        [class.optional]="step.optional"
+        (click)="select(step)"
+      >
+        <span class="step-index">{{ index + 1 }}</span>
+        <span class="step-label">{{ step.shortLabel }}</span>
+      </button>
+    }
+  </nav>
+</section>

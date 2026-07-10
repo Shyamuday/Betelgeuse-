@@ -47,16 +47,13 @@
                 </label>
 
                 <label class="bc-field">
-                  <span class="bc-label">{{ copy.booking.mobileLabel }}</span>
-                  <div class="bc-input-wrap">
-                    <span class="bc-prefix">+91</span>
-                    <input
-                      [formField]="bookingForm.mobile"
-                      [placeholder]="copy.booking.mobilePlaceholder"
-                      inputmode="tel"
-                      autocomplete="tel"
-                    />
-                  </div>
+                  <span class="bc-label">{{ copy.booking.emailLabel }}</span>
+                  <input
+                    [formField]="bookingForm.email"
+                    [placeholder]="copy.booking.emailPlaceholder"
+                    type="email"
+                    autocomplete="email"
+                  />
                 </label>
 
                 <button class="bc-btn" type="button" [disabled]="busy()" (click)="sendOtp()">
@@ -73,7 +70,7 @@
             @case ('otp') {
               <h2 class="booking-title">{{ copy.booking.otpTitle }}</h2>
               <p class="bc-otp-who">
-                OTP sent to <strong>+91 {{ bookingFormModel().mobile }}</strong>
+                OTP sent to <strong>{{ bookingFormModel().email }}</strong>
               </p>
               <div class="bc-fields">
                 <label class="bc-field">

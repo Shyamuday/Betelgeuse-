@@ -17,7 +17,7 @@ type Step = 'register' | 'otp' | 'loading' | 'done';
   standalone: true,
   imports: [CommonModule, FormField],
   templateUrl: './free-consultation-promo.component.html',
-  styleUrl: './free-consultation-promo.component.scss'
+  styleUrl: './free-consultation-promo.component.scss',
 })
 export class FreeConsultationPromoComponent {
   private readonly auth = inject(AuthService);
@@ -30,7 +30,7 @@ export class FreeConsultationPromoComponent {
   readonly error = signal('');
   readonly patientSelection = signal<PatientSelectionCandidate[] | null>(null);
 
-  readonly formModel = signal({ mobile: '', otp: '' });
+  readonly formModel = signal({ email: '', otp: '' });
   readonly form = form(this.formModel);
 
   close() {
@@ -42,16 +42,16 @@ export class FreeConsultationPromoComponent {
     this.hostRef.close();
     this.overlayService.open(AuthFormOverlayComponent, {
       width: '480px',
-      panelClass: 'app-overlay-panel'
+      panelClass: 'app-overlay-panel',
     });
   }
 
   async sendOtp() {
-    const { mobile: rawMobile } = this.formModel();
-    const mobile = rawMobile.trim().replace(/\s+/g, '');
+    const { email: rawEmail } = this.formModel();
+    const email = rawEmail.trim().toLowerCase();
 
-    if (!/^\d{10}$/.test(mobile)) {
-      this.error.set('Enter a valid 10-digit mobile number.');
+    if (!/.+@.+\..+/.test(email)) {
+      this.error.set('Enter a valid email address.');
       return;
     }
 
@@ -59,12 +59,12 @@ export class FreeConsultationPromoComponent {
     this.busy.set(true);
     try {
       await firstValueFrom(
-        this.auth.requestOtp(mobile, {
+        this.auth.requestOtp(email, {
           source: 'PROMO_POPUP',
-          entryPage: typeof window !== 'undefined' ? window.location.pathname : undefined
-        })
+          entryPage: typeof window !== 'undefined' ? window.location.pathname : undefined,
+        }),
       );
-      this.formModel.update((m) => ({ ...m, mobile }));
+      this.formModel.update((m) => ({ ...m, email }));
       this.step.set('otp');
     } catch (err: unknown) {
       const message = (err as { error?: { message?: string } })?.error?.message;
@@ -75,9 +75,9 @@ export class FreeConsultationPromoComponent {
   }
 
   async verifyAndRegister() {
-    const { mobile, otp } = this.formModel();
+    const { email, otp } = this.formModel();
     if (!otp.trim()) {
-      this.error.set('Enter the OTP sent to your mobile.');
+      this.error.set('Enter the OTP sent to your email.');
       return;
     }
 
@@ -87,9 +87,9 @@ export class FreeConsultationPromoComponent {
     try {
       const response = await firstValueFrom(
         this.auth.patientLogin({
-          mobile,
-          otp: otp.trim()
-        })
+          email,
+          otp: otp.trim(),
+        }),
       );
 
       if ('requiresPatientSelection' in response) {
@@ -114,11 +114,11 @@ export class FreeConsultationPromoComponent {
   }
 
   async selectPatient(patientId: string) {
-    const { mobile, otp } = this.formModel();
+    const { email, otp } = this.formModel();
     this.busy.set(true);
     try {
       const response = await firstValueFrom(
-        this.auth.patientLoginSelect({ mobile, otp: otp.trim(), patientId })
+        this.auth.patientLoginSelect({ email, otp: otp.trim(), patientId }),
       );
       this.step.set('done');
       setTimeout(() => {
@@ -133,7 +133,7 @@ export class FreeConsultationPromoComponent {
     }
   }
 
-  backToMobile() {
+  backToEmail() {
     this.formModel.update((m) => ({ ...m, otp: '' }));
     this.patientSelection.set(null);
     this.error.set('');

@@ -20,7 +20,6 @@ type AuthFormOverlayData = {
 
 type AuthView = 'login' | 'signup';
 type ForgotStep = 'none' | 'request' | 'reset';
-type LoginMode = 'password' | 'otp';
 
 @Component({
   selector: 'app-auth-form-overlay',
@@ -33,14 +32,13 @@ export class AuthFormOverlayComponent {
     typeof window !== 'undefined'
       ? new URLSearchParams(window.location.search).get('ref') || undefined
       : undefined;
-  readonly loginMode = signal<LoginMode>('password');
   readonly authView = signal<AuthView>('login');
   readonly isProcessing = signal(false);
   readonly forgotStep = signal<ForgotStep>(this.overlayData.initialForgotStep || 'none');
   readonly resetToken = signal<string>(this.overlayData.resetToken || '');
   readonly patientSelection = signal<{
     mode: 'otp' | 'password';
-    mobile?: string;
+    email?: string;
     patients: PatientSelectionCandidate[];
   } | null>(null);
   private activeOverlayRef?: AppOverlayRef;
@@ -52,7 +50,7 @@ export class AuthFormOverlayComponent {
   readonly patientCredentialsForm = form(this.patientCredentialsModel);
 
   readonly patientOtpModel = signal({
-    mobile: DEV_DEMO_ACCOUNTS.patientMobile as string,
+    email: DEV_DEMO_ACCOUNTS.patientRahul.email as string,
     otp: DEV_DEMO_ACCOUNTS.otp as string,
   });
   readonly patientOtpForm = form(this.patientOtpModel);
@@ -67,9 +65,7 @@ export class AuthFormOverlayComponent {
   readonly signupModel = signal({
     name: '',
     email: '',
-    mobile: '',
-    password: '',
-    confirmPassword: '',
+    otp: '',
   });
   readonly signupForm = form(this.signupModel);
 
@@ -89,21 +85,21 @@ export class AuthFormOverlayComponent {
   }
 
   canRequestPasswordReset(): boolean {
-    return /.+@.+\..+/.test(this.forgotModel().email.trim());
+    return this.isEmail(this.forgotModel().email);
   }
 
   canRegisterPatient(): boolean {
     const signup = this.signupModel();
     return !!(
       signup.name.trim().length >= 2 &&
-      (signup.email.trim() || signup.mobile.trim()) &&
-      signup.password.length >= 8 &&
-      signup.password === signup.confirmPassword
+      this.isEmail(signup.email) &&
+      signup.otp.trim().length >= 4
     );
   }
 
-  setLoginMode(mode: LoginMode) {
-    this.loginMode.set(mode);
+  canLoginWithEmailOtp(): boolean {
+    const otp = this.patientOtpModel();
+    return this.isEmail(otp.email) && otp.otp.trim().length >= 4;
   }
 
   setAuthView(view: AuthView) {
@@ -122,11 +118,19 @@ export class AuthFormOverlayComponent {
     this.forgotStep.set('none');
   }
 
-  requestOtp() {
-    const { mobile } = this.patientOtpModel();
-    this.process('Sending OTP...', this.auth.requestOtp(mobile)).subscribe({
+  requestOtp(email: string) {
+    if (!this.isEmail(email)) {
+      this.showError('Enter a valid email address.');
+      return;
+    }
+
+    this.process('Sending OTP...', this.auth.requestOtp(email.trim().toLowerCase())).subscribe({
       next: (response) =>
-        this.showSuccess(`OTP sent successfully. Development OTP: ${response.devOtp}`),
+        this.showSuccess(
+          response.devOtp
+            ? `OTP sent successfully. Development OTP: ${response.devOtp}`
+            : 'OTP sent successfully. Check your email.',
+        ),
       error: () => this.showError('Could not request OTP.'),
     });
   }
@@ -142,15 +146,15 @@ export class AuthFormOverlayComponent {
     const identifier = credentials.identifier ?? credentials.email;
     if (identifier) {
       this.patientCredentialsModel.update((m) => ({ ...m, identifier }));
+      this.patientOtpModel.update((m) => ({ ...m, email: identifier }));
+      this.signupModel.update((m) => ({ ...m, email: identifier }));
     }
     if (credentials.password) {
       this.patientCredentialsModel.update((m) => ({ ...m, password: credentials.password! }));
     }
-    if (credentials.mobile) {
-      this.patientOtpModel.update((m) => ({ ...m, mobile: credentials.mobile! }));
-    }
     if (credentials.otp) {
       this.patientOtpModel.update((m) => ({ ...m, otp: credentials.otp! }));
+      this.signupModel.update((m) => ({ ...m, otp: credentials.otp! }));
     }
   }
 
@@ -160,6 +164,7 @@ export class AuthFormOverlayComponent {
       'Logging in patient...',
       this.auth.patientLogin({
         ...otp,
+        email: otp.email.trim().toLowerCase(),
         referralCode: this.referralCodeFromUrl,
       }),
     ).subscribe({
@@ -167,7 +172,7 @@ export class AuthFormOverlayComponent {
         if ('requiresPatientSelection' in response) {
           this.patientSelection.set({
             mode: 'otp',
-            mobile: response.mobile || this.patientOtpModel().mobile,
+            email: response.email || this.patientOtpModel().email,
             patients: response.patients,
           });
           this.closeActiveOverlay();
@@ -189,7 +194,7 @@ export class AuthFormOverlayComponent {
       this.process(
         'Signing in...',
         this.auth.patientLoginSelect({
-          mobile: selection.mobile || otp.mobile,
+          email: (selection.email || otp.email).trim().toLowerCase(),
           otp: otp.otp,
           patientId,
         }),
@@ -251,23 +256,37 @@ export class AuthFormOverlayComponent {
 
   registerPatient() {
     if (!this.canRegisterPatient()) {
-      this.showError('Enter your name, email or mobile, and matching password.');
+      this.showError('Enter your name, email, and OTP.');
       return;
     }
 
     const signup = this.signupModel();
     this.process(
       'Creating patient account...',
-      this.auth.patientRegister({
+      this.auth.patientLogin({
         name: signup.name.trim(),
-        email: signup.email.trim() || undefined,
-        mobile: signup.mobile.trim() || undefined,
-        password: signup.password,
+        email: signup.email.trim().toLowerCase(),
+        otp: signup.otp.trim(),
+        referralCode: this.referralCodeFromUrl,
       }),
     ).subscribe({
-      next: ({ user }) => {
+      next: (response) => {
+        if ('requiresPatientSelection' in response) {
+          this.patientOtpModel.update((model) => ({
+            ...model,
+            email: signup.email,
+            otp: signup.otp,
+          }));
+          this.patientSelection.set({
+            mode: 'otp',
+            email: response.email || signup.email,
+            patients: response.patients,
+          });
+          this.closeActiveOverlay();
+          return;
+        }
         this.closeAllOverlays();
-        this.router.navigateByUrl(this.auth.dashboardFor(user.role));
+        this.router.navigateByUrl(this.auth.dashboardFor(response.user.role));
       },
       error: (error) => this.showError(error.error?.message || 'Patient signup failed.'),
     });
@@ -382,5 +401,9 @@ export class AuthFormOverlayComponent {
 
   private errorCleanup() {
     this.closeActiveOverlay();
+  }
+
+  private isEmail(value: string) {
+    return /.+@.+\..+/.test(value.trim());
   }
 }
