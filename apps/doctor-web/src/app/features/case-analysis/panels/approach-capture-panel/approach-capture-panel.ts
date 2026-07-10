@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, output, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
-import type { ApproachFieldDef } from '@vitalis/homeopathy-approaches';
+import { fieldOptionGroupsForField, type ApproachFieldDef } from '@vitalis/homeopathy-approaches';
 import { installApproachPanelAutoSave } from '../../approach-panel-autosave';
 import { ApproachFieldHintComponent } from '../approach-field-hint/approach-field-hint';
 
@@ -14,14 +14,14 @@ export type ApproachCapturePanelConfig = {
   selector: 'app-approach-capture-panel',
   imports: [FormField, ApproachFieldHintComponent],
   templateUrl: './approach-capture-panel.html',
-  styleUrl: './approach-capture-panel.scss'
+  styleUrl: './approach-capture-panel.scss',
 })
 export class ApproachCapturePanelComponent implements OnChanges {
   private readonly hydrating = signal(true);
   private readonly autoSave = installApproachPanelAutoSave(
     () => this.model(),
     (value) => this.autoSaveRequested.emit(value),
-    () => this.hydrating()
+    () => this.hydrating(),
   );
 
   @Input({ required: true }) config!: ApproachCapturePanelConfig;
@@ -62,8 +62,40 @@ export class ApproachCapturePanelComponent implements OnChanges {
   suggestField(field: ApproachFieldDef) {
     this.fieldSuggestRequested.emit({
       field,
-      currentValue: this.model()[field.key] || ''
+      currentValue: this.model()[field.key] || '',
     });
+  }
+
+  addFieldOption(field: ApproachFieldDef, option: string) {
+    const current = this.model()[field.key]?.trim();
+    if (this.hasFieldOption(field, option)) {
+      this.removeFieldOption(field, option);
+      return;
+    }
+    this.model.update((model) => ({
+      ...model,
+      [field.key]: current ? `${current}; ${option}` : option,
+    }));
+  }
+
+  removeFieldOption(field: ApproachFieldDef, option: string) {
+    const next = (this.model()[field.key] || '')
+      .split(';')
+      .map((item) => item.trim())
+      .filter((item) => item && item.toLowerCase() !== option.toLowerCase())
+      .join('; ');
+    this.model.update((model) => ({ ...model, [field.key]: next }));
+  }
+
+  hasFieldOption(field: ApproachFieldDef, option: string) {
+    return (this.model()[field.key] || '')
+      .split(';')
+      .map((item) => item.trim().toLowerCase())
+      .includes(option.toLowerCase());
+  }
+
+  optionGroups(field: ApproachFieldDef) {
+    return fieldOptionGroupsForField(field);
   }
 
   isMultiline(field: ApproachFieldDef) {

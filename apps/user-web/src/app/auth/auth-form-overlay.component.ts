@@ -18,8 +18,8 @@ type AuthFormOverlayData = {
   resetToken?: string;
 };
 
-type ForgotStep = 'none' | 'reset';
-type LoginMode = 'password' | 'otp';
+type AuthView = 'login' | 'signup';
+type ForgotStep = 'none' | 'request' | 'reset';
 
 @Component({
   selector: 'app-auth-form-overlay',
@@ -32,13 +32,16 @@ export class AuthFormOverlayComponent {
     typeof window !== 'undefined'
       ? new URLSearchParams(window.location.search).get('ref') || undefined
       : undefined;
-  readonly loginMode = signal<LoginMode>('password');
+  readonly authView = signal<AuthView>('login');
+  readonly loginOtpSent = signal(false);
+  readonly signupOtpSent = signal(false);
+  readonly otpNotice = signal('');
   readonly isProcessing = signal(false);
   readonly forgotStep = signal<ForgotStep>(this.overlayData.initialForgotStep || 'none');
   readonly resetToken = signal<string>(this.overlayData.resetToken || '');
   readonly patientSelection = signal<{
     mode: 'otp' | 'password';
-    mobile?: string;
+    email?: string;
     patients: PatientSelectionCandidate[];
   } | null>(null);
   private activeOverlayRef?: AppOverlayRef;
@@ -50,7 +53,7 @@ export class AuthFormOverlayComponent {
   readonly patientCredentialsForm = form(this.patientCredentialsModel);
 
   readonly patientOtpModel = signal({
-    mobile: DEV_DEMO_ACCOUNTS.patientMobile as string,
+    email: DEV_DEMO_ACCOUNTS.patientRahul.email as string,
     otp: DEV_DEMO_ACCOUNTS.otp as string,
   });
   readonly patientOtpForm = form(this.patientOtpModel);
@@ -61,6 +64,13 @@ export class AuthFormOverlayComponent {
     confirmPassword: '',
   });
   readonly forgotForm = form(this.forgotModel);
+
+  readonly signupModel = signal({
+    name: '',
+    email: '',
+    otp: '',
+  });
+  readonly signupForm = form(this.signupModel);
 
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
@@ -77,15 +87,97 @@ export class AuthFormOverlayComponent {
     );
   }
 
-  setLoginMode(mode: LoginMode) {
-    this.loginMode.set(mode);
+  canRequestPasswordReset(): boolean {
+    return this.isEmail(this.forgotModel().email);
   }
 
-  requestOtp() {
-    const { mobile } = this.patientOtpModel();
-    this.process('Sending OTP...', this.auth.requestOtp(mobile)).subscribe({
-      next: (response) =>
-        this.showSuccess(`OTP sent successfully. Development OTP: ${response.devOtp}`),
+  canRegisterPatient(): boolean {
+    const signup = this.signupModel();
+    return !!(
+      signup.name.trim().length >= 2 &&
+      this.isEmail(signup.email) &&
+      this.signupOtpSent() &&
+      this.isSixDigitOtp(signup.otp)
+    );
+  }
+
+  canLoginWithEmailOtp(): boolean {
+    const otp = this.patientOtpModel();
+    return this.isEmail(otp.email) && this.loginOtpSent() && this.isSixDigitOtp(otp.otp);
+  }
+
+  setAuthView(view: AuthView) {
+    this.authView.set(view);
+    this.forgotStep.set('none');
+    this.patientSelection.set(null);
+    this.loginOtpSent.set(false);
+    this.signupOtpSent.set(false);
+    this.otpNotice.set('');
+    this.errorCleanup();
+  }
+
+  startForgotPassword() {
+    this.forgotStep.set('request');
+    this.patientSelection.set(null);
+  }
+
+  cancelForgotPassword() {
+    this.forgotStep.set('none');
+  }
+
+  resetLoginOtp() {
+    this.loginOtpSent.set(false);
+    this.otpNotice.set('');
+    this.patientOtpModel.update((model) => ({ ...model, otp: '' }));
+  }
+
+  resetSignupOtp() {
+    this.signupOtpSent.set(false);
+    this.otpNotice.set('');
+    this.signupModel.update((model) => ({ ...model, otp: '' }));
+  }
+
+  requestLoginOtp() {
+    const email = this.patientOtpModel().email;
+    this.requestOtp(email, () => {
+      this.patientOtpModel.update((model) => ({
+        ...model,
+        email: email.trim().toLowerCase(),
+        otp: '',
+      }));
+      this.loginOtpSent.set(true);
+    });
+  }
+
+  requestSignupOtp() {
+    const email = this.signupModel().email;
+    this.requestOtp(email, () => {
+      this.signupModel.update((model) => ({
+        ...model,
+        email: email.trim().toLowerCase(),
+        otp: '',
+      }));
+      this.signupOtpSent.set(true);
+    });
+  }
+
+  private requestOtp(email: string, onSent: () => void) {
+    if (!this.isEmail(email)) {
+      this.showError('Enter a valid email address.');
+      return;
+    }
+
+    this.otpNotice.set('');
+    this.process('Sending OTP...', this.auth.requestOtp(email.trim().toLowerCase())).subscribe({
+      next: (response) => {
+        onSent();
+        this.closeActiveOverlay();
+        this.otpNotice.set(
+          response.devOtp
+            ? `OTP sent successfully. Development OTP: ${response.devOtp}`
+            : 'OTP sent successfully. Check your email.',
+        );
+      },
       error: () => this.showError('Could not request OTP.'),
     });
   }
@@ -101,29 +193,35 @@ export class AuthFormOverlayComponent {
     const identifier = credentials.identifier ?? credentials.email;
     if (identifier) {
       this.patientCredentialsModel.update((m) => ({ ...m, identifier }));
+      this.patientOtpModel.update((m) => ({ ...m, email: identifier }));
+      this.signupModel.update((m) => ({ ...m, email: identifier }));
     }
     if (credentials.password) {
       this.patientCredentialsModel.update((m) => ({ ...m, password: credentials.password! }));
     }
-    if (credentials.mobile) {
-      this.patientOtpModel.update((m) => ({ ...m, mobile: credentials.mobile! }));
-    }
     if (credentials.otp) {
       this.patientOtpModel.update((m) => ({ ...m, otp: credentials.otp! }));
+      this.signupModel.update((m) => ({ ...m, otp: credentials.otp! }));
+      this.loginOtpSent.set(true);
+      this.signupOtpSent.set(true);
     }
   }
 
   loginPatientWithOtp() {
     const otp = this.patientOtpModel();
-    this.process('Logging in patient...', this.auth.patientLogin({
-      ...otp,
-      referralCode: this.referralCodeFromUrl
-    })).subscribe({
+    this.process(
+      'Logging in patient...',
+      this.auth.patientLogin({
+        ...otp,
+        email: otp.email.trim().toLowerCase(),
+        referralCode: this.referralCodeFromUrl,
+      }),
+    ).subscribe({
       next: (response) => {
         if ('requiresPatientSelection' in response) {
           this.patientSelection.set({
             mode: 'otp',
-            mobile: response.mobile || this.patientOtpModel().mobile,
+            email: response.email || this.patientOtpModel().email,
             patients: response.patients,
           });
           this.closeActiveOverlay();
@@ -145,7 +243,7 @@ export class AuthFormOverlayComponent {
       this.process(
         'Signing in...',
         this.auth.patientLoginSelect({
-          mobile: selection.mobile || otp.mobile,
+          email: (selection.email || otp.email).trim().toLowerCase(),
           otp: otp.otp,
           patientId,
         }),
@@ -205,6 +303,58 @@ export class AuthFormOverlayComponent {
     });
   }
 
+  registerPatient() {
+    if (!this.canRegisterPatient()) {
+      this.showError('Enter your name, email, and OTP.');
+      return;
+    }
+
+    const signup = this.signupModel();
+    this.process(
+      'Creating patient account...',
+      this.auth.patientLogin({
+        name: signup.name.trim(),
+        email: signup.email.trim().toLowerCase(),
+        otp: signup.otp.trim(),
+        referralCode: this.referralCodeFromUrl,
+      }),
+    ).subscribe({
+      next: (response) => {
+        if ('requiresPatientSelection' in response) {
+          this.patientOtpModel.update((model) => ({
+            ...model,
+            email: signup.email,
+            otp: signup.otp,
+          }));
+          this.patientSelection.set({
+            mode: 'otp',
+            email: response.email || signup.email,
+            patients: response.patients,
+          });
+          this.closeActiveOverlay();
+          return;
+        }
+        this.closeAllOverlays();
+        this.router.navigateByUrl(this.auth.dashboardFor(response.user.role));
+      },
+      error: (error) => this.showError(error.error?.message || 'Patient signup failed.'),
+    });
+  }
+
+  forgotPassword() {
+    const email = this.forgotModel().email.trim();
+    if (!email) {
+      this.showError('Enter your registered email to receive a reset link.');
+      return;
+    }
+
+    this.process('Sending reset link...', this.auth.forgotPassword(email)).subscribe({
+      next: () =>
+        this.showSuccess('If the account exists, a reset link has been sent to your email.'),
+      error: (error) => this.showError(error.error?.message || 'Could not send reset link.'),
+    });
+  }
+
   resetPassword() {
     const token = this.resetToken();
     const { password } = this.forgotModel();
@@ -213,10 +363,7 @@ export class AuthFormOverlayComponent {
       return;
     }
 
-    this.process(
-      'Resetting password...',
-      this.auth.resetPassword({ token, password }),
-    ).subscribe({
+    this.process('Resetting password...', this.auth.resetPassword({ token, password })).subscribe({
       next: ({ user }) => {
         this.closeAllOverlays();
         this.router.navigateByUrl(this.auth.dashboardFor(user.role));
@@ -228,8 +375,7 @@ export class AuthFormOverlayComponent {
   loginWithGoogle() {
     const w = window as unknown as Record<string, unknown>;
     const googleAccounts = (w['google'] as Record<string, unknown> | undefined)?.['accounts'] as
-      | { id: { initialize(cfg: Record<string, unknown>): void; prompt(): void } }
-      | undefined;
+      { id: { initialize(cfg: Record<string, unknown>): void; prompt(): void } } | undefined;
 
     if (!googleAccounts?.id) {
       this.showError('Google Sign-In is not available. Ensure GOOGLE_CLIENT_ID is configured.');
@@ -300,5 +446,17 @@ export class AuthFormOverlayComponent {
       disableClose: state === 'loading',
       width: '360px',
     });
+  }
+
+  private errorCleanup() {
+    this.closeActiveOverlay();
+  }
+
+  private isEmail(value: string) {
+    return /.+@.+\..+/.test(value.trim());
+  }
+
+  private isSixDigitOtp(value: string) {
+    return /^\d{6}$/.test(value.trim());
   }
 }

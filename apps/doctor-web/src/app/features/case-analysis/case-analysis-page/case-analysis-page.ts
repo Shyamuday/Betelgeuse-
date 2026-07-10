@@ -204,6 +204,23 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
 
   readonly workflowSteps = computed(() => this.activeApproach().steps);
 
+  readonly activeWorkflowStepIndex = computed(() => {
+    const index = this.workflowSteps().findIndex((step) => step.id === this.activeStepId());
+    return index >= 0 ? index : 0;
+  });
+
+  readonly activeWorkflowStep = computed(
+    () => this.workflowSteps()[this.activeWorkflowStepIndex()] || null,
+  );
+
+  readonly previousWorkflowStep = computed(
+    () => this.workflowSteps()[this.activeWorkflowStepIndex() - 1] || null,
+  );
+
+  readonly nextWorkflowStep = computed(
+    () => this.workflowSteps()[this.activeWorkflowStepIndex() + 1] || null,
+  );
+
   readonly caseSheetFields = computed(() =>
     caseSheetFieldsForSchema(this.activeApproach().caseSheetSchemaId),
   );
@@ -373,6 +390,20 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
 
   setActiveStep(stepId: ApproachStepId) {
     this.activeStepId.set(stepId);
+  }
+
+  goToPreviousWorkflowStep() {
+    const previous = this.previousWorkflowStep();
+    if (previous) {
+      this.setActiveStep(previous.id);
+    }
+  }
+
+  goToNextWorkflowStep() {
+    const next = this.nextWorkflowStep();
+    if (next) {
+      this.setActiveStep(next.id);
+    }
   }
 
   async loadPracticeSession() {
@@ -802,12 +833,28 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
   applyRubricSearchPhrase(phrase: string) {
     const trimmed = phrase.trim();
     if (!trimmed) return;
+    this.searchMode.set('repertory');
     this.searchModel.update((model) => ({ ...model, rubricQuery: trimmed }));
     if (this.repertoryEnabled()) {
       this.setActiveStep('rubric-search');
     }
-    void this.searchRubrics();
+    this.scrollToRubricSearch();
+    this.scheduleRubricSuggest(
+      trimmed,
+      this.searchModel().selectedSourceId || this.analysis()?.source?.id || '',
+    );
+    void this.runSymptomSearch();
     this.message.set(`Search prefilled: "${trimmed}".`);
+  }
+
+  private scrollToRubricSearch() {
+    if (typeof document === 'undefined') return;
+    window.setTimeout(() => {
+      document.getElementById('rubric-search-box')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }, 0);
   }
 
   async applyApproachFieldSuggestion(payload: { field: ApproachFieldDef; currentValue: string }) {
@@ -850,6 +897,28 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
     } finally {
       this.fieldSuggestingKey.set(null);
     }
+  }
+
+  toggleCaseSheetFieldOption(field: ApproachFieldDef, option: string) {
+    const current = this.caseSheetModel()[field.key]?.trim();
+    const hasOption = (current || '')
+      .split(';')
+      .map((item) => item.trim().toLowerCase())
+      .includes(option.toLowerCase());
+    const next = hasOption
+      ? (current || '')
+          .split(';')
+          .map((item) => item.trim())
+          .filter((item) => item && item.toLowerCase() !== option.toLowerCase())
+          .join('; ')
+      : current
+        ? `${current}; ${option}`
+        : option;
+    this.caseSheetModel.update((model) => ({
+      ...model,
+      [field.key]: next,
+    }));
+    this.scheduleAutoSaveCaseSheet();
   }
 
   private applyFieldSuggestionValue(

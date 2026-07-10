@@ -34,7 +34,7 @@ For AWS EC2 sizing and production deployment (100–500 patients/day), see **[do
 - ORM: Prisma
 - Realtime: Socket.io
 - Payments: Razorpay
-- Notifications: Twilio (SMS/WhatsApp)
+- Notifications: Email OTP, in-app notifications, email/push provider hooks
 
 ## Backend Setup
 
