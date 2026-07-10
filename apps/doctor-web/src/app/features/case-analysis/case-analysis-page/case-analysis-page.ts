@@ -899,6 +899,28 @@ export class CaseAnalysisPage implements OnDestroy, OnInit {
     }
   }
 
+  toggleCaseSheetFieldOption(field: ApproachFieldDef, option: string) {
+    const current = this.caseSheetModel()[field.key]?.trim();
+    const hasOption = (current || '')
+      .split(';')
+      .map((item) => item.trim().toLowerCase())
+      .includes(option.toLowerCase());
+    const next = hasOption
+      ? (current || '')
+          .split(';')
+          .map((item) => item.trim())
+          .filter((item) => item && item.toLowerCase() !== option.toLowerCase())
+          .join('; ')
+      : current
+        ? `${current}; ${option}`
+        : option;
+    this.caseSheetModel.update((model) => ({
+      ...model,
+      [field.key]: next,
+    }));
+    this.scheduleAutoSaveCaseSheet();
+  }
+
   private applyFieldSuggestionValue(
     fieldKey: string,
     suggestion: string,

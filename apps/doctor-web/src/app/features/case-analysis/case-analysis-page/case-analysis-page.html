@@ -294,6 +294,7 @@
           (saveRequested)="saveCaseSheet()"
           (rubricPhraseSelected)="applyRubricSearchPhrase($event)"
           (fieldSuggestRequested)="applyApproachFieldSuggestion($event)"
+          (fieldOptionToggled)="toggleCaseSheetFieldOption($event.field, $event.option)"
         />
       }
 

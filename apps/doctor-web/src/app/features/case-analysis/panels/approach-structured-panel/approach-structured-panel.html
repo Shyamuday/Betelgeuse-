@@ -122,15 +122,23 @@
                 } @else {
                   <input [formField]="form[field.key]" [attr.placeholder]="field.placeholder || null" />
                 }
-                @if (field.optionGroups?.length) {
+                @if (optionGroups(field).length) {
                   <div class="field-option-groups">
-                    @for (group of field.optionGroups; track group.title) {
+                    @for (group of optionGroups(field); track group.title) {
                       <div class="field-option-group">
                         <span>{{ group.title }}</span>
                         <div>
                           @for (option of group.options; track option) {
-                            <button type="button" class="field-option-chip" (click)="addFieldOption(field, option)">
+                            <button
+                              type="button"
+                              class="field-option-chip"
+                              [class.selected]="hasFieldOption(field, option)"
+                              (click)="addFieldOption(field, option)"
+                            >
                               {{ option }}
+                              @if (hasFieldOption(field, option)) {
+                                <span aria-hidden="true">x</span>
+                              }
                             </button>
                           }
                         </div>
@@ -200,15 +208,23 @@
           } @else {
             <input [formField]="form[field.key]" [attr.placeholder]="field.placeholder || null" />
           }
-          @if (field.optionGroups?.length) {
+          @if (optionGroups(field).length) {
             <div class="field-option-groups">
-              @for (group of field.optionGroups; track group.title) {
+              @for (group of optionGroups(field); track group.title) {
                 <div class="field-option-group">
                   <span>{{ group.title }}</span>
                   <div>
                     @for (option of group.options; track option) {
-                      <button type="button" class="field-option-chip" (click)="addFieldOption(field, option)">
+                      <button
+                        type="button"
+                        class="field-option-chip"
+                        [class.selected]="hasFieldOption(field, option)"
+                        (click)="addFieldOption(field, option)"
+                      >
                         {{ option }}
+                        @if (hasFieldOption(field, option)) {
+                          <span aria-hidden="true">x</span>
+                        }
                       </button>
                     }
                   </div>

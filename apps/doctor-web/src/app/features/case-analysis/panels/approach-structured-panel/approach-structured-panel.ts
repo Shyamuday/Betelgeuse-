@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, output, signal, type SimpleChanges } from 
 import { form, FormField } from '@angular/forms/signals';
 import {
   COMBINATION_REMEDY_CATALOG,
+  fieldOptionGroupsForField,
   type ApproachStructuredPanelDef,
   type CombinationRemedy,
   type ApproachFieldDef,
@@ -81,11 +82,34 @@ export class ApproachStructuredPanelComponent implements OnChanges {
 
   addFieldOption(field: ApproachFieldDef, option: string) {
     const current = this.model()[field.key]?.trim();
-    if (current?.toLowerCase().includes(option.toLowerCase())) return;
+    if (this.hasFieldOption(field, option)) {
+      this.removeFieldOption(field, option);
+      return;
+    }
     this.model.update((model) => ({
       ...model,
       [field.key]: current ? `${current}; ${option}` : option,
     }));
+  }
+
+  removeFieldOption(field: ApproachFieldDef, option: string) {
+    const next = (this.model()[field.key] || '')
+      .split(';')
+      .map((item) => item.trim())
+      .filter((item) => item && item.toLowerCase() !== option.toLowerCase())
+      .join('; ');
+    this.model.update((model) => ({ ...model, [field.key]: next }));
+  }
+
+  hasFieldOption(field: ApproachFieldDef, option: string) {
+    return (this.model()[field.key] || '')
+      .split(';')
+      .map((item) => item.trim().toLowerCase())
+      .includes(option.toLowerCase());
+  }
+
+  optionGroups(field: ApproachFieldDef) {
+    return fieldOptionGroupsForField(field);
   }
 
   isMultiline(field: ApproachFieldDef) {

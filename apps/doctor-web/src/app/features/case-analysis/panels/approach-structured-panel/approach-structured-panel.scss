@@ -388,6 +388,17 @@ textarea {
   color: #0f766e;
 }
 
+.field-option-chip.selected {
+  border-color: #0f766e;
+  background: #0f766e;
+  color: #fff;
+}
+
+.field-option-chip span {
+  margin-left: 0.28rem;
+  font-weight: 700;
+}
+
 .btn-guided {
   border: 1px solid #cbd5e1;
   border-radius: 8px;

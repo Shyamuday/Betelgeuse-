@@ -1,13 +1,13 @@
 import { Component, Input, output } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
-import type { ApproachFieldDef } from '@vitalis/homeopathy-approaches';
+import { fieldOptionGroupsForField, type ApproachFieldDef } from '@vitalis/homeopathy-approaches';
 import { ApproachFieldHintComponent } from '../approach-field-hint/approach-field-hint';
 
 @Component({
   selector: 'app-approach-case-sheet-panel',
   imports: [FormField, ApproachFieldHintComponent],
   templateUrl: './approach-case-sheet-panel.html',
-  styleUrl: './approach-case-sheet-panel.scss'
+  styleUrl: './approach-case-sheet-panel.scss',
 })
 export class ApproachCaseSheetPanelComponent {
   @Input({ required: true }) fields: ApproachFieldDef[] = [];
@@ -20,6 +20,7 @@ export class ApproachCaseSheetPanelComponent {
   readonly saveRequested = output<void>();
   readonly rubricPhraseSelected = output<string>();
   readonly fieldSuggestRequested = output<{ field: ApproachFieldDef; currentValue: string }>();
+  readonly fieldOptionToggled = output<{ field: ApproachFieldDef; option: string }>();
 
   searchRubricsFromField(field: ApproachFieldDef) {
     const phrase = this.caseSheetValues[field.key]?.trim();
@@ -30,8 +31,23 @@ export class ApproachCaseSheetPanelComponent {
   suggestField(field: ApproachFieldDef) {
     this.fieldSuggestRequested.emit({
       field,
-      currentValue: this.caseSheetValues[field.key] || ''
+      currentValue: this.caseSheetValues[field.key] || '',
     });
+  }
+
+  addFieldOption(field: ApproachFieldDef, option: string) {
+    this.fieldOptionToggled.emit({ field, option });
+  }
+
+  hasFieldOption(field: ApproachFieldDef, option: string) {
+    return (this.caseSheetValues[field.key] || '')
+      .split(';')
+      .map((item) => item.trim().toLowerCase())
+      .includes(option.toLowerCase());
+  }
+
+  optionGroups(field: ApproachFieldDef) {
+    return fieldOptionGroupsForField(field);
   }
 
   isMultiline(field: ApproachFieldDef) {
