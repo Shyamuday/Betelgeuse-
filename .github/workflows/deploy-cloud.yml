@@ -221,70 +221,51 @@ jobs:
           aws s3 sync deploy/static/operations "s3://${OPERATIONS_BUCKET}" --delete --exclude "index.html" --cache-control "public,max-age=31536000,immutable"
           aws s3 cp deploy/static/operations/index.html "s3://${OPERATIONS_BUCKET}/index.html" --cache-control "no-cache,no-store,must-revalidate"
 
-      - name: Deploy API to Lightsail
-        if: steps.select-apps.outputs.api == 'true'
+  deploy-api:
+    name: Deploy API on Lightsail
+    runs-on: [self-hosted, hopehub-backend]
+    environment: production
+
+    steps:
+      - name: Checkout workflow context
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Decide whether API deploy is needed
+        id: api-changes
+        shell: bash
         env:
-          LIGHTSAIL_SSH_PRIVATE_KEY: ${{ secrets.LIGHTSAIL_SSH_PRIVATE_KEY }}
+          REQUESTED_APPS: ${{ github.event.inputs.apps || 'auto' }}
         run: |
           set -euo pipefail
-          if [ -z "${LIGHTSAIL_SSH_PRIVATE_KEY}" ]; then
-            echo "Missing GitHub secret LIGHTSAIL_SSH_PRIVATE_KEY"
-            exit 1
+          requested="$(echo "$REQUESTED_APPS" | tr '[:upper:]' '[:lower:]' | tr -d ' ')"
+          deploy=false
+
+          case "$requested" in
+            all|api|backend|node|node-api|*,api,*|api,*|*,api|*,backend,*|backend,*|*,backend) deploy=true ;;
+          esac
+
+          if [ "$requested" = "auto" ] || [ -z "$requested" ]; then
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              deploy=true
+            else
+              base="${{ github.event.before }}"
+              head="${{ github.sha }}"
+              if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+                base="HEAD^"
+              fi
+              changed="$(git diff --name-only "$base" "$head")"
+              echo "$changed"
+              if echo "$changed" | grep -Eq '^(apps/api|libs|shared|deploy/config|deploy/scripts/deploy-api-local\.sh|package\.json|package-lock\.json|\.github/workflows/deploy-cloud\.yml)'; then
+                deploy=true
+              fi
+            fi
           fi
 
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$LIGHTSAIL_SSH_PRIVATE_KEY" > ~/.ssh/hopehub-lightsail.pem
-          chmod 600 ~/.ssh/hopehub-lightsail.pem
-          ssh-keyscan -H "$LIGHTSAIL_HOST" >> ~/.ssh/known_hosts
+          echo "deploy=$deploy" >> "$GITHUB_OUTPUT"
+          echo "API deploy selected: $deploy"
 
-          ssh -i ~/.ssh/hopehub-lightsail.pem "${LIGHTSAIL_USER}@${LIGHTSAIL_HOST}" \
-            "LIGHTSAIL_APP_DIR='${LIGHTSAIL_APP_DIR}' bash -s" <<'REMOTE'
-          set -euo pipefail
-
-          cd "$LIGHTSAIL_APP_DIR"
-          git remote set-url origin https://github.com/Shyamuday/Hopehub.git
-          git fetch origin main
-          git checkout main
-          git reset --hard origin/main
-          git update-index --skip-worktree apps/api/.env || true
-
-          cd apps/api
-          if [ ! -f /etc/hopehub-db-pass ] || [ ! -f /etc/hopehub-jwt-secret ]; then
-            echo "Missing /etc/hopehub-db-pass or /etc/hopehub-jwt-secret on server"
-            exit 1
-          fi
-
-          DB_PASS="$(sudo cat /etc/hopehub-db-pass)"
-          JWT_SECRET="$(sudo cat /etc/hopehub-jwt-secret)"
-          cat > .env <<ENV
-          DATABASE_URL="postgresql://hopehub_app:${DB_PASS}@localhost:5432/hopehub_clinic?schema=public"
-          JWT_SECRET="${JWT_SECRET}"
-          NODE_ENV="production"
-          PORT=4000
-          API_PUBLIC_URL="https://api.hopehub.in"
-          API_URL="https://api.hopehub.in"
-          WEB_ORIGIN="https://hopehub.in"
-          ADMIN_ORIGIN="https://admin.hopehub.in"
-          DOCTOR_ORIGIN="https://doctor.hopehub.in"
-          OPERATIONS_ORIGIN="https://ops.hopehub.in"
-          DEV_OTP=""
-          DISABLE_DEV_DEMO="true"
-          SMTP_FROM="noreply@hopehub.in"
-          DOSE_OVERDUE_SWEEP_ENABLED="true"
-          DOSE_OVERDUE_SWEEP_INTERVAL_MS="300000"
-          DOSE_REMINDER_SWEEP_ENABLED="true"
-          DOSE_REMINDER_WINDOW_MINUTES="30"
-          NOTIFICATION_CHANNELS="IN_APP,EMAIL"
-          OOREP_BASE_URL="https://www.oorep.com"
-          OOREP_TIMEOUT_MS="15000"
-          ENV
-          chmod 600 .env
-
-          npm install --no-audit --no-fund
-          npm run prisma:generate
-          npm run prisma:deploy
-          NODE_OPTIONS=--max-old-space-size=1536 npm run build
-          pm2 restart hopehub-api --update-env
-          pm2 save
-          curl -fsS http://127.0.0.1:4000/health
-          REMOTE
+      - name: Deploy API locally
+        if: steps.api-changes.outputs.deploy == 'true'
+        run: bash deploy/scripts/deploy-api-local.sh

@@ -61,13 +61,13 @@ They contain:
 
 Do not commit these values to GitHub.
 
-GitHub Actions also needs this repository secret to deploy the backend automatically:
+Backend auto-deploy should use a GitHub self-hosted runner installed on the Lightsail server. This avoids storing the Lightsail `.pem` key in GitHub.
 
 ```text
-LIGHTSAIL_SSH_PRIVATE_KEY
+self-hosted runner label: hopehub-backend
 ```
 
-Its value should be the full private key content from the Lightsail `.pem` file.
+With that runner online, pushes to `main` can deploy the API locally on the server.
 
 ## Database
 
