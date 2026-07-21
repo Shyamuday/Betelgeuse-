@@ -1,3 +1,17 @@
+const parseOriginList = (...values: Array<string | undefined>) =>
+  values
+    .flatMap((value) => (value || '').split(','))
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+const configuredOrigins = parseOriginList(
+  process.env.WEB_ORIGIN,
+  process.env.ADMIN_ORIGIN,
+  process.env.DOCTOR_ORIGIN,
+  process.env.OPERATIONS_ORIGIN,
+  process.env.CORS_ORIGINS
+);
+
 export const SERVER_CONFIG = {
   DEFAULT_PORT: 4000,
   ORIGINS: {
@@ -6,6 +20,15 @@ export const SERVER_CONFIG = {
     DOCTOR: process.env.DOCTOR_ORIGIN || 'http://localhost:4202',
     OPERATIONS: process.env.OPERATIONS_ORIGIN || 'http://localhost:5800'
   },
+  CORS_ORIGINS:
+    configuredOrigins.length > 0
+      ? configuredOrigins
+      : [
+          'http://localhost:4203',
+          'http://localhost:4201',
+          'http://localhost:4202',
+          'http://localhost:5800'
+        ],
   API_PUBLIC_URL: process.env.API_PUBLIC_URL || process.env.API_URL || 'http://localhost:4000',
   SMTP: {
     DEFAULT_PORT: 587,

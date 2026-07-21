@@ -94,7 +94,7 @@ const {
 
 // ── Socket.IO ──────────────────────────────────────────────────────────────────
 
-const socketOrigins = [webOrigin, adminOrigin, doctorOrigin, operationsOrigin];
+const socketOrigins = SERVER_CONFIG.CORS_ORIGINS;
 
 const io = new SocketIoServer(httpServer, {
   cors: { origin: socketOrigins, credentials: true }
@@ -151,7 +151,7 @@ io.on('connection', (socket) => {
 
 app.use(
   cors({
-    origin: [webOrigin, adminOrigin, doctorOrigin, operationsOrigin],
+    origin: SERVER_CONFIG.CORS_ORIGINS,
     credentials: true
   })
 );
