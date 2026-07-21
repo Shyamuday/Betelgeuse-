@@ -51,4 +51,18 @@ npm run prisma:generate
 npm run prisma:deploy
 pm2 restart hopehub-api --update-env
 pm2 save
-curl -fsS http://127.0.0.1:4000/health
+
+echo "Waiting for API to be ready..."
+for i in $(seq 1 15); do
+  if curl -fsS http://127.0.0.1:4000/health > /dev/null 2>&1; then
+    echo "API is up after ${i} attempt(s)"
+    break
+  fi
+  if [ "$i" -eq 15 ]; then
+    echo "API did not respond on port 4000 after 30s"
+    pm2 logs hopehub-api --lines 50 --nostream
+    exit 1
+  fi
+  echo "Attempt $i: not ready yet, retrying in 2s..."
+  sleep 2
+done
