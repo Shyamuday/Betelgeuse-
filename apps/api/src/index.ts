@@ -82,6 +82,7 @@ import { setNotificationSocket } from './services/in-app-notifications.js';
 // ── App & HTTP server ──────────────────────────────────────────────────────────
 
 const app = express();
+app.set('trust proxy', 1);
 const httpServer = createServer(app);
 const port = Number(process.env.PORT || SERVER_CONFIG.DEFAULT_PORT);
 
