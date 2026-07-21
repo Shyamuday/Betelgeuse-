@@ -94,12 +94,7 @@ const {
 
 // ── Socket.IO ──────────────────────────────────────────────────────────────────
 
-const socketOrigins = [
-  webOrigin,
-  adminOrigin,
-  doctorOrigin,
-  operationsOrigin
-];
+const socketOrigins = [webOrigin, adminOrigin, doctorOrigin, operationsOrigin];
 
 const io = new SocketIoServer(httpServer, {
   cors: { origin: socketOrigins, credentials: true }
@@ -120,12 +115,10 @@ io.use((socket, next) => {
     };
     const userId = decoded.id ?? decoded.userId;
     if (userId) {
-       
       (socket as any).userId = userId;
       return next();
     }
     if (decoded.staffId) {
-       
       (socket as any).storeStaffId = decoded.staffId;
       return next();
     }
@@ -136,9 +129,8 @@ io.use((socket, next) => {
 });
 
 io.on('connection', (socket) => {
-   
   const userId = (socket as any).userId as string | undefined;
-   
+
   const storeStaffId = (socket as any).storeStaffId as string | undefined;
   if (userId) {
     void socket.join(`${SOCKET_ROOM_PREFIXES.USER}${userId}`);
@@ -157,10 +149,12 @@ io.on('connection', (socket) => {
 
 // ── Middleware ─────────────────────────────────────────────────────────────────
 
-app.use(cors({
-  origin: [webOrigin, adminOrigin, doctorOrigin, operationsOrigin],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [webOrigin, adminOrigin, doctorOrigin, operationsOrigin],
+    credentials: true
+  })
+);
 app.use('/payments/razorpay-webhook', express.raw({ type: 'application/json' }));
 app.use(express.json({ limit: '8mb' }));
 
@@ -238,31 +232,33 @@ app.use(chatRouter);
 
 // ── Global error handler ───────────────────────────────────────────────────────
 
-app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  if (error instanceof ReceptionScopeError) {
-    return res.status(400).json({ message: error.message });
+app.use(
+  (error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    if (error instanceof ReceptionScopeError) {
+      return res.status(400).json({ message: error.message });
+    }
+    if (error instanceof ClinicManagerScopeError) {
+      return res.status(400).json({ message: error.message });
+    }
+    if (error instanceof PurchaseOrderError) {
+      return res.status(400).json({ message: error.message });
+    }
+    if (error instanceof StockTransferError) {
+      return res.status(400).json({ message: error.message });
+    }
+    if (error instanceof MedicineDeliveryError) {
+      return res.status(400).json({ message: error.message });
+    }
+    if (error instanceof LabReferralError) {
+      return res.status(400).json({ message: error.message });
+    }
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ message: 'Validation failed', issues: error.issues });
+    }
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
-  if (error instanceof ClinicManagerScopeError) {
-    return res.status(400).json({ message: error.message });
-  }
-  if (error instanceof PurchaseOrderError) {
-    return res.status(400).json({ message: error.message });
-  }
-  if (error instanceof StockTransferError) {
-    return res.status(400).json({ message: error.message });
-  }
-  if (error instanceof MedicineDeliveryError) {
-    return res.status(400).json({ message: error.message });
-  }
-  if (error instanceof LabReferralError) {
-    return res.status(400).json({ message: error.message });
-  }
-  if (error instanceof z.ZodError) {
-    return res.status(400).json({ message: 'Validation failed', issues: error.issues });
-  }
-  console.error(error);
-  res.status(500).json({ message: 'Internal server error' });
-});
+);
 
 // ── Startup ────────────────────────────────────────────────────────────────────
 
@@ -272,25 +268,39 @@ httpServer.listen(port, () => {
   if (!doseOverdueSweepEnabled) {
     console.log('[scheduler] Overdue dose sweep disabled');
   } else {
-    console.log(`[scheduler] Overdue dose sweep enabled (interval: ${doseOverdueSweepIntervalMs}ms)`);
+    console.log(
+      `[scheduler] Overdue dose sweep enabled (interval: ${doseOverdueSweepIntervalMs}ms)`
+    );
   }
   if (!doseReminderSweepEnabled) {
     console.log('[scheduler] Dose reminder sweep disabled');
   } else {
-    console.log(`[scheduler] Dose reminder sweep enabled (window: ${doseReminderWindowMinutes} minutes)`);
+    console.log(
+      `[scheduler] Dose reminder sweep enabled (window: ${doseReminderWindowMinutes} minutes)`
+    );
   }
-  console.log(`[scheduler] Notification channels: ${enabledNotificationChannels.join(', ') || 'none'}`);
+  console.log(
+    `[scheduler] Notification channels: ${enabledNotificationChannels.join(', ') || 'none'}`
+  );
 
-  void runDoseSchedulers().catch((e) => console.error('[scheduler] Initial dose scheduler run failed', e));
+  void runDoseSchedulers().catch((e) =>
+    console.error('[scheduler] Initial dose scheduler run failed', e)
+  );
 
   const doseTimer = setInterval(() => {
-    void runDoseSchedulers().catch((e) => console.error('[scheduler] Dose scheduler run failed', e));
+    void runDoseSchedulers().catch((e) =>
+      console.error('[scheduler] Dose scheduler run failed', e)
+    );
   }, doseOverdueSweepIntervalMs);
   doseTimer.unref();
 
-  void restoreEmployeesFromLeave().catch((e) => console.error('[scheduler] Leave restore failed', e));
+  void restoreEmployeesFromLeave().catch((e) =>
+    console.error('[scheduler] Leave restore failed', e)
+  );
   const leaveTimer = setInterval(() => {
-    void restoreEmployeesFromLeave().catch((e) => console.error('[scheduler] Leave restore failed', e));
+    void restoreEmployeesFromLeave().catch((e) =>
+      console.error('[scheduler] Leave restore failed', e)
+    );
   }, SCHEDULER_CONFIG.LEAVE_RESTORE_MS);
   leaveTimer.unref();
 });
