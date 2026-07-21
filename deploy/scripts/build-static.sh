@@ -5,23 +5,59 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 STATIC="$ROOT/deploy/static"
+APPS="${HOPEHUB_STATIC_APPS:-patient,admin,doctor,operations}"
+
+should_build() {
+  case ",$APPS," in
+    *",$1,"*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 
 echo "==> Building frontends..."
 cd "$ROOT"
-npm run build:all
+if should_build patient; then
+  npm run build:user
+fi
+if should_build admin; then
+  npm run build:admin
+fi
+if should_build doctor; then
+  npm run build:doctor
+fi
+if should_build operations; then
+  npm run build:operations
+fi
 
 echo "==> Staging static assets..."
-rm -rf "$STATIC"
-mkdir -p "$STATIC/patient" "$STATIC/admin" "$STATIC/doctor" "$STATIC/operations"
+mkdir -p "$STATIC"
 
-cp -r "$ROOT/apps/user-web/dist/user-web/browser/"* "$STATIC/patient/"
-cp -r "$ROOT/apps/admin-web/dist/admin-web/browser/"* "$STATIC/admin/"
-cp -r "$ROOT/apps/doctor-web/dist/doctor-web/browser/"* "$STATIC/doctor/"
+if should_build patient; then
+  rm -rf "$STATIC/patient"
+  mkdir -p "$STATIC/patient"
+  cp -r "$ROOT/apps/user-web/dist/user-web/browser/"* "$STATIC/patient/"
+fi
 
-if [ -d "$ROOT/apps/operations-web/dist/operations-web/browser" ]; then
-  cp -r "$ROOT/apps/operations-web/dist/operations-web/browser/"* "$STATIC/operations/"
-else
-  cp -r "$ROOT/apps/operations-web/dist/operations-web/"* "$STATIC/operations/"
+if should_build admin; then
+  rm -rf "$STATIC/admin"
+  mkdir -p "$STATIC/admin"
+  cp -r "$ROOT/apps/admin-web/dist/admin-web/browser/"* "$STATIC/admin/"
+fi
+
+if should_build doctor; then
+  rm -rf "$STATIC/doctor"
+  mkdir -p "$STATIC/doctor"
+  cp -r "$ROOT/apps/doctor-web/dist/doctor-web/browser/"* "$STATIC/doctor/"
+fi
+
+if should_build operations; then
+  rm -rf "$STATIC/operations"
+  mkdir -p "$STATIC/operations"
+  if [ -d "$ROOT/apps/operations-web/dist/operations-web/browser" ]; then
+    cp -r "$ROOT/apps/operations-web/dist/operations-web/browser/"* "$STATIC/operations/"
+  else
+    cp -r "$ROOT/apps/operations-web/dist/operations-web/"* "$STATIC/operations/"
+  fi
 fi
 
 echo "==> Static files ready in deploy/static/"

@@ -2,10 +2,17 @@ name: Deploy Cloud
 
 on:
   workflow_dispatch:
+    inputs:
+      apps:
+        description: 'Apps to deploy: auto, all, patient, admin, doctor, operations, or comma-separated list'
+        required: false
+        default: auto
   push:
     branches: [main]
     paths:
       - 'apps/**'
+      - 'libs/**'
+      - 'shared/**'
       - 'deploy/**'
       - 'package.json'
       - 'package-lock.json'
@@ -24,6 +31,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Load deployment constants
         run: |
@@ -43,7 +52,97 @@ jobs:
             echo "HOPEHUB_OPERATIONS_ORIGIN=${HOPEHUB_OPERATIONS_ORIGIN}"
           } >> "$GITHUB_ENV"
 
+      - name: Select apps to deploy
+        id: select-apps
+        shell: bash
+        env:
+          REQUESTED_APPS: ${{ github.event.inputs.apps || 'auto' }}
+        run: |
+          set -euo pipefail
+
+          normalize_apps() {
+            echo "$1" | tr '[:upper:]' '[:lower:]' | tr -d ' '
+          }
+
+          apps="$(normalize_apps "$REQUESTED_APPS")"
+          patient=false
+          admin=false
+          doctor=false
+          operations=false
+
+          select_all() {
+            patient=true
+            admin=true
+            doctor=true
+            operations=true
+          }
+
+          select_from_list() {
+            IFS=',' read -ra requested <<< "$1"
+            for app in "${requested[@]}"; do
+              case "$app" in
+                user|user-web|patient|consumer) patient=true ;;
+                admin|admin-web) admin=true ;;
+                doctor|doctor-web) doctor=true ;;
+                ops|operations|operations-web) operations=true ;;
+                all) select_all ;;
+                auto|'') ;;
+                *) echo "Unknown app '$app'"; exit 1 ;;
+              esac
+            done
+          }
+
+          if [ "$apps" = "all" ]; then
+            select_all
+          elif [ "$apps" != "auto" ] && [ -n "$apps" ]; then
+            select_from_list "$apps"
+          else
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              select_all
+            else
+              base="${{ github.event.before }}"
+              head="${{ github.sha }}"
+              if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+                base="HEAD^"
+              fi
+              changed="$(git diff --name-only "$base" "$head")"
+              echo "$changed"
+
+              if echo "$changed" | grep -Eq '^apps/user-web/'; then patient=true; fi
+              if echo "$changed" | grep -Eq '^apps/admin-web/'; then admin=true; fi
+              if echo "$changed" | grep -Eq '^apps/doctor-web/'; then doctor=true; fi
+              if echo "$changed" | grep -Eq '^apps/operations-web/'; then operations=true; fi
+
+              if echo "$changed" | grep -Eq '^(libs|shared|deploy/config|deploy/scripts|package\.json|package-lock\.json|\.github/workflows/deploy-cloud\.yml)'; then
+                select_all
+              fi
+            fi
+          fi
+
+          selected=()
+          [ "$patient" = true ] && selected+=("patient")
+          [ "$admin" = true ] && selected+=("admin")
+          [ "$doctor" = true ] && selected+=("doctor")
+          [ "$operations" = true ] && selected+=("operations")
+          if [ "${#selected[@]}" -eq 0 ]; then
+            echo "No frontend app changes detected."
+            selected_csv=""
+          else
+            selected_csv="$(IFS=,; echo "${selected[*]}")"
+          fi
+
+          {
+            echo "patient=$patient"
+            echo "admin=$admin"
+            echo "doctor=$doctor"
+            echo "operations=$operations"
+            echo "selected=$selected_csv"
+          } >> "$GITHUB_OUTPUT"
+          echo "HOPEHUB_STATIC_APPS=$selected_csv" >> "$GITHUB_ENV"
+          echo "Selected apps: ${selected_csv:-none}"
+
       - name: Setup Node
+        if: steps.select-apps.outputs.selected != ''
         uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -51,9 +150,11 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Install root dependencies
+        if: steps.select-apps.outputs.selected != ''
         run: npm ci
 
       - name: Configure production URLs
+        if: steps.select-apps.outputs.selected != ''
         env:
           API_PUBLIC_URL: ${{ secrets.API_PUBLIC_URL }}
           WEB_ORIGIN: ${{ secrets.WEB_ORIGIN }}
@@ -63,9 +164,11 @@ jobs:
         run: bash deploy/scripts/configure-production-urls.sh
 
       - name: Build static frontends
+        if: steps.select-apps.outputs.selected != ''
         run: bash deploy/scripts/build-static.sh
 
       - name: Configure AWS credentials
+        if: steps.select-apps.outputs.selected != ''
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -73,27 +176,33 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Configure S3 website hosting
+        if: steps.select-apps.outputs.selected != ''
         run: |
-          for bucket in "${PATIENT_BUCKET}" "${ADMIN_BUCKET}" "${DOCTOR_BUCKET}" "${OPERATIONS_BUCKET}"; do
-            aws s3 website "s3://${bucket}" --index-document index.html --error-document index.html
-          done
+          if [ "${{ steps.select-apps.outputs.patient }}" = "true" ]; then aws s3 website "s3://${PATIENT_BUCKET}" --index-document index.html --error-document index.html; fi
+          if [ "${{ steps.select-apps.outputs.admin }}" = "true" ]; then aws s3 website "s3://${ADMIN_BUCKET}" --index-document index.html --error-document index.html; fi
+          if [ "${{ steps.select-apps.outputs.doctor }}" = "true" ]; then aws s3 website "s3://${DOCTOR_BUCKET}" --index-document index.html --error-document index.html; fi
+          if [ "${{ steps.select-apps.outputs.operations }}" = "true" ]; then aws s3 website "s3://${OPERATIONS_BUCKET}" --index-document index.html --error-document index.html; fi
 
       - name: Deploy patient web to S3
+        if: steps.select-apps.outputs.patient == 'true'
         run: |
           aws s3 sync deploy/static/patient "s3://${PATIENT_BUCKET}" --delete --exclude "index.html" --cache-control "public,max-age=31536000,immutable"
           aws s3 cp deploy/static/patient/index.html "s3://${PATIENT_BUCKET}/index.html" --cache-control "no-cache,no-store,must-revalidate"
 
       - name: Deploy admin web to S3
+        if: steps.select-apps.outputs.admin == 'true'
         run: |
           aws s3 sync deploy/static/admin "s3://${ADMIN_BUCKET}" --delete --exclude "index.html" --cache-control "public,max-age=31536000,immutable"
           aws s3 cp deploy/static/admin/index.html "s3://${ADMIN_BUCKET}/index.html" --cache-control "no-cache,no-store,must-revalidate"
 
       - name: Deploy doctor web to S3
+        if: steps.select-apps.outputs.doctor == 'true'
         run: |
           aws s3 sync deploy/static/doctor "s3://${DOCTOR_BUCKET}" --delete --exclude "index.html" --cache-control "public,max-age=31536000,immutable"
           aws s3 cp deploy/static/doctor/index.html "s3://${DOCTOR_BUCKET}/index.html" --cache-control "no-cache,no-store,must-revalidate"
 
       - name: Deploy operations web to S3
+        if: steps.select-apps.outputs.operations == 'true'
         run: |
           aws s3 sync deploy/static/operations "s3://${OPERATIONS_BUCKET}" --delete --exclude "index.html" --cache-control "public,max-age=31536000,immutable"
           aws s3 cp deploy/static/operations/index.html "s3://${OPERATIONS_BUCKET}/index.html" --cache-control "no-cache,no-store,must-revalidate"
