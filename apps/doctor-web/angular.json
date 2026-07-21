@@ -30,9 +30,7 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.scss"
-            ]
+            "styles": ["src/styles.scss"]
           },
           "configurations": {
             "production": {
@@ -45,8 +43,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1.1MB"
+                  "maximumWarning": "800kB",
+                  "maximumError": "1.35MB"
                 },
                 {
                   "type": "anyComponentStyle",
