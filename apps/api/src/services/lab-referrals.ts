@@ -20,7 +20,10 @@ function nextReferralNumber(storeCode: string) {
   return `LAB-${storeCode}-${Date.now().toString(36).toUpperCase()}`;
 }
 
-export async function resolveDiagnosticCenterId(userId: string, role: string): Promise<string | null> {
+export async function resolveDiagnosticCenterId(
+  userId: string,
+  role: string
+): Promise<string | null> {
   if (role === 'ADMIN') return null;
   const profile = await prisma.diagnosticCenterProfile.findUnique({
     where: { userId },
@@ -124,7 +127,9 @@ export async function partnerAcceptLabReferral(
     data: {
       status: LabReferralStatus.ACCEPTED,
       partnerNotes: input.partnerNotes,
-      expectedResultDate: input.expectedResultDate ? new Date(input.expectedResultDate) : referral.expectedResultDate,
+      expectedResultDate: input.expectedResultDate
+        ? new Date(input.expectedResultDate)
+        : referral.expectedResultDate,
       acceptedAt: new Date()
     },
     include: referralInclude
@@ -223,7 +228,9 @@ export async function partnerSubmitLabResults(
   });
 }
 
-function formatReferral(referral: Prisma.LabReferralGetPayload<{ include: typeof referralInclude }>) {
+function formatReferral(
+  referral: Prisma.LabReferralGetPayload<{ include: typeof referralInclude }>
+) {
   const completedTests = referral.lines.filter((line) => line.resultSummary).length;
   return {
     ...referral,
@@ -271,45 +278,4 @@ export async function getDoctorPatientLabReferral(id: string, patientId: string)
     include: referralInclude
   });
   return referral ? formatReferral(referral) : null;
-}
-
-const demoResultSummaries: Record<string, string> = {
-  CBC: 'Hemoglobin 13.2 g/dL, WBC 7.1 x10³/µL — within normal limits',
-  THY: 'TSH 2.1 mIU/L, T3/T4 normal — euthyroid'
-};
-
-/** Dev seed helper — publishes demo lab results without going through the partner portal. */
-export async function publishDemoLabResults(referralId: string) {
-  const referral = await prisma.labReferral.findUnique({
-    where: { id: referralId },
-    include: referralInclude
-  });
-  if (!referral) return null;
-  if (referral.status === LabReferralStatus.RESULT_READY) {
-    return formatReferral(referral);
-  }
-
-  const lines = referral.lines;
-  return prisma.$transaction(async (tx) => {
-    for (const line of lines) {
-      const summary =
-        (line.testCode && demoResultSummaries[line.testCode]) ||
-        `${line.testName}: results within normal limits`;
-      await tx.labReferralLine.update({
-        where: { id: line.id },
-        data: { resultSummary: summary, completedAt: new Date() }
-      });
-    }
-
-    const updated = await tx.labReferral.update({
-      where: { id: referralId },
-      data: {
-        status: LabReferralStatus.RESULT_READY,
-        acceptedAt: referral.acceptedAt ?? new Date(),
-        completedAt: new Date()
-      },
-      include: referralInclude
-    });
-    return formatReferral(updated);
-  });
 }

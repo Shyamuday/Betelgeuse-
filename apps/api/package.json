@@ -16,7 +16,6 @@
     "prisma:sync": "tsx prisma/sync-migrations.ts",
     "prisma:verify": "tsx scripts/verify-migrations.ts",
     "prisma:push": "prisma db push",
-    "seed": "tsx prisma/seed.ts",
     "repertory:download:oorep": "tsx scripts/download-oorep-sql.ts",
     "repertory:import:oorep": "tsx scripts/import-oorep-sql.ts",
     "verify:doctor-earnings": "tsx scripts/verify-doctor-earnings.ts",
@@ -55,8 +54,5 @@
     "prisma": "^7.2.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
   }
 }
