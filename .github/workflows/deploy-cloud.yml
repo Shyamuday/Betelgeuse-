@@ -181,6 +181,26 @@ jobs:
         if: steps.select-apps.outputs.frontend_selected == 'true'
         run: bash deploy/scripts/build-static.sh
 
+      - name: Verify AWS deploy secrets
+        if: steps.select-apps.outputs.patient == 'true' || steps.select-apps.outputs.admin == 'true' || steps.select-apps.outputs.doctor == 'true' || steps.select-apps.outputs.operations == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          missing=false
+          if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+            echo "::error::AWS_ACCESS_KEY_ID is not visible to this workflow job."
+            missing=true
+          fi
+          if [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo "::error::AWS_SECRET_ACCESS_KEY is not visible to this workflow job."
+            missing=true
+          fi
+          if [ "$missing" = true ]; then
+            echo "Check GitHub repo/environment secrets for environment 'production'."
+            exit 1
+          fi
+
       - name: Configure AWS credentials
         if: steps.select-apps.outputs.patient == 'true' || steps.select-apps.outputs.admin == 'true' || steps.select-apps.outputs.doctor == 'true' || steps.select-apps.outputs.operations == 'true'
         uses: aws-actions/configure-aws-credentials@v4
