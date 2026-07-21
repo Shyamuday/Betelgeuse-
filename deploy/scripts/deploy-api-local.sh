@@ -49,7 +49,6 @@ chmod 600 .env
 npm install --no-audit --no-fund
 npm run prisma:generate
 npm run prisma:deploy
-NODE_OPTIONS=--max-old-space-size=1536 npm run build
 pm2 restart hopehub-api --update-env
 pm2 save
 curl -fsS http://127.0.0.1:4000/health

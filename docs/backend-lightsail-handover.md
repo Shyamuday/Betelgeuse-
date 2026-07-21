@@ -141,5 +141,6 @@ df -h /
 - The server has a 2 GB swap file to help this small instance handle installs/builds.
 - PM2 is saved for reboot restore.
 - Nginx proxies both `/` and `/api/` to the API, so both `/health` and `/api/health` work.
-- The app currently runs via `tsx src/index.ts`; later we should fix compiled production output and run plain Node.
+- The app currently runs via `tsx src/index.ts`; backend auto-deploy skips `npm run build` on the 1 GB server and restarts the existing PM2 `tsx` process.
+- Later we should fix compiled production output and run plain Node.
 - Prisma is configured for PostgreSQL. The repo has `apps/api/prisma/migrations/migration_lock.toml` with `provider = "postgresql"`.
