@@ -4,9 +4,12 @@ export const WHATSAPP_CONTACT_URL =
 export const RAZORPAY_CHECKOUT = {
   NAME: 'HopeHub Care',
   THEME_COLOR: '#0f62fe',
-  SCRIPT_URL: 'https://checkout.razorpay.com/v1/checkout.js'
+  SCRIPT_URL: 'https://checkout.razorpay.com/v1/checkout.js',
 } as const;
 
 export const SEO_DEFAULTS = {
-  SITE_URL: 'https://hopehubclinic.com'
+  SITE_URL: 'https://hopehubclinic.com',
+  DEFAULT_TITLE: 'HopeHub Care | Doctor-Led Homeopathy for All Conditions',
+  DEFAULT_DESCRIPTION:
+    'HopeHub Care offers doctor-led online homeopathic consultations for acute and chronic conditions - prescriptions, follow-up, and secure digital care.',
 } as const;

@@ -4,10 +4,7 @@ import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { ClinicApiClient } from './clinic-api/clinic-api.client';
-import { PUBLIC_SITE_BRAND } from './core/constants/public-site-content.constants';
 import { SEO_DEFAULTS } from './core/constants/branding.constants';
-import { diseaseInfos } from './disease/disease-info.constants';
-import { homeopathyApproaches } from './treatment-approach/homeopathy-approaches.constants';
 
 type DiseaseSeo = {
   metaTitle?: string;
@@ -29,8 +26,8 @@ export class SeoService {
   private readonly apiClient = inject(ClinicApiClient);
 
   private readonly siteUrl = SEO_DEFAULTS.SITE_URL;
-  private readonly defaultTitle = PUBLIC_SITE_BRAND.seo.defaultTitle;
-  private readonly defaultDescription = PUBLIC_SITE_BRAND.seo.defaultDescription;
+  private readonly defaultTitle = SEO_DEFAULTS.DEFAULT_TITLE;
+  private readonly defaultDescription = SEO_DEFAULTS.DEFAULT_DESCRIPTION;
   private readonly defaultImage = `${this.siteUrl}/favicon.ico`;
 
   init() {
@@ -44,7 +41,7 @@ export class SeoService {
   private async applyRouteSeo() {
     const routeData = this.getLeafRoute(this.activatedRoute).snapshot.data;
     const diseaseSeo = await this.getDiseaseSeoFromUrl();
-    const approachSeo = this.getApproachSeoFromPage();
+    const approachSeo = await this.getApproachSeoFromPage();
 
     const seoTitle =
       diseaseSeo.metaTitle || approachSeo.metaTitle || routeData['seoTitle'] || this.defaultTitle;
@@ -107,6 +104,7 @@ export class SeoService {
     }
 
     const slug = decodeURIComponent(match[1]);
+    const { diseaseInfos } = await import('./disease/disease-info.constants');
     const staticInfo = diseaseInfos.find((item) => item.slug === slug);
     const staticSeo = staticInfo?.seo || {};
     const canonicalPath = staticSeo.canonicalPath || `/treatments/${slug}`;
@@ -139,11 +137,13 @@ export class SeoService {
     }
   }
 
-  private getApproachSeoFromPage() {
+  private async getApproachSeoFromPage(): Promise<DiseaseSeo> {
     if (!this.router.url.startsWith('/why-successful')) {
       return {};
     }
 
+    const { homeopathyApproaches } =
+      await import('./treatment-approach/homeopathy-approaches.constants');
     const allKeywords = homeopathyApproaches.flatMap((approach) => approach.seo?.keywords || []);
     return {
       metaTitle: 'Homeopathy Approaches | HopeHub Care and Research Centre',

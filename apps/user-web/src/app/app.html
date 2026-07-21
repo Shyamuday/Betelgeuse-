@@ -1,3 +1,5 @@
 <router-outlet />
-<app-chatbot-widget />
-<app-promo-popup-host />
+@defer (on idle) {
+  <app-chatbot-widget />
+  <app-promo-popup-host />
+}
