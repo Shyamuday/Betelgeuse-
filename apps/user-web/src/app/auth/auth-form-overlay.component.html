@@ -20,7 +20,7 @@
         <h2>Set new password</h2>
         <p class="muted">Enter your new password below.</p>
 
-        <form (ngSubmit)="resetPassword()">
+        <form (submit)="$event.preventDefault(); resetPassword()">
           <label>
             New password
             <input [formField]="forgotForm.password" type="password" placeholder="Min 8 characters" />
@@ -39,7 +39,7 @@
         <h2>Reset password</h2>
         <p class="muted">Enter your registered email and we will send a password reset link.</p>
 
-        <form (ngSubmit)="forgotPassword()">
+        <form (submit)="$event.preventDefault(); forgotPassword()">
           <label>
             Email
             <input [formField]="forgotForm.email" type="email" placeholder="Enter your Gmail" autocomplete="email" />
@@ -50,7 +50,7 @@
         <h2>Create patient account</h2>
         <p class="muted">Sign up with your email and password. You can add your mobile number later from profile.</p>
 
-        <form (ngSubmit)="registerPatient()">
+        <form (submit)="$event.preventDefault(); registerPatient()">
           <label>
             Full name
             <input [formField]="signupForm.name" placeholder="Enter patient name" autocomplete="name" />
@@ -75,7 +75,7 @@
           @if (signupModel().password && signupModel().confirmPassword && signupModel().password !== signupModel().confirmPassword) {
             <p class="error-text">Passwords do not match</p>
           }
-          <button class="primary" type="submit" [disabled]="isProcessing() || !canRegisterPatient()">Create account</button>
+          <button class="primary" type="submit" [disabled]="isProcessing()">Create account</button>
         </form>
 
         <p class="mode-switch-wrap">
@@ -91,7 +91,7 @@
         </div>
 
         @if (authMethod() === 'otp') {
-          <form (ngSubmit)="loginPatientWithOtp()">
+          <form (submit)="$event.preventDefault(); loginPatientWithOtp()">
             <label>
               Email
               <input
@@ -117,7 +117,7 @@
             }
           </form>
         } @else {
-          <form (ngSubmit)="loginPatientWithPassword()">
+          <form (submit)="$event.preventDefault(); loginPatientWithPassword()">
             <label>
               Email
               <input
