@@ -33,6 +33,23 @@ type Draft = {
   imageUpload?: { mimeType: string; fileName: string; dataBase64: string };
 };
 
+type Announcement = {
+  id: string;
+  text: string;
+  linkLabel?: string | null;
+  linkUrl?: string | null;
+  isPublished: boolean;
+  sortOrder: number;
+};
+
+type AnnouncementDraft = {
+  text: string;
+  linkLabel: string;
+  linkUrl: string;
+  isPublished: boolean;
+  sortOrder: number;
+};
+
 const EMPTY_DRAFT: Draft = {
   title: '',
   subtitle: '',
@@ -46,6 +63,14 @@ const EMPTY_DRAFT: Draft = {
   sortOrder: 0,
 };
 
+const EMPTY_ANNOUNCEMENT: AnnouncementDraft = {
+  text: '',
+  linkLabel: '',
+  linkUrl: '',
+  isPublished: true,
+  sortOrder: 0,
+};
+
 @Component({
   selector: 'app-home-carousel-page',
   imports: [CommonModule, FormField],
@@ -54,9 +79,11 @@ const EMPTY_DRAFT: Draft = {
 })
 export class HomeCarouselPage {
   readonly slides = signal<Slide[]>([]);
+  readonly announcements = signal<Announcement[]>([]);
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly editingId = signal<string | null>(null);
+  readonly editingAnnouncementId = signal<string | null>(null);
   readonly error = signal('');
   readonly message = signal('');
 
@@ -64,6 +91,10 @@ export class HomeCarouselPage {
   readonly createForm = form(this.createModel);
   readonly editModel = signal<Draft>({ ...EMPTY_DRAFT });
   readonly editForm = form(this.editModel);
+  readonly announcementModel = signal<AnnouncementDraft>({ ...EMPTY_ANNOUNCEMENT });
+  readonly announcementForm = form(this.announcementModel);
+  readonly editAnnouncementModel = signal<AnnouncementDraft>({ ...EMPTY_ANNOUNCEMENT });
+  readonly editAnnouncementForm = form(this.editAnnouncementModel);
 
   constructor(private readonly api: AdminApi) {
     void this.load();
@@ -75,10 +106,52 @@ export class HomeCarouselPage {
     try {
       const res = await this.api.listHomeCarouselSlides();
       this.slides.set(res.slides);
+      const announcementRes = await this.api.listHomeAnnouncements();
+      this.announcements.set(announcementRes.announcements);
     } catch {
       this.error.set('Could not load home carousel slides.');
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  startEditAnnouncement(item: Announcement) {
+    this.editingAnnouncementId.set(item.id);
+    this.editAnnouncementModel.set({
+      text: item.text,
+      linkLabel: item.linkLabel || '',
+      linkUrl: item.linkUrl || '',
+      isPublished: item.isPublished,
+      sortOrder: item.sortOrder,
+    });
+  }
+
+  cancelEditAnnouncement() {
+    this.editingAnnouncementId.set(null);
+    this.editAnnouncementModel.set({ ...EMPTY_ANNOUNCEMENT });
+  }
+
+  async createAnnouncement() {
+    await this.saveAnnouncement(this.announcementModel(), null);
+    this.announcementModel.set({ ...EMPTY_ANNOUNCEMENT });
+  }
+
+  async updateAnnouncement(id: string) {
+    await this.saveAnnouncement(this.editAnnouncementModel(), id);
+    this.cancelEditAnnouncement();
+  }
+
+  async deleteAnnouncement(item: Announcement) {
+    if (!confirm('Delete announcement?')) return;
+    this.saving.set(true);
+    try {
+      await this.api.deleteHomeAnnouncement(item.id);
+      this.message.set('Announcement deleted.');
+      await this.load();
+    } catch {
+      this.error.set('Could not delete announcement.');
+    } finally {
+      this.saving.set(false);
     }
   }
 
@@ -182,6 +255,33 @@ export class HomeCarouselPage {
       await this.load();
     } catch (error: any) {
       this.error.set(error?.error?.message || 'Could not save slide.');
+    } finally {
+      this.saving.set(false);
+    }
+  }
+
+  private async saveAnnouncement(draft: AnnouncementDraft, id: string | null) {
+    this.saving.set(true);
+    this.error.set('');
+    this.message.set('');
+    try {
+      const payload = {
+        text: draft.text.trim(),
+        linkLabel: draft.linkLabel.trim() || null,
+        linkUrl: draft.linkUrl.trim() || null,
+        isPublished: draft.isPublished,
+        sortOrder: Number(draft.sortOrder) || 0,
+      };
+      if (id) {
+        await this.api.updateHomeAnnouncement(id, payload);
+        this.message.set('Announcement saved.');
+      } else {
+        await this.api.createHomeAnnouncement(payload);
+        this.message.set('Announcement created.');
+      }
+      await this.load();
+    } catch (error: any) {
+      this.error.set(error?.error?.message || 'Could not save announcement.');
     } finally {
       this.saving.set(false);
     }

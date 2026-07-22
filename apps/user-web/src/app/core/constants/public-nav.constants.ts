@@ -17,7 +17,7 @@ export const PUBLIC_HEADER_NAV_GROUPS: PublicNavGroup[] = [
     label: 'Care',
     links: [
       { label: 'Treatments', path: `/${ROUTE_PATHS.TREATMENTS}` },
-      { label: 'Talk to provider', path: '/talk-to-provider' },
+      { label: 'Talk to our expert now', path: '/talk-to-provider' },
       { label: 'Chronic care', path: `/${ROUTE_PATHS.CHRONIC_CARE}` },
       { label: 'Our providers', path: `/${ROUTE_PATHS.OUR_PROVIDERS}` },
     ],

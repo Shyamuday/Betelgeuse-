@@ -119,6 +119,18 @@ export class AdminApi {
   deleteHomeCarouselSlide(...args: Parameters<AdminDoctorsApi['deleteHomeCarouselSlide']>) {
     return this.doctors.deleteHomeCarouselSlide(...args);
   }
+  listHomeAnnouncements() {
+    return this.doctors.listHomeAnnouncements();
+  }
+  createHomeAnnouncement(...args: Parameters<AdminDoctorsApi['createHomeAnnouncement']>) {
+    return this.doctors.createHomeAnnouncement(...args);
+  }
+  updateHomeAnnouncement(...args: Parameters<AdminDoctorsApi['updateHomeAnnouncement']>) {
+    return this.doctors.updateHomeAnnouncement(...args);
+  }
+  deleteHomeAnnouncement(...args: Parameters<AdminDoctorsApi['deleteHomeAnnouncement']>) {
+    return this.doctors.deleteHomeAnnouncement(...args);
+  }
   listTestimonials() {
     return this.doctors.listTestimonials();
   }

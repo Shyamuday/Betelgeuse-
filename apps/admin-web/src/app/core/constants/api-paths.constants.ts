@@ -63,6 +63,8 @@ export const API_PATHS = {
     PUBLIC_PAGE_BY_ID: (id: string) => `/admin/public-pages/${id}`,
     HOME_CAROUSEL: '/admin/home-carousel',
     HOME_CAROUSEL_BY_ID: (id: string) => `/admin/home-carousel/${id}`,
+    HOME_ANNOUNCEMENTS: '/admin/home-announcements',
+    HOME_ANNOUNCEMENT_BY_ID: (id: string) => `/admin/home-announcements/${id}`,
     TESTIMONIALS: '/admin/testimonials',
     TESTIMONIAL_BY_ID: (id: string) => `/admin/testimonials/${id}`,
     FAQ: '/admin/faq',

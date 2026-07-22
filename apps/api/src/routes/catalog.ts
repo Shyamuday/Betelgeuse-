@@ -650,3 +650,26 @@ router.get(
     }
   })
 );
+
+router.get(
+  '/home-announcements',
+  asyncRoute(async (_req, res) => {
+    const now = new Date();
+    const announcements = await prisma.homeAnnouncement.findMany({
+      where: {
+        isPublished: true,
+        OR: [{ startsAt: null }, { startsAt: { lte: now } }],
+        AND: [{ OR: [{ endsAt: null }, { endsAt: { gte: now } }] }]
+      },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }]
+    });
+    res.json({
+      announcements: announcements.map((item) => ({
+        id: item.id,
+        text: item.text,
+        linkLabel: item.linkLabel,
+        linkUrl: item.linkUrl
+      }))
+    });
+  })
+);

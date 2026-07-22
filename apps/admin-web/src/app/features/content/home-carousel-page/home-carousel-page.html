@@ -73,6 +73,56 @@
 @if (loading()) { <p class="loading-text">Loading...</p> }
 
 <section class="panel">
+  <h2>Text Scroller</h2>
+  <p class="page-hint">Short announcements shown above the home carousel.</p>
+
+  <form class="form-grid" (submit)="$event.preventDefault(); createAnnouncement()">
+    <label class="field">
+      <span class="field-label">Announcement text</span>
+      <input [formField]="announcementForm.text" placeholder="New webinar launching this Sunday" />
+    </label>
+    <div class="grid-3">
+      <label class="field"><span class="field-label">Link label</span><input [formField]="announcementForm.linkLabel" placeholder="Register" /></label>
+      <label class="field"><span class="field-label">Link URL</span><input [formField]="announcementForm.linkUrl" placeholder="/treatments or https://..." /></label>
+      <label class="field"><span class="field-label">Sort order</span><input type="number" [formField]="announcementForm.sortOrder" /></label>
+    </div>
+    <label class="check"><input type="checkbox" [formField]="announcementForm.isPublished" /> Published</label>
+    <button type="submit" [disabled]="saving()">Create announcement</button>
+  </form>
+
+  <div class="announcement-list">
+    @for (item of announcements(); track item.id) {
+      <article class="announcement-row">
+        <div>
+          <strong>{{ item.text }}</strong>
+          <p class="meta">{{ item.linkLabel || 'No link label' }} · order {{ item.sortOrder }}</p>
+        </div>
+        <div class="badge-row">
+          <span class="badge" [class.published]="item.isPublished">{{ item.isPublished ? 'PUBLISHED' : 'DRAFT' }}</span>
+          <button type="button" class="ghost" (click)="startEditAnnouncement(item)">Edit</button>
+          <button type="button" class="danger" (click)="deleteAnnouncement(item)">Delete</button>
+        </div>
+      </article>
+      @if (editingAnnouncementId() === item.id) {
+        <form class="form-grid edit-form" (submit)="$event.preventDefault(); updateAnnouncement(item.id)">
+          <label class="field"><span class="field-label">Announcement text</span><input [formField]="editAnnouncementForm.text" /></label>
+          <div class="grid-3">
+            <label class="field"><span class="field-label">Link label</span><input [formField]="editAnnouncementForm.linkLabel" /></label>
+            <label class="field"><span class="field-label">Link URL</span><input [formField]="editAnnouncementForm.linkUrl" /></label>
+            <label class="field"><span class="field-label">Sort order</span><input type="number" [formField]="editAnnouncementForm.sortOrder" /></label>
+          </div>
+          <label class="check"><input type="checkbox" [formField]="editAnnouncementForm.isPublished" /> Published</label>
+          <div class="actions">
+            <button type="submit" [disabled]="saving()">Save</button>
+            <button type="button" class="ghost" (click)="cancelEditAnnouncement()">Cancel</button>
+          </div>
+        </form>
+      }
+    }
+  </div>
+</section>
+
+<section class="panel">
   <h2>Slides ({{ slides().length }})</h2>
   <div class="slide-list">
     @for (slide of slides(); track slide.id) {

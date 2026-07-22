@@ -67,6 +67,7 @@ export const API_PATHS = {
   CLINICS: '/clinics',
   PUBLIC_CONFIG: '/public-config',
   HOME_CAROUSEL: '/home-carousel',
+  HOME_ANNOUNCEMENTS: '/home-announcements',
   PUBLIC_PAGES: '/public-pages',
   PUBLIC_PAGE: (slug: string) => `/public-pages/${encodeURIComponent(slug)}`,
 } as const;

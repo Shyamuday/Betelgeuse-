@@ -1,0 +1,22 @@
+@if (announcements().length) {
+  <section class="announcement-ticker" aria-label="Announcements">
+    <div class="ticker-track">
+      @for (item of announcements(); track item.id) {
+        <button type="button" class="ticker-item" (click)="open(item)">
+          <span>{{ item.text }}</span>
+          @if (item.linkLabel) {
+            <strong>{{ item.linkLabel }}</strong>
+          }
+        </button>
+      }
+      @for (item of announcements(); track item.id + '-copy') {
+        <button type="button" class="ticker-item" (click)="open(item)" aria-hidden="true" tabindex="-1">
+          <span>{{ item.text }}</span>
+          @if (item.linkLabel) {
+            <strong>{{ item.linkLabel }}</strong>
+          }
+        </button>
+      }
+    </div>
+  </section>
+}

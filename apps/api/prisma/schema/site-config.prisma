@@ -54,3 +54,19 @@ model HomeCarouselSlide {
   @@index([isPublished])
   @@index([sortOrder])
 }
+
+model HomeAnnouncement {
+  id          String   @id @default(cuid())
+  text        String   @db.Text
+  linkLabel   String?
+  linkUrl     String?
+  isPublished Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublished])
+  @@index([sortOrder])
+}

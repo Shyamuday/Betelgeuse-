@@ -205,6 +205,38 @@ export class AdminDoctorsApi extends AdminApiBase {
     );
   }
 
+  listHomeAnnouncements() {
+    return firstValueFrom(
+      this.http.get<{ announcements: any[] }>(
+        `${this.apiBase}${API_PATHS.ADMIN.HOME_ANNOUNCEMENTS}`,
+      ),
+    );
+  }
+
+  createHomeAnnouncement(payload: any) {
+    return firstValueFrom(
+      this.http.post<{ announcement: any }>(
+        `${this.apiBase}${API_PATHS.ADMIN.HOME_ANNOUNCEMENTS}`,
+        payload,
+      ),
+    );
+  }
+
+  updateHomeAnnouncement(id: string, payload: any) {
+    return firstValueFrom(
+      this.http.patch<{ announcement: any }>(
+        `${this.apiBase}${API_PATHS.ADMIN.HOME_ANNOUNCEMENT_BY_ID(id)}`,
+        payload,
+      ),
+    );
+  }
+
+  deleteHomeAnnouncement(id: string) {
+    return firstValueFrom(
+      this.http.delete(`${this.apiBase}${API_PATHS.ADMIN.HOME_ANNOUNCEMENT_BY_ID(id)}`),
+    );
+  }
+
   // ── Testimonials ──────────────────────────────────────────────────────────
   listTestimonials() {
     return firstValueFrom(

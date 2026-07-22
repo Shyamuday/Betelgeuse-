@@ -27,7 +27,7 @@ export const routes: Routes = [
     path: 'talk-to-provider',
     loadComponent: () => import('./talk-to-doctor.component').then((m) => m.TalkToDoctorComponent),
     data: {
-      title: 'Talk to a provider now',
+      title: 'Talk to our expert now',
       description: 'Instant online consultation with live providers.',
     },
   },
