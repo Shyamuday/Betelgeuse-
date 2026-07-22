@@ -12,17 +12,7 @@
           <p class="bc-sub">{{ copy.booking.formSubtitle }}</p>
 
           <div class="bc-fields">
-            <label class="bc-field">
-              <span class="bc-label">{{ copy.booking.emailLabel }}</span>
-              <input
-                [formField]="bookingForm.email"
-                [placeholder]="copy.booking.emailPlaceholder"
-                type="email"
-                autocomplete="email"
-              />
-            </label>
-
-            <button class="bc-btn" type="button" [disabled]="busy()" (click)="sendOtp()">
+            <button class="bc-btn" type="button" [disabled]="busy()" (click)="beginBooking()">
               {{ copy.booking.submitLabel }}
             </button>
           </div>

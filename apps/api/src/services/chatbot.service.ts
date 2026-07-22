@@ -345,7 +345,7 @@ export function getBotReply(stage: number, userMessage: string): BotReply {
 
   if (stage === 12) {
     return {
-      message: `Thank you. Based on what you shared, a personalised online consultation with our homeopathic doctors would be a good next step.\n\nWould you like to book a consultation?`,
+      message: `Thank you. Based on what you shared, a personalised online consultation with our healthcare experts would be a good next step.\n\nWould you like to book a consultation?`,
       nextStage: 13,
       needsOperator: false,
       options: [...BOOK_OPTIONS],

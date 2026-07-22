@@ -1,20 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, inject, signal } from '@angular/core';
-import { form, FormField } from '@angular/forms/signals';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
-import { POST_LOGIN_REDIRECT_DELAY_MS } from './core/constants/timing.constants';
 import { HOME_CONTENT } from './core/constants/public-site-content.constants';
 import { AuthService } from './auth/auth.service';
 import { AuthFormOverlayComponent } from './auth/auth-form-overlay.component';
 import { PublicConfigService } from './core/services/public-config.service';
 import { AppOverlayService } from './overlay.service';
 
-type BookStep = 'form' | 'otp' | 'loading' | 'done';
-
 @Component({
   selector: 'app-home-hero-section',
-  imports: [CommonModule, FormField],
+  imports: [CommonModule],
   styleUrl: './home-hero-section.component.scss',
   templateUrl: './home-hero-section.component.html',
 })
@@ -26,10 +21,6 @@ export class HomeHeroSectionComponent {
   readonly heroHeadline = signal<string>(HOME_CONTENT.hero.headline);
   readonly heroLead = signal<string>(HOME_CONTENT.hero.lead);
 
-  readonly bookingFormModel = signal({ email: '', otp: '' });
-  readonly bookingForm = form(this.bookingFormModel);
-
-  readonly step = signal<BookStep>('form');
   readonly busy = signal(false);
   readonly error = signal('');
 
@@ -57,47 +48,16 @@ export class HomeHeroSectionComponent {
     }
   }
 
-  async sendOtp() {
+  async beginBooking() {
     this.error.set('');
+    if (this.auth.isLoggedIn()) {
+      await this.router.navigateByUrl(this.auth.dashboardFor(this.auth.user()!.role));
+      return;
+    }
+
     this.overlayService.open(AuthFormOverlayComponent, {
       width: '480px',
       panelClass: 'app-overlay-panel',
     });
-  }
-
-  async verifyOtp() {
-    const { otp } = this.bookingFormModel();
-    if (!otp.trim()) {
-      this.error.set('Enter the OTP.');
-      return;
-    }
-    this.error.set('');
-    this.busy.set(true);
-    this.step.set('loading');
-    try {
-      const form = this.bookingFormModel();
-      const response = await firstValueFrom(
-        this.auth.patientLogin({
-          email: form.email,
-          otp: form.otp.trim(),
-        }),
-      );
-      this.step.set('done');
-      if ('user' in response) {
-        const dashboard = this.auth.dashboardFor(response.user.role);
-        setTimeout(() => void this.router.navigateByUrl(dashboard), POST_LOGIN_REDIRECT_DELAY_MS);
-      }
-    } catch (err: any) {
-      this.step.set('otp');
-      this.error.set(err?.error?.message || 'Incorrect OTP. Please try again.');
-    } finally {
-      this.busy.set(false);
-    }
-  }
-
-  goBack() {
-    this.bookingFormModel.update((m) => ({ ...m, otp: '' }));
-    this.error.set('');
-    this.step.set('form');
   }
 }
