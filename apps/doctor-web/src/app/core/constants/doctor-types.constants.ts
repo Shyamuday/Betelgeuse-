@@ -97,6 +97,11 @@ export const PROVIDER_TYPE_LABELS: Record<ProviderType, string> = {
   OTHER: 'Other Healthcare Professional',
 };
 
+export const PROVIDER_TYPE_OPTIONS = PROVIDER_TYPES.map((value) => ({
+  value,
+  label: PROVIDER_TYPE_LABELS[value],
+}));
+
 export const DOCTOR_TYPE_LABELS: Record<HomeopathicDoctorType, string> = {
   CHIEF_CONSULTANT: 'Homeopathic Doctor (Chief Consultant)',
   JUNIOR_DOCTOR: 'Junior Homeopathic Doctor',

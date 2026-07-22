@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { HomeopathicDoctorType, Role } from '@prisma/client';
+import { HomeopathicDoctorType, ProviderType, Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { authRequired, allowRoles } from '../../auth.js';
 import { prisma } from '../../db.js';
@@ -27,7 +27,9 @@ export function registerAuthDoctorRoutes(router: Router) {
           email: z.string().email(),
           mobile: z.string().min(8).optional(),
           password: z.string().min(8),
-          specialty: z.string().min(2),
+          providerType: z.nativeEnum(ProviderType).optional(),
+          specialization: z.string().min(2).optional().or(z.literal('')),
+          specialty: z.string().min(2).optional().or(z.literal('')),
           registrationNo: z.string().optional()
         })
         .parse(req.body);
@@ -43,8 +45,10 @@ export function registerAuthDoctorRoutes(router: Router) {
           isActive: false,
           doctorProfile: {
             create: toDoctorProfilePayload({
+              providerType: body.providerType,
               doctorType: HomeopathicDoctorType.JUNIOR_DOCTOR,
               specialty: body.specialty,
+              specialization: body.specialization,
               registrationNo: body.registrationNo
             })
           }
@@ -103,6 +107,7 @@ export function registerAuthDoctorRoutes(router: Router) {
           name: z.string().min(2),
           mobile: z.string().min(8).optional().or(z.literal('')),
           specialty: z.string().min(2),
+          specialization: z.string().min(2).optional().or(z.literal('')),
           registrationNo: z.string().optional().or(z.literal('')),
           isAvailable: z.boolean().optional().default(true),
           bio: z.string().max(1200).optional().nullable(),
@@ -133,7 +138,7 @@ export function registerAuthDoctorRoutes(router: Router) {
       const profilePayload = toDoctorProfilePayload({
         providerType: existing?.providerType,
         providerCategory: existing?.providerCategory,
-        specialization: existing?.specialization ?? undefined,
+        specialization: body.specialization ?? existing?.specialization ?? undefined,
         doctorType: existing?.doctorType ?? HomeopathicDoctorType.JUNIOR_DOCTOR,
         specialtyFocus: existing?.specialtyFocus,
         specialty: body.specialty,
@@ -161,6 +166,7 @@ export function registerAuthDoctorRoutes(router: Router) {
               },
               update: {
                 specialty: profilePayload.specialty,
+                specialization: profilePayload.specialization,
                 registrationNo: profilePayload.registrationNo,
                 isAvailable: profilePayload.isAvailable,
                 ...(body.defaultMethodOptionId !== undefined

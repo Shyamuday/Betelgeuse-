@@ -55,10 +55,20 @@
       <label for="mobile">Mobile</label>
       <input id="mobile" [formField]="enrollForm.mobile" />
 
-      <label for="specialty">Specialty</label>
+      <label for="providerType">Provider type</label>
+      <select id="providerType" [formField]="enrollForm.providerType">
+        @for (option of providerTypeOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+
+      <label for="specialization">Specialization</label>
+      <input id="specialization" [formField]="enrollForm.specialization" placeholder="e.g. Clinical Psychologist" />
+
+      <label for="specialty">Display specialty</label>
       <input id="specialty" [formField]="enrollForm.specialty" />
 
-      <label for="registrationNo">Registration number</label>
+      <label for="registrationNo">Registration/license number</label>
       <input id="registrationNo" [formField]="enrollForm.registrationNo" />
 
       <label for="enrollPassword">Password</label>
