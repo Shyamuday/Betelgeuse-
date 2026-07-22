@@ -7,6 +7,7 @@ import { RAZORPAY_CHECKOUT } from './core/constants/branding.constants';
 import { SOCKET_EVENTS, SOCKET_TRANSPORTS } from './core/constants/socket.constants';
 import { environment } from '../environments/environment';
 import { BillingPlan, Consultation, Doctor, GroupedDiseaseCategory, LabResult } from './models';
+import type { BookingHealthService } from './book-consultation-panel.component';
 import type { PatientProfile } from './core/constants/patient-profile.constants';
 import { ClinicApiClient } from './clinic-api/clinic-api.client';
 import {
@@ -44,6 +45,18 @@ export class ClinicApiService {
       this.client.apiFetch<{
         clinics: Array<{ id: string; name: string; address?: string | null }>;
       }>(API_PATHS.CLINICS),
+    );
+  }
+
+  healthServices(params?: { pageSize?: number; sort?: string }) {
+    const query = new URLSearchParams({
+      pageSize: String(params?.pageSize ?? 48),
+      sort: params?.sort ?? 'featured',
+    });
+    return from(
+      this.client.apiFetch<{
+        services: BookingHealthService[];
+      }>(`${API_PATHS.SERVICES}?${query}`),
     );
   }
 

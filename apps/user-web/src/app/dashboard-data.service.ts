@@ -6,6 +6,7 @@ import { API_PATHS } from './core/constants/api-paths.constants';
 import { ProductAnalyticsService } from './core/services/product-analytics.service';
 import { PRODUCT_ANALYTICS_EVENTS } from './core/constants/analytics.constants';
 import { AuthService } from './auth/auth.service';
+import { BookingHealthService } from './book-consultation-panel.component';
 import {
   BillingPlan,
   Consultation,
@@ -41,6 +42,10 @@ export class DashboardDataService {
 
   loadBillingPlans(): Observable<{ plans: BillingPlan[] }> {
     return this.api.billingPlans();
+  }
+
+  loadHealthServices(): Observable<{ services: BookingHealthService[] }> {
+    return this.api.healthServices();
   }
 
   loadConsultations(): Observable<{ consultations: Consultation[] }> {

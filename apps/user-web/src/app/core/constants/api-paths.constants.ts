@@ -64,6 +64,7 @@ export const API_PATHS = {
   ONLINE_DOCTORS: '/online-providers',
   RTC_ICE_SERVERS: '/rtc/ice-servers',
   DISEASES: '/diseases',
+  SERVICES: '/services',
   CLINICS: '/clinics',
   PUBLIC_CONFIG: '/public-config',
   HOME_CAROUSEL: '/home-carousel',

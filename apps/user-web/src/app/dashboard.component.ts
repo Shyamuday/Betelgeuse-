@@ -9,6 +9,7 @@ import { AppHeaderComponent } from './app-header.component';
 import { AdminStatsComponent } from './admin-stats.component';
 import {
   BookConsultationPanelComponent,
+  BookingHealthService,
   BookConsultationPayload,
 } from './book-consultation-panel.component';
 import {
@@ -84,6 +85,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private pendingClinicStoreId: string | null = null;
 
   readonly diseases = signal<Disease[]>([]);
+  readonly services = signal<BookingHealthService[]>([]);
   readonly selectedClinicStoreId = signal('');
   readonly billingPlans = signal<BillingPlan[]>([]);
   readonly consultations = signal<Consultation[]>([]);
@@ -527,6 +529,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: ({ plans }) => this.billingPlans.set(plans || []),
       error: () => {
         /* keep disease-based one-time fallback */
+      },
+    });
+    this.dataService.loadHealthServices().subscribe({
+      next: ({ services }) => this.services.set(services || []),
+      error: () => {
+        /* disease fee fallback keeps booking usable */
       },
     });
     this.loadConsultations();

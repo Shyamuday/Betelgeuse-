@@ -38,9 +38,22 @@ type ClinicOption = {
   address?: string | null;
 };
 
+export type BookingHealthService = {
+  id: string;
+  slug: string;
+  title: string;
+  shortTitle?: string | null;
+  category: string;
+  expertTypes: string[];
+  expertTypeLabels: string[];
+  priceInPaise: number;
+  durationMinutes?: number | null;
+};
+
 type BookingForm = {
   purchaseType: typeof PURCHASE_TYPES.ONE_TIME | typeof PURCHASE_TYPES.PLAN;
   selectedPlanCode: string;
+  selectedServiceSlug: string;
   selectedDiseaseId: string;
   selectedClinicStoreId: string;
   intakeAnswers: Record<string, string>;
@@ -60,6 +73,7 @@ function emptyBookingForm(): BookingForm {
   return {
     purchaseType: PURCHASE_TYPES.ONE_TIME,
     selectedPlanCode: '',
+    selectedServiceSlug: '',
     selectedDiseaseId: '',
     selectedClinicStoreId: '',
     intakeAnswers: {},
@@ -87,6 +101,7 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
   readonly clinicsLoading = signal(true);
 
   @Input() diseases: Disease[] = [];
+  @Input() services: BookingHealthService[] = [];
   @Input() plans: BillingPlan[] = [];
   @Input() disabled = false;
   @Input() initialDiseaseId = '';
@@ -165,6 +180,19 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
   ngOnChanges() {
     const current = this.bookingFormModel();
     const updates: Partial<BookingForm> = {};
+    const preferredServiceSlug =
+      this.initialServiceSlug ||
+      (typeof sessionStorage !== 'undefined'
+        ? sessionStorage.getItem('pendingServiceSlug') || ''
+        : '');
+    if (preferredServiceSlug && this.services.some((s) => s.slug === preferredServiceSlug)) {
+      updates.selectedServiceSlug = preferredServiceSlug;
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem('pendingServiceSlug');
+      }
+    } else if (!current.selectedServiceSlug && this.services.length) {
+      updates.selectedServiceSlug = this.services[0].slug;
+    }
     const preferredDiseaseId =
       this.initialDiseaseId ||
       (typeof sessionStorage !== 'undefined'
@@ -194,6 +222,15 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
     return this.diseases.find((d) => d.id === selectedDiseaseId) || null;
   }
 
+  selectedService() {
+    const { selectedServiceSlug } = this.bookingFormModel();
+    return this.services.find((service) => service.slug === selectedServiceSlug) || null;
+  }
+
+  selectedServiceExpertLabel() {
+    return this.selectedService()?.expertTypeLabels?.join(', ') || '';
+  }
+
   selectedPlanDescription() {
     const { selectedPlanCode } = this.bookingFormModel();
     return this.plans.find((p) => p.code === selectedPlanCode)?.description || null;
@@ -210,7 +247,7 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
     if (purchaseType === PURCHASE_TYPES.PLAN) {
       return this.plans.find((p) => p.code === selectedPlanCode)?.priceInPaise || 0;
     }
-    return this.selectedDisease()?.feeInPaise || 0;
+    return this.selectedService()?.priceInPaise ?? this.selectedDisease()?.feeInPaise ?? 0;
   }
 
   payableAmount() {
@@ -240,6 +277,10 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
 
   onDiseaseChange() {
     this.bookingFormModel.update((m) => ({ ...m, intakeAnswers: {} }));
+    this.onBookingOptionChange();
+  }
+
+  onServiceChange() {
     this.onBookingOptionChange();
   }
 
@@ -278,9 +319,10 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
     const form = this.bookingFormModel();
     if (!form.selectedDiseaseId) return;
     const quote = this.checkoutQuote();
+    const serviceSlug = form.selectedServiceSlug || this.initialServiceSlug;
     this.booked.emit({
       diseaseId: form.selectedDiseaseId,
-      ...(this.initialServiceSlug ? { serviceSlug: this.initialServiceSlug } : {}),
+      ...(serviceSlug ? { serviceSlug } : {}),
       intakeAnswers: { ...form.intakeAnswers },
       purchaseType: form.purchaseType,
       ...(form.purchaseType === PURCHASE_TYPES.PLAN ? { planCode: form.selectedPlanCode } : {}),
@@ -307,11 +349,12 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
 
     this.quoteLoading.set(true);
     try {
+      const serviceSlug = form.selectedServiceSlug || this.initialServiceSlug;
       const { quote } = await this.http.post<{ quote: CheckoutQuote | null }>(
         API_PATHS.PATIENT.REWARDS_CHECKOUT_QUOTE,
         {
           diseaseId: form.selectedDiseaseId,
-          ...(this.initialServiceSlug ? { serviceSlug: this.initialServiceSlug } : {}),
+          ...(serviceSlug ? { serviceSlug } : {}),
           purchaseType: form.purchaseType,
           ...(form.purchaseType === PURCHASE_TYPES.PLAN ? { planCode: form.selectedPlanCode } : {}),
           walletRedeemInPaise: this.useWallet() ? 99_999_999 : 0,

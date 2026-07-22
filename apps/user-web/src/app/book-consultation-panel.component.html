@@ -4,10 +4,15 @@
         <div>
           <p class="eyebrow">Online consultation</p>
           <h2>Book Consultation</h2>
-          @if (initialServiceTitle) {
+          @if (selectedService(); as service) {
+            <p class="muted">Selected service: <strong>{{ service.title }}</strong></p>
+            @if (selectedServiceExpertLabel()) {
+              <p class="service-meta-line">{{ selectedServiceExpertLabel() }}</p>
+            }
+          } @else if (initialServiceTitle) {
             <p class="muted">Selected service: <strong>{{ initialServiceTitle }}</strong></p>
           } @else {
-            <p class="muted">Choose your concern, share a short intake, and continue to secure payment.</p>
+            <p class="muted">Choose a service, share your health issue, and continue to secure payment.</p>
           }
         </div>
         <div class="book-price-card">
@@ -23,6 +28,19 @@
       <div class="book-panel-grid">
         <div class="book-form-area">
           <div class="field-row">
+            @if (services.length) {
+              <label>
+                Select service / expert type
+                <select [formField]="bookingForm.selectedServiceSlug" (change)="onServiceChange()">
+                  @for (service of services; track service.slug) {
+                    <option [value]="service.slug">
+                      {{ service.shortTitle || service.title }} — {{ service.priceInPaise / 100 | currency: CURRENCY_CODE }}
+                    </option>
+                  }
+                </select>
+              </label>
+            }
+
             <label>
               Purchase type
               <select [formField]="bookingForm.purchaseType" (change)="onBookingOptionChange()">
@@ -32,7 +50,7 @@
             </label>
 
             <label>
-              Select problem
+              Select health issue
               <select [formField]="bookingForm.selectedDiseaseId" (change)="onDiseaseChange()">
                 @for (disease of diseases; track disease.id) {
                   <option [value]="disease.id">
