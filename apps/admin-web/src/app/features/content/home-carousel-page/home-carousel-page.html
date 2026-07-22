@@ -1,0 +1,128 @@
+<section class="panel">
+  <div class="page-head">
+    <div>
+      <h2>Home Carousel</h2>
+      <p class="page-hint">Upload slides for webinars, courses, offers, launches, and booking campaigns.</p>
+    </div>
+  </div>
+
+  <form class="form-grid" (submit)="$event.preventDefault(); create()">
+    <h3>Create slide</h3>
+    <div class="grid-2">
+      <label class="field">
+        <span class="field-label">Title</span>
+        <input [formField]="createForm.title" />
+      </label>
+      <label class="field">
+        <span class="field-label">Eyebrow</span>
+        <input [formField]="createForm.eyebrow" placeholder="Webinar / Course / Offer" />
+      </label>
+    </div>
+    <label class="field">
+      <span class="field-label">Subtitle</span>
+      <textarea rows="2" [formField]="createForm.subtitle"></textarea>
+    </label>
+    <div class="grid-2">
+      <label class="field">
+        <span class="field-label">Upload image</span>
+        <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onFilePicked($event, 'create')" />
+      </label>
+      <label class="field">
+        <span class="field-label">Or external image URL</span>
+        <input [formField]="createForm.externalImageUrl" />
+      </label>
+    </div>
+    <div class="grid-3">
+      <label class="field">
+        <span class="field-label">Action</span>
+        <select [formField]="createForm.actionType">
+          <option value="BOOK">Open booking/login</option>
+          <option value="INTERNAL_LINK">Internal page</option>
+          <option value="EXTERNAL_LINK">External link</option>
+        </select>
+      </label>
+      <label class="field">
+        <span class="field-label">Button label</span>
+        <input [formField]="createForm.actionLabel" />
+      </label>
+      <label class="field">
+        <span class="field-label">Action URL</span>
+        <input [formField]="createForm.actionUrl" placeholder="/treatments or https://..." />
+      </label>
+    </div>
+    <div class="grid-3">
+      <label class="field">
+        <span class="field-label">Image alt</span>
+        <input [formField]="createForm.imageAlt" />
+      </label>
+      <label class="field">
+        <span class="field-label">Sort order</span>
+        <input type="number" [formField]="createForm.sortOrder" />
+      </label>
+      <label class="check">
+        <input type="checkbox" [formField]="createForm.isPublished" />
+        Published
+      </label>
+    </div>
+    <button type="submit" [disabled]="saving()">Create slide</button>
+  </form>
+</section>
+
+@if (message()) { <p class="success">{{ message() }}</p> }
+@if (error()) { <p class="error">{{ error() }}</p> }
+@if (loading()) { <p class="loading-text">Loading...</p> }
+
+<section class="panel">
+  <h2>Slides ({{ slides().length }})</h2>
+  <div class="slide-list">
+    @for (slide of slides(); track slide.id) {
+      <article class="slide-card">
+        @if (imageSrc(slide); as src) {
+          <img [src]="src" [alt]="slide.imageAlt || slide.title" loading="lazy" />
+        }
+        <div class="slide-body">
+          <div class="card-header">
+            <div>
+              <p class="meta">{{ slide.eyebrow || slide.actionType }} · order {{ slide.sortOrder }}</p>
+              <strong>{{ slide.title }}</strong>
+              <p>{{ slide.subtitle }}</p>
+            </div>
+            <div class="badge-row">
+              <span class="badge" [class.published]="slide.isPublished">{{ slide.isPublished ? 'PUBLISHED' : 'DRAFT' }}</span>
+              <button type="button" class="ghost" (click)="startEdit(slide)">Edit</button>
+              <button type="button" class="danger" (click)="delete(slide)">Delete</button>
+            </div>
+          </div>
+
+          @if (editingId() === slide.id) {
+            <form class="form-grid edit-form" (submit)="$event.preventDefault(); update(slide.id)">
+              <div class="grid-2">
+                <label class="field"><span class="field-label">Title</span><input [formField]="editForm.title" /></label>
+                <label class="field"><span class="field-label">Eyebrow</span><input [formField]="editForm.eyebrow" /></label>
+              </div>
+              <label class="field"><span class="field-label">Subtitle</span><textarea rows="2" [formField]="editForm.subtitle"></textarea></label>
+              <div class="grid-2">
+                <label class="field"><span class="field-label">Replace image</span><input type="file" accept="image/jpeg,image/png,image/webp" (change)="onFilePicked($event, 'edit')" /></label>
+                <label class="field"><span class="field-label">External image URL</span><input [formField]="editForm.externalImageUrl" /></label>
+              </div>
+              <div class="grid-3">
+                <label class="field"><span class="field-label">Action</span><select [formField]="editForm.actionType"><option value="BOOK">Open booking/login</option><option value="INTERNAL_LINK">Internal page</option><option value="EXTERNAL_LINK">External link</option></select></label>
+                <label class="field"><span class="field-label">Button label</span><input [formField]="editForm.actionLabel" /></label>
+                <label class="field"><span class="field-label">Action URL</span><input [formField]="editForm.actionUrl" /></label>
+              </div>
+              <div class="grid-3">
+                <label class="field"><span class="field-label">Image alt</span><input [formField]="editForm.imageAlt" /></label>
+                <label class="field"><span class="field-label">Sort order</span><input type="number" [formField]="editForm.sortOrder" /></label>
+                <label class="check"><input type="checkbox" [formField]="editForm.isPublished" /> Published</label>
+              </div>
+              <div class="actions">
+                <button type="submit" [disabled]="saving()">Save</button>
+                <button type="button" class="ghost" (click)="cancelEdit()">Cancel</button>
+              </div>
+            </form>
+          }
+        </div>
+      </article>
+    }
+  </div>
+</section>

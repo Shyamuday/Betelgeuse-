@@ -73,6 +73,13 @@ const ADMIN_ROUTE_RULES: Array<{ pattern: RegExp; rules: RouteRule[] }> = [
     ]
   },
   {
+    pattern: /^\/admin\/home-carousel/,
+    rules: [
+      { method: 'GET', permissions: [PERMISSIONS.CATALOG_READ] },
+      { permissions: [PERMISSIONS.CATALOG_WRITE] }
+    ]
+  },
+  {
     pattern: /^\/admin\/notifications/,
     rules: [{ permissions: [PERMISSIONS.NOTIFICATIONS_WRITE] }]
   },

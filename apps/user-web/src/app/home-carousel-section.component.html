@@ -1,0 +1,28 @@
+@if (activeSlide(); as slide) {
+  <section class="home-carousel" aria-label="Featured announcements">
+    <button type="button" class="carousel-nav prev" (click)="go(-1)" aria-label="Previous slide">‹</button>
+    <button type="button" class="carousel-slide" (click)="activate(slide)">
+      <img [src]="slide.imageUrl || ''" [alt]="slide.imageAlt || slide.title" />
+      <span class="carousel-shade"></span>
+      <span class="carousel-copy">
+        @if (slide.eyebrow) {
+          <span class="carousel-eyebrow">{{ slide.eyebrow }}</span>
+        }
+        <strong>{{ slide.title }}</strong>
+        @if (slide.subtitle) {
+          <span class="carousel-subtitle">{{ slide.subtitle }}</span>
+        }
+        <span class="carousel-cta">{{ slide.actionLabel || 'Book now' }}</span>
+      </span>
+    </button>
+    <button type="button" class="carousel-nav next" (click)="go(1)" aria-label="Next slide">›</button>
+
+    @if (slides().length > 1) {
+      <div class="carousel-dots">
+        @for (item of slides(); track item.id; let i = $index) {
+          <button type="button" [class.active]="i === activeIndex()" (click)="select(i)" [attr.aria-label]="'Show slide ' + (i + 1)"></button>
+        }
+      </div>
+    }
+  </section>
+}

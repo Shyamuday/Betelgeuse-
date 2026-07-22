@@ -28,6 +28,10 @@ import {
   updateDiseasePublicPage
 } from '../services/disease-public-page.js';
 import { diseasePublicPageUpdateSchema } from '../types/disease-public-page.js';
+import {
+  publicCarouselImageMimeType,
+  readPublicCarouselImage
+} from '../services/public-carousel-image-storage.js';
 import { providerCategoryLabel, providerTypeLabel } from '../constants/homeopathic-doctor-types.js';
 
 export const router = Router();
@@ -594,5 +598,55 @@ router.get(
       return;
     }
     res.json({ page });
+  })
+);
+
+router.get(
+  '/home-carousel',
+  asyncRoute(async (_req, res) => {
+    const now = new Date();
+    const slides = await prisma.homeCarouselSlide.findMany({
+      where: {
+        isPublished: true,
+        OR: [{ startsAt: null }, { startsAt: { lte: now } }],
+        AND: [{ OR: [{ endsAt: null }, { endsAt: { gte: now } }] }]
+      },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }]
+    });
+    res.json({
+      slides: slides.map((slide) => ({
+        id: slide.id,
+        title: slide.title,
+        subtitle: slide.subtitle,
+        eyebrow: slide.eyebrow,
+        imageAlt: slide.imageAlt,
+        imageUrl: slide.imageKey ? `/home-carousel/${slide.id}/image` : slide.externalImageUrl,
+        actionLabel: slide.actionLabel,
+        actionType: slide.actionType,
+        actionUrl: slide.actionUrl
+      }))
+    });
+  })
+);
+
+router.get(
+  '/home-carousel/:id/image',
+  asyncRoute(async (req, res) => {
+    const slide = await prisma.homeCarouselSlide.findUnique({
+      where: { id: routeParam(req, 'id') },
+      select: { imageKey: true, isPublished: true }
+    });
+    if (!slide?.imageKey || !slide.isPublished) {
+      res.status(404).json({ message: 'Carousel image not found.' });
+      return;
+    }
+    try {
+      const buffer = await readPublicCarouselImage(slide.imageKey);
+      res.setHeader('Content-Type', publicCarouselImageMimeType(slide.imageKey));
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.send(buffer);
+    } catch {
+      res.status(404).json({ message: 'Carousel image not found.' });
+    }
   })
 );

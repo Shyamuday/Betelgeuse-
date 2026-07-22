@@ -107,6 +107,18 @@ export class AdminApi {
   deletePublicPage(...args: Parameters<AdminDoctorsApi['deletePublicPage']>) {
     return this.doctors.deletePublicPage(...args);
   }
+  listHomeCarouselSlides() {
+    return this.doctors.listHomeCarouselSlides();
+  }
+  createHomeCarouselSlide(...args: Parameters<AdminDoctorsApi['createHomeCarouselSlide']>) {
+    return this.doctors.createHomeCarouselSlide(...args);
+  }
+  updateHomeCarouselSlide(...args: Parameters<AdminDoctorsApi['updateHomeCarouselSlide']>) {
+    return this.doctors.updateHomeCarouselSlide(...args);
+  }
+  deleteHomeCarouselSlide(...args: Parameters<AdminDoctorsApi['deleteHomeCarouselSlide']>) {
+    return this.doctors.deleteHomeCarouselSlide(...args);
+  }
   listTestimonials() {
     return this.doctors.listTestimonials();
   }

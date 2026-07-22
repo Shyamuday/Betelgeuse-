@@ -32,3 +32,25 @@ model PublicPage {
   @@index([status])
   @@index([sortOrder])
 }
+
+model HomeCarouselSlide {
+  id               String   @id @default(cuid())
+  title            String
+  subtitle         String?  @db.Text
+  eyebrow          String?
+  imageAlt         String?
+  imageKey         String?
+  externalImageUrl String?
+  actionLabel      String?
+  actionType       String   @default("BOOK")
+  actionUrl        String?
+  isPublished      Boolean  @default(true)
+  sortOrder        Int      @default(0)
+  startsAt         DateTime?
+  endsAt           DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([isPublished])
+  @@index([sortOrder])
+}

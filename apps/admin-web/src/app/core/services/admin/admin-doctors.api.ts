@@ -178,6 +178,33 @@ export class AdminDoctorsApi extends AdminApiBase {
     );
   }
 
+  listHomeCarouselSlides() {
+    return firstValueFrom(
+      this.http.get<{ slides: any[] }>(`${this.apiBase}${API_PATHS.ADMIN.HOME_CAROUSEL}`),
+    );
+  }
+
+  createHomeCarouselSlide(payload: any) {
+    return firstValueFrom(
+      this.http.post<{ slide: any }>(`${this.apiBase}${API_PATHS.ADMIN.HOME_CAROUSEL}`, payload),
+    );
+  }
+
+  updateHomeCarouselSlide(id: string, payload: any) {
+    return firstValueFrom(
+      this.http.patch<{ slide: any }>(
+        `${this.apiBase}${API_PATHS.ADMIN.HOME_CAROUSEL_BY_ID(id)}`,
+        payload,
+      ),
+    );
+  }
+
+  deleteHomeCarouselSlide(id: string) {
+    return firstValueFrom(
+      this.http.delete(`${this.apiBase}${API_PATHS.ADMIN.HOME_CAROUSEL_BY_ID(id)}`),
+    );
+  }
+
   // ── Testimonials ──────────────────────────────────────────────────────────
   listTestimonials() {
     return firstValueFrom(

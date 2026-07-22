@@ -5,6 +5,7 @@ import { AppHeaderComponent } from './app-header.component';
 import { HomeAppDownloadSectionComponent } from './home-app-download-section.component';
 import { HomeFinalCtaSectionComponent } from './home-final-cta-section.component';
 import { HomeHeroSectionComponent } from './home-hero-section.component';
+import { HomeCarouselSectionComponent } from './home-carousel-section.component';
 import { HomeTalkToDoctorSectionComponent } from './home-talk-to-doctor-section.component';
 import { HomeHowItWorksSectionComponent } from './home-how-it-works-section.component';
 import { HomeSafetyFaqSectionComponent } from './home-safety-faq-section.component';
@@ -15,6 +16,7 @@ import { HomeTreatmentsSectionComponent } from './home-treatments-section.compon
   imports: [
     AppHeaderComponent,
     AppFooterComponent,
+    HomeCarouselSectionComponent,
     HomeHeroSectionComponent,
     HomeTalkToDoctorSectionComponent,
     HomeTreatmentsSectionComponent,
@@ -22,8 +24,7 @@ import { HomeTreatmentsSectionComponent } from './home-treatments-section.compon
     HomeSafetyFaqSectionComponent,
     HomeAppDownloadSectionComponent,
     HomeFinalCtaSectionComponent,
-  ]
-,
+  ],
   templateUrl: './home.component.html',
 })
 export class HomeComponent {

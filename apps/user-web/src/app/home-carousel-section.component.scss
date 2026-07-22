@@ -1,0 +1,139 @@
+.home-carousel {
+  position: relative;
+  width: min(1180px, calc(100% - 2rem));
+  margin: 0 auto 1rem;
+}
+
+.carousel-slide {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 5;
+  min-height: 220px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 8px;
+  padding: 0;
+  cursor: pointer;
+  background: #0f172a;
+  text-align: left;
+}
+
+.carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.carousel-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.84), rgba(15, 23, 42, 0.34), rgba(15, 23, 42, 0.08));
+}
+
+.carousel-copy {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.65rem;
+  max-width: 620px;
+  padding: clamp(1.2rem, 4vw, 3rem);
+  color: #fff;
+}
+
+.carousel-eyebrow {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.carousel-copy strong {
+  font-size: clamp(1.75rem, 4vw, 3.4rem);
+  line-height: 1.02;
+}
+
+.carousel-subtitle {
+  font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.carousel-cta {
+  width: fit-content;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 800;
+  padding: 0.72rem 1rem;
+}
+
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #0f172a;
+  cursor: pointer;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.carousel-nav.prev {
+  left: 0.75rem;
+}
+
+.carousel-nav.next {
+  right: 0.75rem;
+}
+
+.carousel-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 0.85rem;
+  display: flex;
+  gap: 0.4rem;
+  transform: translateX(-50%);
+}
+
+.carousel-dots button {
+  width: 9px;
+  height: 9px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+}
+
+.carousel-dots button.active {
+  width: 24px;
+  background: #fff;
+}
+
+@media (max-width: 720px) {
+  .home-carousel {
+    width: calc(100% - 1rem);
+  }
+
+  .carousel-slide {
+    aspect-ratio: 4 / 5;
+    min-height: 360px;
+  }
+
+  .carousel-shade {
+    background: linear-gradient(0deg, rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.24));
+  }
+
+  .carousel-copy {
+    justify-content: flex-end;
+    padding: 1.2rem;
+  }
+}
