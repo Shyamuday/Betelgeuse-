@@ -9,7 +9,8 @@ import {
   resolvePatientByCode
 } from '../services/patient-identity.js';
 import { buildPatientScanContext } from '../services/patient-scan-context.js';
-import { getPatientAppDownloadInfo } from '../services/patient-app-download.js';
+// Patient app download helpers kept for future mobile launch.
+// import { getPatientAppDownloadInfo } from '../services/patient-app-download.js';
 
 export const scanRouter = Router();
 
@@ -22,24 +23,27 @@ function escapeHtml(value: string) {
 }
 
 // Public landing — opened when anyone scans the patient card QR
-scanRouter.get('/go/p/:patientCode', asyncRoute(async (req, res) => {
-  const patient = await resolvePatientByCode(routeParam(req, 'patientCode'));
-  if (!patient?.patientCode) {
-    return res.status(404).send('<h1>Patient not found</h1>');
-  }
+scanRouter.get(
+  '/go/p/:patientCode',
+  asyncRoute(async (req, res) => {
+    const patient = await resolvePatientByCode(routeParam(req, 'patientCode'));
+    if (!patient?.patientCode) {
+      return res.status(404).send('<h1>Patient not found</h1>');
+    }
 
-  const code = encodeURIComponent(patient.patientCode);
-  const { DOCTOR, OPERATIONS, WEB } = SERVER_CONFIG.ORIGINS;
-  const doctorUrl = `${DOCTOR}/scan/patient/${code}`;
-  const storeUrl = `${OPERATIONS}/store/scan/patient/${code}`;
-  const receptionUrl = `${OPERATIONS}/walk-in?patientCode=${code}`;
-  const scanHubUrl = `${OPERATIONS}/scan?patientCode=${code}`;
-  const adminUrl = `${OPERATIONS}/admin/scan?patientCode=${code}`;
-  const managerUrl = `${OPERATIONS}/store-manager/patients`;
-  const patientUrl = `${WEB}/patient/dashboard`;
-  const appDownloadUrl = `${SERVER_CONFIG.API_PUBLIC_URL}/go/app`;
+    const code = encodeURIComponent(patient.patientCode);
+    const { DOCTOR, OPERATIONS, WEB } = SERVER_CONFIG.ORIGINS;
+    const doctorUrl = `${DOCTOR}/scan/patient/${code}`;
+    const storeUrl = `${OPERATIONS}/store/scan/patient/${code}`;
+    const receptionUrl = `${OPERATIONS}/walk-in?patientCode=${code}`;
+    const scanHubUrl = `${OPERATIONS}/scan?patientCode=${code}`;
+    const adminUrl = `${OPERATIONS}/admin/scan?patientCode=${code}`;
+    const managerUrl = `${OPERATIONS}/store-manager/patients`;
+    const patientUrl = `${WEB}/patient/dashboard`;
+    // Patient app download link kept for future mobile launch.
+    // const appDownloadUrl = `${SERVER_CONFIG.API_PUBLIC_URL}/go/app`;
 
-  res.type('html').send(`<!DOCTYPE html>
+    res.type('html').send(`<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -75,69 +79,73 @@ scanRouter.get('/go/p/:patientCode', asyncRoute(async (req, res) => {
         <a class="btn patient" href="${adminUrl}">Admin — patient registry</a>
         <a class="btn patient" href="${managerUrl}">Store manager — patients</a>
         <a class="btn patient" href="${patientUrl}">Patient app</a>
-        <a class="btn scan" href="${appDownloadUrl}">Download patient app</a>
+        <!-- Patient app download link kept for future mobile launch.
+        <a class="btn scan" href="/go/app">Download patient app</a>
+        -->
       </div>
     </div>
   </main>
 </body>
 </html>`);
-}));
+  })
+);
 
-// Public landing — download the patient mobile / web app (no account required)
-scanRouter.get('/go/app', asyncRoute(async (_req, res) => {
-  const info = getPatientAppDownloadInfo();
-  const { WEB } = SERVER_CONFIG.ORIGINS;
-  const loginUrl = `${WEB}/login`;
-
-  const storeButtons = [
-    info.androidUrl
-      ? `<a class="btn android" href="${escapeHtml(info.androidUrl)}">Get on Google Play</a>`
-      : '',
-    info.iosUrl ? `<a class="btn ios" href="${escapeHtml(info.iosUrl)}">Download on App Store</a>` : '',
-    `<a class="btn web" href="${escapeHtml(info.webAppUrl)}">Open in browser</a>`,
-    `<a class="btn signup" href="${escapeHtml(loginUrl)}">Sign up / log in</a>`
-  ]
-    .filter(Boolean)
-    .join('\n');
-
-  res.type('html').send(`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${escapeHtml(info.appName)} — HopeHub Care</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 0; background: #f0fdf4; color: #0f172a; }
-    main { max-width: 420px; margin: 0 auto; padding: 24px 16px; }
-    .card { background: #fff; border: 1px solid #bbf7d0; border-radius: 16px; padding: 20px; }
-    h1 { margin: 0 0 8px; font-size: 1.45rem; }
-    p { color: #475569; line-height: 1.5; }
-    .actions { display: grid; gap: 10px; margin-top: 18px; }
-    a.btn { display: block; text-align: center; padding: 14px; border-radius: 12px; text-decoration: none; font-weight: 700; }
-    .android { background: #0f766e; color: #fff; }
-    .ios { background: #0f172a; color: #fff; }
-    .web { background: #fff; color: #0f766e; border: 2px solid #0f766e; }
-    .signup { background: #4338ca; color: #fff; }
-  </style>
-</head>
-<body>
-  <main>
-    <div class="card">
-      <h1>${escapeHtml(info.appName)}</h1>
-      <p>Book consultations, track medicines, and chat with your doctor — free to install.</p>
-      <p><small>No account yet? Open the app and register in under a minute.</small></p>
-      <div class="actions">
-        ${storeButtons}
-      </div>
-    </div>
-  </main>
-</body>
-</html>`);
-}));
-
-scanRouter.get('/app/download', asyncRoute(async (_req, res) => {
-  res.json(getPatientAppDownloadInfo());
-}));
+// Public landing — download the patient mobile / web app (no account required).
+// Kept for future mobile launch.
+// scanRouter.get('/go/app', asyncRoute(async (_req, res) => {
+//   const info = getPatientAppDownloadInfo();
+//   const { WEB } = SERVER_CONFIG.ORIGINS;
+//   const loginUrl = `${WEB}/login`;
+//
+//   const storeButtons = [
+//     info.androidUrl
+//       ? `<a class="btn android" href="${escapeHtml(info.androidUrl)}">Get on Google Play</a>`
+//       : '',
+//     info.iosUrl ? `<a class="btn ios" href="${escapeHtml(info.iosUrl)}">Download on App Store</a>` : '',
+//     `<a class="btn web" href="${escapeHtml(info.webAppUrl)}">Open in browser</a>`,
+//     `<a class="btn signup" href="${escapeHtml(loginUrl)}">Sign up / log in</a>`
+//   ]
+//     .filter(Boolean)
+//     .join('\n');
+//
+//   res.type('html').send(`<!DOCTYPE html>
+// <html lang="en">
+// <head>
+//   <meta charset="utf-8" />
+//   <meta name="viewport" content="width=device-width, initial-scale=1" />
+//   <title>${escapeHtml(info.appName)} — HopeHub Care</title>
+//   <style>
+//     body { font-family: system-ui, sans-serif; margin: 0; background: #f0fdf4; color: #0f172a; }
+//     main { max-width: 420px; margin: 0 auto; padding: 24px 16px; }
+//     .card { background: #fff; border: 1px solid #bbf7d0; border-radius: 16px; padding: 20px; }
+//     h1 { margin: 0 0 8px; font-size: 1.45rem; }
+//     p { color: #475569; line-height: 1.5; }
+//     .actions { display: grid; gap: 10px; margin-top: 18px; }
+//     a.btn { display: block; text-align: center; padding: 14px; border-radius: 12px; text-decoration: none; font-weight: 700; }
+//     .android { background: #0f766e; color: #fff; }
+//     .ios { background: #0f172a; color: #fff; }
+//     .web { background: #fff; color: #0f766e; border: 2px solid #0f766e; }
+//     .signup { background: #4338ca; color: #fff; }
+//   </style>
+// </head>
+// <body>
+//   <main>
+//     <div class="card">
+//       <h1>${escapeHtml(info.appName)}</h1>
+//       <p>Book consultations, track medicines, and chat with your doctor — free to install.</p>
+//       <p><small>No account yet? Open the app and register in under a minute.</small></p>
+//       <div class="actions">
+//         ${storeButtons}
+//       </div>
+//     </div>
+//   </main>
+// </body>
+// </html>`);
+// }));
+//
+// scanRouter.get('/app/download', asyncRoute(async (_req, res) => {
+//   res.json(getPatientAppDownloadInfo());
+// }));
 
 // Unified scan context for all authenticated platform apps
 scanRouter.get(
@@ -193,9 +201,13 @@ scanRouter.get(
       }
     }
 
-    const primaryConsultation = context.consultations.find(
-      (c) => c.status === ConsultationStatus.IN_PROGRESS || c.status === ConsultationStatus.ASSIGNED
-    ) ?? context.consultations[0] ?? null;
+    const primaryConsultation =
+      context.consultations.find(
+        (c) =>
+          c.status === ConsultationStatus.IN_PROGRESS || c.status === ConsultationStatus.ASSIGNED
+      ) ??
+      context.consultations[0] ??
+      null;
 
     res.json({
       patient: context.patient,

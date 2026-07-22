@@ -42,11 +42,12 @@ export const PUBLIC_HEADER_NAV_GROUPS: PublicNavGroup[] = [
       { label: 'FAQ', path: `/${ROUTE_PATHS.FAQ}` },
     ],
   },
-  {
-    id: 'app',
-    label: 'App',
-    links: [{ label: 'Get the app', path: '/get-app' }],
-  },
+  // Patient app navigation kept for future mobile launch.
+  // {
+  //   id: 'app',
+  //   label: 'App',
+  //   links: [{ label: 'Get the app', path: '/get-app' }],
+  // },
 ];
 
 export const PUBLIC_HEADER_QUICK_LINKS: PublicNavLink[] = PUBLIC_HEADER_NAV_GROUPS.flatMap(

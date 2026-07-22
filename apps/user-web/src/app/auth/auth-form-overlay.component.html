@@ -20,7 +20,7 @@
         <h2>Set new password</h2>
         <p class="muted">Enter your new password below.</p>
 
-        <form (ngSubmit)="resetPassword()">
+        <form (submit)="$event.preventDefault(); resetPassword()">
           <label>
             New password
             <input [formField]="forgotForm.password" type="password" placeholder="Min 8 characters" />
@@ -39,7 +39,7 @@
         <h2>Reset password</h2>
         <p class="muted">Enter your registered email and we will send a password reset link.</p>
 
-        <form (ngSubmit)="forgotPassword()">
+        <form (submit)="$event.preventDefault(); forgotPassword()">
           <label>
             Email
             <input [formField]="forgotForm.email" type="email" placeholder="Enter your Gmail" autocomplete="email" />
@@ -48,70 +48,124 @@
         </form>
       } @else if (authView() === 'signup') {
         <h2>Create patient account</h2>
-        <p class="muted">Sign up with your email OTP. You can add your mobile number later from profile.</p>
-
-        <form (ngSubmit)="registerPatient()">
-          <label>
-            Full name
-            <input [formField]="signupForm.name" placeholder="Enter patient name" autocomplete="name" />
-          </label>
-          <label>
-            Email
-            <input
-              [formField]="signupForm.email"
-              type="email"
-              placeholder="Enter Gmail"
-              autocomplete="email"
-              (input)="resetSignupOtp()"
-            />
-          </label>
-          @if (signupOtpSent()) {
-            @if (otpNotice()) {
-              <p class="muted">{{ otpNotice() }}</p>
-            }
-            <label>
-              6-digit OTP
-              <input [formField]="signupForm.otp" placeholder="Enter OTP" inputmode="numeric" autocomplete="one-time-code" />
-            </label>
-            <button class="primary" type="submit" [disabled]="isProcessing() || !canRegisterPatient()">Verify OTP & create account</button>
-            <button type="button" class="secondary" [disabled]="isProcessing()" (click)="requestSignupOtp()">Resend OTP</button>
+        <p class="muted">
+          @if (signupMode() === 'password') {
+            Create your account with email and password.
           } @else {
-            <button type="button" class="primary" [disabled]="isProcessing() || !signupModel().name.trim() || !signupModel().email.trim()" (click)="requestSignupOtp()">Send OTP</button>
+            Sign up with your email OTP. You can add your mobile number later from profile.
           }
-        </form>
+        </p>
+
+        <div class="auth-mode-tabs" role="tablist" aria-label="Signup method">
+          <button type="button" [class.active]="signupMode() === 'password'" (click)="setSignupMode('password')">Password</button>
+          <button type="button" [class.active]="signupMode() === 'otp'" (click)="setSignupMode('otp')">OTP</button>
+        </div>
+
+        @if (signupMode() === 'password') {
+          <form (submit)="$event.preventDefault(); registerPatientWithPassword()">
+            <label>
+              Full name
+              <input [formField]="signupForm.name" placeholder="Enter patient name" autocomplete="name" />
+            </label>
+            <label>
+              Email
+              <input [formField]="signupForm.email" type="email" placeholder="Enter Gmail" autocomplete="email" />
+            </label>
+            <label>
+              Password
+              <input [formField]="signupForm.password" type="password" placeholder="Min 8 characters" autocomplete="new-password" />
+            </label>
+            <button class="primary" type="submit" [disabled]="isProcessing() || !canRegisterPatientWithPassword()">Create account</button>
+          </form>
+        } @else {
+          <form (submit)="$event.preventDefault(); registerPatient()">
+            <label>
+              Full name
+              <input [formField]="signupForm.name" placeholder="Enter patient name" autocomplete="name" />
+            </label>
+            <label>
+              Email
+              <input
+                [formField]="signupForm.email"
+                type="email"
+                placeholder="Enter Gmail"
+                autocomplete="email"
+                (input)="resetSignupOtp()"
+              />
+            </label>
+            @if (signupOtpSent()) {
+              @if (otpNotice()) {
+                <p class="muted">{{ otpNotice() }}</p>
+              }
+              <label>
+                6-digit OTP
+                <input [formField]="signupForm.otp" placeholder="Enter OTP" inputmode="numeric" autocomplete="one-time-code" />
+              </label>
+              <button class="primary" type="submit" [disabled]="isProcessing() || !canRegisterPatient()">Verify OTP & create account</button>
+              <button type="button" class="secondary" [disabled]="isProcessing()" (click)="requestSignupOtp()">Resend OTP</button>
+            } @else {
+              <button type="button" class="primary" [disabled]="isProcessing() || !signupModel().name.trim() || !signupModel().email.trim()" (click)="requestSignupOtp()">Send OTP</button>
+            }
+          </form>
+        }
 
         <p class="mode-switch-wrap">
           <button type="button" class="mode-switch" (click)="setAuthView('login')">Already have an account? Login</button>
         </p>
       } @else {
         <h2>Login to continue</h2>
-        <p class="muted">Sign in securely with an OTP sent to your email.</p>
-
-        <form (ngSubmit)="loginPatientWithOtp()">
-          <label>
-            Email
-            <input
-              [formField]="patientOtpForm.email"
-              type="email"
-              placeholder="Enter Gmail"
-              autocomplete="email"
-              (input)="resetLoginOtp()"
-            />
-          </label>
-          @if (loginOtpSent()) {
-            @if (otpNotice()) {
-              <p class="muted">{{ otpNotice() }}</p>
-            }
-            <label>
-              6-digit OTP
-              <input [formField]="patientOtpForm.otp" placeholder="Enter OTP" inputmode="numeric" autocomplete="one-time-code" />
-            </label>
-            <button class="primary" type="submit" [disabled]="isProcessing() || !canLoginWithEmailOtp()">Verify OTP & login</button>
-            <button type="button" class="secondary" [disabled]="isProcessing()" (click)="requestLoginOtp()">Resend OTP</button>
+        <p class="muted">
+          @if (loginMode() === 'otp') {
+            Sign in securely with an OTP sent to your email.
           } @else {
-            <button type="button" class="primary" [disabled]="isProcessing() || !patientOtpModel().email.trim()" (click)="requestLoginOtp()">Send OTP</button>
+            Sign in with your email and password.
           }
-        </form>
+        </p>
+
+        <div class="auth-mode-tabs" role="tablist" aria-label="Login method">
+          <button type="button" [class.active]="loginMode() === 'otp'" (click)="setLoginMode('otp')">OTP</button>
+          <button type="button" [class.active]="loginMode() === 'password'" (click)="setLoginMode('password')">Password</button>
+        </div>
+
+        @if (loginMode() === 'password') {
+          <form (submit)="$event.preventDefault(); loginPatientWithPassword()">
+            <label>
+              Email
+              <input [formField]="patientCredentialsForm.identifier" type="email" placeholder="Enter Gmail" autocomplete="email" />
+            </label>
+            <label>
+              Password
+              <input [formField]="patientCredentialsForm.password" type="password" placeholder="Enter password" autocomplete="current-password" />
+            </label>
+            <button class="primary" type="submit" [disabled]="isProcessing() || !canLoginWithPassword()">Login with password</button>
+          </form>
+        } @else {
+          <form (submit)="$event.preventDefault(); loginPatientWithOtp()">
+            <label>
+              Email
+              <input
+                [formField]="patientOtpForm.email"
+                type="email"
+                placeholder="Enter Gmail"
+                autocomplete="email"
+                (input)="resetLoginOtp()"
+              />
+            </label>
+            @if (loginOtpSent()) {
+              @if (otpNotice()) {
+                <p class="muted">{{ otpNotice() }}</p>
+              }
+              <label>
+                6-digit OTP
+                <input [formField]="patientOtpForm.otp" placeholder="Enter OTP" inputmode="numeric" autocomplete="one-time-code" />
+              </label>
+              <button class="primary" type="submit" [disabled]="isProcessing() || !canLoginWithEmailOtp()">Verify OTP & login</button>
+              <button type="button" class="secondary" [disabled]="isProcessing()" (click)="requestLoginOtp()">Resend OTP</button>
+            } @else {
+              <button type="button" class="primary" [disabled]="isProcessing() || !patientOtpModel().email.trim()" (click)="requestLoginOtp()">Send OTP</button>
+            }
+          </form>
+        }
 
         <p class="mode-switch-wrap">
           <button type="button" class="mode-switch" (click)="startForgotPassword()">Forgot password?</button>

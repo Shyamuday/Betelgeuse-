@@ -60,7 +60,8 @@ export const FOOTER_NAV_LINKS: readonly PublicNavLink[] = [
   { label: 'Patient stories', href: '/testimonials' },
   { label: 'Blog', href: '/blog' },
   { label: 'FAQ', href: '/faq' },
-  { label: 'Get the app', href: '/get-app' },
+  // Patient app link kept for future mobile launch.
+  // { label: 'Get the app', href: '/get-app' },
   { label: 'Contact', href: '/contact' },
   { label: 'Careers', href: '/careers' },
   { label: 'Legal & policies', href: '/legal' },
