@@ -1,19 +1,19 @@
 /** Route-level SEO - keys match `app.routes.ts` path segments. */
 export const ROUTE_SEO_CONTENT = {
   home: {
-    seoTitle: 'HopeHub Care | Provider-Led Homeopathy for All Conditions',
+    seoTitle: 'HopeHub Care | Provider-Led Healthcare for All Conditions',
     seoDescription:
-      'Book online homeopathic consultations for any health concern. Licensed providers, prescriptions, follow-up, and secure patient support.',
+      'Book online healthcare consultations for any health concern. Licensed providers, prescriptions where appropriate, follow-up, and secure patient support.',
   },
   about: {
-    seoTitle: 'About HopeHub Care and Research Centre | Provider-Led Homeopathy',
+    seoTitle: 'About HopeHub Care and Research Centre | Provider-Led Healthcare',
     seoDescription:
-      'Learn about HopeHub Care - a Provider-Led homeopathic clinic offering online consultations for acute, chronic, and preventive care across all conditions.',
+      'Learn about HopeHub Care - a provider-led healthcare platform offering online consultations for acute, chronic, mental wellness, preventive, and supportive care.',
   },
   treatments: {
     seoTitle: 'Treatments | HopeHub Care and Research Centre',
     seoDescription:
-      'Explore homeopathic treatment at HopeHub Care for acute and chronic conditions across all body systems and age groups.',
+      'Explore provider-led care at HopeHub Care for acute and chronic conditions across body systems, age groups, and care needs.',
   },
   'treatments/:slug': {
     seoTitle: 'Treatment Details | HopeHub Care',
@@ -23,27 +23,27 @@ export const ROUTE_SEO_CONTENT = {
   'our-doctors': {
     seoTitle: 'Our Providers | HopeHub Care and Research Centre',
     seoDescription:
-      'Meet qualified homeopathic providers at HopeHub Care. Our internal provider team is matched to patients based on their condition for personalised care.',
+      'Meet qualified healthcare providers at HopeHub Care. Our internal provider team is matched to patients based on their concern for personalised care.',
   },
   blog: {
     seoTitle: 'Health Blog | HopeHub Care and Research Centre',
     seoDescription:
-      'Evidence-informed articles on homeopathy, common diseases, mental wellness, and healthy living from the HopeHub Care clinical team.',
+      'Evidence-informed articles on common diseases, mental wellness, preventive care, and healthy living from the HopeHub Care team.',
   },
   testimonials: {
     seoTitle: 'Patient Stories | HopeHub Care and Research Centre',
     seoDescription:
-      'Read real patient experiences from HopeHub Care - Provider-Led homeopathic care for a wide range of health concerns.',
+      'Read real patient experiences from HopeHub Care - provider-led care for a wide range of health concerns.',
   },
   careers: {
     seoTitle: 'Careers | HopeHub Care and Research Centre',
     seoDescription:
-      'Join the HopeHub Care team. We are hiring homeopathic providers, care coordinators, pharmacists, and operations staff who are passionate about patient-first healthcare.',
+      'Join the HopeHub Care team. We are hiring providers, counsellors, care coordinators, pharmacists, and operations staff who are passionate about patient-first healthcare.',
   },
   'chronic-care': {
-    seoTitle: 'Homeopathic Treatment | HopeHub Care',
+    seoTitle: 'Provider-Led Care | HopeHub Care',
     seoDescription:
-      'Comprehensive homeopathic care at HopeHub Care for acute, chronic, and preventive treatment across all disease categories.',
+      'Comprehensive provider-led care at HopeHub Care for acute, chronic, mental wellness, preventive, and supportive health needs.',
   },
   faq: {
     seoTitle: 'FAQ | HopeHub Care',

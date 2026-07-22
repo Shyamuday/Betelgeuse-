@@ -34,7 +34,7 @@ export const FAQ_FALLBACK_ENTRIES: FaqAccordionItem[] = [
     category: 'Treatment',
     question: 'Do you use homeopathy?',
     answer:
-      'Our approach is homeopathy-led and low-medicine where suitable, guided by provider assessment and your health profile.',
+      'Yes, homeopathy is one supported care approach where suitable. Your provider will guide the right plan based on your concern, history, safety needs, and goals.',
   },
   {
     category: 'Treatment',

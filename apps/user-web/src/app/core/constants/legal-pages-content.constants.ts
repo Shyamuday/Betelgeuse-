@@ -117,7 +117,7 @@ export const LEGAL_PAGES = {
       {
         title: 'Nature of service',
         paragraphs: [
-          'We provide provider-led online homeopathic consultations, digital prescriptions where clinically appropriate, follow-up messaging, and medicine fulfilment support.',
+          'We provide provider-led online healthcare consultations, digital prescriptions where clinically appropriate, follow-up messaging, and medicine fulfilment support.',
           'Our platform is not an emergency service. Severe or sudden symptoms require immediate offline medical care.',
         ],
       },
@@ -132,9 +132,9 @@ export const LEGAL_PAGES = {
       {
         title: 'Consultations & provider assignment',
         bullets: [
-          'Doctors are assigned internally based on your concern, availability, and clinic workflow — patients do not browse or select doctors from a public marketplace listing.',
+          'Providers are assigned internally based on your concern, availability, and clinic workflow - patients do not browse or select providers from a public marketplace listing.',
           'A consultation fee may apply before provider review or assignment, as shown at booking.',
-          'The doctor may request additional history, photos, or reports before prescribing.',
+          'The provider may request additional history, photos, or reports before prescribing or giving care guidance.',
           'Prescriptions are issued only when clinically appropriate.',
         ],
       },
@@ -209,7 +209,7 @@ export const LEGAL_PAGES = {
           'Opened or partially used products.',
           'Products stored incorrectly by the customer after delivery.',
           'Delays caused by incorrect address or unavailable recipient.',
-          'Prescription items correctly dispensed as per doctor order.',
+          'Prescription items correctly dispensed as per provider order.',
         ],
       },
       {
