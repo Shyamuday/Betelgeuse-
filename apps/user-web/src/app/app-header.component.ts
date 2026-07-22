@@ -56,6 +56,7 @@ export class AppHeaderComponent implements OnDestroy {
 
   readonly menuOpen = signal(false);
   readonly accountMenuOpen = signal(false);
+  readonly desktopMenuOpen = signal<string | null>(null);
   readonly bellConfig = {
     apiBase: environment.apiUrl,
     tokenKey: AUTH_TOKEN_KEY,
@@ -85,6 +86,9 @@ export class AppHeaderComponent implements OnDestroy {
     if (this.accountMenuOpen()) {
       this.closeAccountMenu();
     }
+    if (this.desktopMenuOpen()) {
+      this.closeDesktopMenu();
+    }
   }
 
   @HostListener('document:click', ['$event'])
@@ -92,6 +96,9 @@ export class AppHeaderComponent implements OnDestroy {
     const target = event.target as HTMLElement | null;
     if (!target?.closest('.account-menu-wrap')) {
       this.closeAccountMenu();
+    }
+    if (!target?.closest('.desktop-nav-group')) {
+      this.closeDesktopMenu();
     }
   }
 
@@ -111,6 +118,20 @@ export class AppHeaderComponent implements OnDestroy {
 
   closeAccountMenu(): void {
     this.accountMenuOpen.set(false);
+  }
+
+  toggleDesktopMenu(groupId: string, event: Event): void {
+    event.stopPropagation();
+    this.desktopMenuOpen.update((open) => (open === groupId ? null : groupId));
+    this.closeAccountMenu();
+  }
+
+  openDesktopMenu(groupId: string): void {
+    this.desktopMenuOpen.set(groupId);
+  }
+
+  closeDesktopMenu(): void {
+    this.desktopMenuOpen.set(null);
   }
 
   openAuthOverlay(event: Event) {

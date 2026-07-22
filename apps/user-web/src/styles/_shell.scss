@@ -277,7 +277,8 @@
 
 .desktop-nav-trigger:hover,
 .desktop-nav-group:focus-within .desktop-nav-trigger,
-.desktop-nav-group:hover .desktop-nav-trigger {
+.desktop-nav-group:hover .desktop-nav-trigger,
+.desktop-nav-group.open .desktop-nav-trigger {
   background: #eef4ff;
   color: #0f62fe;
   transform: translateY(-1px);
@@ -285,7 +286,7 @@
 
 .desktop-submenu {
   position: absolute;
-  top: calc(100% + 0.45rem);
+  top: 100%;
   left: 0;
   z-index: 50;
   display: grid;
@@ -298,12 +299,14 @@
   opacity: 0;
   padding: 0.45rem;
   pointer-events: none;
+  margin-top: 0.45rem;
   transform: translateY(6px);
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .desktop-nav-group:hover .desktop-submenu,
-.desktop-nav-group:focus-within .desktop-submenu {
+.desktop-nav-group:focus-within .desktop-submenu,
+.desktop-nav-group.open .desktop-submenu {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
