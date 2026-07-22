@@ -154,8 +154,10 @@ export const routes: Routes = [
   },
   {
     path: 'get-app',
-    loadComponent: () => import('./get-app-page.component').then((m) => m.GetAppPageComponent),
-    data: ROUTE_SEO_CONTENT['get-app'],
+    // loadComponent: () => import('./get-app-page.component').then((m) => m.GetAppPageComponent),
+    // data: ROUTE_SEO_CONTENT['get-app'],
+    redirectTo: '',
+    pathMatch: 'full',
   },
   {
     path: 'patient/scan',
@@ -277,15 +279,17 @@ export const routes: Routes = [
       },
       {
         path: 'permissions',
-        loadComponent: () =>
-          import('./account/patient-account-permissions-page.component').then(
-            (m) => m.PatientAccountPermissionsPageComponent,
-          ),
-        data: {
-          seoTitle: 'App permissions | HopeHub Care',
-          seoDescription:
-            'Learn why HopeHub asks for camera, microphone, and notification access — and how you stay in control.',
-        },
+        // loadComponent: () =>
+        //   import('./account/patient-account-permissions-page.component').then(
+        //     (m) => m.PatientAccountPermissionsPageComponent,
+        //   ),
+        // data: {
+        //   seoTitle: 'App permissions | HopeHub Care',
+        //   seoDescription:
+        //     'Learn why HopeHub asks for camera, microphone, and notification access - and how you stay in control.',
+        // },
+        redirectTo: '/patient/account',
+        pathMatch: 'full',
       },
     ],
   },

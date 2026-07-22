@@ -27,9 +27,12 @@
   </div>
   <button type="button" class="btn-print" (click)="printCard()">Print my card</button>
 } @else {
+  <!-- App download QR hidden for now. Keep component available for later relaunch.
   <app-download-qr
     [compact]="true"
     title="Share the app with family"
     subtitle="Your patient ID will appear after your first clinic visit."
   />
+  -->
+  <p class="card-hint">Your patient ID will appear after your first clinic visit.</p>
 }

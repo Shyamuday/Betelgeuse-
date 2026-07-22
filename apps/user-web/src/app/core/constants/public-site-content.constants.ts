@@ -1,4 +1,4 @@
-/** Single source of truth for public marketing copy — edit here to update the patient app UI. */
+/** Single source of truth for public marketing copy. */
 
 export type PublicNavLink = { label: string; href: string };
 
@@ -71,7 +71,8 @@ export const FOOTER_NAV_LINKS: readonly PublicNavLink[] = [
   { label: 'Patient stories', href: '/testimonials' },
   { label: 'Blog', href: '/blog' },
   { label: 'FAQ', href: '/faq' },
-  { label: 'Get the app', href: '/get-app' },
+  // App download link hidden for now. Keep /get-app route available for later relaunch.
+  // { label: 'Get the app', href: '/get-app' },
   { label: 'Contact', href: '/contact' },
   { label: 'Careers', href: '/careers' },
   { label: 'Legal & policies', href: '/legal' },
@@ -476,11 +477,11 @@ export const ROUTE_SEO_CONTENT = {
     seoDescription:
       'Review safety guidance, medical disclaimers, and emergency-care boundaries for HopeHub Care consultations.',
   },
-  'get-app': {
-    seoTitle: 'Download HopeHub Patient App',
-    seoDescription:
-      'Scan the QR code to install the HopeHub patient app. No account required to download.',
-  },
+  // 'get-app': {
+  //   seoTitle: 'Download HopeHub Patient App',
+  //   seoDescription:
+  //     'Scan the QR code to install the HopeHub patient app. No account required to download.',
+  // },
   'patient/dashboard': {
     seoTitle: 'Patient Dashboard | HopeHub Care',
     seoDescription:

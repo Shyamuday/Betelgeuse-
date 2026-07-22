@@ -20,7 +20,8 @@ export const PATIENT_ACCOUNT_NAV_GROUPS: PatientAccountNavGroup[] = [
   { id: 'history', label: 'Care history', itemIds: ['consultations', 'lab-results', 'orders'] },
   { id: 'profile', label: 'Profile & delivery', itemIds: ['profile', 'addresses', 'card'] },
   { id: 'rewards', label: 'Rewards', itemIds: ['refer', 'rewards'] },
-  { id: 'settings', label: 'Settings', itemIds: ['permissions'] },
+  // App permission screen hidden for now. Keep route/component available for later relaunch.
+  // { id: 'settings', label: 'Settings', itemIds: ['permissions'] },
 ];
 
 export const PATIENT_ACCOUNT_NAV: PatientAccountNavItem[] = [
@@ -86,7 +87,7 @@ export const PATIENT_ACCOUNT_NAV: PatientAccountNavItem[] = [
     description: 'Why we ask for camera, mic & alerts',
     path: `/${ROUTE_PATHS.PATIENT_ACCOUNT_PERMISSIONS}`,
     icon: '🔒',
-    available: true,
+    available: false,
   },
   {
     id: 'dashboard',

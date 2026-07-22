@@ -44,8 +44,10 @@
                   <p class="account-menu-section">Rewards</p>
                   <a role="menuitem" [routerLink]="accountPaths.refer" (click)="closeAccountMenu()">Refer and Earn</a>
                   <a role="menuitem" [routerLink]="accountPaths.rewards" (click)="closeAccountMenu()">Rewards</a>
+                  <!--
                   <p class="account-menu-section">Settings</p>
                   <a role="menuitem" [routerLink]="accountPaths.permissions" (click)="closeAccountMenu()">App permissions</a>
+                  -->
                   <button type="button" role="menuitem" class="menu-logout" (click)="closeAccountMenu(); logout.emit()">Logout</button>
                 </div>
               }

@@ -99,11 +99,11 @@ export const ROUTE_SEO_CONTENT = {
     seoDescription:
       'Review safety guidance, medical disclaimers, and emergency-care boundaries for HopeHub Care consultations.',
   },
-  'get-app': {
-    seoTitle: 'Download HopeHub Patient App',
-    seoDescription:
-      'Scan the QR code to install the HopeHub patient app. No account required to download.',
-  },
+  // 'get-app': {
+  //   seoTitle: 'Download HopeHub Patient App',
+  //   seoDescription:
+  //     'Scan the QR code to install the HopeHub patient app. No account required to download.',
+  // },
   'patient/dashboard': {
     seoTitle: 'Patient Dashboard | HopeHub Care',
     seoDescription:

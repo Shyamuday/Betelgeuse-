@@ -51,7 +51,8 @@ export const FOOTER_CONTENT = {
         { label: 'Book Consultation', href: '/login', authOverlay: true },
         { label: 'My Dashboard', href: '/patient/dashboard' },
         { label: "FAQ's", href: '/faq' },
-        { label: 'Get the Patient App', href: '/get-app' },
+        // App download link hidden for now. Keep /get-app route available for later relaunch.
+        // { label: 'Get the Patient App', href: '/get-app' },
         { label: 'Raise a Service Request', href: '/contact' },
       ],
     },

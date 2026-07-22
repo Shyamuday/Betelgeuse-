@@ -3,7 +3,8 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CLINIC_API_BASE_URL, ClinicHttpClient } from '@hopehub/clinic-api';
 import { API_PATHS } from '../../core/constants/api-paths.constants';
 import { AuthService } from '../../auth/auth.service';
-import { AppDownloadQrComponent } from '../app-download-qr/app-download-qr.component';
+// App download QR hidden for now. Keep component available for later relaunch.
+// import { AppDownloadQrComponent } from '../app-download-qr/app-download-qr.component';
 
 export type PatientIdCard = {
   patientCode: string;
@@ -18,7 +19,7 @@ export type PatientIdCard = {
 @Component({
   selector: 'app-patient-id-card',
   standalone: true,
-  imports: [CommonModule, AppDownloadQrComponent],
+  imports: [CommonModule /* AppDownloadQrComponent */],
   templateUrl: './patient-id-card.component.html',
   styleUrl: './patient-id-card.component.scss',
 })

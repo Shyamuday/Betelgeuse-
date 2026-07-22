@@ -42,11 +42,12 @@ export const PUBLIC_HEADER_NAV_GROUPS: PublicNavGroup[] = [
       { label: 'FAQ', path: `/${ROUTE_PATHS.FAQ}` },
     ],
   },
-  {
-    id: 'app',
-    label: 'App',
-    links: [{ label: 'Get the app', path: '/get-app' }],
-  },
+  // App download links are hidden for now. Keep /get-app route available for later relaunch.
+  // {
+  //   id: 'app',
+  //   label: 'App',
+  //   links: [{ label: 'Get the app', path: '/get-app' }],
+  // },
 ];
 
 export const PUBLIC_HEADER_QUICK_LINKS: PublicNavLink[] = PUBLIC_HEADER_NAV_GROUPS.flatMap(
