@@ -30,7 +30,6 @@ export class SearchComponent implements OnDestroy {
 
   private searchSubject = new Subject<{ q: string; potency: string }>();
   private destroy$ = new Subject<void>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private recognition: any = null;
 
   potencyFilters = [
@@ -38,28 +37,35 @@ export class SearchComponent implements OnDestroy {
     { label: '30C', value: '30C' },
     { label: '200C', value: '200C' },
     { label: '1M', value: '1M' },
-    { label: 'Q', value: 'Q' },
+    { label: 'Q', value: 'Q' }
   ];
 
   constructor() {
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged((a, b) => a.q === b.q && a.potency === b.potency),
-      switchMap(({ q, potency }) => {
-        this.loading.set(true);
-        this.page.set(DEFAULT_PAGE);
-        return this.api.getMedicines({ q, potency, page: DEFAULT_PAGE, pageSize: PAGE_SIZES.SEARCH });
-      }),
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (res) => {
-        this.medicines.set(res.medicines);
-        this.total.set(res.pagination.total);
-        this.hasMore.set(res.pagination.page < res.pagination.totalPages);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false)
-    });
+    this.searchSubject
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged((a, b) => a.q === b.q && a.potency === b.potency),
+        switchMap(({ q, potency }) => {
+          this.loading.set(true);
+          this.page.set(DEFAULT_PAGE);
+          return this.api.getMedicines({
+            q,
+            potency,
+            page: DEFAULT_PAGE,
+            pageSize: PAGE_SIZES.SEARCH
+          });
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (res) => {
+          this.medicines.set(res.medicines);
+          this.total.set(res.pagination.total);
+          this.hasMore.set(res.pagination.page < res.pagination.totalPages);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false)
+      });
   }
 
   onSearch(): void {
@@ -80,13 +86,20 @@ export class SearchComponent implements OnDestroy {
 
   loadMore(): void {
     const next = this.page() + 1;
-    this.api.getMedicines({ q: this.searchModel().q, potency: this.selectedPotency(), page: next, pageSize: PAGE_SIZES.SEARCH }).subscribe({
-      next: (res) => {
-        this.medicines.update(list => [...list, ...res.medicines]);
-        this.page.set(next);
-        this.hasMore.set(res.pagination.page < res.pagination.totalPages);
-      }
-    });
+    this.api
+      .getMedicines({
+        q: this.searchModel().q,
+        potency: this.selectedPotency(),
+        page: next,
+        pageSize: PAGE_SIZES.SEARCH
+      })
+      .subscribe({
+        next: (res) => {
+          this.medicines.update((list) => [...list, ...res.medicines]);
+          this.page.set(next);
+          this.hasMore.set(res.pagination.page < res.pagination.totalPages);
+        }
+      });
   }
 
   toggleVoice(): void {
@@ -95,7 +108,6 @@ export class SearchComponent implements OnDestroy {
       this.isListening.set(false);
       return;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) {
       alert('Voice search not supported in this browser');
