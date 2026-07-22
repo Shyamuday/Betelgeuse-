@@ -161,13 +161,16 @@ export const routes: Routes = [
   },
   {
     path: 'patient/scan',
-    loadComponent: () => import('./user-patient-scan-page').then((m) => m.UserPatientScanPage),
-    canActivate: [roleGuard],
-    data: {
-      roles: ['PATIENT'],
-      ...ROUTE_SEO_CONTENT['patient/dashboard'],
-      seoTitle: 'Scan patient ID | HopeHub Care',
-    },
+    // Offline clinic scan hidden for now. Platform is online-only.
+    // loadComponent: () => import('./user-patient-scan-page').then((m) => m.UserPatientScanPage),
+    // canActivate: [roleGuard],
+    // data: {
+    //   roles: ['PATIENT'],
+    //   ...ROUTE_SEO_CONTENT['patient/dashboard'],
+    //   seoTitle: 'Scan patient ID | HopeHub Care',
+    // },
+    redirectTo: 'patient/dashboard',
+    pathMatch: 'full',
   },
   {
     path: 'patient/dashboard',
@@ -271,11 +274,14 @@ export const routes: Routes = [
       },
       {
         path: 'card',
-        loadComponent: () =>
-          import('./account/patient-account-card-page.component').then(
-            (m) => m.PatientAccountCardPageComponent,
-          ),
-        data: ROUTE_SEO_CONTENT['patient/account/card'],
+        // Offline clinic card hidden for now. Platform is online-only.
+        // loadComponent: () =>
+        //   import('./account/patient-account-card-page.component').then(
+        //     (m) => m.PatientAccountCardPageComponent,
+        //   ),
+        // data: ROUTE_SEO_CONTENT['patient/account/card'],
+        redirectTo: '/patient/account',
+        pathMatch: 'full',
       },
       {
         path: 'permissions',

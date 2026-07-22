@@ -24,7 +24,8 @@ import {
 import { ClinicHttpClient, CLINIC_API_BASE_URL } from '@hopehub/clinic-api';
 import { AuthService } from './auth/auth.service';
 import { ClinicApiService } from './clinic-api.service';
-import { PatientIdCardComponent } from './shared/patient-id-card/patient-id-card.component';
+// Offline clinic card hidden for now. Platform is online-only.
+// import { PatientIdCardComponent } from './shared/patient-id-card/patient-id-card.component';
 import { PatientAddressBookComponent } from './shared/patient-address-book/patient-address-book.component';
 import { PatientClinicalMediaPanelComponent } from './shared/patient-clinical-media/patient-clinical-media-panel';
 import { ProfileAvatarUploadComponent } from '@hopehub/platform-ui';
@@ -37,7 +38,7 @@ import { AUTH_TOKEN_KEY } from './core/constants/auth.constants';
     CommonModule,
     RouterLink,
     FormField,
-    PatientIdCardComponent,
+    // PatientIdCardComponent,
     PatientAddressBookComponent,
     ProfileAvatarUploadComponent,
     PatientClinicalMediaPanelComponent,
@@ -91,7 +92,9 @@ export class PatientProfileComponent implements OnInit {
 
   ngOnInit() {
     void this.load();
-    void this.loadClinics();
+    // Offline preferred clinic hidden for now. Platform is online-only.
+    // void this.loadClinics();
+    this.clinicsLoading.set(false);
   }
 
   private async loadClinics() {

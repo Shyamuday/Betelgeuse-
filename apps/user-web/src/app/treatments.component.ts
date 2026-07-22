@@ -104,7 +104,9 @@ export class TreatmentsComponent implements OnInit {
   async bootstrap() {
     await this.loadPageCopy();
 
-    await this.loadClinics();
+    // Offline clinic/location picker hidden for now. Platform is online-only.
+    // await this.loadClinics();
+    this.clinicsLoading.set(false);
     await this.loadCatalog();
   }
 
@@ -152,9 +154,10 @@ export class TreatmentsComponent implements OnInit {
     this.error.set('');
 
     try {
-      const clinicStoreId = this.selectedClinicStoreId() || undefined;
-
-      const response = await firstValueFrom(this.api.diseasesGrouped({ clinicStoreId }));
+      // Offline clinic/location filtering hidden for now. Platform is online-only.
+      // const clinicStoreId = this.selectedClinicStoreId() || undefined;
+      // const response = await firstValueFrom(this.api.diseasesGrouped({ clinicStoreId }));
+      const response = await firstValueFrom(this.api.diseasesGrouped());
 
       const groups: TreatmentCategory[] = (response.categories || [])
 
@@ -207,9 +210,10 @@ export class TreatmentsComponent implements OnInit {
   bookingQuery(diseaseId: string) {
     const query: Record<string, string> = { diseaseId };
 
-    if (this.selectedClinicStoreId()) {
-      query['clinicStoreId'] = this.selectedClinicStoreId();
-    }
+    // Offline clinic/location routing hidden for now. Platform is online-only.
+    // if (this.selectedClinicStoreId()) {
+    //   query['clinicStoreId'] = this.selectedClinicStoreId();
+    // }
 
     return query;
   }
@@ -220,9 +224,10 @@ export class TreatmentsComponent implements OnInit {
     if (typeof sessionStorage !== 'undefined') {
       sessionStorage.setItem('pendingDiseaseId', diseaseId);
 
-      if (this.selectedClinicStoreId()) {
-        sessionStorage.setItem('pendingClinicStoreId', this.selectedClinicStoreId());
-      }
+      // Offline clinic/location routing hidden for now. Platform is online-only.
+      // if (this.selectedClinicStoreId()) {
+      //   sessionStorage.setItem('pendingClinicStoreId', this.selectedClinicStoreId());
+      // }
     }
 
     this.overlayService.open(AuthFormOverlayComponent, {

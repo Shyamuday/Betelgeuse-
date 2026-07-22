@@ -18,7 +18,9 @@ export type PatientAccountNavGroup = {
 export const PATIENT_ACCOUNT_NAV_GROUPS: PatientAccountNavGroup[] = [
   { id: 'overview', label: 'Overview', itemIds: ['overview', 'dashboard'] },
   { id: 'history', label: 'Care history', itemIds: ['consultations', 'lab-results', 'orders'] },
-  { id: 'profile', label: 'Profile & delivery', itemIds: ['profile', 'addresses', 'card'] },
+  // Offline clinic card hidden for now. Platform is online-only.
+  // { id: 'profile', label: 'Profile & delivery', itemIds: ['profile', 'addresses', 'card'] },
+  { id: 'profile', label: 'Profile & delivery', itemIds: ['profile', 'addresses'] },
   { id: 'rewards', label: 'Rewards', itemIds: ['refer', 'rewards'] },
   // App permission screen hidden for now. Keep route/component available for later relaunch.
   // { id: 'settings', label: 'Settings', itemIds: ['permissions'] },
@@ -79,7 +81,7 @@ export const PATIENT_ACCOUNT_NAV: PatientAccountNavItem[] = [
     description: 'Patient ID and QR for visits',
     path: `/${ROUTE_PATHS.PATIENT_ACCOUNT_CARD}`,
     icon: '🪪',
-    available: true,
+    available: false,
   },
   {
     id: 'permissions',

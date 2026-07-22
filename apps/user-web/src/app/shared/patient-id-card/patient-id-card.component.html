@@ -1,13 +1,19 @@
 @if (loading()) {
-  <p class="loading-text">Loading clinic card…</p>
+  <!-- Offline clinic card text hidden for now. Platform is online-only. -->
+  <p class="loading-text">Loading patient ID…</p>
 } @else if (card(); as c) {
+  <!-- Offline clinic card text hidden for now. Platform is online-only.
   <p class="card-hint">Bring this ID to every visit. Staff can find your record quickly with this number.</p>
+  -->
+  <p class="card-hint">Use this ID when contacting HopeHub support about your online care.</p>
   <div class="id-card" id="patient-id-card-print">
     <header class="id-card-header">
       <p class="brand">HopeHub Care</p>
+      <!-- Offline clinic location hidden for now. Platform is online-only.
       @if (c.clinic) {
         <p class="clinic">{{ c.clinic.name }} ({{ c.clinic.code }})</p>
       }
+      -->
     </header>
     <div class="id-card-body">
       <div class="id-card-main">
@@ -18,12 +24,17 @@
       </div>
       <div class="id-card-qr">
         <img [src]="qrImageUrl(c)" width="120" height="120" alt="Scan for quick access" />
+        <!-- Offline clinic scan text hidden for now. Platform is online-only.
         <p class="qr-hint">Scan at clinic</p>
+        -->
+        <p class="qr-hint">Patient ID</p>
       </div>
     </div>
+    <!-- Offline clinic card footer hidden for now. Platform is online-only.
     <footer class="id-card-footer">
       <p>Keep this card safe for future consultations.</p>
     </footer>
+    -->
   </div>
   <button type="button" class="btn-print" (click)="printCard()">Print my card</button>
 } @else {

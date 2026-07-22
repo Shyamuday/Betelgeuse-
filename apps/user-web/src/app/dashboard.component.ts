@@ -156,21 +156,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.pendingConsultationId = this.route.snapshot.queryParamMap.get('consultationId');
     this.pendingDiseaseId = this.route.snapshot.queryParamMap.get('diseaseId');
-    this.pendingClinicStoreId = this.route.snapshot.queryParamMap.get('clinicStoreId');
+    // Offline clinic/location selection hidden for now. Platform is online-only.
+    // this.pendingClinicStoreId = this.route.snapshot.queryParamMap.get('clinicStoreId');
     this.route.queryParamMap.subscribe((params) => {
       this.pendingConsultationId = params.get('consultationId');
       this.pendingDiseaseId = params.get('diseaseId');
-      const clinicStoreId = params.get('clinicStoreId');
+      // const clinicStoreId = params.get('clinicStoreId');
       if (params.get('bookFollowUp')) {
         this.showNotice('Book your follow-up consultation below.');
       }
-      if (clinicStoreId !== this.pendingClinicStoreId) {
-        this.pendingClinicStoreId = clinicStoreId;
-        if (clinicStoreId) {
-          this.selectedClinicStoreId.set(clinicStoreId);
-          this.reloadDiseases(clinicStoreId);
-        }
-      }
+      // Offline clinic/location selection hidden for now. Platform is online-only.
+      // if (clinicStoreId !== this.pendingClinicStoreId) {
+      //   this.pendingClinicStoreId = clinicStoreId;
+      //   if (clinicStoreId) {
+      //     this.selectedClinicStoreId.set(clinicStoreId);
+      //     this.reloadDiseases(clinicStoreId);
+      //   }
+      // }
       this.applyPendingConsultation();
     });
     void this.bootstrap();
@@ -182,11 +184,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private async bootstrap() {
-    const clinicStoreId = await this.resolveClinicStoreId();
-    if (clinicStoreId) {
-      this.selectedClinicStoreId.set(clinicStoreId);
-    }
-    this.loadBaseData(clinicStoreId || undefined);
+    // Offline clinic/location selection hidden for now. Platform is online-only.
+    // const clinicStoreId = await this.resolveClinicStoreId();
+    // if (clinicStoreId) {
+    //   this.selectedClinicStoreId.set(clinicStoreId);
+    // }
+    this.loadBaseData();
   }
 
   private async resolveClinicStoreId(): Promise<string | null> {
@@ -248,7 +251,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
           ? { walletRedeemInPaise: payload.walletRedeemInPaise }
           : {}),
         ...(payload.promoCode ? { promoCode: payload.promoCode } : {}),
-        ...(payload.clinicStoreId !== undefined ? { clinicStoreId: payload.clinicStoreId } : {}),
+        // Offline clinic/location selection hidden for now. Platform is online-only.
+        // ...(payload.clinicStoreId !== undefined ? { clinicStoreId: payload.clinicStoreId } : {}),
       })
       .subscribe({
         next: () => {

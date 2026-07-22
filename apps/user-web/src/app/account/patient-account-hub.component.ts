@@ -13,7 +13,7 @@ import { PATIENT_ACCOUNT_NAV } from './constants/patient-account.constants';
   standalone: true,
   imports: [RouterLink],
   templateUrl: './patient-account-hub.component.html',
-  styleUrl: './patient-account-hub.component.scss'
+  styleUrl: './patient-account-hub.component.scss',
 })
 export class PatientAccountHubComponent implements OnInit {
   private readonly auth = inject(AuthService);
@@ -24,7 +24,18 @@ export class PatientAccountHubComponent implements OnInit {
   readonly profileCompletion = signal(0);
 
   readonly quickLinks = PATIENT_ACCOUNT_NAV.filter((item) =>
-    ['profile', 'addresses', 'consultations', 'orders', 'lab-results', 'card', 'refer', 'rewards', 'dashboard'].includes(item.id)
+    [
+      'profile',
+      'addresses',
+      'consultations',
+      'orders',
+      'lab-results',
+      // Offline clinic card hidden for now. Platform is online-only.
+      // 'card',
+      'refer',
+      'rewards',
+      'dashboard',
+    ].includes(item.id),
   );
 
   readonly walletBalanceInPaise = signal(0);

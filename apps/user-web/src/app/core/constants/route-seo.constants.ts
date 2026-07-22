@@ -141,10 +141,11 @@ export const ROUTE_SEO_CONTENT = {
     seoTitle: 'Lab Results | HopeHub Care',
     seoDescription: 'View diagnostic referrals and completed lab test results.',
   },
-  'patient/account/card': {
-    seoTitle: 'My Clinic Card | HopeHub Care',
-    seoDescription: 'Your patient ID card and QR code for clinic visits.',
-  },
+  // Offline clinic card hidden for now. Platform is online-only.
+  // 'patient/account/card': {
+  //   seoTitle: 'My Clinic Card | HopeHub Care',
+  //   seoDescription: 'Your patient ID card and QR code for clinic visits.',
+  // },
   'doctor/dashboard': {
     seoTitle: 'provider dashboard | HopeHub Care',
     seoDescription:

@@ -101,7 +101,9 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
   readonly checkoutQuote = signal<CheckoutQuote | null>(null);
 
   ngOnInit() {
-    void this.loadClinics();
+    // Offline clinic/location selection hidden for now. Platform is online-only.
+    // void this.loadClinics();
+    this.clinicsLoading.set(false);
   }
 
   private async loadClinics() {
@@ -130,8 +132,10 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
   }
 
   selectedClinicStoreId() {
-    const value = this.bookingFormModel().selectedClinicStoreId;
-    return value || null;
+    // Offline clinic/location selection hidden for now. Platform is online-only.
+    // const value = this.bookingFormModel().selectedClinicStoreId;
+    // return value || null;
+    return null;
   }
 
   private resolvePreferredClinicId(clinics: ClinicOption[]) {
@@ -278,7 +282,7 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
         ? { walletRedeemInPaise: quote.walletRedeemedInPaise }
         : {}),
       ...(this.promoCode().trim() ? { promoCode: this.promoCode().trim() } : {}),
-      clinicStoreId: this.selectedClinicStoreId(),
+      clinicStoreId: null,
     });
   }
 
@@ -305,7 +309,7 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
           ...(form.purchaseType === PURCHASE_TYPES.PLAN ? { planCode: form.selectedPlanCode } : {}),
           walletRedeemInPaise: this.useWallet() ? 99_999_999 : 0,
           ...(this.promoCode().trim() ? { promoCode: this.promoCode().trim() } : {}),
-          clinicStoreId: this.selectedClinicStoreId(),
+          clinicStoreId: null,
         },
       );
       this.checkoutQuote.set(quote);

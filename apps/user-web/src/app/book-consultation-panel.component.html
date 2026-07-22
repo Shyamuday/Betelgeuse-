@@ -39,6 +39,7 @@
         </select>
       </label>
 
+      <!-- Offline clinic/location selection hidden for now. Platform is online-only.
       <label>
         Consultation location
         <select [formField]="bookingForm.selectedClinicStoreId" (change)="onClinicChange()">
@@ -51,6 +52,7 @@
           }
         </select>
       </label>
+      -->
 
       @for (question of intakeQuestions(); track question) {
         <label>

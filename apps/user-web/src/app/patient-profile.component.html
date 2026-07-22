@@ -1,9 +1,11 @@
+<!-- Offline clinic card hidden for now. Platform is online-only.
 @if (!accountPage) {
   <section class="id-card-panel">
     <h2>My clinic card</h2>
     <app-patient-id-card />
   </section>
 }
+-->
 
 <div class="profile-wrap" [class.account-page]="accountPage">
   <div class="profile-panel">
@@ -47,6 +49,7 @@
         <button type="button" class="retry-btn" (click)="load()">Retry</button>
       </div>
     } @else {
+      <!-- Offline clinic reference/preferred clinic hidden for now. Platform is online-only.
       <section class="profile-section">
         <h3>Clinic reference</h3>
         @if (profile()?.patientCode) {
@@ -71,6 +74,7 @@
           <span class="hint">Used for consultation fees and your clinic reference.</span>
         </div>
       </section>
+      -->
 
       <app-patient-clinical-media-panel />
 

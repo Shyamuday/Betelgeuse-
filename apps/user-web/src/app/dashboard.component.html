@@ -41,14 +41,15 @@
         }
 
         <section class="grid two">
+          <!-- Offline clinic/location selection hidden for now. Platform is online-only.
+          Restore [initialClinicStoreId] and (clinicStoreChange) when offline clinics return.
+          -->
           <app-book-consultation-panel
             [diseases]="diseases()"
             [plans]="billingPlans()"
             [initialDiseaseId]="pendingDiseaseIdValue()"
-            [initialClinicStoreId]="selectedClinicStoreId()"
             [disabled]="isProcessing()"
             (booked)="onBooked($event)"
-            (clinicStoreChange)="onClinicStoreChange($event)"
           />
           <app-consultation-list
             [consultations]="consultations()"
