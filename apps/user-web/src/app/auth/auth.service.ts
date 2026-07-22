@@ -1,5 +1,5 @@
 import { computed, inject, Service } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom, from, tap } from 'rxjs';
 import { AUTH_PATHS, AUTH_TOKEN_KEY, ROLE_DASHBOARD_PATHS } from '../core/constants/auth.constants';
 import { Role, User, type PatientSelectionResponse } from '../models';
@@ -39,8 +39,11 @@ export class AuthService {
       );
       this.patientAuth.setAuthenticatedUser(response.user);
       return response.user;
-    } catch {
-      localStorage.removeItem(AUTH_TOKEN_KEY);
+    } catch (error) {
+      const status = error instanceof HttpErrorResponse ? error.status : 0;
+      if (status === 401 || status === 403) {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+      }
       this.patientAuth.setAuthenticatedUser(null);
       return null;
     }
