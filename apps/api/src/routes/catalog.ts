@@ -558,10 +558,10 @@ router.get(
       clinicAddressLine2: 'Near City Centre, Main Road',
       clinicAddressLine3: 'Ranchi, Jharkhand, India',
       clinicAddressLine4: 'Pincode — 834001',
-      homeHeroEyebrow: 'Provider-led healthcare',
+      homeHeroEyebrow: 'Expert-led online healthcare',
       homeHeroHeadline: 'Personalised care for every health concern.',
       homeHeroLead:
-        'Acute illnesses, chronic conditions, skin and hair issues, digestive problems, allergies, mental wellness, nutrition, rehabilitation, and more - consult qualified healthcare providers online with guidance, prescriptions where appropriate, and follow-up.',
+        'Acute illnesses, chronic conditions, skin and hair issues, digestive problems, allergies, mental wellness, nutrition, rehabilitation, and more - consult qualified healthcare experts online with guidance, prescriptions where appropriate, and follow-up.',
       statConsultations: '5,000+',
       statDoctors: '12+',
       statRating: '4.8★',

@@ -3,17 +3,17 @@ export const ROUTE_SEO_CONTENT = {
   home: {
     seoTitle: 'HopeHub Care | Expert-Led Healthcare for All Conditions',
     seoDescription:
-      'Book online healthcare consultations for any health concern. Licensed Experts, prescriptions where appropriate, follow-up, and secure patient support.',
+      'Book online healthcare consultations for any health concern. Licensed experts, prescriptions where appropriate, follow-up, and secure patient support.',
   },
   about: {
     seoTitle: 'About HopeHub Care and Research Centre | Expert-Led Healthcare',
     seoDescription:
-      'Learn about HopeHub Care - a Expert-led healthcare platform offering online consultations for acute, chronic, mental wellness, preventive, and supportive care.',
+      'Learn about HopeHub Care - an expert-led healthcare platform offering online consultations for acute, chronic, mental wellness, preventive, and supportive care.',
   },
   treatments: {
     seoTitle: 'Treatments | HopeHub Care and Research Centre',
     seoDescription:
-      'Explore Expert-led care at HopeHub Care for acute and chronic conditions across body systems, age groups, and care needs.',
+      'Explore expert-led care at HopeHub Care for acute and chronic conditions across body systems, age groups, and care needs.',
   },
   'treatments/:slug': {
     seoTitle: 'Treatment Details | HopeHub Care',
@@ -23,7 +23,7 @@ export const ROUTE_SEO_CONTENT = {
   'our-doctors': {
     seoTitle: 'Our Experts | HopeHub Care and Research Centre',
     seoDescription:
-      'Meet qualified healthcare Experts at HopeHub Care. Our internal Expert team is matched to patients based on their concern for personalised care.',
+      'Meet qualified healthcare experts at HopeHub Care. Our internal expert team is matched to patients based on their concern for personalised care.',
   },
   blog: {
     seoTitle: 'Health Blog | HopeHub Care and Research Centre',
@@ -33,17 +33,17 @@ export const ROUTE_SEO_CONTENT = {
   testimonials: {
     seoTitle: 'Patient Stories | HopeHub Care and Research Centre',
     seoDescription:
-      'Read real patient experiences from HopeHub Care - Expert-led care for a wide range of health concerns.',
+      'Read real patient experiences from HopeHub Care - expert-led care for a wide range of health concerns.',
   },
   careers: {
     seoTitle: 'Careers | HopeHub Care and Research Centre',
     seoDescription:
-      'Join the HopeHub Care team. We are hiring Experts, counsellors, care coordinators, pharmacists, and operations staff who are passionate about patient-first healthcare.',
+      'Join the HopeHub Care team. We are hiring experts, counsellors, care coordinators, pharmacists, and operations staff who are passionate about patient-first healthcare.',
   },
   'chronic-care': {
     seoTitle: 'Expert-Led Care | HopeHub Care',
     seoDescription:
-      'Comprehensive Expert-led care at HopeHub Care for acute, chronic, mental wellness, preventive, and supportive health needs.',
+      'Comprehensive expert-led care at HopeHub Care for acute, chronic, mental wellness, preventive, and supportive health needs.',
   },
   faq: {
     seoTitle: 'FAQ | HopeHub Care',
@@ -147,13 +147,13 @@ export const ROUTE_SEO_CONTENT = {
   //   seoDescription: 'Your patient ID card and QR code for clinic visits.',
   // },
   'doctor/dashboard': {
-    seoTitle: 'Expert dashboard | HopeHub Care',
+    seoTitle: 'Expert Dashboard | HopeHub Care',
     seoDescription:
-      'Review assigned consultations, patient chats, and prescriptions in the HopeHub Care Expert dashboard.',
+      'Review assigned consultations, patient chats, and prescriptions in the HopeHub Care expert dashboard.',
   },
   'admin/dashboard': {
     seoTitle: 'Admin Dashboard | HopeHub Care',
     seoDescription:
-      'Manage clinic operations, Expert assignment, and reporting in the HopeHub Care admin dashboard.',
+      'Manage online operations, expert assignment, and reporting in the HopeHub Care admin dashboard.',
   },
 } as const;

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { ROUTE_SEO_CONTENT } from './core/constants/route-seo.constants';
+import { LoginPageComponent } from './auth/login-page.component';
 import { roleGuard } from './role.guard';
 
 export const routes: Routes = [
@@ -140,7 +141,7 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    loadComponent: () => import('./auth/login-page.component').then((m) => m.LoginPageComponent),
+    component: LoginPageComponent,
   },
   {
     path: 'auth/reset',

@@ -284,7 +284,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.paymentService.pay(
       consultation,
       () => {
-        this.showNotice('Payment verified. Expert assignment can begin now.');
+        this.showNotice('Payment verified. Your expert assignment can begin now.');
         this.loadConsultations();
       },
       (message) => this.showNotice(message),
@@ -303,7 +303,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   retryPayment() {
     this.paymentService.retryPayment(
       () => {
-        this.showNotice('Payment verified. Expert assignment can begin now.');
+        this.showNotice('Payment verified. Your expert assignment can begin now.');
         this.loadConsultations();
       },
       (message) => this.showNotice(message),
