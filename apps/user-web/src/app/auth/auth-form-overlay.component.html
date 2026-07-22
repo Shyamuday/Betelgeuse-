@@ -83,24 +83,57 @@
         </p>
       } @else {
         <h2>Login to continue</h2>
-        <p class="muted">Sign in with your registered email and password.</p>
+        <p class="muted">Sign in with password or a one-time code sent to your email.</p>
 
-        <form (ngSubmit)="loginPatientWithPassword()">
-          <label>
-            Email
-            <input
-              [formField]="patientCredentialsForm.identifier"
-              type="email"
-              placeholder="Enter Gmail"
-              autocomplete="email"
-            />
-          </label>
-          <label>
-            Password
-            <input [formField]="patientCredentialsForm.password" type="password" placeholder="Enter password" autocomplete="current-password" />
-          </label>
-          <button class="primary" type="submit" [disabled]="isProcessing() || !patientCredentialsModel().identifier.trim() || !patientCredentialsModel().password">Login</button>
-        </form>
+        <div class="auth-method-switch">
+          <button type="button" [class.active]="authMethod() === 'password'" (click)="setAuthMethod('password')">Password</button>
+          <button type="button" [class.active]="authMethod() === 'otp'" (click)="setAuthMethod('otp')">Email OTP</button>
+        </div>
+
+        @if (authMethod() === 'otp') {
+          <form (ngSubmit)="loginPatientWithOtp()">
+            <label>
+              Email
+              <input
+                [formField]="patientOtpForm.email"
+                type="email"
+                placeholder="Enter Gmail"
+                autocomplete="email"
+                (input)="resetLoginOtp()"
+              />
+            </label>
+            @if (loginOtpSent()) {
+              @if (otpNotice()) {
+                <p class="muted">{{ otpNotice() }}</p>
+              }
+              <label>
+                6-digit OTP
+                <input [formField]="patientOtpForm.otp" placeholder="Enter OTP" inputmode="numeric" autocomplete="one-time-code" />
+              </label>
+              <button class="primary" type="submit" [disabled]="isProcessing() || !canLoginWithEmailOtp()">Verify OTP & login</button>
+              <button type="button" class="secondary" [disabled]="isProcessing()" (click)="requestLoginOtp()">Resend OTP</button>
+            } @else {
+              <button type="button" class="primary" [disabled]="isProcessing() || !patientOtpModel().email.trim()" (click)="requestLoginOtp()">Send OTP</button>
+            }
+          </form>
+        } @else {
+          <form (ngSubmit)="loginPatientWithPassword()">
+            <label>
+              Email
+              <input
+                [formField]="patientCredentialsForm.identifier"
+                type="email"
+                placeholder="Enter Gmail"
+                autocomplete="email"
+              />
+            </label>
+            <label>
+              Password
+              <input [formField]="patientCredentialsForm.password" type="password" placeholder="Enter password" autocomplete="current-password" />
+            </label>
+            <button class="primary" type="submit" [disabled]="isProcessing() || !patientCredentialsModel().identifier.trim() || !patientCredentialsModel().password">Login</button>
+          </form>
+        }
 
         <p class="mode-switch-wrap">
           <button type="button" class="mode-switch" (click)="startForgotPassword()">Forgot password?</button>

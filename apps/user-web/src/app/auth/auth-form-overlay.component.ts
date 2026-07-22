@@ -16,6 +16,7 @@ type AuthFormOverlayData = {
 };
 
 type AuthView = 'login' | 'signup';
+type AuthMethod = 'password' | 'otp';
 type ForgotStep = 'none' | 'request' | 'reset';
 
 @Component({
@@ -30,6 +31,7 @@ export class AuthFormOverlayComponent {
       ? new URLSearchParams(window.location.search).get('ref') || undefined
       : undefined;
   readonly authView = signal<AuthView>('login');
+  readonly authMethod = signal<AuthMethod>('password');
   readonly loginOtpSent = signal(false);
   readonly signupOtpSent = signal(false);
   readonly otpNotice = signal('');
@@ -107,11 +109,22 @@ export class AuthFormOverlayComponent {
 
   setAuthView(view: AuthView) {
     this.authView.set(view);
+    this.authMethod.set('password');
     this.forgotStep.set('none');
     this.patientSelection.set(null);
     this.loginOtpSent.set(false);
     this.signupOtpSent.set(false);
     this.otpNotice.set('');
+    this.errorCleanup();
+  }
+
+  setAuthMethod(method: AuthMethod) {
+    this.authMethod.set(method);
+    this.patientSelection.set(null);
+    this.otpNotice.set('');
+    if (method === 'password') {
+      this.loginOtpSent.set(false);
+    }
     this.errorCleanup();
   }
 

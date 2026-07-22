@@ -95,8 +95,7 @@ export const HOME_CONTENT = {
   },
   booking: {
     formTitle: 'Book consultation',
-    formSubtitle:
-      'Log in or create your account. You can choose clinic and health concern after login.',
+    formSubtitle: 'Log in or create your account. Email OTP is also available at login.',
     diseaseLabel: 'Health concern',
     diseasePlaceholder: 'Select a condition',
     diseaseLoadingLabel: 'Loading conditions…',
@@ -105,7 +104,7 @@ export const HOME_CONTENT = {
     emailPlaceholder: 'Enter your Gmail',
     submitLabel: 'Continue',
     submittingLabel: 'Opening login…',
-    hint: 'Secure email and password login.',
+    hint: 'Secure email login with password or OTP.',
     otpTitle: 'Verify email',
     otpLabel: 'Enter OTP',
     otpPlaceholder: '6-digit OTP',
