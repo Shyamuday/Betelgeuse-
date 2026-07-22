@@ -248,37 +248,80 @@
 .header-desktop-nav {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.25rem;
   min-width: 0;
   margin-left: auto;
-  overflow: hidden;
   white-space: nowrap;
 }
 
-.header-desktop-nav a {
+.desktop-nav-group {
+  position: relative;
+}
+
+.desktop-nav-trigger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.25rem;
   min-height: 38px;
+  border: 0;
   border-radius: 999px;
+  background: transparent;
   padding: 0.35rem 0.65rem;
   color: #24344d;
   font-size: 0.84rem;
   font-weight: 700;
-  text-decoration: none;
+  cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
-.header-desktop-nav a:hover {
+.desktop-nav-trigger:hover,
+.desktop-nav-group:focus-within .desktop-nav-trigger,
+.desktop-nav-group:hover .desktop-nav-trigger {
   background: #eef4ff;
   color: #0f62fe;
   transform: translateY(-1px);
 }
 
-@media (max-width: 1180px) {
-  .header-desktop-nav {
-    display: none;
-  }
+.desktop-submenu {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  left: 0;
+  z-index: 50;
+  display: grid;
+  min-width: 220px;
+  gap: 0.15rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.13);
+  opacity: 0;
+  padding: 0.45rem;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.desktop-nav-group:hover .desktop-submenu,
+.desktop-nav-group:focus-within .desktop-submenu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.desktop-submenu a {
+  display: block;
+  border-radius: 6px;
+  color: #24344d;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.68rem 0.75rem;
+  text-decoration: none;
+}
+
+.desktop-submenu a:hover {
+  background: #eef4ff;
+  color: #0f62fe;
 }
 
 .header-guest-bar-end {
@@ -331,6 +374,18 @@
 .header-guest-bar-end .icon-link:hover {
   background: #d9f3e6;
   color: #06693c;
+}
+
+@media (min-width: 1181px) {
+  .header-guest-bar-end .header-menu-toggle {
+    display: none;
+  }
+}
+
+@media (max-width: 1180px) {
+  .header-desktop-nav {
+    display: none;
+  }
 }
 
 html.header-menu-no-scroll,

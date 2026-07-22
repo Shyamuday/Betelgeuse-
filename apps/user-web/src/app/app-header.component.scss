@@ -82,14 +82,23 @@
   display: none;
 }
 
+.mobile-menu-head {
+  display: none;
+}
+
 @media (max-width: 860px) {
   .header-desktop-nav {
     display: none;
   }
 
   .header-nav-group {
-    display: block;
-    margin-bottom: 0.85rem;
+    display: grid;
+    gap: 0.35rem;
+    margin-bottom: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #fff;
+    padding: 0.7rem;
   }
 
   .header-nav-group-title {
