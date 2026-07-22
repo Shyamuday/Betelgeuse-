@@ -37,6 +37,8 @@ export function createConsultationsRouter(io: SocketIoServer) {
           planCode: z.string().min(2).optional(),
           promoCode: z.string().min(2).max(32).optional(),
           walletRedeemInPaise: z.number().int().min(0).optional(),
+          serviceId: z.string().min(1).optional(),
+          serviceSlug: z.string().min(2).max(100).optional(),
           clinicStoreId: z.string().min(1).nullable().optional(),
           consultationMode: z
             .enum(['CLINIC_QUEUE', 'INSTANT_ONLINE'])
@@ -48,6 +50,18 @@ export function createConsultationsRouter(io: SocketIoServer) {
 
       await ensureBillingPlans();
       const disease = await prisma.disease.findUniqueOrThrow({ where: { id: body.diseaseId } });
+      const service =
+        body.serviceId || body.serviceSlug
+          ? await prisma.healthService.findFirst({
+              where: {
+                isPublished: true,
+                ...(body.serviceId ? { id: body.serviceId } : { slug: body.serviceSlug })
+              }
+            })
+          : null;
+      if ((body.serviceId || body.serviceSlug) && !service) {
+        return res.status(400).json({ message: 'Selected service is not available.' });
+      }
       const selectedPlan =
         body.purchaseType === 'PLAN'
           ? await prisma.billingPlan.findFirst({
@@ -81,7 +95,9 @@ export function createConsultationsRouter(io: SocketIoServer) {
       }
       const consultFeePaise = await resolveDiseaseConsultationFee(disease.id, clinicStoreId);
       const grossInPaise =
-        body.purchaseType === 'ONE_TIME' ? consultFeePaise : selectedPlan.priceInPaise;
+        body.purchaseType === 'ONE_TIME'
+          ? (service?.priceInPaise ?? consultFeePaise)
+          : selectedPlan.priceInPaise;
       const checkout = await resolveConsultationCheckout({
         patientId: req.user!.id,
         grossInPaise,
@@ -92,6 +108,7 @@ export function createConsultationsRouter(io: SocketIoServer) {
         data: {
           patientId: req.user!.id,
           diseaseId: disease.id,
+          serviceId: service?.id ?? null,
           clinicStoreId,
           consultationMode: body.consultationMode,
           preferredDoctorUserId: body.preferredDoctorUserId ?? null,
@@ -99,6 +116,10 @@ export function createConsultationsRouter(io: SocketIoServer) {
           billingPlanCode: selectedPlan.code,
           pricingSnapshot: {
             purchaseType: body.purchaseType,
+            serviceId: service?.id ?? null,
+            serviceSlug: service?.slug ?? null,
+            serviceTitle: service?.title ?? null,
+            servicePriceInPaise: service?.priceInPaise ?? null,
             diseaseFeeInPaise: consultFeePaise,
             selectedPlanCode: selectedPlan.code,
             selectedPlanName: selectedPlan.name,
@@ -115,8 +136,12 @@ export function createConsultationsRouter(io: SocketIoServer) {
               appliedRules: checkout.appliedRules,
               lineItems: {
                 purchaseType: body.purchaseType,
+                serviceId: service?.id ?? null,
+                serviceSlug: service?.slug ?? null,
+                serviceTitle: service?.title ?? null,
                 diseaseName: disease.name,
                 consultationFeeInPaise: checkout.grossAmountInPaise,
+                servicePriceInPaise: service?.priceInPaise ?? null,
                 diseaseFeeInPaise: consultFeePaise,
                 discountInPaise: checkout.discountInPaise,
                 walletRedeemedInPaise: checkout.walletRedeemedInPaise,
@@ -142,6 +167,7 @@ export function createConsultationsRouter(io: SocketIoServer) {
         properties: {
           consultationId: consultation.id,
           diseaseId: disease.id,
+          serviceId: service?.id ?? null,
           purchaseType: body.purchaseType
         }
       });

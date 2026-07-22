@@ -107,6 +107,21 @@ export class AdminApi {
   deletePublicPage(...args: Parameters<AdminDoctorsApi['deletePublicPage']>) {
     return this.doctors.deletePublicPage(...args);
   }
+  listHealthServices(...args: Parameters<AdminDoctorsApi['listHealthServices']>) {
+    return this.doctors.listHealthServices(...args);
+  }
+  seedHealthServices(...args: Parameters<AdminDoctorsApi['seedHealthServices']>) {
+    return this.doctors.seedHealthServices(...args);
+  }
+  createHealthService(...args: Parameters<AdminDoctorsApi['createHealthService']>) {
+    return this.doctors.createHealthService(...args);
+  }
+  updateHealthService(...args: Parameters<AdminDoctorsApi['updateHealthService']>) {
+    return this.doctors.updateHealthService(...args);
+  }
+  deleteHealthService(...args: Parameters<AdminDoctorsApi['deleteHealthService']>) {
+    return this.doctors.deleteHealthService(...args);
+  }
   listHomeCarouselSlides() {
     return this.doctors.listHomeCarouselSlides();
   }

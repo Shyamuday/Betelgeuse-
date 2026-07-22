@@ -73,6 +73,7 @@ model Consultation {
   id                    String             @id @default(cuid())
   patientId             String
   diseaseId             String
+  serviceId             String?
   assignedDoctorId      String?
   clinicStoreId         String?
   consultationMode      ConsultationMode   @default(CLINIC_QUEUE)
@@ -83,6 +84,7 @@ model Consultation {
   intakeAnswers   Json
   patient         User               @relation("PatientConsultations", fields: [patientId], references: [id])
   disease         Disease            @relation(fields: [diseaseId], references: [id])
+  service         HealthService?     @relation(fields: [serviceId], references: [id], onDelete: SetNull)
   assignedDoctor  User?              @relation("DoctorConsultations", fields: [assignedDoctorId], references: [id])
   clinicStore     Store?             @relation("ConsultationClinic", fields: [clinicStoreId], references: [id])
   payment         Payment?
@@ -95,6 +97,8 @@ model Consultation {
   websiteLead     WebsiteLead?
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
+
+  @@index([serviceId])
 }
 
 model Payment {

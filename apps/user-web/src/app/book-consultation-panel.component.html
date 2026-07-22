@@ -1,6 +1,9 @@
 
     <div class="panel book-panel">
       <h2>Book Consultation</h2>
+      @if (initialServiceTitle) {
+        <p class="muted">Selected service: <strong>{{ initialServiceTitle }}</strong></p>
+      }
 
       <label>
         Purchase type

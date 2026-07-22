@@ -1,0 +1,217 @@
+<section class="panel">
+  <div class="page-head">
+    <div>
+      <h2>Services</h2>
+      <p class="page-hint">Manage public service pages, pricing, expert types, filters, and SEO from the database.</p>
+    </div>
+    <div class="actions">
+      <input
+        [value]="q()"
+        (input)="q.set($any($event.target).value)"
+        placeholder="Search services"
+      />
+      <button type="button" class="ghost" (click)="load()">Search</button>
+    </div>
+  </div>
+
+  <details>
+    <summary>Create service</summary>
+    <form class="form-grid edit-form" (submit)="$event.preventDefault(); create()">
+      <div class="grid-3">
+        <label class="field">
+          <span class="field-label">Slug</span>
+          <input [value]="createDraft().slug" (input)="updateCreate('slug', $any($event.target).value)" placeholder="psychologist-consultation" />
+        </label>
+        <label class="field">
+          <span class="field-label">Category</span>
+          <input [value]="createDraft().category" (input)="updateCreate('category', $any($event.target).value)" />
+        </label>
+        <label class="field">
+          <span class="field-label">Sort order</span>
+          <input type="number" [value]="createDraft().sortOrder" (input)="updateCreate('sortOrder', $any($event.target).valueAsNumber || 0)" />
+        </label>
+      </div>
+      <label class="field">
+        <span class="field-label">Title</span>
+        <input [value]="createDraft().title" (input)="updateCreate('title', $any($event.target).value)" />
+      </label>
+      <label class="field">
+        <span class="field-label">Summary</span>
+        <textarea rows="2" [value]="createDraft().summary" (input)="updateCreate('summary', $any($event.target).value)"></textarea>
+      </label>
+      <div class="grid-3">
+        <label class="field">
+          <span class="field-label">Price paise</span>
+          <input type="number" [value]="createDraft().priceInPaise" (input)="updateCreate('priceInPaise', $any($event.target).valueAsNumber || 0)" />
+        </label>
+        <label class="field">
+          <span class="field-label">Duration minutes</span>
+          <input type="number" [value]="createDraft().durationMinutes" (input)="updateCreate('durationMinutes', $any($event.target).valueAsNumber || '')" />
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" [checked]="createDraft().isPublished" (change)="updateCreate('isPublished', $any($event.target).checked)" />
+          Published
+        </label>
+      </div>
+      <label class="field">
+        <span class="field-label">Expert types</span>
+        <input [value]="createDraft().expertTypesCsv" (input)="updateCreate('expertTypesCsv', $any($event.target).value)" placeholder="PSYCHOLOGIST, COUNSELLOR" />
+      </label>
+      <button type="submit" [disabled]="saving() || !createDraft().slug || !createDraft().title || !createDraft().summary">Create</button>
+    </form>
+  </details>
+
+  @if (providerTypes().length) {
+    <p class="page-hint">Expert type values: {{ providerTypeValues() }}</p>
+  }
+</section>
+
+@if (message()) { <p class="success">{{ message() }}</p> }
+@if (error()) { <p class="error">{{ error() }}</p> }
+@if (loading()) { <p class="loading-text">Loading...</p> }
+
+<section class="panel">
+  <h2>All Services ({{ services().length }})</h2>
+  @for (service of services(); track service.id) {
+    <article class="card" [class.is-published]="service.isPublished">
+      <div class="card-header">
+        <div>
+          <strong>{{ service.title }}</strong>
+          <p class="meta">/{{ service.slug }} · {{ service.category }} · {{ service.priceInPaise / 100 | currency:'INR' }}</p>
+          <p class="meta">{{ service.expertTypeLabels.join(', ') }}</p>
+        </div>
+        <div class="badge-row">
+          <span class="badge" [class.published]="service.isPublished" [class.draft]="!service.isPublished">
+            {{ service.isPublished ? 'Published' : 'Hidden' }}
+          </span>
+          @if (service.isFeatured) { <span class="badge order">Featured</span> }
+          <button type="button" class="ghost" (click)="startEdit(service)">Edit</button>
+          <button type="button" class="ghost" (click)="toggle(service)">{{ service.isPublished ? 'Hide' : 'Show' }}</button>
+          <button type="button" class="danger" (click)="remove(service)">Delete</button>
+        </div>
+      </div>
+      <p>{{ service.summary }}</p>
+
+      @if (editingId() === service.id) {
+        <form class="form-grid edit-form" (submit)="$event.preventDefault(); update(service.id)">
+          <div class="grid-3">
+            <label class="field">
+              <span class="field-label">Slug</span>
+              <input [value]="editDraft().slug" (input)="updateEdit('slug', $any($event.target).value)" />
+            </label>
+            <label class="field">
+              <span class="field-label">Category</span>
+              <input [value]="editDraft().category" (input)="updateEdit('category', $any($event.target).value)" />
+            </label>
+            <label class="field">
+              <span class="field-label">Sort order</span>
+              <input type="number" [value]="editDraft().sortOrder" (input)="updateEdit('sortOrder', $any($event.target).valueAsNumber || 0)" />
+            </label>
+          </div>
+          <div class="grid-2">
+            <label class="field">
+              <span class="field-label">Title</span>
+              <input [value]="editDraft().title" (input)="updateEdit('title', $any($event.target).value)" />
+            </label>
+            <label class="field">
+              <span class="field-label">Short title</span>
+              <input [value]="editDraft().shortTitle" (input)="updateEdit('shortTitle', $any($event.target).value)" />
+            </label>
+          </div>
+          <label class="field">
+            <span class="field-label">Summary</span>
+            <textarea rows="2" [value]="editDraft().summary" (input)="updateEdit('summary', $any($event.target).value)"></textarea>
+          </label>
+          <label class="field">
+            <span class="field-label">Description</span>
+            <textarea rows="4" [value]="editDraft().description" (input)="updateEdit('description', $any($event.target).value)"></textarea>
+          </label>
+          <div class="grid-3">
+            <label class="field">
+              <span class="field-label">Price paise</span>
+              <input type="number" [value]="editDraft().priceInPaise" (input)="updateEdit('priceInPaise', $any($event.target).valueAsNumber || 0)" />
+            </label>
+            <label class="field">
+              <span class="field-label">Compare at paise</span>
+              <input type="number" [value]="editDraft().compareAtPriceInPaise" (input)="updateEdit('compareAtPriceInPaise', $any($event.target).valueAsNumber || '')" />
+            </label>
+            <label class="field">
+              <span class="field-label">Duration minutes</span>
+              <input type="number" [value]="editDraft().durationMinutes" (input)="updateEdit('durationMinutes', $any($event.target).valueAsNumber || '')" />
+            </label>
+          </div>
+          <div class="grid-2">
+            <label class="field">
+              <span class="field-label">Expert types CSV</span>
+              <input [value]="editDraft().expertTypesCsv" (input)="updateEdit('expertTypesCsv', $any($event.target).value)" />
+            </label>
+            <label class="field">
+              <span class="field-label">Tags CSV</span>
+              <input [value]="editDraft().tagsCsv" (input)="updateEdit('tagsCsv', $any($event.target).value)" />
+            </label>
+          </div>
+          <div class="grid-2">
+            <label class="field">
+              <span class="field-label">Includes, one per line</span>
+              <textarea rows="4" [value]="editDraft().includesText" (input)="updateEdit('includesText', $any($event.target).value)"></textarea>
+            </label>
+            <label class="field">
+              <span class="field-label">Outcomes, one per line</span>
+              <textarea rows="4" [value]="editDraft().outcomesText" (input)="updateEdit('outcomesText', $any($event.target).value)"></textarea>
+            </label>
+          </div>
+          <div class="grid-2">
+            <label class="field">
+              <span class="field-label">Who is it for, one per line</span>
+              <textarea rows="4" [value]="editDraft().whoIsItForText" (input)="updateEdit('whoIsItForText', $any($event.target).value)"></textarea>
+            </label>
+            <label class="field">
+              <span class="field-label">How it works, one per line</span>
+              <textarea rows="4" [value]="editDraft().howItWorksText" (input)="updateEdit('howItWorksText', $any($event.target).value)"></textarea>
+            </label>
+          </div>
+          <label class="field">
+            <span class="field-label">FAQ JSON</span>
+            <textarea rows="5" class="mono" [value]="editDraft().faqsJson" (input)="updateEdit('faqsJson', $any($event.target).value)"></textarea>
+          </label>
+          <div class="grid-2">
+            <label class="field">
+              <span class="field-label">Image URL</span>
+              <input [value]="editDraft().imageUrl" (input)="updateEdit('imageUrl', $any($event.target).value)" />
+            </label>
+            <label class="field">
+              <span class="field-label">Related disease slugs CSV</span>
+              <input [value]="editDraft().relatedDiseaseSlugsCsv" (input)="updateEdit('relatedDiseaseSlugsCsv', $any($event.target).value)" />
+            </label>
+          </div>
+          <div class="grid-2">
+            <label class="field">
+              <span class="field-label">SEO title</span>
+              <input [value]="editDraft().seoTitle" (input)="updateEdit('seoTitle', $any($event.target).value)" />
+            </label>
+            <label class="field">
+              <span class="field-label">SEO description</span>
+              <textarea rows="2" [value]="editDraft().seoDescription" (input)="updateEdit('seoDescription', $any($event.target).value)"></textarea>
+            </label>
+          </div>
+          <div class="row-fields">
+            <label class="checkbox-label">
+              <input type="checkbox" [checked]="editDraft().isPublished" (change)="updateEdit('isPublished', $any($event.target).checked)" />
+              Published
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" [checked]="editDraft().isFeatured" (change)="updateEdit('isFeatured', $any($event.target).checked)" />
+              Featured
+            </label>
+          </div>
+          <div class="actions">
+            <button type="submit" [disabled]="saving()">Save</button>
+            <button type="button" class="ghost" (click)="cancelEdit()">Cancel</button>
+          </div>
+        </form>
+      }
+    </article>
+  } @empty {
+    @if (!loading()) { <p class="empty-state">No services yet. Run migrations or create the first service.</p> }
+  }
+</section>

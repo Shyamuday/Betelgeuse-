@@ -1,0 +1,120 @@
+<section class="public-shell">
+  <app-header subtitle="Services" [whatsappLink]="whatsappLink()" />
+  <main class="content-page">
+    <section class="page-hero panel">
+      <p class="eyebrow">Services and pricing</p>
+      <h1>Choose online care by service, expert type, and health goal.</h1>
+      <p>
+        Browse consultations across medical care, mental wellness, nutrition, rehabilitation, and
+        supportive healthcare. Each service has clear pricing and online booking.
+      </p>
+    </section>
+
+    <section class="panel provider-filter-panel">
+      <div class="provider-filter-header">
+        <div>
+          <p class="eyebrow">Find a service</p>
+          <h2>Filter by need</h2>
+        </div>
+        <p class="provider-result-count">{{ loading() ? 'Updating...' : total() + ' service' + (total() === 1 ? '' : 's') }}</p>
+      </div>
+      <div class="provider-filter-grid">
+        <label>
+          Search
+          <input [value]="q()" (input)="q.set($any($event.target).value)" placeholder="stress, nutrition, pain..." />
+        </label>
+        <label>
+          Category
+          <select [value]="category()" (change)="category.set($any($event.target).value); load(1)">
+            <option value="">All categories</option>
+            @for (option of categories(); track option) {
+              <option [value]="option">{{ option }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Expert type
+          <select [value]="expertType()" (change)="expertType.set($any($event.target).value); load(1)">
+            <option value="">All experts</option>
+            @for (option of expertTypes(); track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Sort
+          <select [value]="sort()" (change)="sort.set($any($event.target).value); load(1)">
+            <option value="featured">Featured first</option>
+            <option value="price-asc">Price low to high</option>
+            <option value="price-desc">Price high to low</option>
+            <option value="name">Name</option>
+          </select>
+        </label>
+      </div>
+      <div class="actions">
+        <button type="button" class="provider-filter-reset" (click)="load(1)">Apply</button>
+        @if (hasFilters()) {
+          <button type="button" class="provider-filter-reset" (click)="reset()">Clear filters</button>
+        }
+      </div>
+      @if (tags().length) {
+        <div class="category-pills">
+          @for (item of tags(); track item) {
+            <button type="button" class="category-pill" [class.active]="tag() === item" (click)="tag.set(tag() === item ? '' : item); load(1)">
+              {{ item }}
+            </button>
+          }
+        </div>
+      }
+    </section>
+
+    @if (loading()) {
+      <section class="panel"><p class="loading-text">Loading services...</p></section>
+    } @else if (error()) {
+      <section class="panel">
+        <p class="error">{{ error() }}</p>
+        <button type="button" class="primary home-action" (click)="load()">Retry</button>
+      </section>
+    } @else if (!services().length) {
+      <section class="panel">
+        <h2>No services matched</h2>
+        <p>Clear filters or talk to our team so we can guide you to the right online service.</p>
+        <a class="secondary home-action" routerLink="/talk-to-provider">Talk to our expert now</a>
+      </section>
+    } @else {
+      <section class="services-grid">
+        @for (service of services(); track service.id) {
+          <article class="service-card panel">
+            <div class="service-card-head">
+              <p class="eyebrow">{{ service.category }}</p>
+              @if (service.isFeatured) { <span class="service-badge">Featured</span> }
+            </div>
+            <h2>{{ service.title }}</h2>
+            <p>{{ service.summary }}</p>
+            <div class="service-meta-row">
+              <strong>{{ service.priceInPaise / 100 | currency: currencyCode }}</strong>
+              @if (service.durationMinutes) { <span>{{ service.durationMinutes }} min</span> }
+            </div>
+            <div class="service-tags">
+              @for (label of service.expertTypeLabels; track label) {
+                <span>{{ label }}</span>
+              }
+            </div>
+            <div class="issue-actions">
+              <a class="primary home-action" [routerLink]="dashboardPath" [queryParams]="bookingQuery(service)">Book</a>
+              <a class="secondary home-action" [routerLink]="['/services', service.slug]">Details</a>
+              <a class="secondary home-action" routerLink="/talk-to-provider">Expert</a>
+            </div>
+          </article>
+        }
+      </section>
+
+      <section class="service-pagination">
+        <button type="button" class="provider-filter-reset" [disabled]="page() <= 1" (click)="load(page() - 1)">Previous</button>
+        <span>Page {{ page() }} of {{ totalPages() }}</span>
+        <button type="button" class="provider-filter-reset" [disabled]="page() >= totalPages()" (click)="load(page() + 1)">Next</button>
+      </section>
+    }
+  </main>
+  <app-footer [whatsappLink]="whatsappLink()" />
+</section>

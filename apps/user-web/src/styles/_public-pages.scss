@@ -156,6 +156,122 @@
   margin-top: 0.75rem;
 }
 
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.service-card {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+
+.service-card h2 {
+  margin: 0;
+  color: #102033;
+  font-size: 1.15rem;
+  line-height: 1.3;
+}
+
+.service-card p {
+  margin: 0;
+  color: #526070;
+  line-height: 1.7;
+}
+
+.service-card-head,
+.service-meta-row,
+.service-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.service-badge {
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #15803d;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.service-meta-row strong {
+  color: #087443;
+  font-size: 1.15rem;
+}
+
+.service-meta-row span {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.service-compare {
+  color: #94a3b8 !important;
+  text-decoration: line-through;
+}
+
+.service-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.service-tags span {
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #174ea6;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.service-pagination {
+  justify-content: center;
+  color: #526070;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.service-detail-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.service-detail-hero h1 {
+  color: #102033;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1;
+}
+
+.service-detail-hero p {
+  color: #526070;
+  line-height: 1.7;
+}
+
+.service-detail-hero img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 18px;
+}
+
+.service-list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.75rem 0 0;
+  padding-left: 1.2rem;
+  color: #526070;
+  line-height: 1.7;
+}
+
 .content-grid.two {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -979,8 +1095,13 @@
   }
 
   .testimonials-grid,
+  .services-grid,
   .blog-grid,
   .blog-featured-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .service-detail-hero {
     grid-template-columns: 1fr;
   }
 

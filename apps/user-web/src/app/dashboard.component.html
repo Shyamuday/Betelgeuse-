@@ -15,7 +15,11 @@
       @if (auth.user()?.role === 'PATIENT') {
         <section class="panel hero">
           <div>
-            @if (heroDisease(); as disease) {
+            @if (pendingServiceTitleValue()) {
+              <p class="eyebrow">Selected service</p>
+              <h2>{{ pendingServiceTitleValue() }}</h2>
+              <p>Pick the closest health concern below so our expert receives the right intake questions.</p>
+            } @else if (heroDisease(); as disease) {
               <p class="eyebrow">Your consultation</p>
               <h2>{{ disease.name }}</h2>
               <p>Book an online consultation for assessment, prescription where appropriate, and follow-up guidance.</p>
@@ -48,6 +52,8 @@
             [diseases]="diseases()"
             [plans]="billingPlans()"
             [initialDiseaseId]="pendingDiseaseIdValue()"
+            [initialServiceSlug]="pendingServiceSlugValue()"
+            [initialServiceTitle]="pendingServiceTitleValue()"
             [disabled]="isProcessing()"
             (booked)="onBooked($event)"
           />

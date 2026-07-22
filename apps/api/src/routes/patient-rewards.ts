@@ -39,6 +39,8 @@ export function registerPatientRewardsRoutes(router: Router) {
       const body = z
         .object({
           diseaseId: z.string().min(1),
+          serviceId: z.string().min(1).optional(),
+          serviceSlug: z.string().min(2).max(100).optional(),
           purchaseType: z.enum(['ONE_TIME', 'PLAN']).default('ONE_TIME'),
           planCode: z.string().optional(),
           promoCode: z.string().optional(),

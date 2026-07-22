@@ -15,6 +15,16 @@ export const ROUTE_SEO_CONTENT = {
     seoDescription:
       'Explore expert-led care at HopeHub Care for acute and chronic conditions across body systems, age groups, and care needs.',
   },
+  services: {
+    seoTitle: 'Services and Pricing | HopeHub Care',
+    seoDescription:
+      'Browse HopeHub Care online services by expert type, concern, price, and care category.',
+  },
+  'services/:slug': {
+    seoTitle: 'Service Details | HopeHub Care',
+    seoDescription:
+      'View HopeHub Care service details, price, expert type, what is included, and booking options.',
+  },
   'treatments/:slug': {
     seoTitle: 'Treatment Details | HopeHub Care',
     seoDescription:

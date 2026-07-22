@@ -178,6 +178,40 @@ export class AdminDoctorsApi extends AdminApiBase {
     );
   }
 
+  listHealthServices(q = '') {
+    return firstValueFrom(
+      this.http.get<{ services: any[]; providerTypes: Array<{ value: string; label: string }> }>(
+        `${this.apiBase}${API_PATHS.ADMIN.SERVICES}`,
+        { params: q ? { q } : {} },
+      ),
+    );
+  }
+
+  seedHealthServices() {
+    return firstValueFrom(
+      this.http.post<{ message: string }>(`${this.apiBase}${API_PATHS.ADMIN.SERVICES_SEED}`, {}),
+    );
+  }
+
+  createHealthService(payload: any) {
+    return firstValueFrom(
+      this.http.post<{ service: any }>(`${this.apiBase}${API_PATHS.ADMIN.SERVICES}`, payload),
+    );
+  }
+
+  updateHealthService(id: string, payload: any) {
+    return firstValueFrom(
+      this.http.patch<{ service: any }>(
+        `${this.apiBase}${API_PATHS.ADMIN.SERVICE_BY_ID(id)}`,
+        payload,
+      ),
+    );
+  }
+
+  deleteHealthService(id: string) {
+    return firstValueFrom(this.http.delete(`${this.apiBase}${API_PATHS.ADMIN.SERVICE_BY_ID(id)}`));
+  }
+
   listHomeCarouselSlides() {
     return firstValueFrom(
       this.http.get<{ slides: any[] }>(`${this.apiBase}${API_PATHS.ADMIN.HOME_CAROUSEL}`),

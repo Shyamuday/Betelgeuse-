@@ -37,6 +37,7 @@ import { FaqPage } from './features/content/faq-page/faq-page';
 import { BlogPage } from './features/content/blog-page/blog-page';
 import { SiteConfigPage } from './features/content/site-config-page/site-config-page';
 import { PublicPagesPage } from './features/content/public-pages-page/public-pages-page';
+import { ServicesPage } from './features/content/services-page/services-page';
 import { HomeCarouselPage } from './features/content/home-carousel-page/home-carousel-page';
 import { ChatInboxPage } from './features/content/chat-inbox-page/chat-inbox-page';
 import { RewardsPage } from './features/rewards/rewards-page/rewards-page';
@@ -95,6 +96,7 @@ export const routes: Routes = [
       { path: ROUTE_PATHS.FAQ, component: FaqPage, canActivate: guard },
       { path: ROUTE_PATHS.BLOG, component: BlogPage, canActivate: guard },
       { path: ROUTE_PATHS.HOME_CAROUSEL, component: HomeCarouselPage, canActivate: guard },
+      { path: ROUTE_PATHS.SERVICES, component: ServicesPage, canActivate: guard },
       { path: ROUTE_PATHS.PUBLIC_PAGES, component: PublicPagesPage, canActivate: guard },
       { path: ROUTE_PATHS.SITE_CONFIG, component: SiteConfigPage, canActivate: guard },
       { path: ROUTE_PATHS.CHAT_INBOX, component: ChatInboxPage, canActivate: guard },

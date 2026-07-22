@@ -79,6 +79,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private pendingConsultationId: string | null = null;
   private pendingDiseaseId: string | null = null;
+  private pendingServiceSlug: string | null = null;
+  private pendingServiceTitle: string | null = null;
   private pendingClinicStoreId: string | null = null;
 
   readonly diseases = signal<Disease[]>([]);
@@ -111,6 +113,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (!id) return null;
     return this.diseases().find((disease) => disease.id === id) ?? null;
   });
+  readonly pendingServiceTitleValue = signal('');
   protected realtimeChannel?: { unsubscribe(): void; socket?: import('socket.io-client').Socket };
   readonly iceServers = signal<
     Array<{ urls: string | string[]; username?: string; credential?: string }>
@@ -156,11 +159,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.pendingConsultationId = this.route.snapshot.queryParamMap.get('consultationId');
     this.pendingDiseaseId = this.route.snapshot.queryParamMap.get('diseaseId');
+    this.pendingServiceSlug = this.route.snapshot.queryParamMap.get('serviceSlug');
+    this.pendingServiceTitle = this.route.snapshot.queryParamMap.get('serviceTitle');
+    this.pendingServiceTitleValue.set(this.pendingServiceTitle || '');
     // Offline clinic/location selection hidden for now. Platform is online-only.
     // this.pendingClinicStoreId = this.route.snapshot.queryParamMap.get('clinicStoreId');
     this.route.queryParamMap.subscribe((params) => {
       this.pendingConsultationId = params.get('consultationId');
       this.pendingDiseaseId = params.get('diseaseId');
+      this.pendingServiceSlug = params.get('serviceSlug');
+      this.pendingServiceTitle = params.get('serviceTitle');
+      this.pendingServiceTitleValue.set(this.pendingServiceTitle || '');
       // const clinicStoreId = params.get('clinicStoreId');
       if (params.get('bookFollowUp')) {
         this.showNotice('Book your follow-up consultation below.');
@@ -225,6 +234,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return '';
   }
 
+  pendingServiceSlugValue() {
+    if (this.pendingServiceSlug) return this.pendingServiceSlug;
+    if (typeof sessionStorage !== 'undefined') {
+      return sessionStorage.getItem('pendingServiceSlug') || '';
+    }
+    return '';
+  }
+
   private applyPendingConsultation() {
     if (!this.pendingConsultationId) return;
     const match = this.consultations().find((c) => c.id === this.pendingConsultationId);
@@ -245,6 +262,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.api
       .createConsultation({
         diseaseId: payload.diseaseId,
+        ...(payload.serviceSlug ? { serviceSlug: payload.serviceSlug } : {}),
         intakeAnswers: payload.intakeAnswers,
         purchaseType: payload.purchaseType,
         ...(payload.purchaseType === PURCHASE_TYPES.PLAN ? { planCode: payload.planCode } : {}),

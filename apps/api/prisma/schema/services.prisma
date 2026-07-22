@@ -1,0 +1,32 @@
+model HealthService {
+  id                    String              @id @default(cuid())
+  slug                  String              @unique
+  title                 String
+  shortTitle            String?
+  category              String
+  expertTypes           ProviderType[]      @default([])
+  summary               String              @db.Text
+  description           String?             @db.Text
+  priceInPaise          Int
+  compareAtPriceInPaise Int?
+  durationMinutes       Int?
+  imageUrl              String?
+  tags                  String[]            @default([])
+  includes              Json?
+  outcomes              Json?
+  whoIsItFor            Json?
+  howItWorks            Json?
+  faqs                  Json?
+  relatedDiseaseSlugs   String[]            @default([])
+  seoTitle              String?
+  seoDescription        String?             @db.Text
+  isPublished           Boolean             @default(true)
+  isFeatured            Boolean             @default(false)
+  sortOrder             Int                 @default(0)
+  consultations         Consultation[]
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([category])
+  @@index([isPublished, sortOrder])
+}

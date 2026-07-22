@@ -2,6 +2,7 @@ export const ROUTE_PATHS = {
   LOGIN: 'login',
   ABOUT: 'about',
   TREATMENTS: 'treatments',
+  SERVICES: 'services',
   CHRONIC_CARE: 'chronic-care',
   FAQ: 'faq',
   CONTACT: 'contact',

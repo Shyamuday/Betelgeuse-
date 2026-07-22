@@ -35,6 +35,7 @@ import { registerAdminClinicalRecordsRoutes } from './clinical-records.js';
 import { registerAdminPublicPageRoutes } from './public-pages.js';
 import { registerAdminHomeCarouselRoutes } from './home-carousel.js';
 import { registerAdminHomeAnnouncementRoutes } from './home-announcements.js';
+import { registerAdminServiceRoutes } from '../services.js';
 import { adminPermissionMiddleware } from '../../admin-route-permissions.js';
 
 export function createAdminRouter(io: SocketIoServer) {
@@ -77,6 +78,7 @@ export function createAdminRouter(io: SocketIoServer) {
   registerAdminPublicPageRoutes(router);
   registerAdminHomeCarouselRoutes(router);
   registerAdminHomeAnnouncementRoutes(router);
+  registerAdminServiceRoutes(router);
 
   return router;
 }

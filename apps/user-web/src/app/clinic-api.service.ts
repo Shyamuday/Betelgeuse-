@@ -57,6 +57,8 @@ export class ClinicApiService {
 
   createConsultation(payload: {
     diseaseId: string;
+    serviceId?: string;
+    serviceSlug?: string;
     intakeAnswers: Record<string, string>;
     purchaseType?: 'ONE_TIME' | 'PLAN';
     planCode?: string;

@@ -23,6 +23,7 @@ import { BillingPlan, Disease } from './models';
 
 export type BookConsultationPayload = {
   diseaseId: string;
+  serviceSlug?: string;
   intakeAnswers: Record<string, string>;
   purchaseType: typeof PURCHASE_TYPES.ONE_TIME | typeof PURCHASE_TYPES.PLAN;
   planCode?: string;
@@ -89,6 +90,8 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
   @Input() plans: BillingPlan[] = [];
   @Input() disabled = false;
   @Input() initialDiseaseId = '';
+  @Input() initialServiceSlug = '';
+  @Input() initialServiceTitle = '';
   @Input() initialClinicStoreId = '';
   @Output() booked = new EventEmitter<BookConsultationPayload>();
   @Output() clinicStoreChange = new EventEmitter<string>();
@@ -201,6 +204,8 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
   }
 
   estimatedGrossAmount() {
+    const quote = this.checkoutQuote();
+    if (quote) return quote.grossAmountInPaise;
     const { purchaseType, selectedPlanCode } = this.bookingFormModel();
     if (purchaseType === PURCHASE_TYPES.PLAN) {
       return this.plans.find((p) => p.code === selectedPlanCode)?.priceInPaise || 0;
@@ -275,6 +280,7 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
     const quote = this.checkoutQuote();
     this.booked.emit({
       diseaseId: form.selectedDiseaseId,
+      ...(this.initialServiceSlug ? { serviceSlug: this.initialServiceSlug } : {}),
       intakeAnswers: { ...form.intakeAnswers },
       purchaseType: form.purchaseType,
       ...(form.purchaseType === PURCHASE_TYPES.PLAN ? { planCode: form.selectedPlanCode } : {}),
@@ -305,6 +311,7 @@ export class BookConsultationPanelComponent implements OnChanges, OnInit {
         API_PATHS.PATIENT.REWARDS_CHECKOUT_QUOTE,
         {
           diseaseId: form.selectedDiseaseId,
+          ...(this.initialServiceSlug ? { serviceSlug: this.initialServiceSlug } : {}),
           purchaseType: form.purchaseType,
           ...(form.purchaseType === PURCHASE_TYPES.PLAN ? { planCode: form.selectedPlanCode } : {}),
           walletRedeemInPaise: this.useWallet() ? 99_999_999 : 0,

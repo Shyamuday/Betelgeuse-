@@ -15,6 +15,16 @@ export const routes: Routes = [
     data: ROUTE_SEO_CONTENT.treatments,
   },
   {
+    path: 'services',
+    loadComponent: () => import('./services.component').then((m) => m.ServicesComponent),
+    data: ROUTE_SEO_CONTENT.services,
+  },
+  {
+    path: 'services/:slug',
+    loadComponent: () => import('./service-detail.component').then((m) => m.ServiceDetailComponent),
+    data: ROUTE_SEO_CONTENT['services/:slug'],
+  },
+  {
     path: 'treatments/:slug',
     loadComponent: () => import('./disease-detail.component').then((m) => m.DiseaseDetailComponent),
     data: ROUTE_SEO_CONTENT['treatments/:slug'],

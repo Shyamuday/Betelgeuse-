@@ -1,0 +1,105 @@
+<section class="public-shell">
+  <app-header subtitle="Service details" [whatsappLink]="whatsappLink()" />
+  <main class="content-page">
+    @if (loading()) {
+      <section class="panel"><p class="loading-text">Loading service...</p></section>
+    } @else if (error()) {
+      <section class="panel">
+        <p class="error">{{ error() }}</p>
+        <a class="secondary home-action" routerLink="/services">Back to services</a>
+      </section>
+    } @else if (service(); as item) {
+      <section class="service-detail-hero panel">
+        <div>
+          <p class="eyebrow">{{ item.category }}</p>
+          <h1>{{ item.title }}</h1>
+          <p>{{ item.description || item.summary }}</p>
+          <div class="service-meta-row">
+            <strong>{{ item.priceInPaise / 100 | currency: currencyCode }}</strong>
+            @if (item.compareAtPriceInPaise) {
+              <span class="service-compare">{{ item.compareAtPriceInPaise / 100 | currency: currencyCode }}</span>
+            }
+            @if (item.durationMinutes) { <span>{{ item.durationMinutes }} min online</span> }
+          </div>
+          <div class="service-tags">
+            @for (label of item.expertTypeLabels; track label) {
+              <span>{{ label }}</span>
+            }
+          </div>
+          <div class="issue-actions">
+            <a class="primary home-action" [routerLink]="dashboardPath" [queryParams]="bookingQuery(item)">Book this service</a>
+            <a class="secondary home-action" routerLink="/talk-to-provider">Talk to our expert now</a>
+          </div>
+        </div>
+        @if (item.imageUrl) {
+          <img [src]="item.imageUrl" [alt]="item.title" />
+        }
+      </section>
+
+      <section class="content-grid two">
+        <article class="panel">
+          <p class="eyebrow">Included</p>
+          <h2>What you get</h2>
+          <ul class="service-list">
+            @for (entry of item.includes; track entry) { <li>{{ entry }}</li> }
+          </ul>
+        </article>
+        <article class="panel">
+          <p class="eyebrow">Best for</p>
+          <h2>Who this helps</h2>
+          <ul class="service-list">
+            @for (entry of item.whoIsItFor; track entry) { <li>{{ entry }}</li> }
+          </ul>
+        </article>
+      </section>
+
+      <section class="content-grid two">
+        <article class="panel">
+          <p class="eyebrow">Process</p>
+          <h2>How it works</h2>
+          <ol class="service-list">
+            @for (entry of item.howItWorks; track entry) { <li>{{ entry }}</li> }
+          </ol>
+        </article>
+        <article class="panel">
+          <p class="eyebrow">Outcomes</p>
+          <h2>Expected next steps</h2>
+          <ul class="service-list">
+            @for (entry of item.outcomes; track entry) { <li>{{ entry }}</li> }
+          </ul>
+        </article>
+      </section>
+
+      @if (item.faqs.length) {
+        <section class="panel">
+          <p class="eyebrow">FAQ</p>
+          <h2>Common questions</h2>
+          <div class="faq-list">
+            @for (faq of item.faqs; track faq.question) {
+              <article>
+                <strong>{{ faq.question }}</strong>
+                <p>{{ faq.answer }}</p>
+              </article>
+            }
+          </div>
+        </section>
+      }
+
+      @if (relatedServices().length) {
+        <section class="panel">
+          <p class="eyebrow">Related services</p>
+          <h2>Explore similar online care</h2>
+          <div class="issue-grid">
+            @for (related of relatedServices(); track related.id) {
+              <a class="issue-card issue-card--link" [routerLink]="['/services', related.slug]">
+                <strong>{{ related.title }}</strong>
+                <span class="issue-fee">{{ related.priceInPaise / 100 | currency: currencyCode }}</span>
+              </a>
+            }
+          </div>
+        </section>
+      }
+    }
+  </main>
+  <app-footer [whatsappLink]="whatsappLink()" />
+</section>
