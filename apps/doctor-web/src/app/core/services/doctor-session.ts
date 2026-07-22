@@ -57,10 +57,16 @@ export class DoctorSessionService {
   }
 
   navItems() {
-    return navItemsForDoctorType(this.session?.doctorProfile?.doctorType);
+    return navItemsForDoctorType(
+      this.session?.doctorProfile?.doctorType,
+      this.session?.doctorProfile?.providerType,
+    );
   }
 
   capabilities() {
-    return capabilitiesForDoctorType(this.session?.doctorProfile?.doctorType);
+    return capabilitiesForDoctorType(
+      this.session?.doctorProfile?.doctorType,
+      this.session?.doctorProfile?.providerType,
+    );
   }
 }

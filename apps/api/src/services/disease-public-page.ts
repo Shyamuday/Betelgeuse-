@@ -194,7 +194,7 @@ export async function updateDiseasePublicPage(
 export async function importStaticDiseasePages(entries: StaticDiseasePageImport[]) {
   let matched = 0;
   let updated = 0;
-  let created = 0;
+  const created = 0;
   const unmatched: string[] = [];
 
   for (const entry of entries) {

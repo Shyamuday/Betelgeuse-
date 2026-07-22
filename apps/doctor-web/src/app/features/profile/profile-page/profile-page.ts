@@ -20,7 +20,7 @@ function emptyProfileModel() {
     bio: '',
     yearsOfExperience: '' as number | '',
     focusAreasText: '',
-    defaultMethodOptionId: ''
+    defaultMethodOptionId: '',
   };
 }
 
@@ -28,7 +28,7 @@ function emptyProfileModel() {
   selector: 'app-profile-page',
   imports: [FormField, ProfileAvatarUploadComponent],
   templateUrl: './profile-page.html',
-  styleUrl: './profile-page.scss'
+  styleUrl: './profile-page.scss',
 })
 export class ProfilePage {
   private readonly http = inject(HttpClient);
@@ -67,14 +67,14 @@ export class ProfilePage {
               mobile?: string | null;
               doctorProfile?: DoctorProfileSummary | null;
             };
-          }>(`${this.apiBase}${API_PATHS.DOCTOR.PROFILE}`)
+          }>(`${this.apiBase}${API_PATHS.DOCTOR.PROFILE}`),
         ),
         firstValueFrom(
           this.http.get<{ options: Array<{ id: string; label: string }> }>(
             `${this.apiBase}${API_PATHS.DOCTOR.PRESCRIPTION_OPTIONS}`,
-            { params: { type: 'METHOD' } }
-          )
-        )
+            { params: { type: 'METHOD' } },
+          ),
+        ),
       ]);
 
       this.methodOptions = methodsRes.options;
@@ -89,12 +89,16 @@ export class ProfilePage {
         bio: profile.doctorProfile?.bio || '',
         yearsOfExperience: profile.doctorProfile?.yearsOfExperience ?? '',
         focusAreasText: (profile.doctorProfile?.focusAreas ?? []).join('\n'),
-        defaultMethodOptionId: profile.doctorProfile?.defaultMethodOptionId || ''
+        defaultMethodOptionId: profile.doctorProfile?.defaultMethodOptionId || '',
       });
-      this.doctorTypeLabel = profile.doctorProfile?.doctorTypeLabel || 'Doctor';
+      this.doctorTypeLabel =
+        profile.doctorProfile?.providerTypeLabel ||
+        profile.doctorProfile?.doctorTypeLabel ||
+        'Doctor';
       this.specialtyFocusLabel = profile.doctorProfile?.specialtyFocusLabel || '';
       this.showOnWebsite = profile.doctorProfile?.showOnWebsite ?? false;
-      this.profileImageUrl = (profile as { profileImageUrl?: string | null }).profileImageUrl ?? null;
+      this.profileImageUrl =
+        (profile as { profileImageUrl?: string | null }).profileImageUrl ?? null;
     } catch {
       this.error = 'Could not load profile.';
     } finally {
@@ -125,8 +129,8 @@ export class ProfilePage {
             .split('\n')
             .map((s) => s.trim())
             .filter(Boolean),
-          defaultMethodOptionId: form.defaultMethodOptionId || null
-        })
+          defaultMethodOptionId: form.defaultMethodOptionId || null,
+        }),
       );
       await this.session.load(true);
       this.message = 'Profile updated successfully.';

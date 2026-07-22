@@ -47,7 +47,13 @@ const diseaseMarketingFields = {
     .nullable()
     .optional(),
   publicDescription: z.string().max(20_000).nullable().optional(),
-  publicImageUrl: z.string().url().max(500).nullable().optional().or(z.literal('').transform(() => null)),
+  publicImageUrl: z
+    .string()
+    .url()
+    .max(500)
+    .nullable()
+    .optional()
+    .or(z.literal('').transform(() => null)),
   seoTitle: z.string().max(200).nullable().optional(),
   seoDescription: z.string().max(500).nullable().optional(),
   publicFaq: diseaseFaqSchema.nullable().optional()
@@ -312,7 +318,10 @@ router.put(
         feeInPaise: z.number().int().positive(),
         isActive: z.boolean(),
         intakeQuestions: z.array(z.string().min(1)).min(1),
-        publicCategory: z.enum(DISEASE_PUBLIC_CATEGORY_KEYS as [string, ...string[]]).nullable().optional(),
+        publicCategory: z
+          .enum(DISEASE_PUBLIC_CATEGORY_KEYS as [string, ...string[]])
+          .nullable()
+          .optional(),
         ...diseaseMarketingFields
       })
       .parse(req.body);
@@ -350,13 +359,18 @@ router.get(
   '/doctors',
   asyncRoute(async (_req, res) => {
     const limitConfig = await prisma.siteConfig.findUnique({ where: { key: 'doctorListLimit' } });
-    const limit = limitConfig ? Math.max(1, Math.min(50, parseInt(limitConfig.value, 10) || 12)) : 12;
+    const limit = limitConfig
+      ? Math.max(1, Math.min(50, parseInt(limitConfig.value, 10) || 12))
+      : 12;
 
     const doctors = await prisma.doctor.findMany({
       where: { showOnWebsite: true, user: { isActive: true } },
       select: {
         id: true,
         specialty: true,
+        specialization: true,
+        providerType: true,
+        providerCategory: true,
         doctorType: true,
         specialtyFocus: true,
         bio: true,
@@ -392,7 +406,11 @@ router.get(
   asyncRoute(async (_req, res) => {
     const entries = await prisma.faqEntry.findMany({
       where: { isPublished: true },
-      orderBy: [{ category: 'asc' }, { sortOrder: { sort: 'asc', nulls: 'last' } }, { createdAt: 'asc' }]
+      orderBy: [
+        { category: 'asc' },
+        { sortOrder: { sort: 'asc', nulls: 'last' } },
+        { createdAt: 'asc' }
+      ]
     });
     res.json({ entries });
   })
@@ -416,12 +434,26 @@ router.get(
   '/public-config',
   asyncRoute(async (_req, res) => {
     const PUBLIC_KEYS = [
-      'whatsappPhone', 'clinicName',
-      'contactPhone', 'contactPhoneTel', 'contactEmail',
-      'clinicAddressLine1', 'clinicAddressLine2', 'clinicAddressLine3', 'clinicAddressLine4',
-      'homeHeroEyebrow', 'homeHeroHeadline', 'homeHeroLead',
-      'statConsultations', 'statDoctors', 'statRating', 'statFollowUp',
-      'statPatientsTreated', 'statConditionsTreated', 'statImprovement', 'statSatisfaction'
+      'whatsappPhone',
+      'clinicName',
+      'contactPhone',
+      'contactPhoneTel',
+      'contactEmail',
+      'clinicAddressLine1',
+      'clinicAddressLine2',
+      'clinicAddressLine3',
+      'clinicAddressLine4',
+      'homeHeroEyebrow',
+      'homeHeroHeadline',
+      'homeHeroLead',
+      'statConsultations',
+      'statDoctors',
+      'statRating',
+      'statFollowUp',
+      'statPatientsTreated',
+      'statConditionsTreated',
+      'statImprovement',
+      'statSatisfaction'
     ];
     const DEFAULTS: Record<string, string> = {
       whatsappPhone: '919876543210',

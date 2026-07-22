@@ -92,9 +92,15 @@ export class DoctorShell implements OnInit, OnDestroy {
       const profile = await this.session.load();
       this.doctorName = profile.name;
       this.doctorProfileImageUrl = profile.profileImageUrl ?? null;
-      this.doctorTypeLabel = profile.doctorProfile?.doctorTypeLabel || 'Doctor';
+      this.doctorTypeLabel =
+        profile.doctorProfile?.providerTypeLabel ||
+        profile.doctorProfile?.doctorTypeLabel ||
+        'Doctor';
       this.specialtyLabel = profile.doctorProfile?.specialty || '';
-      this.doctorTypeKey = profile.doctorProfile?.doctorType ?? null;
+      this.doctorTypeKey =
+        profile.doctorProfile?.providerType === 'HOMEOPATH'
+          ? (profile.doctorProfile?.doctorType ?? null)
+          : (profile.doctorProfile?.providerType ?? null);
       this.navItems = this.buildNav(this.session.navItems());
     } catch {
       this.navItems = this.buildNav(this.session.navItems());
