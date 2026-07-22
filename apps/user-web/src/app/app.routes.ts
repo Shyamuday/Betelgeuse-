@@ -142,11 +142,12 @@ export const routes: Routes = [
     redirectTo: 'patient/account/profile',
     pathMatch: 'full',
   },
-  {
-    path: 'get-app',
-    loadComponent: () => import('./get-app-page.component').then((m) => m.GetAppPageComponent),
-    data: ROUTE_SEO_CONTENT['get-app'],
-  },
+  // Patient app route kept for future mobile launch.
+  // {
+  //   path: 'get-app',
+  //   loadComponent: () => import('./get-app-page.component').then((m) => m.GetAppPageComponent),
+  //   data: ROUTE_SEO_CONTENT['get-app'],
+  // },
   {
     path: 'patient/scan',
     loadComponent: () => import('./user-patient-scan-page').then((m) => m.UserPatientScanPage),

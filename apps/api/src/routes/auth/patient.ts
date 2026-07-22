@@ -36,7 +36,10 @@ export function registerAuthPatientRoutes(router: Router) {
         select: { id: true, passwordHash: true }
       });
       if (existingEmail?.passwordHash) {
-        return res.status(409).json({ message: 'Account already exists. Please log in.' });
+        return res.status(409).json({
+          code: 'PATIENT_ACCOUNT_EXISTS',
+          message: 'This email is already registered. Please log in instead.'
+        });
       }
 
       const passwordHash = await bcrypt.hash(body.password, 10);

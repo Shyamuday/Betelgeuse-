@@ -1,10 +1,15 @@
 .home-hero--booking {
   display: grid;
-  gap: 1.25rem;
-  justify-items: start;
+  grid-template-areas:
+    'intro booking'
+    'trust booking';
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 1.5rem 2rem;
+  align-items: center;
 }
 
 .hero-intro {
+  grid-area: intro;
   max-width: 42rem;
 }
 
@@ -22,7 +27,7 @@
   font-size: clamp(1.75rem, 4vw, 2.35rem);
   font-weight: 800;
   line-height: 1.15;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   color: #102033;
 }
 
@@ -34,6 +39,8 @@
 }
 
 .booking-card {
+  grid-area: booking;
+  justify-self: end;
   width: min(100%, 480px);
   background: #fff;
   border: 1px solid #dbe4f0;
@@ -231,9 +238,26 @@
 }
 
 .hero-trust-row {
+  grid-area: trust;
   display: flex;
   flex-wrap: wrap;
   gap: 1rem 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .home-hero--booking {
+    grid-template-areas:
+      'intro'
+      'booking'
+      'trust';
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .booking-card {
+    justify-self: stretch;
+    width: 100%;
+  }
 }
 
 @media (max-width: 640px) {

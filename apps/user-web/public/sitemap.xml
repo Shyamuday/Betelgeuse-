@@ -60,11 +60,13 @@
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
+  <!-- Patient app page kept out of the sitemap until mobile launch.
   <url>
     <loc>https://hopehub.in/get-app</loc>
     <changefreq>monthly</changefreq>
     <priority>0.55</priority>
   </url>
+  -->
   <url>
     <loc>https://hopehub.in/safety</loc>
     <changefreq>yearly</changefreq>

@@ -16,6 +16,8 @@ type AuthFormOverlayData = {
 };
 
 type AuthView = 'login' | 'signup';
+type LoginMode = 'otp' | 'password';
+type SignupMode = 'otp' | 'password';
 type ForgotStep = 'none' | 'request' | 'reset';
 
 @Component({
@@ -30,6 +32,8 @@ export class AuthFormOverlayComponent {
       ? new URLSearchParams(window.location.search).get('ref') || undefined
       : undefined;
   readonly authView = signal<AuthView>('login');
+  readonly loginMode = signal<LoginMode>('otp');
+  readonly signupMode = signal<SignupMode>('password');
   readonly loginOtpSent = signal(false);
   readonly signupOtpSent = signal(false);
   readonly otpNotice = signal('');
@@ -66,6 +70,7 @@ export class AuthFormOverlayComponent {
     name: '',
     email: '',
     otp: '',
+    password: '',
   });
   readonly signupForm = form(this.signupModel);
 
@@ -98,9 +103,21 @@ export class AuthFormOverlayComponent {
     );
   }
 
+  canRegisterPatientWithPassword(): boolean {
+    const signup = this.signupModel();
+    return (
+      signup.name.trim().length >= 2 && this.isEmail(signup.email) && signup.password.length >= 8
+    );
+  }
+
   canLoginWithEmailOtp(): boolean {
     const otp = this.patientOtpModel();
     return this.isEmail(otp.email) && this.loginOtpSent() && this.isSixDigitOtp(otp.otp);
+  }
+
+  canLoginWithPassword(): boolean {
+    const credentials = this.patientCredentialsModel();
+    return this.isEmail(credentials.identifier) && credentials.password.length > 0;
   }
 
   setAuthView(view: AuthView) {
@@ -108,6 +125,20 @@ export class AuthFormOverlayComponent {
     this.forgotStep.set('none');
     this.patientSelection.set(null);
     this.loginOtpSent.set(false);
+    this.signupOtpSent.set(false);
+    this.otpNotice.set('');
+    this.errorCleanup();
+  }
+
+  setLoginMode(mode: LoginMode) {
+    this.loginMode.set(mode);
+    this.patientSelection.set(null);
+    this.otpNotice.set('');
+    this.errorCleanup();
+  }
+
+  setSignupMode(mode: SignupMode) {
+    this.signupMode.set(mode);
     this.signupOtpSent.set(false);
     this.otpNotice.set('');
     this.errorCleanup();
@@ -309,7 +340,30 @@ export class AuthFormOverlayComponent {
         this.closeAllOverlays();
         this.router.navigateByUrl(this.auth.dashboardFor(response.user.role));
       },
-      error: (error) => this.showError(error.error?.message || 'Patient signup failed.'),
+      error: (error) => this.handleSignupError(error, signup.email),
+    });
+  }
+
+  registerPatientWithPassword() {
+    const signup = this.signupModel();
+    if (!this.canRegisterPatientWithPassword()) {
+      this.showError('Enter your name, email, and a password with at least 8 characters.');
+      return;
+    }
+
+    this.process(
+      'Creating patient account...',
+      this.auth.patientRegister({
+        name: signup.name.trim(),
+        email: signup.email.trim().toLowerCase(),
+        password: signup.password,
+      }),
+    ).subscribe({
+      next: ({ user }) => {
+        this.closeAllOverlays();
+        this.router.navigateByUrl(this.auth.dashboardFor(user.role));
+      },
+      error: (error) => this.handleSignupError(error, signup.email),
     });
   }
 
@@ -409,6 +463,23 @@ export class AuthFormOverlayComponent {
 
   private showError(message: string) {
     this.openAuthOverlay('error', 'Request failed', message);
+  }
+
+  private handleSignupError(
+    error: { status?: number; error?: { code?: string; message?: string } },
+    email: string,
+  ) {
+    const message = error.error?.message || 'Patient signup failed.';
+    if (error.status === 409 || error.error?.code === 'PATIENT_ACCOUNT_EXISTS') {
+      this.authView.set('login');
+      this.loginMode.set('password');
+      this.patientCredentialsModel.update((model) => ({
+        ...model,
+        identifier: email.trim().toLowerCase(),
+        password: '',
+      }));
+    }
+    this.showError(message);
   }
 
   private openAuthOverlay(state: 'loading' | 'success' | 'error', label: string, message: string) {
