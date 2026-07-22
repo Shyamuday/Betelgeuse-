@@ -9,7 +9,7 @@ export const RAZORPAY_CHECKOUT = {
 
 export const SEO_DEFAULTS = {
   SITE_URL: 'https://hopehubclinic.com',
-  DEFAULT_TITLE: 'HopeHub Care | Provider-Led Healthcare for All Conditions',
+  DEFAULT_TITLE: 'HopeHub Care | Expert-Led Online Healthcare',
   DEFAULT_DESCRIPTION:
-    'HopeHub Care offers provider-led online healthcare consultations for acute and chronic conditions - prescriptions where appropriate, follow-up, and secure digital care.',
+    'HopeHub Care offers expert-led online consultations for acute and chronic conditions - prescriptions where appropriate, follow-up, and secure digital care.',
 } as const;

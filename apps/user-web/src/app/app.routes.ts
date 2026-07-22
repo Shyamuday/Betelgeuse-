@@ -28,7 +28,7 @@ export const routes: Routes = [
     loadComponent: () => import('./talk-to-doctor.component').then((m) => m.TalkToDoctorComponent),
     data: {
       title: 'Talk to our expert now',
-      description: 'Instant online consultation with live providers.',
+      description: 'Instant online consultation with live experts.',
     },
   },
   {
@@ -41,7 +41,7 @@ export const routes: Routes = [
     data: {
       roles: ['PATIENT'],
       seoTitle: 'Instant consult room | HopeHub Care',
-      seoDescription: 'Chat and video call with your online provider.',
+      seoDescription: 'Chat and video call with your online expert.',
     },
   },
   {

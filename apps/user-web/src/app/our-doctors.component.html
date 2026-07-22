@@ -14,8 +14,8 @@
           <section class="panel provider-filter-panel">
             <div class="provider-filter-header">
               <div>
-                <p class="eyebrow">Find a provider</p>
-                <h2>Filter provider profiles</h2>
+                <p class="eyebrow">Find an expert</p>
+                <h2>Filter expert profiles</h2>
               </div>
               <p class="provider-result-count">
                 {{ filterLoading() ? 'Updating...' : providers().length + ' result' + (providers().length === 1 ? '' : 's') }}
@@ -34,12 +34,12 @@
               </label>
 
               <label>
-                Provider type
+                Expert type
                 <select
                   [value]="filters().providerType"
                   (change)="updateFilter('providerType', $any($event.target).value)"
                 >
-                  <option value="">All provider types</option>
+                  <option value="">All expert types</option>
                   @for (option of filterOptions().providerTypes; track option.value) {
                     <option [value]="option.value">{{ option.label }}</option>
                   }
@@ -119,15 +119,15 @@
           </section>
         } @else {
           <section class="panel doctors-empty-panel">
-            <p class="eyebrow">{{ hasActiveFilters() ? 'No matching providers' : 'Provider profiles' }}</p>
+            <p class="eyebrow">{{ hasActiveFilters() ? 'No matching experts' : 'Expert profiles' }}</p>
             <h2>{{ hasActiveFilters() ? 'Try a different filter.' : 'Our team details are being updated.' }}</h2>
             @if (hasActiveFilters()) {
-              <p>No provider profiles matched your current filters. You can clear filters or book a consultation and let our team match you.</p>
+              <p>No expert profiles matched your current filters. You can clear filters or book a consultation and let our team match you.</p>
               <button type="button" class="provider-filter-reset" (click)="resetFilters()">Clear filters</button>
             } @else {
               <p>
-                We are curating our provider listing for the website. You can still book a consultation - our care
-                team will match you to the right provider based on your condition.
+                We are curating our expert listing for the website. You can still book a consultation - our care
+                team will match you to the right expert based on your condition.
               </p>
             }
             <a class="whatsapp-action" [href]="whatsappLink()" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">

@@ -8,7 +8,7 @@
 
       @if (isLoading()) {
         <section class="panel">
-          <p class="loading-text">Loading clinic data…</p>
+          <p class="loading-text">Loading online care data…</p>
         </section>
       }
 
@@ -18,7 +18,7 @@
             @if (heroDisease(); as disease) {
               <p class="eyebrow">Your consultation</p>
               <h2>{{ disease.name }}</h2>
-              <p>Book a chat consultation for diagnosis, prescription, and follow-up guidance.</p>
+              <p>Book an online consultation for assessment, prescription where appropriate, and follow-up guidance.</p>
             } @else {
               <p class="eyebrow">Book care</p>
               <h2>Book a consultation</h2>
@@ -115,7 +115,7 @@
         </section>
       }
 
-      @if (auth.user()?.role === 'DOCTOR') {
+        @if (auth.user()?.role === 'DOCTOR') {
         <section class="grid two">
           <app-consultation-list
             [consultations]="consultations()"
@@ -147,13 +147,13 @@
 
         <section class="grid two">
           <div class="panel">
-            <h2>Add Provider</h2>
+            <h2>Add Expert</h2>
             <label>Name <input [formField]="doctorForm.name" /></label>
             <label>Email <input [formField]="doctorForm.email" /></label>
             <label>Mobile <input [formField]="doctorForm.mobile" /></label>
             <label>Specialty <input [formField]="doctorForm.specialty" /></label>
             <label>Password <input type="password" [formField]="doctorForm.password" /></label>
-            <button class="primary" (click)="createDoctor()">Create provider</button>
+            <button class="primary" (click)="createDoctor()">Create expert</button>
           </div>
 
           <div class="panel">
@@ -169,14 +169,14 @@
               </select>
             </label>
             <label>
-              Provider
+              Expert
               <select [formField]="assignmentForm.doctorId">
                 @for (doctor of doctors(); track doctor.id) {
                   <option [value]="doctor.id">{{ doctor.name }} - {{ doctor.doctorProfile?.specialization || doctor.doctorProfile?.specialty || doctor.doctorProfile?.providerTypeLabel }}</option>
                 }
               </select>
             </label>
-            <button class="primary" (click)="assignDoctor()">Assign provider</button>
+            <button class="primary" (click)="assignDoctor()">Assign expert</button>
           </div>
         </section>
 

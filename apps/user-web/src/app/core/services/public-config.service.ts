@@ -45,11 +45,11 @@ const FALLBACK: PublicConfig = {
   clinicAddressLine1: FOOTER_CONTENT.address.lines[0] ?? '',
   clinicAddressLine2: FOOTER_CONTENT.address.lines[1] ?? '',
   clinicAddressLine3: FOOTER_CONTENT.address.lines[2] ?? '',
-  clinicAddressLine4: FOOTER_CONTENT.address.lines[3] ?? '',
-  homeHeroEyebrow: 'provider-led healthcare',
-  homeHeroHeadline: 'Personalised care for every health concern.',
+  clinicAddressLine4: '',
+  homeHeroEyebrow: 'Expert-led online healthcare',
+  homeHeroHeadline: 'Online consultations for every health concern.',
   homeHeroLead:
-    'Acute illnesses, chronic conditions, skin and hair issues, digestive problems, allergies, mental wellness, nutrition, rehabilitation, and more - consult qualified healthcare providers online with guidance, prescriptions where appropriate, and follow-up.',
+    'Consult qualified healthcare experts online for acute illnesses, chronic conditions, skin and hair, digestion, allergies, mental wellness, nutrition, rehabilitation, and more - with secure follow-up and prescriptions where appropriate.',
   statConsultations: '5,000+',
   statDoctors: '12+',
   statRating: '4.8★',
@@ -86,15 +86,17 @@ export class PublicConfigService {
   }
 
   footerContact(config: PublicConfig): PublicFooterContact {
-    const lines = [
-      config.clinicAddressLine1,
-      config.clinicAddressLine2,
-      config.clinicAddressLine3,
-      config.clinicAddressLine4,
-    ].filter((line) => line?.trim());
+    // Offline address lines hidden for now. Platform is online-only.
+    // const lines = [
+    //   config.clinicAddressLine1,
+    //   config.clinicAddressLine2,
+    //   config.clinicAddressLine3,
+    //   config.clinicAddressLine4,
+    // ].filter((line) => line?.trim());
+    const lines = [...FOOTER_CONTENT.address.lines];
 
     return {
-      clinicName: config.clinicName || FALLBACK.clinicName,
+      clinicName: FOOTER_CONTENT.address.clinicName,
       lines,
       phoneLabel: FOOTER_CONTENT.address.phoneLabel,
       phone: config.contactPhone || FALLBACK.contactPhone,

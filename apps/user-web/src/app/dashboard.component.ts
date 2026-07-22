@@ -273,7 +273,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.paymentService.pay(
       consultation,
       () => {
-        this.showNotice('Payment verified. Admin can Assign provider now.');
+        this.showNotice('Payment verified. Expert assignment can begin now.');
         this.loadConsultations();
       },
       (message) => this.showNotice(message),
@@ -292,7 +292,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   retryPayment() {
     this.paymentService.retryPayment(
       () => {
-        this.showNotice('Payment verified. Admin can Assign provider now.');
+        this.showNotice('Payment verified. Expert assignment can begin now.');
         this.loadConsultations();
       },
       (message) => this.showNotice(message),
@@ -426,7 +426,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.isProcessing.set(true);
     this.api.explainDose(payload.id, payload.note).subscribe({
       next: () => {
-        this.showNotice('Reason saved for your provider.');
+        this.showNotice('Reason saved for your expert.');
         this.loadPatientMedicationData();
       },
       error: (error) => {
@@ -455,12 +455,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.isProcessing.set(true);
     this.api.createDoctor(this.doctorFormModel()).subscribe({
       next: () => {
-        this.showNotice('Provider created.');
+        this.showNotice('Expert created.');
         this.loadAdminData();
       },
       error: (error) => {
         this.isProcessing.set(false);
-        this.showNotice(error.error?.message || error.message || 'Could not Create provider.');
+        this.showNotice(error.error?.message || error.message || 'Could not create expert.');
       },
       complete: () => this.isProcessing.set(false),
     });
@@ -469,18 +469,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   assignDoctor() {
     const assignment = this.assignmentModel();
     if (!assignment.consultationId || !assignment.doctorId) {
-      return this.showNotice('Select consultation and provider.');
+      return this.showNotice('Select consultation and expert.');
     }
 
     this.isProcessing.set(true);
     this.api.assignDoctor(assignment.consultationId, assignment.doctorId).subscribe({
       next: () => {
-        this.showNotice('Provider assigned.');
+        this.showNotice('Expert assigned.');
         this.loadConsultations();
       },
       error: (error) => {
         this.isProcessing.set(false);
-        this.showNotice(error.error?.message || error.message || 'Could not Assign provider.');
+        this.showNotice(error.error?.message || error.message || 'Could not assign expert.');
       },
       complete: () => this.isProcessing.set(false),
     });
@@ -557,7 +557,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
       },
       error: (error) =>
-        this.showNotice(error.error?.message || error.message || 'Could not load providers.'),
+        this.showNotice(error.error?.message || error.message || 'Could not load experts.'),
     });
     this.dataService.loadReports().subscribe({
       next: (report) => this.report.set(report),

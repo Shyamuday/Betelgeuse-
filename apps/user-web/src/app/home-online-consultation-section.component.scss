@@ -1,0 +1,78 @@
+.online-consult-section {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 1rem;
+  align-items: stretch;
+  margin: 1.25rem 0;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #f8fbff;
+}
+
+.online-consult-copy,
+.online-step {
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 8px;
+  padding: clamp(1rem, 2vw, 1.35rem);
+}
+
+.online-consult-copy h2 {
+  margin: 0.35rem 0 0.6rem;
+  color: #102033;
+  font-size: clamp(1.65rem, 2.8vw, 2.35rem);
+  line-height: 1.08;
+}
+
+.online-consult-copy p,
+.online-step p {
+  color: #526070;
+  line-height: 1.65;
+}
+
+.online-consult-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.online-consult-flow {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.online-step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 0.85rem;
+  align-items: start;
+}
+
+.online-step span {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 999px;
+  background: #0f766e;
+  color: #fff;
+  font-weight: 800;
+}
+
+.online-step h3 {
+  margin: 0;
+  color: #102033;
+  font-size: 1rem;
+}
+
+.online-step p {
+  grid-column: 2;
+  margin: 0.35rem 0 0;
+}
+
+@media (max-width: 820px) {
+  .online-consult-section {
+    grid-template-columns: 1fr;
+  }
+}

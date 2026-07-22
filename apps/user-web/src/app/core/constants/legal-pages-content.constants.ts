@@ -21,7 +21,7 @@ export type LegalPageContent = {
 export const LEGAL_HUB_CONTENT = {
   headerSubtitle: 'Legal',
   eyebrow: 'Policies',
-  title: 'Privacy, terms, and clinic policies.',
+  title: 'Privacy, terms, and online care policies.',
   intro:
     'Read how HopeHub Care and Research Centre handles your data, consultations, payments, medicine orders, delivery, and returns.',
   links: [
@@ -59,7 +59,7 @@ export const LEGAL_PAGES = {
       {
         title: 'How we use your information',
         bullets: [
-          'To provide online consultations, provider assignment, prescriptions, reminders, and follow-up care.',
+          'To provide online consultations, expert assignment, prescriptions, reminders, and follow-up care.',
           'To process consultation fees and medicine payments.',
           'To arrange medicine packing, dispatch, and delivery.',
           'To send OTPs, appointment updates, prescription alerts, and service notifications.',
@@ -70,7 +70,7 @@ export const LEGAL_PAGES = {
       {
         title: 'Medical confidentiality',
         paragraphs: [
-          'Consultation and prescription information is shared only with authorised providers, pharmacists, care coordinators, and operations staff who need it to deliver your care.',
+          'Consultation and prescription information is shared only with authorised experts, pharmacists, care coordinators, and operations staff who need it to deliver your care.',
           'We do not sell your personal or health data to third-party advertisers.',
         ],
       },
@@ -86,7 +86,7 @@ export const LEGAL_PAGES = {
       {
         title: 'Data retention & security',
         paragraphs: [
-          'We retain consultation and prescription records as required for continuity of care and applicable regulations. Account data is stored using access controls, encryption in transit where supported, and clinic-operated infrastructure.',
+          'We retain consultation and prescription records as required for continuity of care and applicable regulations. Account data is stored using access controls, encryption in transit where supported, and secure platform infrastructure.',
           'You may request correction of inaccurate profile information through patient support.',
         ],
       },
@@ -117,7 +117,7 @@ export const LEGAL_PAGES = {
       {
         title: 'Nature of service',
         paragraphs: [
-          'We provide provider-led online healthcare consultations, digital prescriptions where clinically appropriate, follow-up messaging, and medicine fulfilment support.',
+          'We provide expert-led online healthcare consultations, digital prescriptions where clinically appropriate, follow-up messaging, and medicine fulfilment support.',
           'Our platform is not an emergency service. Severe or sudden symptoms require immediate offline medical care.',
         ],
       },
@@ -130,11 +130,11 @@ export const LEGAL_PAGES = {
         ],
       },
       {
-        title: 'Consultations & provider assignment',
+        title: 'Consultations & expert assignment',
         bullets: [
-          'Providers are assigned internally based on your concern, availability, and clinic workflow - patients do not browse or select providers from a public marketplace listing.',
-          'A consultation fee may apply before provider review or assignment, as shown at booking.',
-          'The provider may request additional history, photos, or reports before prescribing or giving care guidance.',
+          'Experts are assigned internally based on your concern, availability, and care workflow - patients do not browse or select experts from a public marketplace listing.',
+          'A consultation fee may apply before expert review or assignment, as shown at booking.',
+          'The expert may request additional history, photos, or reports before prescribing or giving care guidance.',
           'Prescriptions are issued only when clinically appropriate.',
         ],
       },
@@ -142,13 +142,13 @@ export const LEGAL_PAGES = {
         title: 'Medicines & fulfilment',
         paragraphs: [
           'Medicines prescribed during consultation may be ordered through our platform subject to stock, licensing, and delivery coverage.',
-          'You agree to use medicines only as directed by the prescribing provider.',
+          'You agree to use medicines only as directed by the prescribing expert.',
         ],
       },
       {
         title: 'User conduct',
         bullets: [
-          'Do not misuse the platform, submit false information, harass staff or providers, or attempt unauthorised access.',
+          'Do not misuse the platform, submit false information, harass staff or experts, or attempt unauthorised access.',
           'Do not record or redistribute consultation content without consent where prohibited by law.',
           'We may suspend accounts that violate these terms or create safety risks.',
         ],
@@ -156,13 +156,13 @@ export const LEGAL_PAGES = {
       {
         title: 'Intellectual property',
         paragraphs: [
-          'Website content, branding, workflows, and software are owned by or licensed to the clinic. You may not copy or commercially exploit them without permission.',
+          'Website content, branding, workflows, and software are owned by or licensed to HopeHub Care. You may not copy or commercially exploit them without permission.',
         ],
       },
       {
         title: 'Limitation of liability',
         paragraphs: [
-          'To the fullest extent permitted by law, the clinic is not liable for indirect or consequential damages arising from platform use, delivery delays outside our control, or failure to seek emergency care when needed.',
+          'To the fullest extent permitted by law, HopeHub Care is not liable for indirect or consequential damages arising from platform use, delivery delays outside our control, or failure to seek emergency care when needed.',
           'Nothing in these terms limits rights that cannot be excluded under applicable consumer protection law.',
         ],
       },
@@ -209,7 +209,7 @@ export const LEGAL_PAGES = {
           'Opened or partially used products.',
           'Products stored incorrectly by the customer after delivery.',
           'Delays caused by incorrect address or unavailable recipient.',
-          'Prescription items correctly dispensed as per provider order.',
+          'Prescription items correctly dispensed as per expert order.',
         ],
       },
       {
@@ -223,7 +223,7 @@ export const LEGAL_PAGES = {
       {
         title: 'Consultation fees',
         paragraphs: [
-          'Consultation fee refunds are governed by our Payment Policy and depend on whether the provider has started clinical review, whether the consultation was completed, or whether the case was cancelled due to clinic unavailability.',
+          'Consultation fee refunds are governed by our Payment Policy and depend on whether the expert has started clinical review, whether the consultation was completed, or whether the case was cancelled due to platform unavailability.',
         ],
       },
       {
@@ -246,7 +246,7 @@ export const LEGAL_PAGES = {
       {
         title: 'Serviceable areas',
         paragraphs: [
-          'We currently dispatch medicines to addresses within our active delivery network. Availability may vary by city, pin code, and courier partner coverage. If your area is not serviceable, our team will inform you and suggest alternatives such as clinic pickup where available.',
+          'We currently dispatch medicines to addresses within our active delivery network. Availability may vary by city, pin code, and courier partner coverage. If your area is not serviceable, our team will inform you and suggest available alternatives.',
         ],
       },
       {
@@ -311,9 +311,9 @@ export const LEGAL_PAGES = {
         title: 'Consultation payments',
         bullets: [
           'Consultation fees are displayed before you confirm booking.',
-          'Payment confirms your request in the clinic queue for provider assignment and review.',
-          'If a consultation cannot be provided due to clinic-side cancellation, a full refund or reschedule option will be offered.',
-          'If you cancel before provider review begins, refund eligibility is assessed as per clinic rules shown at checkout.',
+          'Payment confirms your request in the online queue for expert assignment and review.',
+          'If a consultation cannot be provided due to HopeHub-side cancellation, a full refund or reschedule option will be offered.',
+          'If you cancel before expert review begins, refund eligibility is assessed as per rules shown at checkout.',
         ],
       },
       {

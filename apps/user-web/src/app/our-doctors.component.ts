@@ -69,13 +69,13 @@ export class OurDoctorsComponent {
     },
     {
       step: '02',
-      title: 'We assign the right provider',
-      detail: 'Our team matches you to the provider best suited for your condition.',
+      title: 'We assign the right expert',
+      detail: 'Our team matches you to the expert best suited for your condition.',
     },
     {
       step: '03',
       title: 'Consultation begins',
-      detail: 'Your assigned provider reviews your case and begins a private chat consultation.',
+      detail: 'Your assigned expert reviews your case and begins a private chat consultation.',
     },
     {
       step: '04',
@@ -146,7 +146,7 @@ export class OurDoctorsComponent {
       provider.specialization ||
       provider.specialty ||
       provider.providerTypeLabel ||
-      'Healthcare Provider'
+      'Healthcare Expert'
     );
   }
 

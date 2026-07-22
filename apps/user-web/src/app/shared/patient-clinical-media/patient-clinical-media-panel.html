@@ -2,7 +2,7 @@
   <div class="panel-head">
     <div>
       <h3>Health photos</h3>
-      <p class="muted">Upload symptom photos by body area or condition — skin, tongue, swelling, wounds, and more. your provider can review these during consultation.</p>
+      <p class="muted">Upload symptom photos by body area or condition — skin, tongue, swelling, wounds, and more. Your expert can review these during consultation.</p>
     </div>
   </div>
 
@@ -46,7 +46,7 @@
 
       <label class="field-label" for="health-photo-disease">Related condition (catalog)</label>
       <select id="health-photo-disease" [formField]="uploadForm.diseaseId">
-        <option value="">Optional — pick from clinic list</option>
+        <option value="">Optional — pick from condition list</option>
         @for (d of diseases(); track d.id) {
           <option [value]="d.id">{{ d.name }}</option>
         }
@@ -120,7 +120,7 @@
                     }
                     @if (preview.discussionPoints.length) {
                       <div class="ai-section">
-                        <strong>Discuss with your provider</strong>
+                        <strong>Discuss with your expert</strong>
                         <ul>
                           @for (line of preview.discussionPoints; track line) {
                             <li>{{ line }}</li>

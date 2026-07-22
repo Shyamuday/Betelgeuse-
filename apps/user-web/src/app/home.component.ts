@@ -7,6 +7,7 @@ import { HomeHeroSectionComponent } from './home-hero-section.component';
 import { HomeCarouselSectionComponent } from './home-carousel-section.component';
 import { HomeAnnouncementTickerComponent } from './home-announcement-ticker.component';
 import { HomeTalkToDoctorSectionComponent } from './home-talk-to-doctor-section.component';
+import { HomeOnlineConsultationSectionComponent } from './home-online-consultation-section.component';
 import { HomeHowItWorksSectionComponent } from './home-how-it-works-section.component';
 import { HomeSafetyFaqSectionComponent } from './home-safety-faq-section.component';
 import { HomeTreatmentsSectionComponent } from './home-treatments-section.component';
@@ -20,6 +21,7 @@ import { HomeTreatmentsSectionComponent } from './home-treatments-section.compon
     HomeCarouselSectionComponent,
     HomeHeroSectionComponent,
     HomeTalkToDoctorSectionComponent,
+    HomeOnlineConsultationSectionComponent,
     HomeTreatmentsSectionComponent,
     HomeHowItWorksSectionComponent,
     HomeSafetyFaqSectionComponent,

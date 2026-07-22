@@ -30,7 +30,7 @@ import { AppOverlayService } from './overlay.service';
   styleUrl: './app-header.component.scss',
 })
 export class AppHeaderComponent implements OnDestroy {
-  @Input() subtitle = 'Digital clinic';
+  @Input() subtitle = 'Online care';
   @Input() user: User | null | undefined;
   @Input() whatsappLink = '';
   @Output() logout = new EventEmitter<void>();

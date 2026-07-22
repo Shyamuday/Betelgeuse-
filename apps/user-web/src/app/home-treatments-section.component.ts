@@ -23,7 +23,7 @@ export class HomeTreatmentsSectionComponent {
       const cfg = await this.configSvc.get();
       this.stats.set([
         { value: cfg.statConsultations, label: 'Consultations completed' },
-        { value: cfg.statDoctors, label: 'Experienced providers' },
+        { value: cfg.statDoctors, label: 'Experienced experts' },
         { value: cfg.statRating, label: 'Patient rating' },
         { value: cfg.statFollowUp, label: 'Follow-up compliance' },
       ]);

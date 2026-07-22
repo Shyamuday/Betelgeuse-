@@ -1,0 +1,24 @@
+<section class="online-consult-section">
+  <div class="online-consult-copy">
+    <p class="eyebrow">Fully online consultation</p>
+    <h2>Care from the right expert, wherever you are.</h2>
+    <p>
+      HopeHub is built for online-first healthcare: symptom intake, expert matching, secure chat
+      or video, prescriptions where appropriate, medicine delivery support, and follow-up in one place.
+    </p>
+    <div class="online-consult-actions">
+      <a class="primary home-action" routerLink="/treatments">Start consultation</a>
+      <a class="secondary home-action" routerLink="/talk-to-provider">Talk to our expert now</a>
+    </div>
+  </div>
+
+  <div class="online-consult-flow" aria-label="Online consultation flow">
+    @for (step of steps; track step.label) {
+      <article class="online-step">
+        <span>{{ step.label }}</span>
+        <h3>{{ step.title }}</h3>
+        <p>{{ step.body }}</p>
+      </article>
+    }
+  </div>
+</section>

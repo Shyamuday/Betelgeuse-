@@ -87,8 +87,8 @@ export class PatientInstantConsultPageComponent implements OnInit, OnDestroy {
 
   phaseLabel() {
     const map: Record<string, string> = {
-      payment: 'Complete payment to connect with a provider',
-      waiting: 'Finding an online provider for you...',
+      payment: 'Complete payment to connect with an expert',
+      waiting: 'Finding an online expert for you...',
       active: 'You are connected - chat or start a call below',
       done: 'This consultation has ended',
       unknown: 'Loading…',
@@ -103,7 +103,7 @@ export class PatientInstantConsultPageComponent implements OnInit, OnDestroy {
     this.paymentService.pay(
       c,
       () => {
-        this.notice.set('Payment successful. Matching you with a provider...');
+        this.notice.set('Payment successful. Matching you with an expert...');
         this.load(c.id);
       },
       (message) => this.notice.set(message),

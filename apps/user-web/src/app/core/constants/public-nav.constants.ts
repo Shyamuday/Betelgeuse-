@@ -19,7 +19,7 @@ export const PUBLIC_HEADER_NAV_GROUPS: PublicNavGroup[] = [
       { label: 'Treatments', path: `/${ROUTE_PATHS.TREATMENTS}` },
       { label: 'Talk to our expert now', path: '/talk-to-provider' },
       { label: 'Chronic care', path: `/${ROUTE_PATHS.CHRONIC_CARE}` },
-      { label: 'Our providers', path: `/${ROUTE_PATHS.OUR_PROVIDERS}` },
+      { label: 'Our Experts', path: `/${ROUTE_PATHS.OUR_PROVIDERS}` },
     ],
   },
   {
@@ -33,8 +33,8 @@ export const PUBLIC_HEADER_NAV_GROUPS: PublicNavGroup[] = [
     ],
   },
   {
-    id: 'clinic',
-    label: 'Clinic',
+    id: 'support',
+    label: 'Support',
     links: [
       { label: 'About us', path: `/${ROUTE_PATHS.ABOUT}` },
       { label: 'Careers', path: `/${ROUTE_PATHS.CAREERS}` },

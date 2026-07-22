@@ -15,14 +15,16 @@ export type FooterColumn = {
 
 export const FOOTER_CONTENT = {
   address: {
-    title: 'Address',
-    clinicName: 'HopeHub Care and Research Centre',
-    lines: [
-      'Ranchi Main Clinic',
-      'Near City Centre, Main Road',
-      'Ranchi, Jharkhand, India',
-      'Pincode — 834001',
-    ],
+    title: 'Online support',
+    clinicName: 'HopeHub Care',
+    lines: ['Fully online consultations', 'Chat, voice, and video care', 'India-wide support'],
+    // Offline address hidden for now. Platform is online-only.
+    // lines: [
+    //   'Ranchi Main Clinic',
+    //   'Near City Centre, Main Road',
+    //   'Ranchi, Jharkhand, India',
+    //   'Pincode — 834001',
+    // ],
     phoneLabel: 'Contact',
     phone: '+91-98765-43210',
     phoneHref: 'tel:+919876543210',
@@ -38,7 +40,7 @@ export const FOOTER_CONTENT = {
         { label: 'Partial Payment Refund Policy', href: '/payment-policy' },
         { label: 'Contact Us', href: '/contact' },
         { label: 'About HopeHub Care', href: '/about' },
-        { label: 'Our Providers', href: '/our-providers' },
+        { label: 'Our Experts', href: '/our-providers' },
         { label: 'Blogs', href: '/blog' },
         { label: 'Patient Stories', href: '/testimonials' },
         { label: 'Safety & Trust', href: '/safety' },

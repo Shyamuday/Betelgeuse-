@@ -8,7 +8,7 @@ export const DOSE_SKIP_REASONS = [
   'Side effects',
   'Not at home',
   'Ran out of medicine',
-  'Provider advised to pause',
+  'Expert advised to pause',
 ] as const;
 
 export const DOSE_MISSED_REASONS = [

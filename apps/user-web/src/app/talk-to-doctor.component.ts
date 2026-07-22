@@ -95,7 +95,7 @@ export class TalkToDoctorComponent implements OnInit, OnDestroy {
       this.providers.set(docRes.providers ?? docRes.doctors ?? []);
       this.diseases.set(diseaseRes.diseases ?? []);
     } catch {
-      this.error.set('Could not load online providers.');
+      this.error.set('Could not load online experts.');
     } finally {
       this.loading.set(false);
     }
@@ -111,12 +111,15 @@ export class TalkToDoctorComponent implements OnInit, OnDestroy {
 
   providerSpecialty(provider: OnlineProvider) {
     return (
-      provider.specialization || provider.specialty || provider.providerTypeLabel || 'Provider'
+      provider.specialization ||
+      provider.specialty ||
+      provider.providerTypeLabel ||
+      'Healthcare Expert'
     );
   }
 
   categoryLabel(provider: OnlineProvider) {
-    return provider.category === 'SPECIALIST' ? 'Specialist' : 'General provider';
+    return provider.category === 'SPECIALIST' ? 'Specialist' : 'General expert';
   }
 
   async startConsult() {
@@ -146,7 +149,7 @@ export class TalkToDoctorComponent implements OnInit, OnDestroy {
             preferredDoctorUserId: this.selectedProvider()?.userId ?? null,
             intakeAnswers: {
               'Main concern': concern.trim(),
-              'Consultation type': 'Instant online provider',
+              'Consultation type': 'Instant online expert',
             },
             purchaseType: 'ONE_TIME',
           }),
