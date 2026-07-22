@@ -158,6 +158,12 @@ app.use(
 );
 app.use('/payments/razorpay-webhook', express.raw({ type: 'application/json' }));
 app.use(express.json({ limit: '8mb' }));
+app.use((req, _res, next) => {
+  if (req.url === '/provider' || req.url.startsWith('/provider/')) {
+    req.url = req.url.replace(/^\/provider(?=\/|$)/, '/doctor');
+  }
+  next();
+});
 
 // Rate limiting
 const otpLimiter = rateLimit({

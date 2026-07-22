@@ -37,7 +37,7 @@ export class Auth {
     }
   }
 
-  async enrollDoctor(payload: {
+  async enrollProvider(payload: {
     name: string;
     email: string;
     mobile?: string;
@@ -53,7 +53,10 @@ export class Auth {
 
     try {
       const response = await firstValueFrom(
-        this.http.post<{ message?: string }>(`${this.apiBase}${AUTH_PATHS.DOCTOR_ENROLL}`, payload),
+        this.http.post<{ message?: string }>(
+          `${this.apiBase}${AUTH_PATHS.PROVIDER_ENROLL}`,
+          payload,
+        ),
       );
       return {
         ok: true as const,
@@ -62,6 +65,10 @@ export class Auth {
     } catch (error: any) {
       return { ok: false as const, message: error?.error?.message || AUTH_MESSAGES.ENROLL_FAILED };
     }
+  }
+
+  enrollDoctor(payload: Parameters<Auth['enrollProvider']>[0]) {
+    return this.enrollProvider(payload);
   }
 
   applyDevLogin(token: string) {

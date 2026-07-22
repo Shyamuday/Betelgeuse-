@@ -23,7 +23,7 @@ import {
   type LastConsultationWorkspace,
 } from '../../core/services/consultation-navigation.service';
 import { DoctorRealtimeService } from '../../core/services/doctor-realtime.service';
-import { DoctorSessionService } from '../../core/services/doctor-session';
+import { ProviderSessionService } from '../../core/services/provider-session';
 
 export type DoctorBottomNavItem = {
   id: string;
@@ -82,7 +82,7 @@ export class DoctorShell implements OnInit, OnDestroy {
 
   constructor(
     private readonly auth: Auth,
-    private readonly session: DoctorSessionService,
+    private readonly session: ProviderSessionService,
   ) {
     this.navItems = this.buildNav(navItemsForDoctorType(null));
   }

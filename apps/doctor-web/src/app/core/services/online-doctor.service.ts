@@ -35,7 +35,7 @@ export class OnlineDoctorService implements OnDestroy {
       this.http.get<{
         profile: OnlineDoctorProfile;
         diseases: Array<{ id: string; name: string }>;
-      }>(`${this.apiBase}${API_PATHS.DOCTOR.ONLINE_PROFILE}`),
+      }>(`${this.apiBase}${API_PATHS.PROVIDER.ONLINE_PROFILE}`),
     );
   }
 
@@ -44,7 +44,7 @@ export class OnlineDoctorService implements OnDestroy {
   ) {
     return firstValueFrom(
       this.http.put<{ profile: OnlineDoctorProfile }>(
-        `${this.apiBase}${API_PATHS.DOCTOR.ONLINE_PROFILE}`,
+        `${this.apiBase}${API_PATHS.PROVIDER.ONLINE_PROFILE}`,
         payload,
       ),
     );
@@ -57,7 +57,7 @@ export class OnlineDoctorService implements OnDestroy {
   }) {
     return firstValueFrom(
       this.http.put<{ profile: OnlineDoctorProfile }>(
-        `${this.apiBase}${API_PATHS.DOCTOR.ONLINE_STATUS}`,
+        `${this.apiBase}${API_PATHS.PROVIDER.ONLINE_STATUS}`,
         payload,
       ),
     );
@@ -71,7 +71,7 @@ export class OnlineDoctorService implements OnDestroy {
     this.heartbeatTimer = setInterval(() => {
       this.socket?.emit('doctor:heartbeat');
       void firstValueFrom(
-        this.http.post(`${this.apiBase}${API_PATHS.DOCTOR.ONLINE_HEARTBEAT}`, {}),
+        this.http.post(`${this.apiBase}${API_PATHS.PROVIDER.ONLINE_HEARTBEAT}`, {}),
       ).catch(() => undefined);
     }, 30_000);
   }
@@ -97,7 +97,7 @@ export class OnlineDoctorService implements OnDestroy {
           disease: { id: string; name: string };
           updatedAt: string;
         }>;
-      }>(`${this.apiBase}${API_PATHS.DOCTOR.INSTANT_CONSULTATIONS}`),
+      }>(`${this.apiBase}${API_PATHS.PROVIDER.INSTANT_CONSULTATIONS}`),
     );
   }
 

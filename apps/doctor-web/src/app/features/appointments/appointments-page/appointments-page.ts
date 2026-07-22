@@ -13,7 +13,7 @@ import { ConsultationApiService } from '../../../core/services/consultation-api.
 import type { DoctorConsultation } from '../../../core/types/consultation.types';
 import { AppointmentsPrescriptionsService } from './appointments-prescriptions.service';
 import { PrescriptionPdfService } from '../../../core/services/prescription-pdf.service';
-import { DoctorSessionService } from '../../../core/services/doctor-session';
+import { ProviderSessionService } from '../../../core/services/provider-session';
 import { ConsultationChatPanelComponent } from '../../../shared/consultation-chat-panel/consultation-chat-panel';
 import { ConsultationContextHeaderComponent } from '../../../shared/consultation-context-header/consultation-context-header';
 import { ConsultationIntakePanelComponent } from '../../../shared/consultation-intake-panel/consultation-intake-panel';
@@ -86,7 +86,7 @@ function emptyPrescriptionModel() {
 export class AppointmentsPage implements OnInit {
   private readonly prescriptions = inject(AppointmentsPrescriptionsService);
   private readonly prescriptionPdf = inject(PrescriptionPdfService);
-  private readonly session = inject(DoctorSessionService);
+  private readonly session = inject(ProviderSessionService);
   private readonly consultationApi = inject(ConsultationApiService);
   private readonly diseaseCatalog = inject(DiseaseCatalogService);
   private readonly route = inject(ActivatedRoute);

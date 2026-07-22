@@ -94,7 +94,7 @@ export class Login {
     this.message.set('');
     this.submitting.set(true);
     try {
-      const result = await this.auth.enrollDoctor({
+      const result = await this.auth.enrollProvider({
         name,
         email,
         mobile: mobile || undefined,
