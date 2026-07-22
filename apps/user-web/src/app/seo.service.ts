@@ -155,17 +155,21 @@ export class SeoService {
       return {};
     }
 
-    const { homeopathyApproaches } =
-      await import('./treatment-approach/homeopathy-approaches.constants');
-    const allKeywords = homeopathyApproaches.flatMap((approach) => approach.seo?.keywords || []);
     return {
-      metaTitle: 'Homeopathy Approaches | HopeHub Care and Research Centre',
+      metaTitle: 'Why HopeHub Works | HopeHub Care',
       metaDescription:
-        'Explore structured homeopathy approaches used at HopeHub Care and Research Centre, including case frameworks, strengths, and limitations.',
-      keywords: Array.from(new Set(allKeywords)).slice(0, 30),
-      ogTitle: 'Homeopathy Approaches at HopeHub Care and Research Centre',
+        'See how HopeHub Care combines structured intake, expert matching, online consultation, safety checks, and connected follow-up.',
+      keywords: [
+        'online healthcare',
+        'expert consultation',
+        'digital health platform',
+        'patient follow-up',
+        'care coordination',
+        'teleconsultation',
+      ],
+      ogTitle: 'Why HopeHub Works',
       ogDescription:
-        'Compare method-led homeopathy approaches and their digital care mapping at HopeHub Care and Research Centre.',
+        'Structured online care with the right expert, organised records, and follow-up that stays connected.',
     };
   }
 

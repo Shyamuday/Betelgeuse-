@@ -77,7 +77,7 @@ export const FOOTER_CONTENT = {
         { label: 'Skin Care', href: '/treatments/skin-care' },
         { label: 'Chronic & Long-term Care', href: '/chronic-care' },
         { label: 'Why HopeHub Works', href: '/why-successful' },
-        { label: 'Care Approaches', href: '/why-successful' },
+        { label: 'Our Care Model', href: '/why-successful' },
       ],
     },
   ] satisfies readonly FooterColumn[],

@@ -431,7 +431,7 @@ export const ROUTE_SEO_CONTENT = {
   'why-successful': {
     seoTitle: 'Why HopeHub Works | HopeHub Care',
     seoDescription:
-      'See how HopeHub Care combines structured case-taking, method-led decision making, and disciplined follow-up.',
+      'See how HopeHub Care combines structured intake, expert matching, online consultation, safety checks, and connected follow-up.',
   },
   contact: {
     seoTitle: 'Contact | HopeHub Care',
