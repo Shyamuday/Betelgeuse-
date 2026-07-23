@@ -149,12 +149,12 @@ import { APP_CONSTANTS } from '../../core';
           </p>
           <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6">
             <a
-              href="#"
+              routerLink="/privacy"
               class="text-gray-300 hover:text-white text-xs sm:text-sm transition-colors duration-200 text-center"
               >Privacy Policy</a
             >
             <a
-              href="#"
+              routerLink="/terms"
               class="text-gray-300 hover:text-white text-xs sm:text-sm transition-colors duration-200 text-center"
               >Terms of Service</a
             >

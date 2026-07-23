@@ -116,6 +116,39 @@ import { User } from '../../core/models/auth.model';
             >
               Contact
             </a>
+            <div class="relative group">
+              <button
+                class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center"
+              >
+                Legal
+                <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+              <div
+                class="absolute left-0 mt-2 w-44 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
+              >
+                <div class="py-1">
+                  <a
+                    routerLink="/privacy"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600"
+                  >
+                    Privacy Policy
+                  </a>
+                  <a
+                    routerLink="/terms"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600"
+                  >
+                    Terms of Service
+                  </a>
+                </div>
+              </div>
+            </div>
             <a
               routerLink="/donate"
               routerLinkActive="bg-green-600"
@@ -328,6 +361,27 @@ import { User } from '../../core/models/auth.model';
                 role="menuitem"
               >
                 Contact
+              </a>
+              <div class="px-3 py-2">
+                <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Legal</div>
+              </div>
+              <a
+                routerLink="/privacy"
+                (click)="navigateAndClose('/privacy')"
+                routerLinkActive="text-primary-600 bg-primary-50"
+                class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 px-6 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                role="menuitem"
+              >
+                Privacy Policy
+              </a>
+              <a
+                routerLink="/terms"
+                (click)="navigateAndClose('/terms')"
+                routerLinkActive="text-primary-600 bg-primary-50"
+                class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 px-6 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                role="menuitem"
+              >
+                Terms of Service
               </a>
               <a
                 routerLink="/donate"

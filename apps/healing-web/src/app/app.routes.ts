@@ -127,6 +127,28 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'privacy',
+    loadComponent: () =>
+      import('./features/legal/privacy-policy.component').then((m) => m.PrivacyPolicyComponent),
+    title: 'Privacy Policy - Hope Hub',
+    data: {
+      breadcrumb: 'Privacy Policy',
+      description: 'Read the Hope Hub privacy policy for mind.hopehub.in',
+      keywords: 'privacy policy, hope hub, mental health privacy',
+    },
+  },
+  {
+    path: 'terms',
+    loadComponent: () =>
+      import('./features/legal/terms-of-service.component').then((m) => m.TermsOfServiceComponent),
+    title: 'Terms of Service - Hope Hub',
+    data: {
+      breadcrumb: 'Terms of Service',
+      description: 'Read the Hope Hub terms of service for mind.hopehub.in',
+      keywords: 'terms of service, hope hub, mental health services terms',
+    },
+  },
+  {
     path: 'dashboard',
     loadComponent: () =>
       import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
