@@ -4,6 +4,7 @@ export * from './loading.service';
 export * from './lead.service';
 export * from './booking.service';
 export * from './payment.service';
+export * from './realtime.service';
 export * from './auth-modal.service';
 export * from './auth.service';
 export * from './seo.service';

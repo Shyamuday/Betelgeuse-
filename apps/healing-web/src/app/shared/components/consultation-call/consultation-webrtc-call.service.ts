@@ -5,8 +5,7 @@ import {
   type CallSignalingSocket,
   type CallState,
   type IceServerConfig,
-  type MediaAccessResult,
-  type PendingOffer
+  type PendingOffer,
 } from './webrtc-call.types';
 
 const DEFAULT_STUN: IceServerConfig[] = [{ urls: 'stun:stun.l.google.com:19302' }];
@@ -28,19 +27,16 @@ export class ConsultationWebrtcCallService {
   private pc: RTCPeerConnection | null = null;
   private socket: CallSignalingSocket | null = null;
   private callContext: { consultationId: string; targetUserId: string } | null = null;
-  private boundSocketId: symbol | null = null;
-  private ensureMediaAccess: ((mode: CallMode) => Promise<MediaAccessResult>) | null = null;
   private iceQueue: RTCIceCandidateInit[] = [];
 
-  bindSocket(socket: CallSignalingSocket) {
-    if (this.socket === socket && this.boundSocketId) return;
+  bindSocket(socket: CallSignalingSocket): void {
+    if (this.socket === socket) return;
 
     this.unbindSocketListeners();
     this.socket = socket;
-    this.boundSocketId = Symbol('call-socket');
 
     socket.on(CALL_SOCKET_EVENTS.RING, (raw: unknown) => {
-      const payload = raw as { fromUserId?: string; consultationId?: string };
+      const payload = raw as { fromUserId?: string };
       if (!payload?.fromUserId) return;
       this.incomingCall.set(true);
       if (this.state() === 'idle') this.state.set('ringing');
@@ -49,21 +45,14 @@ export class ConsultationWebrtcCallService {
     socket.on(CALL_SOCKET_EVENTS.OFFER, (raw: unknown) => {
       void this.onRemoteOffer(raw);
     });
-
     socket.on(CALL_SOCKET_EVENTS.ANSWER, (raw: unknown) => {
       void this.onRemoteAnswer(raw);
     });
-
     socket.on(CALL_SOCKET_EVENTS.ICE, (raw: unknown) => {
       void this.onRemoteIce(raw);
     });
-
     socket.on(CALL_SOCKET_EVENTS.END, () => this.cleanup('ended'));
     socket.on(CALL_SOCKET_EVENTS.REJECT, () => this.cleanup('ended'));
-  }
-
-  setMediaAccessHandler(handler: (mode: CallMode) => Promise<MediaAccessResult>) {
-    this.ensureMediaAccess = handler;
   }
 
   async startCall(params: {
@@ -72,7 +61,7 @@ export class ConsultationWebrtcCallService {
     targetUserId: string;
     mode: CallMode;
     iceServers?: IceServerConfig[];
-  }) {
+  }): Promise<void> {
     this.bindSocket(params.socket);
     this.callContext = { consultationId: params.consultationId, targetUserId: params.targetUserId };
     this.incomingCall.set(false);
@@ -86,22 +75,22 @@ export class ConsultationWebrtcCallService {
     this.state.set('ringing');
     params.socket.emit(CALL_SOCKET_EVENTS.RING, {
       consultationId: params.consultationId,
-      targetUserId: params.targetUserId
+      targetUserId: params.targetUserId,
     });
     params.socket.emit(CALL_SOCKET_EVENTS.OFFER, {
       consultationId: params.consultationId,
       targetUserId: params.targetUserId,
-      sdp: offer
+      sdp: offer,
     });
   }
 
-  async acceptIncoming(iceServers: IceServerConfig[] = DEFAULT_STUN) {
+  async acceptIncoming(iceServers: IceServerConfig[] = DEFAULT_STUN): Promise<void> {
     const offer = this.pendingOffer();
     if (!offer || !this.socket) return;
 
     this.callContext = {
       consultationId: offer.consultationId,
-      targetUserId: offer.fromUserId
+      targetUserId: offer.fromUserId,
     };
     this.callMode.set(offer.mode);
     this.error.set('');
@@ -116,7 +105,7 @@ export class ConsultationWebrtcCallService {
       this.socket.emit(CALL_SOCKET_EVENTS.ANSWER, {
         consultationId: offer.consultationId,
         targetUserId: offer.fromUserId,
-        sdp: answer
+        sdp: answer,
       });
       this.pendingOffer.set(null);
       this.state.set('connected');
@@ -126,19 +115,19 @@ export class ConsultationWebrtcCallService {
     }
   }
 
-  rejectCall(params: { consultationId: string; targetUserId: string }) {
+  rejectCall(params: { consultationId: string; targetUserId: string }): void {
     this.socket?.emit(CALL_SOCKET_EVENTS.REJECT, params);
     this.pendingOffer.set(null);
     this.incomingCall.set(false);
     this.cleanup('ended');
   }
 
-  endCall(params: { consultationId: string; targetUserId: string }) {
+  endCall(params: { consultationId: string; targetUserId: string }): void {
     this.socket?.emit(CALL_SOCKET_EVENTS.END, params);
     this.cleanup('ended');
   }
 
-  setMicEnabled(enabled: boolean) {
+  setMicEnabled(enabled: boolean): void {
     this.localStream()
       ?.getAudioTracks()
       .forEach((track) => {
@@ -146,7 +135,7 @@ export class ConsultationWebrtcCallService {
       });
   }
 
-  setCameraEnabled(enabled: boolean) {
+  setCameraEnabled(enabled: boolean): void {
     this.localStream()
       ?.getVideoTracks()
       .forEach((track) => {
@@ -154,7 +143,7 @@ export class ConsultationWebrtcCallService {
       });
   }
 
-  cleanup(state: CallState = 'idle') {
+  cleanup(state: CallState = 'idle'): void {
     this.localStream()
       ?.getTracks()
       .forEach((track) => track.stop());
@@ -170,7 +159,7 @@ export class ConsultationWebrtcCallService {
     this.error.set('');
   }
 
-  private async onRemoteOffer(raw: unknown) {
+  private async onRemoteOffer(raw: unknown): Promise<void> {
     const payload = raw as {
       fromUserId?: string;
       consultationId?: string;
@@ -178,18 +167,17 @@ export class ConsultationWebrtcCallService {
     };
     if (!payload?.fromUserId || !payload.consultationId || !payload.sdp?.sdp) return;
 
-    const mode: CallMode = sdpHasVideo(payload.sdp.sdp) ? 'video' : 'audio';
     this.pendingOffer.set({
       fromUserId: payload.fromUserId,
       consultationId: payload.consultationId,
       sdp: payload.sdp,
-      mode
+      mode: sdpHasVideo(payload.sdp.sdp) ? 'video' : 'audio',
     });
     this.incomingCall.set(true);
     this.state.set('ringing');
   }
 
-  private async onRemoteAnswer(raw: unknown) {
+  private async onRemoteAnswer(raw: unknown): Promise<void> {
     const payload = raw as { sdp?: RTCSessionDescriptionInit };
     if (!payload?.sdp || !this.pc) return;
     await this.pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
@@ -197,7 +185,7 @@ export class ConsultationWebrtcCallService {
     this.state.set('connected');
   }
 
-  private async onRemoteIce(raw: unknown) {
+  private async onRemoteIce(raw: unknown): Promise<void> {
     const payload = raw as { candidate?: RTCIceCandidateInit };
     if (!payload?.candidate) return;
     if (!this.pc?.remoteDescription) {
@@ -207,11 +195,11 @@ export class ConsultationWebrtcCallService {
     try {
       await this.pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
     } catch {
-      // stale candidate after reconnect — safe to ignore
+      // Ignore stale candidates after reconnects.
     }
   }
 
-  private async flushIceQueue() {
+  private async flushIceQueue(): Promise<void> {
     if (!this.pc) return;
     const queued = [...this.iceQueue];
     this.iceQueue = [];
@@ -219,27 +207,24 @@ export class ConsultationWebrtcCallService {
       try {
         await this.pc.addIceCandidate(new RTCIceCandidate(candidate));
       } catch {
-        // ignore
+        // Ignore stale candidates after reconnects.
       }
     }
   }
 
-  private async ensurePeer(mode: CallMode, iceServers: IceServerConfig[] = DEFAULT_STUN) {
+  private async ensurePeer(mode: CallMode, iceServers: IceServerConfig[]): Promise<void> {
     if (this.pc) return;
 
-    const access = this.ensureMediaAccess
-      ? await this.ensureMediaAccess(mode)
-      : await this.defaultMediaAccess(mode);
-    if (!access.granted) {
-      this.error.set(access.message ?? 'Camera or microphone permission required.');
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+      this.error.set('Calls are not supported on this device.');
       this.state.set('error');
-      throw new Error(access.message ?? 'Media permission denied');
+      throw new Error('Calls are not supported on this device.');
     }
 
     this.pc = new RTCPeerConnection({ iceServers });
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: true,
-      video: mode === 'video'
+      video: mode === 'video',
     });
     this.localStream.set(stream);
 
@@ -257,36 +242,14 @@ export class ConsultationWebrtcCallService {
       this.socket.emit(CALL_SOCKET_EVENTS.ICE, {
         consultationId: this.callContext.consultationId,
         targetUserId: this.callContext.targetUserId,
-        candidate: event.candidate.toJSON()
+        candidate: event.candidate.toJSON(),
       });
     };
 
     this.state.set('connecting');
   }
 
-  private async defaultMediaAccess(mode: CallMode): Promise<MediaAccessResult> {
-    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
-      return { granted: false, message: 'Calls are not supported on this device.' };
-    }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: mode === 'video'
-      });
-      stream.getTracks().forEach((track) => track.stop());
-      return { granted: true };
-    } catch {
-      return {
-        granted: false,
-        message:
-          mode === 'video'
-            ? 'Camera and microphone access are required for video calls.'
-            : 'Microphone access is required for voice calls.'
-      };
-    }
-  }
-
-  private unbindSocketListeners() {
+  private unbindSocketListeners(): void {
     if (!this.socket?.off) return;
     for (const event of Object.values(CALL_SOCKET_EVENTS)) {
       this.socket.off(event);

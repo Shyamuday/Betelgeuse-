@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import type { IceServerConfig } from '../../shared/components/consultation-call/webrtc-call.types';
 
 export type HopeHubBookingPayload = {
   serviceName: string;
@@ -33,6 +34,10 @@ export class BookingService {
     return this.http.get<{ consultations: any[]; leads: any[] }>(
       `${this.apiUrl}/hope-hub/dashboard`,
     );
+  }
+
+  iceServers(): Observable<{ iceServers: IceServerConfig[] }> {
+    return this.http.get<{ iceServers: IceServerConfig[] }>(`${this.apiUrl}/rtc/ice-servers`);
   }
 
   slots(date: string): Observable<{

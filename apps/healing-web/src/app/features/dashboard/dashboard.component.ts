@@ -4,13 +4,31 @@ import { RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/services/auth.service';
 import { BookingService } from '../../core/services/booking.service';
+import { HopeHubRealtimeService } from '../../core/services/realtime.service';
 import { User } from '../../core/models/auth.model';
 import { ProgressDashboardComponent } from '../../shared/components/progress-dashboard/progress-dashboard.component';
+import { ConsultationCallPanelComponent } from '../../shared/components/consultation-call/consultation-call-panel.component';
+import type {
+  CallSignalingSocket,
+  IceServerConfig,
+} from '../../shared/components/consultation-call/webrtc-call.types';
+
+type HopeHubConsultation = {
+  id: string;
+  status: string;
+  createdAt: string;
+  assignedDoctor?: { id: string; name?: string | null } | null;
+  disease?: { name?: string | null } | null;
+  payment?: {
+    status?: string | null;
+    amountInPaise?: number | null;
+  } | null;
+};
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, ProgressDashboardComponent],
+  imports: [CommonModule, RouterModule, ProgressDashboardComponent, ConsultationCallPanelComponent],
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Header -->
@@ -218,9 +236,27 @@ import { ProgressDashboardComponent } from '../../shared/components/progress-das
                     @if (consultation.payment) {
                       <p class="mt-2 text-sm text-gray-600">
                         Payment: {{ consultation.payment.status }}
-                        @if (consultation.payment.amountInPaise !== undefined) {
-                          · ₹{{ consultation.payment.amountInPaise / 100 | number: '1.0-0' }}
+                        @if (consultation.payment.amountInPaise != null) {
+                          · ₹{{ consultation.payment.amountInPaise! / 100 | number: '1.0-0' }}
                         }
+                      </p>
+                    }
+                    @if (consultation.assignedDoctor) {
+                      <p class="mt-2 text-sm text-gray-600">
+                        Doctor: {{ consultation.assignedDoctor.name || 'Assigned doctor' }}
+                      </p>
+                      <div class="mt-3">
+                        <app-consultation-call-panel
+                          [consultationId]="consultation.id"
+                          [targetUserId]="callTargetUserId(consultation)"
+                          [socket]="realtimeSocket()"
+                          [iceServers]="iceServers()"
+                          [enabled]="callEnabled(consultation)"
+                        />
+                      </div>
+                    } @else {
+                      <p class="mt-2 text-sm text-gray-600">
+                        Voice/video call will appear here after a doctor is assigned.
                       </p>
                     }
                   </div>
@@ -272,18 +308,27 @@ import { ProgressDashboardComponent } from '../../shared/components/progress-das
 export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private bookingService = inject(BookingService);
+  private realtimeService = inject(HopeHubRealtimeService);
   user = signal<User | null>(null);
   isLoading = signal(false);
-  consultations = signal<any[]>([]);
+  consultations = signal<HopeHubConsultation[]>([]);
   leads = signal<any[]>([]);
+  iceServers = signal<IceServerConfig[]>([{ urls: 'stun:stun.l.google.com:19302' }]);
+  realtimeSocket = signal<CallSignalingSocket | null>(null);
 
   constructor() {
     this.authService.user$.pipe(takeUntilDestroyed()).subscribe((user: User | null) => {
       this.user.set(user);
+      if (user) {
+        this.realtimeSocket.set(this.realtimeService.connect());
+      } else {
+        this.realtimeSocket.set(null);
+      }
     });
   }
 
   ngOnInit(): void {
+    this.loadIceServers();
     this.loadDashboard();
   }
 
@@ -293,6 +338,10 @@ export class DashboardComponent implements OnInit {
       next: (dashboard) => {
         this.consultations.set(dashboard.consultations || []);
         this.leads.set(dashboard.leads || []);
+        this.realtimeSocket.set(this.realtimeService.connect());
+        for (const consultation of dashboard.consultations || []) {
+          this.realtimeService.subscribeConsultation(consultation.id);
+        }
         this.isLoading.set(false);
       },
       error: () => {
@@ -301,8 +350,30 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  private loadIceServers(): void {
+    this.bookingService.iceServers().subscribe({
+      next: ({ iceServers }) => this.iceServers.set(iceServers),
+      error: () => {
+        this.iceServers.set([{ urls: 'stun:stun.l.google.com:19302' }]);
+      },
+    });
+  }
+
+  callTargetUserId(consultation: HopeHubConsultation): string {
+    return consultation.assignedDoctor?.id ?? '';
+  }
+
+  callEnabled(consultation: HopeHubConsultation): boolean {
+    return Boolean(
+      consultation.assignedDoctor?.id &&
+      this.realtimeSocket() &&
+      ['ASSIGNED', 'IN_PROGRESS', 'PRESCRIPTION_UPLOADED'].includes(consultation.status),
+    );
+  }
+
   async logout(): Promise<void> {
     try {
+      this.realtimeService.disconnect();
       await this.authService.logout();
     } catch (error) {
       console.error('Logout error:', error);
