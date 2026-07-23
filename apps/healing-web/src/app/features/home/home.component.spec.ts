@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HomeComponent } from './home.component';
-import { getAllServices } from '../../core/data/services-data';
+import { APP_CONSTANTS } from '../../core';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
@@ -21,24 +21,11 @@ describe('HomeComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display all configured services', () => {
-    expect(component.services.length).toBe(getAllServices().length);
+  it('should expose app constants for the announcement banner', () => {
+    expect(component.APP_CONSTANTS.TELEGRAM.GROUP_URL).toBe(APP_CONSTANTS.TELEGRAM.GROUP_URL);
   });
 
-  it('should have announcement message', () => {
-    expect(component.announcementMessage).toContain('monthly healing circle');
-  });
-
-  it('should calculate next first Sunday correctly', () => {
-    expect(component.nextMeetup.date).toBeInstanceOf(Date);
-    expect(component.nextMeetup.date.getDay()).toBe(0); // Sunday
-  });
-
-  it('should format meetup date correctly', () => {
-    const testDate = new Date(2024, 0, 7); // January 7, 2024 (Sunday)
-    const formatted = component.formatMeetupDate(testDate);
-    expect(formatted).toContain('Sunday');
-    expect(formatted).toContain('January');
-    expect(formatted).toContain('2024');
+  it('should have daily Telegram announcement message', () => {
+    expect(component.announcementMessage).toContain('daily 9 PM Telegram voice circle');
   });
 });
