@@ -5,6 +5,7 @@ import {
   ServiceCardComponent,
   ServicesCarouselComponent,
   StatsSectionComponent,
+  FeedbackSectionComponent,
 } from '../../shared/components';
 // import { MultiAssessmentComponent } from '../../shared/components/multi-assessment/multi-assessment.component';
 // import { ProgressDashboardComponent } from '../../shared/components/progress-dashboard/progress-dashboard.component';
@@ -21,6 +22,7 @@ import { getAllServices } from '../../core/data/services-data';
     ServiceCardComponent,
     ServicesCarouselComponent,
     StatsSectionComponent,
+    FeedbackSectionComponent,
   ],
   template: `
     <!-- Announcement Banner -->
@@ -389,6 +391,8 @@ import { getAllServices } from '../../core/data/services-data';
         </div>
       </div>
     </section>
+
+    <app-feedback-section></app-feedback-section>
 
     <!-- Community Engagement -->
     <section class="py-12 sm:py-16 bg-gray-50">

@@ -1,0 +1,36 @@
+<section class="feedback-section">
+  <div class="feedback-section__media" aria-hidden="true">
+    <img src="/image/hopehub-calm-nature.png" alt="" />
+    <div></div>
+  </div>
+
+  <div class="feedback-section__inner">
+    <div class="feedback-section__intro">
+      <p class="feedback-section__eyebrow">Feedback & stories</p>
+      <h2>Help Hope Hub become safer, kinder, and more useful.</h2>
+      <p>
+        Mental health feedback should feel private and respectful. Share what helped, what felt
+        difficult, or what you want us to improve. Public stories are never assumed.
+      </p>
+      <div class="feedback-section__actions">
+        <a routerLink="/contact" [queryParams]="{ type: 'feedback' }" class="feedback-section__primary">
+          Share feedback
+        </a>
+        <a routerLink="/community" class="feedback-section__secondary">Anonymous-friendly community</a>
+      </div>
+    </div>
+
+    <div class="feedback-section__cards">
+      @for (item of feedbackTypes; track item.title) {
+        <article class="feedback-card hope-motion-card">
+          <div class="feedback-card__metric">{{ item.metric }}</div>
+          <div>
+            <span>{{ item.label }}</span>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.description }}</p>
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+</section>
