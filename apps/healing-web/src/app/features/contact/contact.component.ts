@@ -11,7 +11,7 @@ import {
   PaymentService,
 } from '../../core/services';
 import { APP_CONSTANTS } from '../../core';
-import { FEATURED_SERVICES } from '../../core/data/services-data';
+import { FEATURED_SERVICES, getAllServices } from '../../core/data/services-data';
 import { AppointmentCalendarComponent, AppointmentSlot } from '../../shared/components';
 import { User } from '../../core/models/auth.model';
 
@@ -43,6 +43,7 @@ export class ContactComponent implements OnInit {
   selectedAppointment = signal<AppointmentSlot | null>(null);
   prefilledData = signal<any>({});
   currentUser = signal<User | null>(null);
+  services = getAllServices();
 
   constructor() {
     this.readQueryParameters();
@@ -95,8 +96,10 @@ export class ContactComponent implements OnInit {
       email: [userEmail, [Validators.required, Validators.email]],
       phone: [userPhone],
       serviceInterest: [initialServiceValue],
+      urgencyLevel: ['normal', [Validators.required]],
+      preferredTime: [''],
       message: [initialMessage, [Validators.required, Validators.minLength(10)]],
-      preferredContact: [user ? 'email' : '', [Validators.required]],
+      preferredContact: [user ? 'email' : 'whatsapp', [Validators.required]],
     });
   }
 
@@ -245,6 +248,9 @@ export class ContactComponent implements OnInit {
           visitorName: formData.name,
           visitorEmail: formData.email,
           visitorPhone: formData.phone || '',
+          preferredContact: formData.preferredContact,
+          urgencyLevel: formData.urgencyLevel,
+          preferredTime: formData.preferredTime || '',
           entryPage: typeof window === 'undefined' ? undefined : window.location.href,
         })
         .subscribe({ next: resolve, error: reject });
@@ -279,7 +285,9 @@ export class ContactComponent implements OnInit {
       phone: userPhone,
       serviceInterest: '',
       message: '',
-      preferredContact: user ? 'email' : '',
+      urgencyLevel: 'normal',
+      preferredTime: '',
+      preferredContact: user ? 'email' : 'whatsapp',
     });
     this.selectedAppointment.set(null);
 
@@ -295,7 +303,9 @@ export class ContactComponent implements OnInit {
       return Math.round(queryPrice * 100);
     }
 
-    const featured = FEATURED_SERVICES.find((service) => service.name === serviceName);
+    const featured = FEATURED_SERVICES.find(
+      (service) => service.name === serviceName || service.id === serviceName,
+    );
     return Math.round((featured?.price ?? 999) * 100);
   }
 

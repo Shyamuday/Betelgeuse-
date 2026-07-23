@@ -235,9 +235,13 @@ type HopeHubConsultation = {
                         }
                       </p>
                     }
+                    <div class="mt-3 rounded-md bg-blue-50 p-3 text-sm text-blue-900">
+                      <p class="font-semibold">Next step</p>
+                      <p class="mt-1">{{ nextStepFor(consultation) }}</p>
+                    </div>
                     @if (consultation.assignedDoctor) {
                       <p class="mt-2 text-sm text-gray-600">
-                        Doctor: {{ consultation.assignedDoctor.name || 'Assigned doctor' }}
+                        Provider: {{ consultation.assignedDoctor.name || 'Assigned provider' }}
                       </p>
                       <!--
                         Live call UI is intentionally hidden for Hope Hub for now.
@@ -246,13 +250,8 @@ type HopeHubConsultation = {
                         connect HopeHubRealtimeService, load ICE servers, and
                         render app-consultation-call-panel for assigned bookings.
                       -->
-                      <p class="mt-2 text-sm text-gray-600">
-                        Our team will contact you using your selected contact method for next steps.
-                      </p>
                     } @else {
-                      <p class="mt-2 text-sm text-gray-600">
-                        Our team will assign a provider and contact you with the next steps.
-                      </p>
+                      <p class="mt-2 text-sm text-gray-600">Provider matching is pending.</p>
                     }
                   </div>
                 }
@@ -279,6 +278,10 @@ type HopeHubConsultation = {
                       </span>
                     </div>
                     <p class="mt-2 text-sm text-gray-600 line-clamp-3">{{ lead.concern }}</p>
+                    <p class="mt-3 rounded-md bg-green-50 p-3 text-sm text-green-900">
+                      We will use the contact preference in your request and update this status
+                      after follow-up.
+                    </p>
                   </div>
                 }
               </div>
@@ -330,6 +333,19 @@ export class DashboardComponent implements OnInit {
         this.isLoading.set(false);
       },
     });
+  }
+
+  nextStepFor(consultation: HopeHubConsultation): string {
+    const paymentStatus = consultation.payment?.status?.toUpperCase();
+    if (paymentStatus && paymentStatus !== 'CAPTURED' && paymentStatus !== 'PAID') {
+      return 'Payment is not confirmed yet. Complete or retry payment so the team can confirm your session.';
+    }
+
+    if (!consultation.assignedDoctor) {
+      return 'The Hope Hub team is reviewing your concern and matching a provider.';
+    }
+
+    return 'Your provider is assigned. The team will share the confirmed session instructions through your selected contact method.';
   }
 
   async logout(): Promise<void> {

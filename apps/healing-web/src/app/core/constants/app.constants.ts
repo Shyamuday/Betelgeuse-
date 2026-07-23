@@ -11,12 +11,12 @@ export const APP_CONSTANTS = {
   },
   CONTACT: {
     EMAIL: 'contact@mind.hopehub.in',
-    PHONE: '+1 (555) 123-4567',
-    CRISIS_HOTLINE: '988',
+    PHONE: 'Use the request form for routing',
+    CRISIS_HOTLINE: '14416',
   },
   MEETUP: {
     SCHEDULE: 'First Sunday of every month',
-    TIME: '2:00 PM - 4:00 PM EST',
+    TIME: '2:00 PM - 4:00 PM IST',
     MAX_ATTENDEES: 25,
   },
 } as const;

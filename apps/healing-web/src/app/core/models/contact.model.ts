@@ -1,14 +1,17 @@
 export interface ContactForm {
-    name: string;
-    email: string;
-    phone?: string;
-    serviceInterest?: string;
-    message: string;
-    preferredContact: ContactMethod;
+  name: string;
+  email: string;
+  phone?: string;
+  serviceInterest?: string;
+  urgencyLevel?: 'low' | 'normal' | 'high';
+  preferredTime?: string;
+  message: string;
+  preferredContact: ContactMethod;
 }
 
 export enum ContactMethod {
-    EMAIL = 'email',
-    PHONE = 'phone',
-    TELEGRAM = 'telegram'
+  EMAIL = 'email',
+  PHONE = 'phone',
+  WHATSAPP = 'whatsapp',
+  TELEGRAM = 'telegram',
 }

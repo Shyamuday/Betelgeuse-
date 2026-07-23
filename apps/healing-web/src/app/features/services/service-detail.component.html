@@ -35,11 +35,11 @@
           <!-- Pricing Information -->
           @if (service()!.pricing) {
             <div class="mb-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-3">Pricing</h3>
-              <div class="space-y-2">
+              <h3 class="text-lg font-semibold text-gray-900 mb-3">Introductory Session</h3>
+              <div class="space-y-2 rounded-lg border border-blue-100 bg-blue-50 p-4">
                 @if (service()!.pricing!.individual) {
                   <div class="flex justify-between items-center">
-                    <span class="text-gray-600">Individual Session:</span>
+                    <span class="text-gray-700">30-minute support session</span>
                     <span class="font-semibold">{{ formatPrice(service()!.pricing!.individual, service()!.pricing!.currency) }}</span>
                   </div>
                 }
@@ -64,7 +64,7 @@
             <button 
               (click)="bookService()" 
               class="w-full bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 transition-colors duration-200 font-semibold">
-              Book This Service
+              Request 30-minute session
             </button>
             <button 
               (click)="contactForInfo()" 
@@ -78,6 +78,18 @@
 
     <!-- Detailed Information -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Who This Is For</h2>
+        <ul class="space-y-3">
+          @for (item of whoThisIsFor(service()!); track item) {
+            <li class="flex items-start">
+              <span class="mt-1 mr-3 h-2 w-2 rounded-full bg-blue-600 flex-shrink-0"></span>
+              <span class="text-gray-600">{{ item }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+
       <!-- Detailed Description -->
       <div class="bg-white rounded-lg shadow-md p-6">
         <h2 class="text-2xl font-semibold text-gray-900 mb-4">About This Service</h2>
@@ -100,7 +112,7 @@
       </div>
 
       <!-- Service Inquiry Form -->
-      <div class="lg:row-span-2">
+      <div class="lg:row-span-3">
         <app-service-inquiry [serviceName]="service()!.name"></app-service-inquiry>
       </div>
 
@@ -109,19 +121,53 @@
         <h2 class="text-2xl font-semibold text-gray-900 mb-4">Our Approach</h2>
         <p class="text-gray-600 leading-relaxed">{{ service()!.approach }}</p>
       </div>
+
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-4">What Happens in 30 Minutes</h2>
+        <ol class="space-y-3">
+          @for (step of sessionFlow(); track step; let i = $index) {
+            <li class="flex items-start">
+              <span class="mr-3 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">{{ i + 1 }}</span>
+              <span class="text-gray-600">{{ step }}</span>
+            </li>
+          }
+        </ol>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-4">You Leave With</h2>
+        <ul class="space-y-3">
+          @for (item of sessionOutcome(); track item) {
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-gray-600">{{ item }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <div class="rounded-lg border border-amber-200 bg-amber-50 p-6 lg:col-span-2">
+        <h2 class="text-xl font-semibold text-amber-950 mb-2">Important Safety Boundary</h2>
+        <p class="text-sm leading-6 text-amber-900">
+          Hope Hub support is not emergency care. If you are in immediate danger or may harm yourself,
+          contact local emergency services now. In India, Tele MANAS is available at 14416.
+        </p>
+      </div>
     </div>
 
     <!-- Call to Action Section -->
     <div class="mt-12 bg-primary-50 rounded-lg p-8 text-center">
       <h2 class="text-2xl font-semibold text-gray-900 mb-4">Ready to Get Started?</h2>
       <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
-        Take the first step towards better mental health. Our experienced professionals are here to support you on your journey.
+        Submit your request and we will review your concern, confirm the right support path, and guide you to the next step.
       </p>
       <div class="space-x-4">
         <button 
           (click)="bookService()" 
           class="bg-primary-600 text-white px-8 py-3 rounded-md hover:bg-primary-700 transition-colors duration-200 font-semibold">
-          Book Now
+          Request Session
         </button>
         <button 
           (click)="contactForInfo()" 

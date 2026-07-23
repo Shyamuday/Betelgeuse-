@@ -63,6 +63,76 @@ export class ServiceDetailComponent implements OnInit {
     }).format(amount);
   }
 
+  whoThisIsFor(service: Service): string[] {
+    const name = service.name.toLowerCase();
+
+    if (name.includes('breakup')) {
+      return [
+        'You keep replaying the relationship',
+        'No-contact feels difficult',
+        'You need closure and steadier daily structure',
+      ];
+    }
+    if (name.includes('anxiety')) {
+      return [
+        'Your thoughts feel fast or hard to stop',
+        'You avoid situations because of fear',
+        'You want practical calming tools',
+      ];
+    }
+    if (name.includes('career') || name.includes('study')) {
+      return [
+        'You feel stuck between choices',
+        'Pressure is affecting sleep or focus',
+        'You need a small, clear next step',
+      ];
+    }
+    if (name.includes('relationship')) {
+      return [
+        'Arguments keep repeating',
+        'Trust or boundaries feel unclear',
+        'You want to communicate without escalating',
+      ];
+    }
+    if (name.includes('sleep')) {
+      return [
+        'Your mind gets loud at night',
+        'You overthink conversations or decisions',
+        'You want a calmer evening routine',
+      ];
+    }
+    if (name.includes('family')) {
+      return [
+        'Family pressure feels heavy',
+        'Boundaries are hard to hold',
+        'You need help preparing a calmer conversation',
+      ];
+    }
+
+    return [
+      'You need a private space to talk',
+      'You want emotional clarity',
+      'You want one practical step after the session',
+    ];
+  }
+
+  sessionFlow(): string[] {
+    return [
+      'Share what is happening right now',
+      'Identify the main pressure point',
+      'Practice one calming or clarity tool',
+      'Leave with a simple next-step plan',
+    ];
+  }
+
+  sessionOutcome(): string[] {
+    return [
+      'A clearer understanding of your concern',
+      'One practical coping tool',
+      'A next-step plan for the coming days',
+    ];
+  }
+
   private loadService(serviceId: string) {
     this.loading.set(true);
 

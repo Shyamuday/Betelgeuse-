@@ -43,6 +43,9 @@ const hopeHubBookingSchema = z.object({
   visitorName: z.string().trim().max(120).optional().or(z.literal('')),
   visitorEmail: z.string().trim().email().max(254).optional().or(z.literal('')),
   visitorPhone: z.string().trim().max(30).optional().or(z.literal('')),
+  preferredContact: z.enum(['email', 'phone', 'whatsapp', 'telegram']).optional(),
+  urgencyLevel: z.enum(['low', 'normal', 'high']).optional(),
+  preferredTime: z.string().trim().max(120).optional().or(z.literal('')),
   entryPage: z.string().trim().max(500).optional().or(z.literal(''))
 });
 
@@ -154,6 +157,9 @@ hopeHubRouter.post(
           consultantName: body.consultantName || '',
           consultantPhone: body.consultantPhone || '',
           sessionDuration: body.sessionDuration || '',
+          preferredContact: body.preferredContact || '',
+          urgencyLevel: body.urgencyLevel || '',
+          preferredTime: body.preferredTime || '',
           entryPage: body.entryPage || ''
         },
         billingPlanCode: selectedPlan.code,
@@ -199,6 +205,9 @@ hopeHubRouter.post(
         concern: [
           `Service: ${body.serviceName}`,
           `Appointment: ${body.appointmentDate} ${body.appointmentTime}`,
+          body.preferredContact ? `Preferred contact: ${body.preferredContact}` : '',
+          body.urgencyLevel ? `Urgency: ${body.urgencyLevel}` : '',
+          body.preferredTime ? `Preferred callback time: ${body.preferredTime}` : '',
           body.message ? `Message: ${body.message}` : ''
         ]
           .filter(Boolean)

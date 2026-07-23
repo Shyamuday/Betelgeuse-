@@ -16,6 +16,9 @@ export type HopeHubBookingPayload = {
   visitorName?: string;
   visitorEmail?: string;
   visitorPhone?: string;
+  preferredContact?: string;
+  urgencyLevel?: string;
+  preferredTime?: string;
   entryPage?: string;
 };
 

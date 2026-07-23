@@ -135,15 +135,14 @@ export class SEOService {
       description: this.defaultDescription,
       contactPoint: {
         '@type': 'ContactPoint',
-        telephone: '+1-234-567-8900',
         contactType: 'Customer Service',
-        email: 'info@mind.hopehub.in',
+        email: APP_CONSTANTS.CONTACT.EMAIL,
         availableLanguage: ['English'],
       },
       sameAs: [APP_CONSTANTS.TELEGRAM?.GROUP_URL || ''].filter(Boolean),
       address: {
         '@type': 'PostalAddress',
-        addressCountry: 'US',
+        addressCountry: 'IN',
       },
     };
 

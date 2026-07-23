@@ -12,7 +12,9 @@ const websiteLeadSchema = z.object({
   phone: z.string().trim().max(30).optional().or(z.literal('')),
   serviceInterest: z.string().trim().max(160).optional().or(z.literal('')),
   message: z.string().trim().min(10).max(3000),
-  preferredContact: z.enum(['email', 'phone', 'telegram']).optional(),
+  preferredContact: z.enum(['email', 'phone', 'whatsapp', 'telegram']).optional(),
+  urgencyLevel: z.enum(['low', 'normal', 'high']).optional(),
+  preferredTime: z.string().trim().max(120).optional().or(z.literal('')),
   appointmentDate: z.string().trim().max(80).optional().or(z.literal('')),
   appointmentTime: z.string().trim().max(80).optional().or(z.literal('')),
   selectedService: z.string().trim().max(160).optional().or(z.literal('')),
@@ -33,6 +35,8 @@ function compactDetails(body: z.infer<typeof websiteLeadSchema>) {
     body.sessionDuration && `Session duration: ${body.sessionDuration}`,
     body.appointmentDate && `Preferred date: ${body.appointmentDate}`,
     body.appointmentTime && `Preferred time: ${body.appointmentTime}`,
+    body.preferredTime && `Preferred callback time: ${body.preferredTime}`,
+    body.urgencyLevel && `Urgency: ${body.urgencyLevel}`,
     body.preferredContact && `Preferred contact: ${body.preferredContact}`,
     body.bookingSource && `Source: ${body.bookingSource}`,
     `Message: ${body.message}`
@@ -55,8 +59,10 @@ websiteLeadsRouter.post(
       entryPage: body.entryPage || req.get('referer') || null,
       visitorKey: body.visitorKey || null,
       preferredCallbackTime:
-        body.appointmentDate || body.appointmentTime
-          ? [body.appointmentDate, body.appointmentTime].filter(Boolean).join(' ')
+        body.preferredTime || body.appointmentDate || body.appointmentTime
+          ? [body.preferredTime, body.appointmentDate, body.appointmentTime]
+              .filter(Boolean)
+              .join(' ')
           : null,
       userId: req.user?.id
     });

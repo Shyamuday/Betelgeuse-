@@ -64,6 +64,39 @@ import { getAllServices } from '../../core/data/services-data';
     <!-- Services Carousel -->
     <app-services-carousel></app-services-carousel>
 
+    <!-- How Hope Hub Works -->
+    <section class="py-12 sm:py-16 bg-white">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+            How Hope Hub Works
+          </h2>
+          <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+            A simple, low-pressure path from request to support.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+          @for (step of howItWorksSteps; track step.title; let i = $index) {
+            <div class="rounded-lg border border-blue-100 bg-blue-50 p-5">
+              <div
+                class="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-blue-700 text-sm font-bold text-white"
+              >
+                {{ i + 1 }}
+              </div>
+              <h3 class="text-base font-semibold text-gray-900 mb-2">{{ step.title }}</h3>
+              <p class="text-sm leading-6 text-gray-600">{{ step.description }}</p>
+            </div>
+          }
+        </div>
+
+        <div class="mt-8 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          Hope Hub is for supportive counselling and guidance. It is not emergency care. If you are
+          in immediate danger, call local emergency services or Tele MANAS at 14416 in India.
+        </div>
+      </div>
+    </section>
+
     <!-- Mental Health Tools Section -->
     <section class="py-12 sm:py-16 bg-slate-50">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -546,6 +579,29 @@ export class HomeComponent implements OnInit {
 
   announcementMessage =
     'Join us for our monthly healing circle - First Sunday of every month at 2:00 PM';
+
+  howItWorksSteps = [
+    {
+      title: 'Submit request',
+      description: 'Tell us the concern, preferred contact method, and a time that works for you.',
+    },
+    {
+      title: 'We review',
+      description: 'The Hope Hub team checks your request and routes it to the right support path.',
+    },
+    {
+      title: 'Provider matched',
+      description: 'A suitable provider or care team member is assigned based on your concern.',
+    },
+    {
+      title: 'Pay ₹300',
+      description: 'Complete payment for a 30-minute introductory support session.',
+    },
+    {
+      title: 'Get support',
+      description: 'Join the confirmed session or receive next steps through your chosen channel.',
+    },
+  ];
 
   services: Service[] = getAllServices();
 

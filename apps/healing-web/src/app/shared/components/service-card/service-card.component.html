@@ -7,6 +7,11 @@
   <div class="flex-1 flex flex-col">
     <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">{{ service().name }}</h3>
     <p class="text-sm sm:text-base text-gray-600 mb-4 flex-1">{{ service().description }}</p>
+    @if (service().pricing?.individual) {
+      <div class="mb-4 rounded-md bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-800">
+        ₹{{ service().pricing!.individual }} · 30 minutes
+      </div>
+    }
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
       <span class="text-xs sm:text-sm text-gray-500 capitalize">{{ service().category }}</span>
       <button 
