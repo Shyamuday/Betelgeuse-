@@ -53,10 +53,20 @@ import { APP_CONSTANTS } from '../../core';
         <div class="grid gap-6 md:grid-cols-3">
           <div>
             <h2 class="text-2xl font-semibold text-gray-900">Community Safety Rules</h2>
-            <p class="mt-2 text-sm leading-6 text-gray-600">
-              These spaces are for peer support and routing. They are not emergency care or a
-              replacement for clinical treatment.
-            </p>
+            <div class="group relative mt-3 inline-flex">
+              <button
+                type="button"
+                class="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-900"
+              >
+                Safety note
+              </button>
+              <div
+                class="invisible absolute left-0 top-full z-20 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-amber-200 bg-white p-3 text-sm leading-6 text-amber-900 opacity-0 shadow-xl transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+              >
+                These spaces are for peer support and routing. They are not emergency care or a
+                replacement for clinical treatment.
+              </div>
+            </div>
           </div>
           <ul class="space-y-3 text-sm leading-6 text-gray-700 md:col-span-2">
             <li class="rounded-md bg-slate-50 p-3">
