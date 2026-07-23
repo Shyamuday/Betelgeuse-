@@ -25,9 +25,30 @@
   backdrop-filter: blur(8px);
 }
 
+.home-hero__lead,
+.home-hero__sublead {
+  display: block;
+  position: relative;
+  line-height: 1.55;
+}
+
 @media (max-width: 639px) {
   .home-hero {
     min-height: auto;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .home-hero__lead {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  .home-hero__sublead {
+    margin-bottom: 1.75rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
   }
 
   .home-hero__trust {
