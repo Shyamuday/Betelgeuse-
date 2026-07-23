@@ -2,6 +2,7 @@
  * Sitemap Generator Utility
  * Generates sitemap.xml for SEO
  */
+import { getServiceIds } from '../data/services-data';
 
 export interface SitemapUrl {
   loc: string;
@@ -85,67 +86,12 @@ ${urlEntries}
         changefreq: 'daily',
         priority: 0.9,
       },
-      // Service detail pages (add your actual service IDs)
-      {
-        loc: '/services/breakup-counseling',
+      ...getServiceIds().map((serviceId) => ({
+        loc: `/services/${serviceId}`,
         lastmod: this.currentDate,
-        changefreq: 'monthly',
+        changefreq: 'monthly' as const,
         priority: 0.8,
-      },
-      {
-        loc: '/services/career-counseling',
-        lastmod: this.currentDate,
-        changefreq: 'monthly',
-        priority: 0.8,
-      },
-      {
-        loc: '/services/anxiety-therapy',
-        lastmod: this.currentDate,
-        changefreq: 'monthly',
-        priority: 0.8,
-      },
-      {
-        loc: '/services/depression-support',
-        lastmod: this.currentDate,
-        changefreq: 'monthly',
-        priority: 0.8,
-      },
-      {
-        loc: '/services/relationship-counseling',
-        lastmod: this.currentDate,
-        changefreq: 'monthly',
-        priority: 0.8,
-      },
-      {
-        loc: '/services/stress-management',
-        lastmod: this.currentDate,
-        changefreq: 'monthly',
-        priority: 0.8,
-      },
-      {
-        loc: '/services/grief-counseling',
-        lastmod: this.currentDate,
-        changefreq: 'monthly',
-        priority: 0.8,
-      },
-      {
-        loc: '/services/family-therapy',
-        lastmod: this.currentDate,
-        changefreq: 'monthly',
-        priority: 0.8,
-      },
-      {
-        loc: '/services/addiction-support',
-        lastmod: this.currentDate,
-        changefreq: 'monthly',
-        priority: 0.8,
-      },
-      {
-        loc: '/services/self-esteem-coaching',
-        lastmod: this.currentDate,
-        changefreq: 'monthly',
-        priority: 0.8,
-      },
+      })),
     ];
 
     return this.generateSitemap(urls);

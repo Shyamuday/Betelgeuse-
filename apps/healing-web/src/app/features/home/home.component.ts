@@ -8,8 +8,9 @@ import {
 } from '../../shared/components';
 // import { MultiAssessmentComponent } from '../../shared/components/multi-assessment/multi-assessment.component';
 // import { ProgressDashboardComponent } from '../../shared/components/progress-dashboard/progress-dashboard.component';
-import { Service, ServiceCategory, Meetup } from '../../core/models';
+import { Service, Meetup } from '../../core/models';
 import { APP_CONSTANTS } from '../../core';
+import { getAllServices } from '../../core/data/services-data';
 
 @Component({
   selector: 'app-home',
@@ -45,7 +46,7 @@ import { APP_CONSTANTS } from '../../core';
           class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center max-w-md sm:max-w-none mx-auto"
         >
           <button
-            class="cta-button w-full sm:w-auto bg-slate-950 text-white px-6 sm:px-8 py-3 rounded-lg text-base sm:text-lg font-semibold shadow-sm hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-950 transition-colors duration-200"
+            class="cta-button w-full sm:w-auto bg-sky-700 text-white px-6 sm:px-8 py-3 rounded-lg text-base sm:text-lg font-semibold shadow-sm hover:bg-sky-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700 transition-colors duration-200"
             routerLink="/services"
           >
             Explore Services
@@ -546,128 +547,7 @@ export class HomeComponent implements OnInit {
   announcementMessage =
     'Join us for our monthly healing circle - First Sunday of every month at 2:00 PM';
 
-  services: Service[] = [
-    {
-      id: '1',
-      name: 'Breakup Counseling',
-      description:
-        'Navigate the emotional challenges of relationship endings with professional support and guidance.',
-      detailedDescription:
-        'Comprehensive support for processing grief, rebuilding self-esteem, and moving forward.',
-      benefits: ['Emotional healing', 'Closure guidance', 'Self-esteem rebuilding'],
-      approach: 'Cognitive-behavioral therapy combined with mindfulness techniques',
-      category: ServiceCategory.RELATIONSHIP,
-      featured: true,
-      pricing: { individual: 120, currency: 'USD' },
-    },
-    {
-      id: '2',
-      name: 'Career Counseling',
-      description:
-        'Professional guidance for career transitions, workplace stress, and professional development.',
-      detailedDescription:
-        'Support for career changes, workplace challenges, and professional growth.',
-      benefits: ['Career clarity', 'Stress management', 'Professional development'],
-      approach: 'Solution-focused therapy with career assessment tools',
-      category: ServiceCategory.CAREER,
-      featured: true,
-      pricing: { individual: 110, currency: 'USD' },
-    },
-    {
-      id: '3',
-      name: 'Anxiety Therapy',
-      description:
-        'Evidence-based treatment for anxiety disorders, panic attacks, and stress management.',
-      detailedDescription: 'Comprehensive anxiety treatment using proven therapeutic approaches.',
-      benefits: ['Anxiety reduction', 'Coping strategies', 'Stress management'],
-      approach: 'Cognitive-behavioral therapy and exposure therapy',
-      category: ServiceCategory.MENTAL_HEALTH,
-      featured: true,
-      pricing: { individual: 130, currency: 'USD' },
-    },
-    {
-      id: '4',
-      name: 'Depression Support',
-      description: 'Compassionate care for depression, mood disorders, and emotional wellness.',
-      detailedDescription: 'Holistic approach to depression treatment and emotional healing.',
-      benefits: ['Mood improvement', 'Energy restoration', 'Life satisfaction'],
-      approach: 'Interpersonal therapy and behavioral activation',
-      category: ServiceCategory.MENTAL_HEALTH,
-      featured: true,
-      pricing: { individual: 130, currency: 'USD' },
-    },
-    {
-      id: '5',
-      name: 'Relationship Counseling',
-      description:
-        'Strengthen relationships through improved communication and conflict resolution.',
-      detailedDescription:
-        'Couples and relationship therapy for better communication and connection.',
-      benefits: ['Better communication', 'Conflict resolution', 'Intimacy building'],
-      approach: 'Emotionally focused therapy and communication training',
-      category: ServiceCategory.RELATIONSHIP,
-      featured: false,
-      pricing: { couples: 150, currency: 'USD' },
-    },
-    {
-      id: '6',
-      name: 'Stress Management',
-      description: 'Learn effective techniques to manage stress and improve work-life balance.',
-      detailedDescription: 'Practical stress management strategies for daily life challenges.',
-      benefits: ['Stress reduction', 'Better balance', 'Improved wellbeing'],
-      approach: 'Mindfulness-based stress reduction and relaxation techniques',
-      category: ServiceCategory.MENTAL_HEALTH,
-      featured: false,
-      pricing: { individual: 100, currency: 'USD' },
-    },
-    {
-      id: '7',
-      name: 'Grief Counseling',
-      description:
-        'Support through the grieving process and loss recovery with compassionate care.',
-      detailedDescription:
-        'Specialized support for processing grief and loss in a healing environment.',
-      benefits: ['Grief processing', 'Emotional healing', 'Coping strategies'],
-      approach: 'Grief-focused therapy and support group integration',
-      category: ServiceCategory.MENTAL_HEALTH,
-      featured: false,
-      pricing: { individual: 120, currency: 'USD' },
-    },
-    {
-      id: '8',
-      name: 'Family Therapy',
-      description:
-        'Improve family dynamics and communication through professional family counseling.',
-      detailedDescription: 'Family systems therapy to improve relationships and communication.',
-      benefits: ['Better family dynamics', 'Improved communication', 'Conflict resolution'],
-      approach: 'Family systems therapy and communication skills training',
-      category: ServiceCategory.FAMILY,
-      featured: false,
-      pricing: { group: 180, currency: 'USD' },
-    },
-    {
-      id: '9',
-      name: 'Addiction Support',
-      description: 'Comprehensive support for addiction recovery and maintaining sobriety.',
-      detailedDescription: 'Evidence-based addiction treatment and recovery support services.',
-      benefits: ['Recovery support', 'Relapse prevention', 'Life skills development'],
-      approach: 'Motivational interviewing and cognitive-behavioral therapy',
-      category: ServiceCategory.ADDICTION,
-      featured: false,
-      pricing: { individual: 140, currency: 'USD' },
-    },
-    {
-      id: '10',
-      name: 'Self-Esteem Coaching',
-      description: 'Build confidence and self-worth through personalized coaching and support.',
-      detailedDescription: 'Personalized coaching to build confidence and improve self-image.',
-      benefits: ['Increased confidence', 'Better self-image', 'Personal growth'],
-      approach: 'Strengths-based coaching and positive psychology techniques',
-      category: ServiceCategory.MENTAL_HEALTH,
-      featured: false,
-      pricing: { individual: 90, currency: 'USD' },
-    },
-  ];
+  services: Service[] = getAllServices();
 
   nextMeetup: Meetup = {
     id: '1',

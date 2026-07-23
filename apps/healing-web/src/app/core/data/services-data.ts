@@ -1,207 +1,278 @@
-import { CarouselService } from '../../shared/components/services-carousel/services-carousel.component';
+import { Service, ServiceCategory } from '../models';
 
-/**
- * Featured Services Configuration
- *
- * This file contains the configuration for the top 5 featured services
- * displayed in the homepage carousel. Update this data to modify:
- * - Service prices
- * - Consultant information
- * - Contact details
- * - Service descriptions
- */
+export const HOPE_HUB_SESSION_PRICE = 300;
+export const HOPE_HUB_SESSION_CURRENCY = 'INR';
+export const HOPE_HUB_SESSION_DURATION = '30 minutes';
 
-export const FEATURED_SERVICES: CarouselService[] = [
+export const HOPE_HUB_SERVICES: Service[] = [
   {
     id: 'breakup-counseling',
-    name: 'Breakup Counseling',
+    name: 'Breakup & Heartbreak Support',
     description:
-      'Navigate the emotional challenges of relationship endings with professional support and personalized guidance for healing.',
-    price: 300,
-    currency: 'INR',
-    discount: 40,
-    consultantName: 'Hope Hub Care Team',
-    consultantPhone: '',
-    duration: '30 minutes',
-    image: '/assets/images/breakup-counseling.jpg',
+      'Gentle support for breakup pain, attachment, closure, and rebuilding your daily rhythm.',
+    detailedDescription:
+      'A focused support session for people dealing with heartbreak, separation, emotional dependency, no-contact difficulty, or confusion after a relationship ends. The goal is to help you feel steadier and choose your next steps with care.',
+    benefits: [
+      'Process intense emotions safely',
+      'Reduce overthinking and urge to reconnect',
+      'Rebuild confidence and routine',
+      'Create a simple healing plan',
+    ],
+    approach:
+      'We use supportive listening, CBT-style thought work, grounding practices, and practical next-step planning.',
+    pricing: { individual: HOPE_HUB_SESSION_PRICE, currency: HOPE_HUB_SESSION_CURRENCY },
+    category: ServiceCategory.RELATIONSHIP,
     featured: true,
-    badge: 'Popular',
+    imageUrl: '/assets/images/breakup-counseling.jpg',
   },
   {
     id: 'anxiety-therapy',
-    name: 'Anxiety Therapy',
+    name: 'Anxiety & Panic Support',
     description:
-      'Evidence-based treatment for anxiety disorders, panic attacks, and stress management using proven therapeutic approaches.',
-    price: 300,
-    currency: 'INR',
-    discount: 42,
-    consultantName: 'Hope Hub Care Team',
-    consultantPhone: '',
-    duration: '30 minutes',
-    image: '/assets/images/anxiety-therapy.jpg',
+      'Support for anxious thoughts, panic feelings, fear loops, body symptoms, and daily stress.',
+    detailedDescription:
+      'A practical session for people experiencing worry, panic-like symptoms, racing thoughts, avoidance, or fear about everyday situations. We focus on calming tools and a plan you can actually follow.',
+    benefits: [
+      'Understand your anxiety pattern',
+      'Learn grounding and breathing tools',
+      'Reduce avoidance',
+      'Build confidence for daily situations',
+    ],
+    approach:
+      'We combine psychoeducation, grounding, breathing, CBT-informed reframing, and small exposure steps.',
+    pricing: { individual: HOPE_HUB_SESSION_PRICE, currency: HOPE_HUB_SESSION_CURRENCY },
+    category: ServiceCategory.MENTAL_HEALTH,
     featured: true,
-    badge: 'Anxiety care',
+    imageUrl: '/assets/images/anxiety-therapy.jpg',
   },
   {
-    id: 'career-counseling',
-    name: 'Career Counseling',
+    id: 'stress-burnout-support',
+    name: 'Stress & Burnout Support',
     description:
-      'Professional guidance for career transitions, workplace stress, and professional development with personalized strategies.',
-    price: 300,
-    currency: 'INR',
-    discount: 38,
-    consultantName: 'Hope Hub Care Team',
-    consultantPhone: '',
-    duration: '30 minutes',
-    image: '/assets/images/career-counseling.jpg',
+      'For work pressure, emotional exhaustion, irritability, low energy, and feeling overloaded.',
+    detailedDescription:
+      'A session for people feeling stretched thin by responsibilities, deadlines, caregiving, or constant mental load. We help identify pressure points and create a lighter, more realistic routine.',
+    benefits: [
+      'Identify stress triggers',
+      'Create a realistic recovery routine',
+      'Improve boundaries',
+      'Reduce emotional overload',
+    ],
+    approach:
+      'We use stress mapping, priority sorting, nervous-system regulation, and habit planning.',
+    pricing: { individual: HOPE_HUB_SESSION_PRICE, currency: HOPE_HUB_SESSION_CURRENCY },
+    category: ServiceCategory.MENTAL_HEALTH,
     featured: true,
-    badge: 'Career support',
+    imageUrl: '/assets/images/stress-management.jpg',
   },
   {
-    id: 'depression-support',
-    name: 'Depression Support',
+    id: 'career-study-pressure',
+    name: 'Career & Study Pressure',
     description:
-      'Compassionate care for depression, mood disorders, and emotional wellness with holistic treatment approaches.',
-    price: 300,
-    currency: 'INR',
-    discount: 42,
-    consultantName: 'Hope Hub Care Team',
-    consultantPhone: '',
-    duration: '30 minutes',
-    image: '/assets/images/depression-support.jpg',
+      'Guidance for career confusion, exam pressure, workplace stress, and decision paralysis.',
+    detailedDescription:
+      'A focused conversation for students and professionals who feel stuck, pressured, or unsure about their next step. We help bring structure to the decision and reduce emotional noise.',
+    benefits: [
+      'Clarify choices and next steps',
+      'Handle performance pressure',
+      'Reduce decision overwhelm',
+      'Build a practical action plan',
+    ],
+    approach:
+      'We use solution-focused questions, values clarification, stress planning, and short action cycles.',
+    pricing: { individual: HOPE_HUB_SESSION_PRICE, currency: HOPE_HUB_SESSION_CURRENCY },
+    category: ServiceCategory.CAREER,
     featured: true,
-    badge: 'Mood support',
+    imageUrl: '/assets/images/career-counseling.jpg',
   },
   {
-    id: 'relationship-counseling',
-    name: 'Relationship Counseling',
+    id: 'relationship-guidance',
+    name: 'Relationship Guidance',
     description:
-      'Strengthen relationships through improved communication, conflict resolution, and deeper emotional connection.',
-    price: 300,
-    currency: 'INR',
-    discount: 43,
-    consultantName: 'Hope Hub Care Team',
-    consultantPhone: '',
-    duration: '30 minutes',
-    image: '/assets/images/relationship-counseling.jpg',
+      'Support for communication issues, conflict, trust concerns, boundaries, and attachment patterns.',
+    detailedDescription:
+      'A support session for people navigating relationship confusion, repeated conflicts, insecurity, trust concerns, or boundary issues. This can be individual guidance or partner-focused planning.',
+    benefits: [
+      'Understand repeated conflict patterns',
+      'Improve communication',
+      'Set healthier boundaries',
+      'Make clearer relationship decisions',
+    ],
+    approach:
+      'We use emotion-focused reflection, communication mapping, boundary planning, and practical scripts.',
+    pricing: { individual: HOPE_HUB_SESSION_PRICE, currency: HOPE_HUB_SESSION_CURRENCY },
+    category: ServiceCategory.RELATIONSHIP,
     featured: true,
-    badge: 'Relationships',
+    imageUrl: '/assets/images/relationship-counseling.jpg',
+  },
+  {
+    id: 'self-esteem-confidence',
+    name: 'Self-Esteem & Confidence',
+    description:
+      'Help with self-doubt, comparison, people-pleasing, guilt, and negative self-talk.',
+    detailedDescription:
+      'A session for people who feel not good enough, struggle with confidence, or keep putting others first. We focus on self-respect, inner language, and small confidence-building actions.',
+    benefits: [
+      'Challenge negative self-talk',
+      'Build self-respect',
+      'Reduce people-pleasing',
+      'Practice small confidence steps',
+    ],
+    approach:
+      'We use strengths-based coaching, CBT-informed reframing, self-compassion, and behavior experiments.',
+    pricing: { individual: HOPE_HUB_SESSION_PRICE, currency: HOPE_HUB_SESSION_CURRENCY },
+    category: ServiceCategory.MENTAL_HEALTH,
+    featured: false,
+    imageUrl: '/assets/images/self-esteem-coaching.jpg',
+  },
+  {
+    id: 'loneliness-emotional-support',
+    name: 'Loneliness & Emotional Support',
+    description:
+      'A safe conversation when you feel alone, unheard, disconnected, or emotionally heavy.',
+    detailedDescription:
+      'A supportive session for people who need a steady space to talk, organize emotions, and feel less alone. We help you name what is happening and choose one or two manageable next steps.',
+    benefits: [
+      'Feel heard without judgment',
+      'Name difficult emotions',
+      'Plan small connection steps',
+      'Reduce emotional heaviness',
+    ],
+    approach:
+      'We use supportive counseling, emotional validation, grounding, and simple connection planning.',
+    pricing: { individual: HOPE_HUB_SESSION_PRICE, currency: HOPE_HUB_SESSION_CURRENCY },
+    category: ServiceCategory.MENTAL_HEALTH,
+    featured: false,
+    imageUrl: '/assets/images/depression-support.jpg',
+  },
+  {
+    id: 'sleep-overthinking-support',
+    name: 'Sleep & Overthinking Support',
+    description:
+      'Support for racing thoughts at night, sleep routine problems, rumination, and mental restlessness.',
+    detailedDescription:
+      'A practical session for people who cannot switch off mentally, replay conversations, worry at night, or struggle to maintain a sleep routine.',
+    benefits: [
+      'Create a night routine',
+      'Reduce rumination',
+      'Learn calming practices',
+      'Improve mental rest',
+    ],
+    approach: 'We use sleep hygiene planning, worry scheduling, grounding tools, and habit design.',
+    pricing: { individual: HOPE_HUB_SESSION_PRICE, currency: HOPE_HUB_SESSION_CURRENCY },
+    category: ServiceCategory.MENTAL_HEALTH,
+    featured: false,
+    imageUrl: '/assets/images/stress-management.jpg',
+  },
+  {
+    id: 'family-conflict-support',
+    name: 'Family Conflict Support',
+    description:
+      'Support for family pressure, communication gaps, expectations, boundaries, and conflict.',
+    detailedDescription:
+      'A session for people dealing with family tension, repeated arguments, pressure around life choices, or difficulty setting respectful boundaries.',
+    benefits: [
+      'Understand family patterns',
+      'Prepare calmer conversations',
+      'Set respectful boundaries',
+      'Reduce guilt and pressure',
+    ],
+    approach:
+      'We use family-systems thinking, communication planning, boundary scripts, and emotional regulation.',
+    pricing: { individual: HOPE_HUB_SESSION_PRICE, currency: HOPE_HUB_SESSION_CURRENCY },
+    category: ServiceCategory.FAMILY,
+    featured: false,
+    imageUrl: '/assets/images/family-therapy.jpg',
+  },
+  {
+    id: 'grief-loss-support',
+    name: 'Grief & Loss Support',
+    description:
+      'Compassionate support after loss, separation, major life change, or emotional shock.',
+    detailedDescription:
+      'A gentle support session for people moving through grief, sadness, numbness, or life changes that feel hard to accept. We work at your pace.',
+    benefits: [
+      'Process grief safely',
+      'Understand your grief response',
+      'Find steadier coping steps',
+      'Honor the loss without rushing',
+    ],
+    approach:
+      'We use grief-informed support, emotional pacing, grounding, and meaning-centered reflection.',
+    pricing: { individual: HOPE_HUB_SESSION_PRICE, currency: HOPE_HUB_SESSION_CURRENCY },
+    category: ServiceCategory.MENTAL_HEALTH,
+    featured: false,
+    imageUrl: '/assets/images/grief-counseling.jpg',
   },
 ];
 
-/**
- * Consultant Information
- *
- * Detailed information about each consultant for easy management
- */
-export const CONSULTANTS = {
-  'dr-sarah-johnson': {
-    name: 'Dr. Sarah Johnson',
-    title: 'Licensed Clinical Psychologist',
-    specialties: ['Relationship Counseling', 'Breakup Recovery', 'Emotional Healing'],
-    experience: '8 years',
-    phone: '+1 (555) 123-4567',
-    email: 'sarah.johnson@hopehub.in',
-    bio: 'Dr. Sarah Johnson specializes in helping individuals navigate relationship challenges and emotional healing.',
-    availability: 'Monday-Friday, 9 AM - 6 PM EST',
-  },
-  'dr-michael-chen': {
-    name: 'Dr. Michael Chen',
-    title: 'Licensed Therapist',
-    specialties: ['Anxiety Disorders', 'Panic Attacks', 'Stress Management'],
-    experience: '10 years',
-    phone: '+1 (555) 234-5678',
-    email: 'michael.chen@hopehub.in',
-    bio: 'Dr. Michael Chen is an expert in anxiety treatment using evidence-based therapeutic approaches.',
-    availability: 'Tuesday-Saturday, 10 AM - 7 PM EST',
-  },
-  'dr-emily-rodriguez': {
-    name: 'Dr. Emily Rodriguez',
-    title: 'Career Counselor & Life Coach',
-    specialties: ['Career Transitions', 'Workplace Stress', 'Professional Development'],
-    experience: '6 years',
-    phone: '+1 (555) 345-6789',
-    email: 'emily.rodriguez@hopehub.in',
-    bio: 'Dr. Emily Rodriguez helps professionals navigate career challenges and achieve work-life balance.',
-    availability: 'Monday-Thursday, 8 AM - 5 PM EST',
-  },
-  'dr-james-wilson': {
-    name: 'Dr. James Wilson',
-    title: 'Clinical Psychologist',
-    specialties: ['Depression Treatment', 'Mood Disorders', 'Cognitive Behavioral Therapy'],
-    experience: '12 years',
-    phone: '+1 (555) 456-7890',
-    email: 'james.wilson@hopehub.in',
-    bio: 'Dr. James Wilson provides compassionate care for individuals dealing with depression and mood disorders.',
-    availability: 'Monday-Friday, 11 AM - 8 PM EST',
-  },
-  'dr-lisa-thompson': {
-    name: 'Dr. Lisa Thompson',
-    title: 'Marriage & Family Therapist',
-    specialties: ['Couples Therapy', 'Family Counseling', 'Communication Skills'],
-    experience: '9 years',
-    phone: '+1 (555) 567-8901',
-    email: 'lisa.thompson@hopehub.in',
-    bio: 'Dr. Lisa Thompson specializes in helping couples and families build stronger, healthier relationships.',
-    availability: 'Wednesday-Sunday, 12 PM - 9 PM EST',
-  },
+export type FeaturedService = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  currency: string;
+  discount?: number;
+  consultantName: string;
+  consultantPhone: string;
+  duration: string;
+  image: string;
+  featured: boolean;
+  bookingUrl?: string;
+  badge?: string;
 };
 
-/**
- * Pricing Configuration
- *
- * Centralized pricing information for easy updates
- */
-export const SERVICE_PRICING = {
-  'breakup-counseling': {
-    individual: 120,
-    package3: 320, // 3 sessions
-    package6: 600, // 6 sessions
-    currency: 'USD',
-  },
-  'anxiety-therapy': {
-    individual: 130,
-    package3: 350,
-    package6: 650,
-    currency: 'USD',
-  },
-  'career-counseling': {
-    individual: 110,
-    package3: 300,
-    package6: 550,
-    currency: 'USD',
-  },
-  'depression-support': {
-    individual: 130,
-    package3: 350,
-    package6: 650,
-    currency: 'USD',
-  },
-  'relationship-counseling': {
-    couples: 150,
-    package3: 400,
-    package6: 750,
-    currency: 'USD',
-  },
+const featuredBadges: Record<string, string> = {
+  'breakup-counseling': 'Popular',
+  'anxiety-therapy': 'Anxiety care',
+  'stress-burnout-support': 'Stress support',
+  'career-study-pressure': 'Career support',
+  'relationship-guidance': 'Relationships',
 };
 
-/**
- * Helper function to get featured services
- */
-export function getFeaturedServices(): CarouselService[] {
+export const FEATURED_SERVICES: FeaturedService[] = HOPE_HUB_SERVICES.filter(
+  (service) => service.featured,
+).map((service) => ({
+  id: service.id,
+  name: service.name,
+  description: service.description,
+  price: HOPE_HUB_SESSION_PRICE,
+  currency: HOPE_HUB_SESSION_CURRENCY,
+  consultantName: 'Hope Hub Care Team',
+  consultantPhone: '',
+  duration: HOPE_HUB_SESSION_DURATION,
+  image: service.imageUrl ?? '',
+  featured: service.featured,
+  badge: featuredBadges[service.id],
+}));
+
+export const SERVICE_PRICING = Object.fromEntries(
+  HOPE_HUB_SERVICES.map((service) => [
+    service.id,
+    {
+      individual: HOPE_HUB_SESSION_PRICE,
+      currency: HOPE_HUB_SESSION_CURRENCY,
+    },
+  ]),
+);
+
+export function getAllServices(): Service[] {
+  return HOPE_HUB_SERVICES;
+}
+
+export function getFeaturedServices(): FeaturedService[] {
   return FEATURED_SERVICES;
 }
 
-/**
- * Helper function to get consultant information
- */
-export function getConsultant(consultantId: string) {
-  return CONSULTANTS[consultantId as keyof typeof CONSULTANTS];
+export function getServiceById(serviceId: string): Service | undefined {
+  return HOPE_HUB_SERVICES.find((service) => service.id === serviceId);
 }
 
-/**
- * Helper function to get service pricing
- */
+export function getServiceIds(): string[] {
+  return HOPE_HUB_SERVICES.map((service) => service.id);
+}
+
 export function getServicePricing(serviceId: string) {
   return SERVICE_PRICING[serviceId as keyof typeof SERVICE_PRICING];
 }

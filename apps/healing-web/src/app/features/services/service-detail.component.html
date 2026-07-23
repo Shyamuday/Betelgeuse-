@@ -40,19 +40,19 @@
                 @if (service()!.pricing!.individual) {
                   <div class="flex justify-between items-center">
                     <span class="text-gray-600">Individual Session:</span>
-                    <span class="font-semibold">${{ service()!.pricing!.individual }} {{ service()!.pricing!.currency }}</span>
+                    <span class="font-semibold">{{ formatPrice(service()!.pricing!.individual, service()!.pricing!.currency) }}</span>
                   </div>
                 }
                 @if (service()!.pricing!.couples) {
                   <div class="flex justify-between items-center">
                     <span class="text-gray-600">Couples Session:</span>
-                    <span class="font-semibold">${{ service()!.pricing!.couples }} {{ service()!.pricing!.currency }}</span>
+                    <span class="font-semibold">{{ formatPrice(service()!.pricing!.couples, service()!.pricing!.currency) }}</span>
                   </div>
                 }
                 @if (service()!.pricing!.group) {
                   <div class="flex justify-between items-center">
                     <span class="text-gray-600">Group Session:</span>
-                    <span class="font-semibold">${{ service()!.pricing!.group }} {{ service()!.pricing!.currency }}</span>
+                    <span class="font-semibold">{{ formatPrice(service()!.pricing!.group, service()!.pricing!.currency) }}</span>
                   </div>
                 }
               </div>
