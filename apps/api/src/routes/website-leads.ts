@@ -15,6 +15,7 @@ const websiteLeadSchema = z.object({
   preferredContact: z.enum(['email', 'phone', 'whatsapp', 'telegram']).optional(),
   urgencyLevel: z.enum(['low', 'normal', 'high']).optional(),
   preferredTime: z.string().trim().max(120).optional().or(z.literal('')),
+  preferAnonymousTelegram: z.boolean().optional(),
   appointmentDate: z.string().trim().max(80).optional().or(z.literal('')),
   appointmentTime: z.string().trim().max(80).optional().or(z.literal('')),
   selectedService: z.string().trim().max(160).optional().or(z.literal('')),
@@ -37,6 +38,7 @@ function compactDetails(body: z.infer<typeof websiteLeadSchema>) {
     body.appointmentTime && `Preferred time: ${body.appointmentTime}`,
     body.preferredTime && `Preferred callback time: ${body.preferredTime}`,
     body.urgencyLevel && `Urgency: ${body.urgencyLevel}`,
+    body.preferAnonymousTelegram && 'Low-identity Telegram follow-up requested',
     body.preferredContact && `Preferred contact: ${body.preferredContact}`,
     body.bookingSource && `Source: ${body.bookingSource}`,
     `Message: ${body.message}`

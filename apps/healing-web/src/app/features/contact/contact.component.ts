@@ -98,6 +98,7 @@ export class ContactComponent implements OnInit {
       serviceInterest: [initialServiceValue],
       urgencyLevel: ['normal', [Validators.required]],
       preferredTime: [''],
+      preferAnonymousTelegram: [false],
       message: [initialMessage, [Validators.required, Validators.minLength(10)]],
       preferredContact: [user ? 'email' : 'whatsapp', [Validators.required]],
     });
@@ -251,6 +252,7 @@ export class ContactComponent implements OnInit {
           preferredContact: formData.preferredContact,
           urgencyLevel: formData.urgencyLevel,
           preferredTime: formData.preferredTime || '',
+          preferAnonymousTelegram: Boolean(formData.preferAnonymousTelegram),
           entryPage: typeof window === 'undefined' ? undefined : window.location.href,
         })
         .subscribe({ next: resolve, error: reject });
@@ -287,6 +289,7 @@ export class ContactComponent implements OnInit {
       message: '',
       urgencyLevel: 'normal',
       preferredTime: '',
+      preferAnonymousTelegram: false,
       preferredContact: user ? 'email' : 'whatsapp',
     });
     this.selectedAppointment.set(null);

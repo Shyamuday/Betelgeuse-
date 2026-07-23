@@ -5,6 +5,7 @@ export interface ContactForm {
   serviceInterest?: string;
   urgencyLevel?: 'low' | 'normal' | 'high';
   preferredTime?: string;
+  preferAnonymousTelegram?: boolean;
   message: string;
   preferredContact: ContactMethod;
 }

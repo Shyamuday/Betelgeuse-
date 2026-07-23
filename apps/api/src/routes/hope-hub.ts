@@ -46,6 +46,7 @@ const hopeHubBookingSchema = z.object({
   preferredContact: z.enum(['email', 'phone', 'whatsapp', 'telegram']).optional(),
   urgencyLevel: z.enum(['low', 'normal', 'high']).optional(),
   preferredTime: z.string().trim().max(120).optional().or(z.literal('')),
+  preferAnonymousTelegram: z.boolean().optional(),
   entryPage: z.string().trim().max(500).optional().or(z.literal(''))
 });
 
@@ -160,6 +161,7 @@ hopeHubRouter.post(
           preferredContact: body.preferredContact || '',
           urgencyLevel: body.urgencyLevel || '',
           preferredTime: body.preferredTime || '',
+          preferAnonymousTelegram: Boolean(body.preferAnonymousTelegram),
           entryPage: body.entryPage || ''
         },
         billingPlanCode: selectedPlan.code,
@@ -208,6 +210,7 @@ hopeHubRouter.post(
           body.preferredContact ? `Preferred contact: ${body.preferredContact}` : '',
           body.urgencyLevel ? `Urgency: ${body.urgencyLevel}` : '',
           body.preferredTime ? `Preferred callback time: ${body.preferredTime}` : '',
+          body.preferAnonymousTelegram ? 'Low-identity Telegram follow-up requested' : '',
           body.message ? `Message: ${body.message}` : ''
         ]
           .filter(Boolean)

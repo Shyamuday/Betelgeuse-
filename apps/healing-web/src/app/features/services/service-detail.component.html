@@ -155,6 +155,18 @@
           contact local emergency services now. In India, Tele MANAS is available at 14416.
         </p>
       </div>
+
+      <div class="bg-white rounded-lg shadow-md p-6 lg:col-span-2">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Common Questions</h2>
+        <div class="space-y-4">
+          @for (faq of faqs(service()!); track faq.question) {
+            <div class="rounded-lg border border-gray-200 p-4">
+              <h3 class="font-semibold text-gray-900">{{ faq.question }}</h3>
+              <p class="mt-2 text-sm leading-6 text-gray-600">{{ faq.answer }}</p>
+            </div>
+          }
+        </div>
+      </div>
     </div>
 
     <!-- Call to Action Section -->

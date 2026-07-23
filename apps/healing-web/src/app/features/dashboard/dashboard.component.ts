@@ -19,6 +19,11 @@ type HopeHubConsultation = {
   } | null;
 };
 
+type BookingTimelineStep = {
+  label: string;
+  done: boolean;
+};
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -239,6 +244,26 @@ type HopeHubConsultation = {
                       <p class="font-semibold">Next step</p>
                       <p class="mt-1">{{ nextStepFor(consultation) }}</p>
                     </div>
+                    <div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                      @for (step of timelineSteps(consultation); track step.label) {
+                        <div
+                          class="rounded-md border p-2 text-xs"
+                          [class.border-green-200]="step.done"
+                          [class.bg-green-50]="step.done"
+                          [class.text-green-800]="step.done"
+                          [class.border-gray-200]="!step.done"
+                          [class.bg-gray-50]="!step.done"
+                          [class.text-gray-500]="!step.done"
+                        >
+                          <span
+                            class="mb-1 block h-2 w-2 rounded-full"
+                            [class.bg-green-600]="step.done"
+                            [class.bg-gray-300]="!step.done"
+                          ></span>
+                          {{ step.label }}
+                        </div>
+                      }
+                    </div>
                     @if (consultation.assignedDoctor) {
                       <p class="mt-2 text-sm text-gray-600">
                         Provider: {{ consultation.assignedDoctor.name || 'Assigned provider' }}
@@ -346,6 +371,18 @@ export class DashboardComponent implements OnInit {
     }
 
     return 'Your provider is assigned. The team will share the confirmed session instructions through your selected contact method.';
+  }
+
+  timelineSteps(consultation: HopeHubConsultation): BookingTimelineStep[] {
+    const paymentStatus = consultation.payment?.status?.toUpperCase();
+    const isPaymentDone = paymentStatus === 'CAPTURED' || paymentStatus === 'PAID';
+
+    return [
+      { label: 'Request received', done: true },
+      { label: 'Payment confirmed', done: isPaymentDone },
+      { label: 'Provider matched', done: Boolean(consultation.assignedDoctor) },
+      { label: 'Session instructions', done: Boolean(consultation.assignedDoctor) },
+    ];
   }
 
   async logout(): Promise<void> {

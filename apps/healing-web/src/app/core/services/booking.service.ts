@@ -19,6 +19,7 @@ export type HopeHubBookingPayload = {
   preferredContact?: string;
   urgencyLevel?: string;
   preferredTime?: string;
+  preferAnonymousTelegram?: boolean;
   entryPage?: string;
 };
 

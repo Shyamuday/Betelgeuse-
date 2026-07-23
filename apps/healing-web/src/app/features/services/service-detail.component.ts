@@ -133,6 +133,40 @@ export class ServiceDetailComponent implements OnInit {
     ];
   }
 
+  faqs(service: Service): Array<{ question: string; answer: string }> {
+    return [
+      {
+        question: 'Can I stay anonymous?',
+        answer:
+          'For community support, Telegram can be used with a display name or username. For paid bookings, basic account and payment details are still needed for confirmation.',
+      },
+      {
+        question: 'Is this therapy or support?',
+        answer: `${service.name} is supportive counselling and guidance. If your concern needs clinical diagnosis, emergency care, or specialist treatment, we will suggest the right next step.`,
+      },
+      {
+        question: 'What happens after I submit?',
+        answer:
+          'Your request is reviewed, the team checks your concern and preferred contact method, then confirms the next step or session details.',
+      },
+      {
+        question: 'Can I use Telegram?',
+        answer:
+          'Yes. Choose Telegram or the low-identity Telegram preference in the contact form if you are worried about identity reveal.',
+      },
+      {
+        question: 'Is the ₹300 session refundable?',
+        answer:
+          'Refund or reschedule handling depends on whether the session has already been confirmed or started. Contact the team as early as possible if you need a change.',
+      },
+      {
+        question: 'What if I need urgent help?',
+        answer:
+          'Hope Hub is not emergency care. If you are in immediate danger or may harm yourself, contact local emergency services. In India, Tele MANAS is available at 14416.',
+      },
+    ];
+  }
+
   private loadService(serviceId: string) {
     this.loading.set(true);
 
