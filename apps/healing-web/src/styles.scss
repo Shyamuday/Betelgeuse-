@@ -348,24 +348,40 @@ a:focus {
 
 /* Brand-consistent utility classes */
 .btn-primary {
-  @apply bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors;
+  @apply bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50;
 }
 
 .btn-secondary {
-  @apply bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors;
+  @apply border border-primary-600 bg-white text-primary-700 px-6 py-3 rounded-lg font-medium hover:bg-primary-50 focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50;
 }
 
 .btn-outline {
-  @apply border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-medium hover:bg-blue-600 hover:text-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors;
+  @apply border-2 border-primary-600 text-primary-700 px-6 py-3 rounded-lg font-medium hover:bg-primary-50 focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.btn-ghost {
+  @apply text-primary-700 px-4 py-2 rounded-lg font-medium hover:bg-primary-50 focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.btn-danger {
+  @apply bg-red-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-700 focus:ring-2 focus:ring-red-600 focus:ring-offset-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.btn-sm {
+  @apply px-4 py-2 text-sm;
+}
+
+.btn-lg {
+  @apply px-8 py-4 text-lg;
 }
 
 /* Form styling consistency */
 .form-input {
-  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900 placeholder-gray-600 bg-white;
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-colors text-gray-900 placeholder-gray-600 bg-white;
 }
 
 .form-textarea {
-  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900 placeholder-gray-600 bg-white;
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-colors text-gray-900 placeholder-gray-600 bg-white;
   resize: vertical;
 }
 
