@@ -48,9 +48,9 @@ import { User } from '../../core/models/auth.model';
               <img
                 src="/image/hopehublogo.png"
                 alt=""
-                class="h-12 w-12 rounded-full object-cover"
-                width="48"
-                height="48"
+                class="h-11 w-11 object-contain"
+                width="44"
+                height="44"
               />
             </a>
           </div>
