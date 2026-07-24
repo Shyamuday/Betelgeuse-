@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { API_PATHS } from '../constants/api-paths.constants';
 import type {
+  ConsultationAssessmentSummary,
   ConsultationMessage,
   ConsultationSessionNote,
   DoctorConsultation,
@@ -48,5 +49,13 @@ export class ConsultationApiService {
         { note },
       ),
     ).then((response) => response.note);
+  }
+
+  loadAssessmentSummary(consultationId: string) {
+    return firstValueFrom(
+      this.http.get<ConsultationAssessmentSummary>(
+        `${this.apiBase}${API_PATHS.CONSULTATIONS}/${consultationId}/assessment-summary`,
+      ),
+    );
   }
 }

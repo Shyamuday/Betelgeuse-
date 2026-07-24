@@ -7,7 +7,10 @@ import { ConsultationApiService } from '../../core/services/consultation-api.ser
 import { ConsultationNavigationService } from '../../core/services/consultation-navigation.service';
 import { OnlineDoctorService } from '../../core/services/online-doctor.service';
 import { capabilitiesForDoctorType } from '../../core/constants/doctor-types.constants';
-import type { ConsultationSessionNote } from '../../core/types/consultation.types';
+import type {
+  ConsultationAssessmentSummary,
+  ConsultationSessionNote,
+} from '../../core/types/consultation.types';
 
 type InstantConsult = {
   id: string;
@@ -42,6 +45,8 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
   readonly sessionNoteText = signal('');
   readonly sessionNotesLoading = signal(false);
   readonly sessionNoteSaving = signal(false);
+  readonly assessmentSummary = signal<ConsultationAssessmentSummary | null>(null);
+  readonly assessmentSummaryLoading = signal(false);
 
   readonly settingsModel = signal({
     category: 'GENERALIST' as 'GENERALIST' | 'SPECIALIST',
@@ -97,9 +102,9 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
       if (!selected && res.consultations.length) {
         const firstId = res.consultations[0].id;
         this.selectedConsultId.set(firstId);
-        void this.loadSessionNotes(firstId);
+        void this.loadConsultationContext(firstId);
       } else if (selected) {
-        void this.loadSessionNotes(selected);
+        void this.loadConsultationContext(selected);
       }
     } catch {
       this.instantConsults.set([]);
@@ -112,7 +117,8 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
     this.selectedConsultId.set(id);
     this.sessionNotes.set([]);
     this.sessionNoteText.set('');
-    void this.loadSessionNotes(id);
+    this.assessmentSummary.set(null);
+    void this.loadConsultationContext(id);
     void this.router.navigate([], {
       queryParams: { consultationId: id },
       queryParamsHandling: 'merge',
@@ -235,6 +241,24 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
     } finally {
       this.sessionNotesLoading.set(false);
     }
+  }
+
+  async loadAssessmentSummary(consultationId = this.selectedConsultId()) {
+    if (!consultationId) return;
+    this.assessmentSummaryLoading.set(true);
+    try {
+      this.assessmentSummary.set(await this.consultationApi.loadAssessmentSummary(consultationId));
+    } catch {
+      this.assessmentSummary.set(null);
+      this.error.set('Could not load assessment history.');
+    } finally {
+      this.assessmentSummaryLoading.set(false);
+    }
+  }
+
+  loadConsultationContext(consultationId = this.selectedConsultId()) {
+    void this.loadSessionNotes(consultationId);
+    void this.loadAssessmentSummary(consultationId);
   }
 
   async saveSessionNote() {

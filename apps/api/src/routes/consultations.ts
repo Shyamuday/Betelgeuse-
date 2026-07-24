@@ -20,6 +20,27 @@ import { resolveDiseaseConsultationFee } from '../services/consultation-pricing.
 import { resolveConsultationCheckout } from '../services/checkout-pricing.js';
 import { PRODUCT_EVENTS, trackProductEvent } from '../services/product-analytics.js';
 
+function serializeHopeHubAssessmentAttempt(attempt: {
+  id: string;
+  assessmentId: string;
+  assessmentType: string;
+  category: string | null;
+  title: string;
+  totalScore: number;
+  maxScore: number;
+  level: string;
+  color: string | null;
+  safetyFlag: boolean;
+  retakeNumber: number;
+  previousId: string | null;
+  completedAt: Date;
+}) {
+  return {
+    ...attempt,
+    completedAt: attempt.completedAt.toISOString()
+  };
+}
+
 export function createConsultationsRouter(io: SocketIoServer) {
   const router = Router();
 
@@ -230,7 +251,6 @@ export function createConsultationsRouter(io: SocketIoServer) {
         }
       });
 
-       
       const patient = (consultation as any).patient;
       if (patient) {
         void notificationService.sendBatch(
@@ -325,6 +345,58 @@ export function createConsultationsRouter(io: SocketIoServer) {
       });
 
       res.json({ notes });
+    })
+  );
+
+  router.get(
+    '/consultations/:id/assessment-summary',
+    authRequired,
+    allowRoles(Role.DOCTOR, Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const consultation = await prisma.consultation.findUniqueOrThrow({
+        where: { id: routeParam(req, 'id') },
+        select: { id: true, patientId: true, assignedDoctorId: true }
+      });
+
+      if (req.user!.role === Role.DOCTOR && consultation.assignedDoctorId !== req.user!.id) {
+        return res
+          .status(403)
+          .json({ message: 'Only the assigned doctor can view assessment history.' });
+      }
+
+      const attempts = await prisma.hopeHubAssessmentAttempt.findMany({
+        where: { userId: consultation.patientId },
+        select: {
+          id: true,
+          assessmentId: true,
+          assessmentType: true,
+          category: true,
+          title: true,
+          totalScore: true,
+          maxScore: true,
+          level: true,
+          color: true,
+          safetyFlag: true,
+          retakeNumber: true,
+          previousId: true,
+          completedAt: true
+        },
+        orderBy: { completedAt: 'desc' },
+        take: 20
+      });
+
+      const latestByAssessment = new Map<string, (typeof attempts)[number]>();
+      for (const attempt of attempts) {
+        if (!latestByAssessment.has(attempt.assessmentId)) {
+          latestByAssessment.set(attempt.assessmentId, attempt);
+        }
+      }
+
+      res.json({
+        attempts: attempts.map(serializeHopeHubAssessmentAttempt),
+        latest: Array.from(latestByAssessment.values()).map(serializeHopeHubAssessmentAttempt),
+        safetyFlaggedCount: attempts.filter((attempt) => attempt.safetyFlag).length
+      });
     })
   );
 
