@@ -16,9 +16,26 @@ type RazorpayCheckoutResponse = {
   razorpay_signature: string;
 };
 
+type RazorpayPaymentFailedResponse = {
+  error?: {
+    code?: string;
+    description?: string;
+    source?: string;
+    step?: string;
+    reason?: string;
+    metadata?: {
+      order_id?: string;
+      payment_id?: string;
+    };
+  };
+};
+
 declare global {
   interface Window {
-    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+      on?: (event: string, callback: (response: unknown) => void) => void;
+    };
   }
 }
 
@@ -106,6 +123,13 @@ export class PaymentService {
         return;
       }
 
+      let settled = false;
+      const fail = (message: string) => {
+        if (settled) return;
+        settled = true;
+        reject(new Error(message));
+      };
+
       const checkout = new window.Razorpay({
         key: order.razorpayKeyId,
         amount: order.amountInPaise,
@@ -119,8 +143,21 @@ export class PaymentService {
           contact: donor.donorPhone || '',
         },
         theme: { color: '#16a34a' },
-        handler: (response: RazorpayCheckoutResponse) => resolve(response),
-        modal: { ondismiss: () => reject(new Error('Payment was cancelled.')) },
+        handler: (response: RazorpayCheckoutResponse) => {
+          if (settled) return;
+          settled = true;
+          resolve(response);
+        },
+        modal: { ondismiss: () => fail('Payment was cancelled.') },
+      });
+
+      checkout.on?.('payment.failed', (response: unknown) => {
+        const failure = response as RazorpayPaymentFailedResponse;
+        fail(
+          failure.error?.description ||
+            failure.error?.reason ||
+            'Payment failed. Please retry or use another payment method.',
+        );
       });
 
       checkout.open();

@@ -40,6 +40,10 @@ import { APP_CONSTANTS } from '../../core';
               the request and confirms the suitable support path, provider availability, and session
               timing.
             </p>
+            <p class="mt-3 leading-7">
+              Payment confirmation depends on secure gateway verification. If payment fails or is
+              cancelled, the user may retry from the booking flow or contact support for help.
+            </p>
           </section>
 
           <section>

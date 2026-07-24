@@ -8,6 +8,13 @@
               <strong>{{ consultation.disease.name }}</strong>
               <span>{{ consultation.patient.name }}</span>
               <small>{{ consultation.status }}</small>
+              @if (consultation.payment?.status === 'PARTIALLY_REFUNDED') {
+                <small>Partial refund tracked</small>
+              } @else if (consultation.payment?.status === 'REFUNDED') {
+                <small>Refund completed</small>
+              } @else if (consultation.payment?.status === 'FAILED') {
+                <small>Payment failed. You can retry.</small>
+              }
               <hopehub-detail-rows inlineTag="small" [inlineHostless]="true" [rows]="billingRows(consultation)" />
             </button>
             @if (userRole === 'PATIENT' && consultation.status === 'PAYMENT_PENDING') {

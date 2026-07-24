@@ -68,6 +68,16 @@ import { APP_CONSTANTS } from '../../core';
           </section>
 
           <section>
+            <h2 class="text-xl font-bold text-slate-950">Payment Verification & Tracking</h2>
+            <p class="mt-3 leading-7">
+              Online payments are verified securely with our payment gateway before a session is
+              marked as paid. Failed, cancelled, duplicate, and refund events are logged against the
+              original booking so our support team can review the status and help you retry or
+              resolve the payment.
+            </p>
+          </section>
+
+          <section>
             <h2 class="text-xl font-bold text-slate-950">Contact For Refunds</h2>
             <p class="mt-3 leading-7">
               For cancellation, reschedule, or refund support, email

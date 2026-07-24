@@ -266,6 +266,7 @@ export const LEGAL_PAGES = {
         bullets: [
           'If payment is debited but the order or consultation is not confirmed, contact support with the payment reference.',
           'Duplicate or excess payments verified by our team are refunded to the original payment method.',
+          'Payment and refund gateway events are tracked against the original payment so support can review confirmation, failure, retry, and refund status.',
           'Refund timelines depend on Razorpay, bank, card, UPI, or wallet processing and are typically 5-10 business days after approval.',
         ],
       },
@@ -377,6 +378,7 @@ export const LEGAL_PAGES = {
         title: 'Payment security',
         paragraphs: [
           'Card and UPI details are entered on Razorpay’s secure checkout. HopeHub does not store full payment credentials on its own servers.',
+          'Successful payments are verified on our backend using gateway signatures and payment details before a consultation is marked paid.',
           'You are responsible for verifying the amount before authorising payment.',
         ],
       },

@@ -142,7 +142,8 @@ export type HomeopathyApproach = {
 export type Payment = {
   id: string;
   amountInPaise: number;
-  status: 'CREATED' | 'PAID' | 'FAILED';
+  refundedAmountInPaise?: number;
+  status: 'CREATED' | 'PAID' | 'FAILED' | 'PARTIALLY_REFUNDED' | 'REFUNDED';
   billingPlanCode?: string | null;
   lineItems?: Record<string, unknown> | null;
   providerOrderId?: string | null;
