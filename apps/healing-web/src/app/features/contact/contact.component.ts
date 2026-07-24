@@ -27,6 +27,7 @@ import { User } from '../../core/models/auth.model';
 export class ContactComponent implements OnInit {
   APP_CONSTANTS = APP_CONSTANTS;
   readonly notes = NOTE_CONTENT;
+  private readonly pendingBookingStorageKey = 'hope_hub_pending_booking';
 
   private formBuilder = inject(FormBuilder);
   private leadService = inject(LeadService);
@@ -57,6 +58,7 @@ export class ContactComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializeForm();
+    this.restorePendingBooking();
   }
 
   private loadUserData(): void {
@@ -238,6 +240,7 @@ export class ContactComponent implements OnInit {
   private async submitBooking(formData: ContactForm, appointment: AppointmentSlot): Promise<void> {
     const user = this.currentUser();
     if (!user) {
+      this.savePendingBooking(formData, appointment);
       this.waitingForAuthToBook.set(true);
       this.authModalService.openRegister();
       throw new Error('Create a patient account or log in to continue to secure payment.');
@@ -270,6 +273,7 @@ export class ContactComponent implements OnInit {
     });
 
     await this.paymentService.payConsultation(response.consultation);
+    this.clearPendingBooking();
     this.showSuccessAndReset('Appointment booked and payment verified successfully.');
   }
 
@@ -328,5 +332,60 @@ export class ContactComponent implements OnInit {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private savePendingBooking(formData: ContactForm, appointment: AppointmentSlot): void {
+    if (typeof sessionStorage === 'undefined') return;
+    sessionStorage.setItem(
+      this.pendingBookingStorageKey,
+      JSON.stringify({
+        formData,
+        appointment: {
+          ...appointment,
+          date: appointment.date.toISOString(),
+        },
+        prefilledData: this.prefilledData(),
+        savedAt: new Date().toISOString(),
+      }),
+    );
+  }
+
+  private restorePendingBooking(): void {
+    if (typeof sessionStorage === 'undefined') return;
+    const raw = sessionStorage.getItem(this.pendingBookingStorageKey);
+    if (!raw) return;
+
+    try {
+      const parsed = JSON.parse(raw) as {
+        formData: ContactForm;
+        appointment: { date: string; time: string; consultant?: string };
+        prefilledData?: any;
+        savedAt: string;
+      };
+      const savedAt = new Date(parsed.savedAt).getTime();
+      const isFresh = Date.now() - savedAt < 60 * 60 * 1000;
+      if (!isFresh) {
+        this.clearPendingBooking();
+        return;
+      }
+
+      this.prefilledData.set({ ...this.prefilledData(), ...(parsed.prefilledData || {}) });
+      this.contactForm.patchValue(parsed.formData);
+      this.selectedAppointment.set({
+        ...parsed.appointment,
+        date: new Date(parsed.appointment.date),
+      });
+
+      if (!this.currentUser()) {
+        this.waitingForAuthToBook.set(true);
+      }
+    } catch {
+      this.clearPendingBooking();
+    }
+  }
+
+  private clearPendingBooking(): void {
+    if (typeof sessionStorage === 'undefined') return;
+    sessionStorage.removeItem(this.pendingBookingStorageKey);
   }
 }
