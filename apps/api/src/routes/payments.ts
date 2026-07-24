@@ -1,22 +1,227 @@
 import crypto from 'node:crypto';
 import { Router } from 'express';
 import { z } from 'zod';
-import { ConsultationStatus, PaymentStatus, Role } from '@prisma/client';
+import { ConsultationStatus, PaymentStatus, Prisma, Role } from '@prisma/client';
 import type { Server as SocketIoServer } from 'socket.io';
 import { authRequired, allowRoles } from '../auth.js';
 import { prisma } from '../db.js';
 import { asyncRoute, routeParam } from '../utils/helpers.js';
-import { getRazorpayClient, verifyRazorpaySignature, razorpayKeyId, razorpayWebhookSecret } from '../services/razorpay.js';
-import { enabledNotificationChannels, notificationService } from '../services/notification-service.js';
+import {
+  getRazorpayClient,
+  verifyRazorpaySignature,
+  razorpayKeyId,
+  razorpayWebhookSecret
+} from '../services/razorpay.js';
+import {
+  enabledNotificationChannels,
+  notificationService
+} from '../services/notification-service.js';
 import { buildDoctorPayslip, buildPayslipHistory, parseMonth } from '../services/payroll.js';
-import { doctorReceivesConsultationShare, resolveDoctorSharePercent } from '../services/doctor-compensation.js';
+import {
+  doctorReceivesConsultationShare,
+  resolveDoctorSharePercent
+} from '../services/doctor-compensation.js';
 import { buildDoctorEarningsReport } from '../services/doctor-earnings.js';
 import { settleConsultationPaymentRewards } from '../services/reward-settlement.js';
 import { PRODUCT_EVENTS, trackProductEvent } from '../services/product-analytics.js';
 import { tryAssignInstantConsultation } from '../services/online-doctor-presence.js';
 
+type RazorpayPaymentEntity = {
+  id: string;
+  order_id?: string | null;
+  amount?: number | string | null;
+  currency?: string | null;
+  status?: string | null;
+};
+
+type RazorpayOrderEntity = {
+  id?: string | null;
+  amount?: number | string | null;
+  amount_paid?: number | string | null;
+  currency?: string | null;
+  status?: string | null;
+};
+
+type RazorpayRefundEntity = {
+  id: string;
+  payment_id?: string | null;
+  amount?: number | string | null;
+  currency?: string | null;
+  status?: string | null;
+  created_at?: number | null;
+  notes?: Record<string, unknown> | null;
+};
+
 export function createPaymentsRouter(io: SocketIoServer) {
   const router = Router();
+
+  async function recordGatewayEvent(input: {
+    paymentId?: string | null;
+    providerEventId?: string | null;
+    eventType: string;
+    providerOrderId?: string | null;
+    providerPaymentId?: string | null;
+    amountInPaise?: number | null;
+    currency?: string | null;
+    status?: string | null;
+    source: string;
+    signatureVerified?: boolean;
+    payload?: Prisma.InputJsonValue;
+  }) {
+    try {
+      await prisma.paymentGatewayEvent.create({
+        data: {
+          paymentId: input.paymentId ?? null,
+          providerEventId: input.providerEventId || null,
+          eventType: input.eventType,
+          providerOrderId: input.providerOrderId || null,
+          providerPaymentId: input.providerPaymentId || null,
+          amountInPaise: input.amountInPaise ?? null,
+          currency: input.currency || null,
+          status: input.status || null,
+          source: input.source,
+          signatureVerified: input.signatureVerified ?? false,
+          payload: input.payload ?? Prisma.JsonNull
+        }
+      });
+      return { duplicate: false };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        return { duplicate: true };
+      }
+      throw error;
+    }
+  }
+
+  async function markConsultationPaid(input: {
+    paymentId: string;
+    consultationId: string;
+    providerPaymentId: string;
+    patientId: string;
+    actorRole: Role;
+    diseaseName?: string | null;
+    patient?: { id: string; name: string; mobile: string | null; email: string | null } | null;
+    source?: string;
+    wasPaid: boolean;
+  }) {
+    await prisma.payment.update({
+      where: { id: input.paymentId },
+      data: { status: PaymentStatus.PAID, providerPaymentId: input.providerPaymentId }
+    });
+    await prisma.consultation.update({
+      where: { id: input.consultationId },
+      data: { status: ConsultationStatus.PAID }
+    });
+
+    if (input.patient) {
+      void notificationService.sendBatch(
+        enabledNotificationChannels.map((channel) => ({
+          eventType: 'BOOKING_CONFIRMED' as const,
+          channel,
+          recipientId: input.patient!.id,
+          recipientName: input.patient!.name,
+          recipientMobile: input.patient!.mobile,
+          recipientEmail: input.patient!.email,
+          title: 'Booking confirmed — HopeHub Care',
+          body: `Your consultation for ${input.diseaseName || 'your concern'} has been booked and payment received. A doctor will be assigned shortly.`
+        }))
+      );
+      io.to(`user:${input.patient.id}`).emit('payment:updated', {
+        consultationId: input.consultationId,
+        status: 'PAID'
+      });
+    }
+
+    if (!input.wasPaid) {
+      void tryAssignInstantConsultation(io, input.consultationId).catch((err) => {
+        console.error('[instant] Auto-assign failed after payment', err);
+      });
+      void trackProductEvent({
+        name: PRODUCT_EVENTS.PAYMENT_COMPLETED,
+        actorId: input.patientId,
+        actorRole: input.actorRole,
+        properties: {
+          consultationId: input.consultationId,
+          razorpayPaymentId: input.providerPaymentId,
+          ...(input.source ? { source: input.source } : {})
+        }
+      });
+      void settleConsultationPaymentRewards(input.paymentId).catch((err) => {
+        console.error('[rewards] Settlement failed after payment', err);
+      });
+    }
+  }
+
+  async function syncRefundFromWebhook(refundEntity: RazorpayRefundEntity) {
+    if (!refundEntity.payment_id) return;
+    const payment = await prisma.payment.findFirst({
+      where: { providerPaymentId: refundEntity.payment_id },
+      select: {
+        id: true,
+        amountInPaise: true,
+        refundedAmountInPaise: true,
+        consultation: { select: { patientId: true } }
+      }
+    });
+    if (!payment) return;
+
+    const amountInPaise = Number(refundEntity.amount);
+    if (!Number.isFinite(amountInPaise) || amountInPaise <= 0) return;
+
+    const existing = await prisma.paymentRefund.findUnique({
+      where: {
+        provider_providerRefundId: { provider: 'razorpay', providerRefundId: refundEntity.id }
+      }
+    });
+    const previousAmount = existing && existing.status !== 'failed' ? existing.amountInPaise : 0;
+    const nextAmount = refundEntity.status === 'failed' ? 0 : amountInPaise;
+    const refundedAmountInPaise = Math.max(
+      0,
+      Math.min(payment.amountInPaise, payment.refundedAmountInPaise - previousAmount + nextAmount)
+    );
+    const nextPaymentStatus =
+      refundedAmountInPaise <= 0
+        ? PaymentStatus.PAID
+        : refundedAmountInPaise >= payment.amountInPaise
+          ? PaymentStatus.REFUNDED
+          : PaymentStatus.PARTIALLY_REFUNDED;
+    const providerCreatedAt =
+      typeof refundEntity.created_at === 'number'
+        ? new Date(refundEntity.created_at * 1000)
+        : undefined;
+
+    await prisma.$transaction([
+      prisma.paymentRefund.upsert({
+        where: {
+          provider_providerRefundId: { provider: 'razorpay', providerRefundId: refundEntity.id }
+        },
+        create: {
+          paymentId: payment.id,
+          providerRefundId: refundEntity.id,
+          providerPaymentId: refundEntity.payment_id,
+          amountInPaise,
+          status: refundEntity.status || 'unknown',
+          notes: (refundEntity.notes || {}) as Prisma.InputJsonObject,
+          providerCreatedAt
+        },
+        update: {
+          amountInPaise,
+          status: refundEntity.status || 'unknown',
+          notes: (refundEntity.notes || {}) as Prisma.InputJsonObject,
+          providerCreatedAt
+        }
+      }),
+      prisma.payment.update({
+        where: { id: payment.id },
+        data: { refundedAmountInPaise, status: nextPaymentStatus }
+      })
+    ]);
+
+    io.to(`user:${payment.consultation.patientId}`).emit('payment:updated', {
+      paymentId: payment.id,
+      status: nextPaymentStatus
+    });
+  }
 
   // POST /payments/:consultationId/create-order
   router.post(
@@ -30,11 +235,21 @@ export function createPaymentsRouter(io: SocketIoServer) {
         include: { payment: true }
       });
       if (!consultation) return res.status(404).json({ message: 'Consultation not found.' });
-      if (consultation.patientId !== req.user!.id) return res.status(403).json({ message: 'Access denied.' });
+      if (consultation.patientId !== req.user!.id)
+        return res.status(403).json({ message: 'Access denied.' });
 
       const payment = consultation.payment;
-      if (!payment) return res.status(400).json({ message: 'Payment record is missing for this consultation.' });
-      if (payment.status === PaymentStatus.PAID) return res.status(400).json({ message: 'Payment is already completed.' });
+      if (!payment)
+        return res
+          .status(400)
+          .json({ message: 'Payment record is missing for this consultation.' });
+      if (
+        payment.status === PaymentStatus.PAID ||
+        payment.status === PaymentStatus.PARTIALLY_REFUNDED ||
+        payment.status === PaymentStatus.REFUNDED
+      ) {
+        return res.status(400).json({ message: 'Payment is already completed.' });
+      }
 
       const razorpay = getRazorpayClient();
       const order = await razorpay.orders.create({
@@ -60,7 +275,12 @@ export function createPaymentsRouter(io: SocketIoServer) {
         properties: { consultationId, orderId: order.id, amountInPaise: payment.amountInPaise }
       });
 
-      res.json({ orderId: order.id, amountInPaise: payment.amountInPaise, currency: 'INR', razorpayKeyId });
+      res.json({
+        orderId: order.id,
+        amountInPaise: payment.amountInPaise,
+        currency: 'INR',
+        razorpayKeyId
+      });
     })
   );
 
@@ -88,7 +308,8 @@ export function createPaymentsRouter(io: SocketIoServer) {
         }
       });
       if (!consultation) return res.status(404).json({ message: 'Consultation not found.' });
-      if (consultation.patientId !== req.user!.id) return res.status(403).json({ message: 'Access denied.' });
+      if (consultation.patientId !== req.user!.id)
+        return res.status(403).json({ message: 'Access denied.' });
 
       const payment = consultation.payment;
       if (!payment || payment.providerOrderId !== body.razorpayOrderId) {
@@ -98,51 +319,56 @@ export function createPaymentsRouter(io: SocketIoServer) {
         return res.status(400).json({ message: 'Invalid Razorpay signature.' });
       }
 
+      const razorpay = getRazorpayClient();
+      const gatewayPayment = (await razorpay.payments.fetch(
+        body.razorpayPaymentId
+      )) as RazorpayPaymentEntity;
+      const gatewayAmount = Number(gatewayPayment.amount);
+      const gatewayCurrency = (gatewayPayment.currency || '').toUpperCase();
+      await recordGatewayEvent({
+        paymentId: payment.id,
+        eventType: 'payment.checkout_callback',
+        providerOrderId: gatewayPayment.order_id || body.razorpayOrderId,
+        providerPaymentId: gatewayPayment.id,
+        amountInPaise: Number.isFinite(gatewayAmount) ? gatewayAmount : null,
+        currency: gatewayCurrency || null,
+        status: gatewayPayment.status || null,
+        source: 'checkout_callback',
+        signatureVerified: true,
+        payload: gatewayPayment as Prisma.InputJsonValue
+      });
+      if (
+        gatewayPayment.order_id !== body.razorpayOrderId ||
+        gatewayAmount !== payment.amountInPaise ||
+        gatewayCurrency !== 'INR'
+      ) {
+        return res.status(400).json({ message: 'Payment details do not match this order.' });
+      }
+
+      let capturedPayment = gatewayPayment;
+      if (gatewayPayment.status === 'authorized') {
+        capturedPayment = (await razorpay.payments.capture(
+          body.razorpayPaymentId,
+          payment.amountInPaise,
+          'INR'
+        )) as RazorpayPaymentEntity;
+      }
+      if (capturedPayment.status !== 'captured') {
+        return res.status(400).json({ message: 'Payment is not captured yet.' });
+      }
+
       const wasPaid = payment.status === PaymentStatus.PAID;
 
-      await prisma.payment.update({
-        where: { id: payment.id },
-        data: { status: 'PAID', providerPaymentId: body.razorpayPaymentId }
+      await markConsultationPaid({
+        paymentId: payment.id,
+        consultationId,
+        providerPaymentId: body.razorpayPaymentId,
+        patientId: req.user!.id,
+        actorRole: req.user!.role,
+        diseaseName: consultation.disease?.name,
+        patient: consultation.patient,
+        wasPaid
       });
-      await prisma.consultation.update({
-        where: { id: consultation.id },
-        data: { status: ConsultationStatus.PAID }
-      });
-
-      const patient = consultation.patient;
-      if (patient) {
-        void notificationService.sendBatch(
-          enabledNotificationChannels.map((channel) => ({
-            eventType: 'BOOKING_CONFIRMED' as const,
-            channel,
-            recipientId: patient.id,
-            recipientName: patient.name,
-            recipientMobile: patient.mobile,
-            recipientEmail: patient.email,
-            title: 'Booking confirmed — HopeHub Care',
-            body: `Your consultation for ${consultation.disease?.name || 'your concern'} has been booked and payment received. A doctor will be assigned shortly.`
-          }))
-        );
-        io.to(`user:${patient.id}`).emit('payment:updated', { consultationId, status: 'PAID' });
-      }
-
-      if (!wasPaid) {
-        void tryAssignInstantConsultation(io, consultationId).catch((err) => {
-          console.error('[instant] Auto-assign failed after payment', err);
-        });
-      }
-
-      if (!wasPaid) {
-        void trackProductEvent({
-          name: PRODUCT_EVENTS.PAYMENT_COMPLETED,
-          actorId: req.user!.id,
-          actorRole: req.user!.role,
-          properties: { consultationId, razorpayPaymentId: body.razorpayPaymentId }
-        });
-        void settleConsultationPaymentRewards(payment.id).catch((err) => {
-          console.error('[rewards] Settlement failed after verify', err);
-        });
-      }
 
       res.json({ ok: true });
     })
@@ -158,7 +384,10 @@ export function createPaymentsRouter(io: SocketIoServer) {
 
       const signature = req.header('x-razorpay-signature') || '';
       const rawBody = Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body));
-      const expectedSignature = crypto.createHmac('sha256', razorpayWebhookSecret).update(rawBody).digest('hex');
+      const expectedSignature = crypto
+        .createHmac('sha256', razorpayWebhookSecret)
+        .update(rawBody)
+        .digest('hex');
 
       if (
         expectedSignature.length !== signature.length ||
@@ -169,32 +398,134 @@ export function createPaymentsRouter(io: SocketIoServer) {
 
       const event = JSON.parse(rawBody.toString()) as {
         event: string;
-        payload?: { payment?: { entity?: { id: string; order_id: string } } };
+        payload?: {
+          payment?: { entity?: RazorpayPaymentEntity };
+          order?: { entity?: RazorpayOrderEntity };
+          refund?: { entity?: RazorpayRefundEntity };
+        };
       };
 
-      if (event.event !== 'payment.captured') return res.json({ ok: true, ignored: true });
-
+      const providerEventId = req.header('x-razorpay-event-id') || null;
       const paymentEntity = event.payload?.payment?.entity;
-      if (!paymentEntity?.order_id) {
+      const refundEntity = event.payload?.refund?.entity;
+      const orderId = paymentEntity?.order_id || event.payload?.order?.entity?.id;
+      const gatewayAmount = paymentEntity?.amount ?? event.payload?.order?.entity?.amount_paid;
+      const gatewayCurrency =
+        paymentEntity?.currency || event.payload?.order?.entity?.currency || null;
+      const gatewayStatus = paymentEntity?.status || event.payload?.order?.entity?.status || null;
+      const paymentAmount = Number(gatewayAmount);
+
+      const payment = orderId
+        ? await prisma.payment.findFirst({
+            where: { providerOrderId: orderId },
+            select: {
+              id: true,
+              consultationId: true,
+              status: true,
+              amountInPaise: true,
+              providerPaymentId: true,
+              consultation: { select: { patientId: true } }
+            }
+          })
+        : refundEntity?.payment_id
+          ? await prisma.payment.findFirst({
+              where: { providerPaymentId: refundEntity.payment_id },
+              select: {
+                id: true,
+                consultationId: true,
+                status: true,
+                amountInPaise: true,
+                providerPaymentId: true,
+                consultation: { select: { patientId: true } }
+              }
+            })
+          : null;
+
+      const audit = await recordGatewayEvent({
+        paymentId: payment?.id,
+        providerEventId,
+        eventType: event.event || 'unknown',
+        providerOrderId: orderId || null,
+        providerPaymentId: paymentEntity?.id || refundEntity?.payment_id || null,
+        amountInPaise: Number.isFinite(paymentAmount)
+          ? paymentAmount
+          : Number.isFinite(Number(refundEntity?.amount))
+            ? Number(refundEntity?.amount)
+            : null,
+        currency: gatewayCurrency || refundEntity?.currency || null,
+        status: gatewayStatus || refundEntity?.status || null,
+        source: 'webhook',
+        signatureVerified: true,
+        payload: event as unknown as Prisma.InputJsonValue
+      });
+      if (audit.duplicate) return res.json({ ok: true, duplicate: true });
+
+      const refundEvents = [
+        'refund.created',
+        'refund.processed',
+        'refund.failed',
+        'refund.speed_changed'
+      ];
+      if (refundEvents.includes(event.event)) {
+        if (refundEntity) await syncRefundFromWebhook(refundEntity);
+        return res.json({ ok: true });
+      }
+
+      const supportedEvents = ['payment.captured', 'payment.failed', 'order.paid'];
+      if (!supportedEvents.includes(event.event)) return res.json({ ok: true, ignored: true });
+
+      if (!orderId) {
         return res.status(400).json({ message: 'Webhook payment payload is missing order id.' });
       }
 
-      const payment = await prisma.payment.findFirst({
-        where: { providerOrderId: paymentEntity.order_id },
-        select: { id: true, consultationId: true, status: true, consultation: { select: { patientId: true } } }
-      });
-      if (!payment) return res.status(404).json({ message: 'Payment record not found for Razorpay order.' });
+      if (!payment)
+        return res.status(404).json({ message: 'Payment record not found for Razorpay order.' });
 
       const wasPaid = payment.status === PaymentStatus.PAID;
 
-      await prisma.payment.update({
-        where: { id: payment.id },
-        data: { status: PaymentStatus.PAID, providerPaymentId: paymentEntity.id }
-      });
-      await prisma.consultation.update({
-        where: { id: payment.consultationId },
-        data: { status: ConsultationStatus.PAID }
-      });
+      if (event.event === 'payment.failed') {
+        if (!wasPaid) {
+          await prisma.payment.update({
+            where: { id: payment.id },
+            data: {
+              status: PaymentStatus.FAILED,
+              providerPaymentId: paymentEntity?.id || payment.providerPaymentId || null
+            }
+          });
+          io.to(`user:${payment.consultation.patientId}`).emit('payment:updated', {
+            consultationId: payment.consultationId,
+            status: 'FAILED'
+          });
+        }
+        return res.json({ ok: true });
+      }
+
+      if (paymentEntity) {
+        const webhookAmount = Number(paymentEntity.amount);
+        const webhookCurrency = (paymentEntity.currency || '').toUpperCase();
+        if (
+          paymentEntity.status !== 'captured' ||
+          webhookAmount !== payment.amountInPaise ||
+          webhookCurrency !== 'INR'
+        ) {
+          return res
+            .status(400)
+            .json({ message: 'Webhook payment details do not match this order.' });
+        }
+      } else if (event.event === 'order.paid') {
+        const orderEntity = event.payload?.order?.entity;
+        const orderAmount = Number(orderEntity?.amount_paid);
+        const orderCurrency = (orderEntity?.currency || '').toUpperCase();
+        if (
+          orderEntity?.status !== 'paid' ||
+          orderAmount !== payment.amountInPaise ||
+          orderCurrency !== 'INR'
+        ) {
+          return res
+            .status(400)
+            .json({ message: 'Webhook order details do not match this payment.' });
+        }
+      }
 
       const consultationForNotif = await prisma.consultation.findUnique({
         where: { id: payment.consultationId },
@@ -204,39 +535,17 @@ export function createPaymentsRouter(io: SocketIoServer) {
         }
       });
       const webhookPatient = consultationForNotif?.patient;
-      if (webhookPatient) {
-        void notificationService.sendBatch(
-          enabledNotificationChannels.map((channel) => ({
-            eventType: 'BOOKING_CONFIRMED' as const,
-            channel,
-            recipientId: webhookPatient.id,
-            recipientName: webhookPatient.name,
-            recipientMobile: webhookPatient.mobile,
-            recipientEmail: webhookPatient.email,
-            title: 'Booking confirmed — HopeHub Care',
-            body: `Your consultation for ${consultationForNotif?.disease?.name || 'your concern'} has been booked and payment received. A doctor will be assigned shortly.`
-          }))
-        );
-        io.to(`user:${webhookPatient.id}`).emit('payment:updated', { consultationId: payment.consultationId, status: 'PAID' });
-      }
-
-      if (!wasPaid) {
-        void tryAssignInstantConsultation(io, payment.consultationId).catch((err) => {
-          console.error('[instant] Auto-assign failed after webhook payment', err);
-        });
-      }
-
-      if (!wasPaid) {
-        void trackProductEvent({
-          name: PRODUCT_EVENTS.PAYMENT_COMPLETED,
-          actorId: payment.consultation.patientId,
-          actorRole: Role.PATIENT,
-          properties: { consultationId: payment.consultationId, razorpayPaymentId: paymentEntity.id, source: 'webhook' }
-        });
-        void settleConsultationPaymentRewards(payment.id).catch((err) => {
-          console.error('[rewards] Settlement failed after webhook', err);
-        });
-      }
+      await markConsultationPaid({
+        paymentId: payment.id,
+        consultationId: payment.consultationId,
+        providerPaymentId: paymentEntity?.id || payment.providerPaymentId || orderId,
+        patientId: payment.consultation.patientId,
+        actorRole: Role.PATIENT,
+        diseaseName: consultationForNotif?.disease?.name,
+        patient: webhookPatient,
+        source: `webhook:${event.event}`,
+        wasPaid
+      });
 
       res.json({ ok: true });
     })
@@ -311,7 +620,8 @@ export function createPaymentsRouter(io: SocketIoServer) {
           medicineSales: earnings.medicineSales.count,
           consultationFeeGrossInPaise: earnings.consultation.paid.consultationGrossInPaise,
           medicineFeeGrossInPaise:
-            earnings.consultation.paid.medicineGrossInPaise + earnings.medicineSales.medicineGrossInPaise,
+            earnings.consultation.paid.medicineGrossInPaise +
+            earnings.medicineSales.medicineGrossInPaise,
           grossInPaise: earnings.totals.totalGrossInPaise,
           estimatedDoctorEarningsInPaise: earnings.totals.earnedInPaise,
           pendingEarningsInPaise: earnings.totals.pendingInPaise,
@@ -330,7 +640,10 @@ export function createPaymentsRouter(io: SocketIoServer) {
     authRequired,
     allowRoles(Role.DOCTOR),
     asyncRoute(async (req, res) => {
-      const doctor = await prisma.doctor.findUnique({ where: { userId: req.user!.id }, select: { id: true } });
+      const doctor = await prisma.doctor.findUnique({
+        where: { userId: req.user!.id },
+        select: { id: true }
+      });
       if (!doctor) return res.status(404).json({ message: 'Doctor profile not found.' });
 
       const month = typeof req.query['month'] === 'string' ? req.query['month'] : undefined;

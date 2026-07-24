@@ -14,7 +14,9 @@ export function buildPaymentWhere(input: {
   return {
     ...(status === PaymentStatus.PAID ||
     status === PaymentStatus.FAILED ||
-    status === PaymentStatus.CREATED
+    status === PaymentStatus.CREATED ||
+    status === PaymentStatus.PARTIALLY_REFUNDED ||
+    status === PaymentStatus.REFUNDED
       ? { status: status as PaymentStatus }
       : {}),
     ...(createdAt ? { createdAt } : {})
@@ -53,14 +55,18 @@ const paymentInclude = {
 } as const;
 
 export async function summarizePayments(where: Prisma.PaymentWhereInput) {
-  const [totals, paidTotals, pendingCount, failedCount] = await Promise.all([
+  const [totals, paidTotals, refundTotals, pendingCount, failedCount] = await Promise.all([
     prisma.payment.aggregate({
       where,
       _sum: { amountInPaise: true }
     }),
     prisma.payment.aggregate({
-      where: { ...where, status: PaymentStatus.PAID },
+      where: { ...where, status: { in: [PaymentStatus.PAID, PaymentStatus.PARTIALLY_REFUNDED] } },
       _sum: { amountInPaise: true }
+    }),
+    prisma.payment.aggregate({
+      where,
+      _sum: { refundedAmountInPaise: true }
     }),
     prisma.payment.count({
       where: { ...where, status: PaymentStatus.CREATED }
@@ -73,6 +79,8 @@ export async function summarizePayments(where: Prisma.PaymentWhereInput) {
   return {
     total: totals._sum.amountInPaise ?? 0,
     paid: paidTotals._sum.amountInPaise ?? 0,
+    refunded: refundTotals._sum.refundedAmountInPaise ?? 0,
+    netPaid: (paidTotals._sum.amountInPaise ?? 0) - (refundTotals._sum.refundedAmountInPaise ?? 0),
     pendingCount,
     failedCount
   };
@@ -87,6 +95,7 @@ export function paymentRowsToCsv(
     billingPlanCode: string | null;
     providerOrderId: string | null;
     providerPaymentId: string | null;
+    refundedAmountInPaise: number;
     createdAt: Date;
     consultation: {
       patient?: { name?: string | null } | null;
@@ -96,7 +105,7 @@ export function paymentRowsToCsv(
   }>
 ) {
   const lines = [
-    'paymentId,consultationId,patientName,doctorName,disease,billingPlanCode,amountInPaise,status,providerOrderId,providerPaymentId,createdAt'
+    'paymentId,consultationId,patientName,doctorName,disease,billingPlanCode,amountInPaise,refundedAmountInPaise,status,providerOrderId,providerPaymentId,createdAt'
   ];
 
   for (const payment of payments) {
@@ -109,6 +118,7 @@ export function paymentRowsToCsv(
         payment.consultation.disease?.name || '',
         payment.billingPlanCode || '',
         String(payment.amountInPaise),
+        String(payment.refundedAmountInPaise),
         payment.status,
         payment.providerOrderId || '',
         payment.providerPaymentId || '',
@@ -122,7 +132,11 @@ export function paymentRowsToCsv(
   return lines.join('\n');
 }
 
-export async function listAdminPayments(where: Prisma.PaymentWhereInput, page: number, pageSize: number) {
+export async function listAdminPayments(
+  where: Prisma.PaymentWhereInput,
+  page: number,
+  pageSize: number
+) {
   const [total, payments, summary] = await Promise.all([
     prisma.payment.count({ where }),
     prisma.payment.findMany({

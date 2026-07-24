@@ -12,6 +12,8 @@ enum PaymentStatus {
   CREATED
   PAID
   FAILED
+  PARTIALLY_REFUNDED
+  REFUNDED
 }
 
 enum BillingPlanType {
@@ -98,13 +100,63 @@ model Payment {
   discountInPaise    Int          @default(0)
   walletRedeemedInPaise Int       @default(0)
   amountInPaise   Int
+  refundedAmountInPaise Int       @default(0)
   lineItems       Json?
   appliedRules    Json?
   status          PaymentStatus @default(CREATED)
   consultation    Consultation  @relation(fields: [consultationId], references: [id])
   rewardRedemptions RewardRedemption[]
+  gatewayEvents   PaymentGatewayEvent[]
+  refunds         PaymentRefund[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+}
+
+model PaymentGatewayEvent {
+  id                String   @id @default(cuid())
+  paymentId          String?
+  provider           String   @default("razorpay")
+  providerEventId    String?
+  eventType          String
+  providerOrderId    String?
+  providerPaymentId  String?
+  amountInPaise      Int?
+  currency           String?
+  status             String?
+  source             String
+  signatureVerified  Boolean  @default(false)
+  payload            Json?
+  receivedAt         DateTime @default(now())
+  createdAt          DateTime @default(now())
+  payment            Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, providerEventId])
+  @@index([paymentId, receivedAt])
+  @@index([providerOrderId])
+  @@index([providerPaymentId])
+  @@index([eventType, receivedAt])
+}
+
+model PaymentRefund {
+  id                    String   @id @default(cuid())
+  paymentId              String
+  provider               String   @default("razorpay")
+  providerRefundId       String?
+  providerPaymentId      String
+  amountInPaise          Int
+  status                 String
+  reason                 String?
+  notes                  Json?
+  processedByUserId      String?
+  providerCreatedAt      DateTime?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  payment                Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerRefundId])
+  @@index([paymentId, createdAt])
+  @@index([providerPaymentId])
+  @@index([status])
 }
 
 model BillingPlan {
