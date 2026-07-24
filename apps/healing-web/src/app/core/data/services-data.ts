@@ -1,6 +1,6 @@
 import { Service, ServiceCategory } from '../models';
 
-export const HOPE_HUB_SESSION_PRICE = 300;
+export const HOPE_HUB_SESSION_PRICE = 500;
 export const HOPE_HUB_SESSION_CURRENCY = 'INR';
 export const HOPE_HUB_SESSION_DURATION = '30 minutes';
 

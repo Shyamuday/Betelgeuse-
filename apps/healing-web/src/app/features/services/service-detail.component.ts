@@ -157,7 +157,7 @@ export class ServiceDetailComponent implements OnInit {
           'Yes. Choose Telegram or the low-identity Telegram preference in the contact form if you are worried about identity reveal.',
       },
       {
-        question: 'Is the ₹300 session refundable?',
+        question: 'Is the ₹500 session refundable?',
         answer:
           'Refund or reschedule handling depends on whether the session has already been confirmed or started. Contact the team as early as possible if you need a change.',
       },

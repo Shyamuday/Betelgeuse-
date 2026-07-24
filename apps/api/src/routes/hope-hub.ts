@@ -16,6 +16,11 @@ import { enrichWithProfileImageUrl, userProfileImagePath } from '../utils/profil
 
 export const hopeHubRouter = Router();
 
+const HOPE_HUB_SESSION_FEE_IN_PAISE = 50000;
+const HOPE_HUB_SESSION_DURATION_MINUTES = 30;
+const HOPE_HUB_PSYCHOLOGIST_SHARE_PERCENT = 50;
+const HOPE_HUB_PLATFORM_SHARE_PERCENT = 100 - HOPE_HUB_PSYCHOLOGIST_SHARE_PERCENT;
+
 const HOPE_HUB_TIME_SLOTS = [
   { time: '9:00 AM', period: 'morning' },
   { time: '9:30 AM', period: 'morning' },
@@ -66,6 +71,19 @@ function slugify(value: string) {
 
 function defaultDescription(serviceName: string) {
   return `Hope Hub consultation request for ${serviceName}.`;
+}
+
+function hopeHubRevenueSplit(amountInPaise: number) {
+  const psychologistShareInPaise = Math.round(
+    (amountInPaise * HOPE_HUB_PSYCHOLOGIST_SHARE_PERCENT) / 100
+  );
+  return {
+    shareModel: 'HOPE_HUB_50_50',
+    psychologistSharePercent: HOPE_HUB_PSYCHOLOGIST_SHARE_PERCENT,
+    platformSharePercent: HOPE_HUB_PLATFORM_SHARE_PERCENT,
+    psychologistShareInPaise,
+    platformShareInPaise: amountInPaise - psychologistShareInPaise
+  };
 }
 
 hopeHubRouter.get(
@@ -199,7 +217,7 @@ hopeHubRouter.post(
   allowRoles(Role.PATIENT),
   asyncRoute(async (req, res) => {
     const body = hopeHubBookingSchema.parse(req.body);
-    const amountInPaise = body.servicePriceInPaise ?? 99900;
+    const amountInPaise = HOPE_HUB_SESSION_FEE_IN_PAISE;
     const slug = slugify(body.serviceName);
 
     await ensureBillingPlans();
@@ -234,6 +252,8 @@ hopeHubRouter.post(
       patientId: req.user!.id,
       grossInPaise: amountInPaise
     });
+    const grossRevenueSplit = hopeHubRevenueSplit(checkout.grossAmountInPaise);
+    const payableRevenueSplit = hopeHubRevenueSplit(checkout.payableInPaise);
 
     const consultation = await prisma.consultation.create({
       data: {
@@ -249,7 +269,8 @@ hopeHubRouter.post(
           appointmentTime: body.appointmentTime,
           consultantName: body.consultantName || '',
           consultantPhone: body.consultantPhone || '',
-          sessionDuration: body.sessionDuration || '',
+          sessionDuration: `${HOPE_HUB_SESSION_DURATION_MINUTES} minutes`,
+          requestedSessionDuration: body.sessionDuration || '',
           preferredContact: body.preferredContact || '',
           urgencyLevel: body.urgencyLevel || '',
           preferredTime: body.preferredTime || '',
@@ -261,6 +282,10 @@ hopeHubRouter.post(
           source: 'hope-hub',
           purchaseType: 'ONE_TIME',
           serviceName: body.serviceName,
+          sessionFeeInPaise: amountInPaise,
+          sessionDurationMinutes: HOPE_HUB_SESSION_DURATION_MINUTES,
+          grossRevenueSplit,
+          payableRevenueSplit,
           checkout
         },
         payment: {
@@ -274,10 +299,13 @@ hopeHubRouter.post(
             lineItems: {
               source: 'hope-hub',
               serviceName: body.serviceName,
+              sessionDurationMinutes: HOPE_HUB_SESSION_DURATION_MINUTES,
               consultationFeeInPaise: checkout.grossAmountInPaise,
               discountInPaise: checkout.discountInPaise,
               walletRedeemedInPaise: checkout.walletRedeemedInPaise,
               payableInPaise: checkout.payableInPaise,
+              grossRevenueSplit,
+              payableRevenueSplit,
               planCode: selectedPlan.code,
               planName: selectedPlan.name,
               appliedRules: checkout.appliedRules

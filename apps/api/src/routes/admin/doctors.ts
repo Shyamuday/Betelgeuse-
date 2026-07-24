@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { Role } from '@prisma/client';
+import { HomeopathicDoctorType, Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { authRequired, allowRoles } from '../../auth.js';
 import { prisma } from '../../db.js';
@@ -12,7 +12,10 @@ import {
   publicUserSelect,
   writeAuditLog
 } from '../../utils/helpers.js';
-import { enabledNotificationChannels, notificationService } from '../../services/notification-service.js';
+import {
+  enabledNotificationChannels,
+  notificationService
+} from '../../services/notification-service.js';
 import {
   doctorProfileSchema,
   doctorProfileSelect,
@@ -20,7 +23,11 @@ import {
   specialtyFocusLabel,
   toDoctorProfilePayload
 } from '../../constants/homeopathic-doctor-types.js';
-import { applyDoctorHrProfileFields, suggestedProbationEndDate } from '../../constants/doctor-hr-defaults.js';
+import {
+  applyDoctorHrProfileFields,
+  suggestedProbationEndDate
+} from '../../constants/doctor-hr-defaults.js';
+import { PSYCHOLOGIST_CONSULTATION_SHARE_PERCENT } from '../../services/doctor-compensation.js';
 
 export function registerAdminDoctorRoutes(router: Router) {
   // ─── Doctors ──────────────────────────────────────────────────────────────────
@@ -35,7 +42,8 @@ export function registerAdminDoctorRoutes(router: Router) {
       const query = queryText(req, 'q').trim();
       const status = queryText(req, 'status').toUpperCase();
       const sortBy = queryText(req, 'sortBy');
-      const sortDirection = queryText(req, 'sortDirection').toLowerCase() === 'asc' ? 'asc' : 'desc';
+      const sortDirection =
+        queryText(req, 'sortDirection').toLowerCase() === 'asc' ? 'asc' : 'desc';
 
       const where = {
         role: Role.DOCTOR,
@@ -69,7 +77,10 @@ export function registerAdminDoctorRoutes(router: Router) {
         take: pageSize
       });
 
-      res.json({ doctors, pagination: { page, pageSize, total, totalPages: Math.max(1, Math.ceil(total / pageSize)) } });
+      res.json({
+        doctors,
+        pagination: { page, pageSize, total, totalPages: Math.max(1, Math.ceil(total / pageSize)) }
+      });
     })
   );
 
@@ -106,7 +117,10 @@ export function registerAdminDoctorRoutes(router: Router) {
         take: pageSize
       });
 
-      res.json({ pendingDoctors, pagination: { page, pageSize, total, totalPages: Math.max(1, Math.ceil(total / pageSize)) } });
+      res.json({
+        pendingDoctors,
+        pagination: { page, pageSize, total, totalPages: Math.max(1, Math.ceil(total / pageSize)) }
+      });
     })
   );
 
@@ -177,7 +191,12 @@ export function registerAdminDoctorRoutes(router: Router) {
         summary: body.isActive ? 'Doctor activated by admin.' : 'Doctor deactivated by admin.',
         metadata: { isActive: body.isActive }
       });
-      res.json({ doctor, message: body.isActive ? 'Doctor activated successfully.' : 'Doctor deactivated successfully.' });
+      res.json({
+        doctor,
+        message: body.isActive
+          ? 'Doctor activated successfully.'
+          : 'Doctor deactivated successfully.'
+      });
     })
   );
 
@@ -205,6 +224,10 @@ export function registerAdminDoctorRoutes(router: Router) {
         specialtyFocus: profilePayload.specialtyFocus,
         specialty: profilePayload.specialty
       });
+      const compensationFields =
+        profilePayload.doctorType === HomeopathicDoctorType.PSYCHOLOGIST
+          ? { consultationSharePercent: PSYCHOLOGIST_CONSULTATION_SHARE_PERCENT }
+          : {};
       const doctor = await prisma.user.create({
         data: {
           name: body.name,
@@ -216,7 +239,8 @@ export function registerAdminDoctorRoutes(router: Router) {
             create: {
               ...profilePayload,
               designation: hrFields.designation,
-              department: hrFields.department
+              department: hrFields.department,
+              ...compensationFields
             }
           }
         },
@@ -249,7 +273,17 @@ export function registerAdminDoctorRoutes(router: Router) {
           email: true,
           mobile: true,
           isActive: true,
-          doctorProfile: { select: { specialty: true, registrationNo: true, isAvailable: true, doctorType: true, specialtyFocus: true, designation: true, department: true } }
+          doctorProfile: {
+            select: {
+              specialty: true,
+              registrationNo: true,
+              isAvailable: true,
+              doctorType: true,
+              specialtyFocus: true,
+              designation: true,
+              department: true
+            }
+          }
         }
       });
       if (!existing) return res.status(404).json({ message: 'Doctor not found' });
@@ -287,6 +321,10 @@ export function registerAdminDoctorRoutes(router: Router) {
         yearsOfExperience: body.yearsOfExperience ?? null,
         focusAreas: (body.focusAreas ?? []).map((f) => f.trim()).filter(Boolean)
       };
+      const compensationFields =
+        profilePayload.doctorType === HomeopathicDoctorType.PSYCHOLOGIST
+          ? { consultationSharePercent: PSYCHOLOGIST_CONSULTATION_SHARE_PERCENT }
+          : {};
 
       const doctor = await prisma.user.update({
         where: { id: doctorId },
@@ -301,6 +339,7 @@ export function registerAdminDoctorRoutes(router: Router) {
                 designation: hrFields.designation,
                 department: hrFields.department,
                 isAvailable: profilePayload.isAvailable,
+                ...compensationFields,
                 ...publicProfileFields
               },
               update: {
@@ -308,12 +347,17 @@ export function registerAdminDoctorRoutes(router: Router) {
                 designation: hrFields.designation,
                 department: hrFields.department,
                 isAvailable: profilePayload.isAvailable,
+                ...compensationFields,
                 ...publicProfileFields
               }
             }
           }
         },
-        select: { ...publicUserSelect, isActive: true, doctorProfile: { select: doctorProfileSelect } }
+        select: {
+          ...publicUserSelect,
+          isActive: true,
+          doctorProfile: { select: doctorProfileSelect }
+        }
       });
       await writeAuditLog({
         actorId: req.user!.id,
@@ -372,9 +416,10 @@ export function registerAdminDoctorRoutes(router: Router) {
         action: 'doctor.website_order',
         targetType: 'doctor',
         targetId: doctorId,
-        summary: websiteOrder != null
-          ? `Doctor website order set to ${websiteOrder}.`
-          : 'Doctor website order cleared.'
+        summary:
+          websiteOrder != null
+            ? `Doctor website order set to ${websiteOrder}.`
+            : 'Doctor website order cleared.'
       });
 
       res.json({ message: 'Website order updated.' });

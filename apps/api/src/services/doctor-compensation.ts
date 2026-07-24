@@ -1,13 +1,16 @@
 import { DoctorCompensationModel, type Doctor } from '@prisma/client';
 
 export const DEFAULT_DOCTOR_SHARE_PERCENT = 60;
+export const PSYCHOLOGIST_CONSULTATION_SHARE_PERCENT = 50;
 
 export type DoctorCompensationFields = Pick<
   Doctor,
   'compensationModel' | 'consultationSharePercent' | 'consultationFee'
 >;
 
-export function resolveDoctorSharePercent(doctor: Pick<Doctor, 'consultationSharePercent'>): number {
+export function resolveDoctorSharePercent(
+  doctor: Pick<Doctor, 'consultationSharePercent'>
+): number {
   const pct = doctor.consultationSharePercent;
   if (pct == null || pct < 0 || pct > 100) return DEFAULT_DOCTOR_SHARE_PERCENT;
   return pct;
@@ -17,7 +20,9 @@ export function doctorReceivesSalary(doctor: Pick<Doctor, 'compensationModel'>):
   return doctor.compensationModel !== DoctorCompensationModel.CONSULT_ONLY;
 }
 
-export function doctorReceivesConsultationShare(doctor: Pick<Doctor, 'compensationModel'>): boolean {
+export function doctorReceivesConsultationShare(
+  doctor: Pick<Doctor, 'compensationModel'>
+): boolean {
   return doctor.compensationModel !== DoctorCompensationModel.SALARIED;
 }
 

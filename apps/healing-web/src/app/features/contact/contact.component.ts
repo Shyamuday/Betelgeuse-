@@ -311,7 +311,7 @@ export class ContactComponent implements OnInit {
     const featured = FEATURED_SERVICES.find(
       (service) => service.name === serviceName || service.id === serviceName,
     );
-    return Math.round((featured?.price ?? 999) * 100);
+    return Math.round((featured?.price ?? 500) * 100);
   }
 
   private formatLocalDate(date: Date): string {
