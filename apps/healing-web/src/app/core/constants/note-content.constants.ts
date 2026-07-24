@@ -1,7 +1,7 @@
 export const NOTE_CONTENT = {
   care: {
     label: 'Care note',
-    text: 'Hope Hub provides supportive counselling and guidance. It is not emergency care or a replacement for medical diagnosis. Provider details and next steps are confirmed after request review.',
+    text: 'Hope Hub provides supportive counselling and guidance. It is not emergency care or a replacement for medical diagnosis. Expert details and next steps are confirmed after support request review.',
   },
   contactSafety: {
     label: 'Safety note',

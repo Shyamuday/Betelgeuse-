@@ -52,7 +52,7 @@ import { APP_CONSTANTS } from '../../core';
           <section>
             <h2 class="text-xl font-bold text-slate-950">Appointments And Requests</h2>
             <p class="mt-3 leading-7">
-              Submitting a request does not guarantee immediate availability. Provider details,
+              Submitting a request does not guarantee immediate availability. Expert details,
               timing, payment details, and next steps may be shared after review.
             </p>
           </section>

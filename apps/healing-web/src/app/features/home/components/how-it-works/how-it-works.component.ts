@@ -25,8 +25,8 @@ export class HowItWorksComponent {
       description: 'The Hope Hub team checks your request and routes it to the right support path.',
     },
     {
-      title: 'Provider matched',
-      description: 'A suitable provider or care team member is assigned based on your concern.',
+      title: 'Expert matched',
+      description: 'A suitable psychologist or Hope Hub expert is assigned based on your concern.',
     },
     {
       title: 'Confirm next step',

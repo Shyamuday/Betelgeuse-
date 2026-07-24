@@ -36,8 +36,8 @@ export class App implements OnInit {
   protected readonly title = signal('hope-hub-website');
   protected readonly announcementItems = [
     'Daily 9 PM Telegram voice circle with Hope Hub experts',
-    'Request support for breakup, anxiety, career stress, mood, and relationships',
-    'Provider is matched after your request is reviewed',
+    'Request expert support for breakup, anxiety, career stress, mood, and relationships',
+    'An expert is matched after your support request is reviewed',
   ];
 
   private seoService = inject(SEOService);

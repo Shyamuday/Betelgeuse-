@@ -290,7 +290,7 @@ type BookingTimelineStep = {
                     </div>
                     @if (consultation.assignedDoctor) {
                       <p class="mt-2 text-sm text-gray-600">
-                        Provider: {{ consultation.assignedDoctor.name || 'Assigned provider' }}
+                        Expert: {{ consultation.assignedDoctor.name || 'Assigned expert' }}
                       </p>
                       <!--
                         Live call UI is intentionally hidden for Hope Hub for now.
@@ -300,7 +300,7 @@ type BookingTimelineStep = {
                         render app-consultation-call-panel for assigned bookings.
                       -->
                     } @else {
-                      <p class="mt-2 text-sm text-gray-600">Provider matching is pending.</p>
+                      <p class="mt-2 text-sm text-gray-600">Expert matching is pending.</p>
                     }
                   </div>
                 }
@@ -406,10 +406,10 @@ export class DashboardComponent implements OnInit {
     }
 
     if (!consultation.assignedDoctor) {
-      return 'The Hope Hub team is reviewing your concern and matching a provider.';
+      return 'The Hope Hub team is reviewing your concern and matching the right expert.';
     }
 
-    return 'Your provider is assigned. The team will share the confirmed session instructions through your selected contact method.';
+    return 'Your expert is assigned. The team will share the confirmed session instructions through your selected contact method.';
   }
 
   canRetryPayment(consultation: HopeHubConsultation): boolean {
@@ -428,7 +428,7 @@ export class DashboardComponent implements OnInit {
       await this.paymentService.payConsultation(consultation);
       this.paymentFlowState.set('SUCCESS');
       this.notice.set(
-        'Payment verified successfully. Your booking is now ready for provider confirmation.',
+        'Payment verified successfully. Your booking is now ready for expert confirmation.',
       );
       this.loadDashboard();
     } catch (error) {
@@ -492,7 +492,7 @@ export class DashboardComponent implements OnInit {
     return [
       { label: 'Request received', done: true },
       { label: 'Payment confirmed', done: isPaymentDone },
-      { label: 'Provider matched', done: Boolean(consultation.assignedDoctor) },
+      { label: 'Expert matched', done: Boolean(consultation.assignedDoctor) },
       { label: 'Session instructions', done: Boolean(consultation.assignedDoctor) },
     ];
   }
