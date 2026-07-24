@@ -39,3 +39,67 @@
 }
 .active-meta { font-size: 0.9rem; color: #475569; margin-bottom: 0.5rem; }
 .muted { color: #64748b; }
+.session-notes-card {
+  margin-top: 1rem;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 1rem;
+}
+.session-notes-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+.session-notes-head h3 {
+  margin: 0 0 0.2rem;
+  color: #0f172a;
+}
+.session-notes-card textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font: inherit;
+  color: #0f172a;
+  background: #fff;
+}
+.session-note-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.75rem 0 1rem;
+}
+.session-note-actions .btn-primary {
+  background: #0f766e;
+  color: #fff;
+  border: 1px solid #0f766e;
+  border-radius: 8px;
+  padding: 0.55rem 0.85rem;
+}
+.session-note-actions .btn-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.session-note-list {
+  display: grid;
+  gap: 0.6rem;
+}
+.session-note-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  padding: 0.75rem;
+}
+.session-note-item p {
+  margin: 0 0 0.45rem;
+  color: #1e293b;
+  white-space: pre-wrap;
+}
+.session-note-item small {
+  color: #64748b;
+}

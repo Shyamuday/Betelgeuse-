@@ -1,11 +1,19 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { ConsultationStatus, PaymentStatus, Role } from '@prisma/client';
+import { ConsultationStatus, PaymentStatus, Role, SupportNoteCategory } from '@prisma/client';
 import type { Server as SocketIoServer } from 'socket.io';
 import { authRequired, allowRoles } from '../auth.js';
 import { prisma } from '../db.js';
-import { asyncRoute, routeParam, publicUserSelect, includeConsultationRelations } from '../utils/helpers.js';
-import { enabledNotificationChannels, notificationService } from '../services/notification-service.js';
+import {
+  asyncRoute,
+  routeParam,
+  publicUserSelect,
+  includeConsultationRelations
+} from '../utils/helpers.js';
+import {
+  enabledNotificationChannels,
+  notificationService
+} from '../services/notification-service.js';
 import { emitConsultationAssigned } from '../services/consultation-realtime.js';
 import { ensureBillingPlans } from './catalog.js';
 import { resolveDiseaseConsultationFee } from '../services/consultation-pricing.js';
@@ -30,7 +38,10 @@ export function createConsultationsRouter(io: SocketIoServer) {
           promoCode: z.string().min(2).max(32).optional(),
           walletRedeemInPaise: z.number().int().min(0).optional(),
           clinicStoreId: z.string().min(1).nullable().optional(),
-          consultationMode: z.enum(['CLINIC_QUEUE', 'INSTANT_ONLINE']).optional().default('CLINIC_QUEUE'),
+          consultationMode: z
+            .enum(['CLINIC_QUEUE', 'INSTANT_ONLINE'])
+            .optional()
+            .default('CLINIC_QUEUE'),
           preferredDoctorUserId: z.string().min(1).nullable().optional()
         })
         .parse(req.body);
@@ -39,7 +50,9 @@ export function createConsultationsRouter(io: SocketIoServer) {
       const disease = await prisma.disease.findUniqueOrThrow({ where: { id: body.diseaseId } });
       const selectedPlan =
         body.purchaseType === 'PLAN'
-          ? await prisma.billingPlan.findFirst({ where: { code: body.planCode || '', isActive: true } })
+          ? await prisma.billingPlan.findFirst({
+              where: { code: body.planCode || '', isActive: true }
+            })
           : await prisma.billingPlan.findFirst({ where: { code: 'ONE_TIME', isActive: true } });
 
       if (!selectedPlan) {
@@ -56,14 +69,19 @@ export function createConsultationsRouter(io: SocketIoServer) {
         : body.clinicStoreId === undefined
           ? patient.homeClinicStoreId
           : body.clinicStoreId;
-      if (!isInstant && body.clinicStoreId !== undefined && body.clinicStoreId !== patient.homeClinicStoreId) {
+      if (
+        !isInstant &&
+        body.clinicStoreId !== undefined &&
+        body.clinicStoreId !== patient.homeClinicStoreId
+      ) {
         await prisma.user.update({
           where: { id: req.user!.id },
           data: { homeClinicStoreId: body.clinicStoreId }
         });
       }
       const consultFeePaise = await resolveDiseaseConsultationFee(disease.id, clinicStoreId);
-      const grossInPaise = body.purchaseType === 'ONE_TIME' ? consultFeePaise : selectedPlan.priceInPaise;
+      const grossInPaise =
+        body.purchaseType === 'ONE_TIME' ? consultFeePaise : selectedPlan.priceInPaise;
       const checkout = await resolveConsultationCheckout({
         patientId: req.user!.id,
         grossInPaise,
@@ -185,7 +203,10 @@ export function createConsultationsRouter(io: SocketIoServer) {
     asyncRoute(async (req, res) => {
       const body = z.object({ doctorId: z.string().min(1) }).parse(req.body);
       const id = routeParam(req, 'id');
-      const existing = await prisma.consultation.findUnique({ where: { id }, select: { consultationMode: true } });
+      const existing = await prisma.consultation.findUnique({
+        where: { id },
+        select: { consultationMode: true }
+      });
       const doctor = await prisma.user.findFirstOrThrow({
         where: { id: body.doctorId, role: Role.DOCTOR, isActive: true },
         include: { doctorProfile: { select: { clinicStoreId: true } } }
@@ -199,12 +220,17 @@ export function createConsultationsRouter(io: SocketIoServer) {
           clinicStoreId:
             existing?.consultationMode === 'INSTANT_ONLINE'
               ? null
-              : doctor.doctorProfile?.clinicStoreId ?? undefined
+              : (doctor.doctorProfile?.clinicStoreId ?? undefined)
         },
-        include: { ...includeConsultationRelations(), patient: { select: { id: true, name: true, mobile: true, email: true, patientCode: true } } }
+        include: {
+          ...includeConsultationRelations(),
+          patient: {
+            select: { id: true, name: true, mobile: true, email: true, patientCode: true }
+          }
+        }
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const patient = (consultation as any).patient;
       if (patient) {
         void notificationService.sendBatch(
@@ -219,7 +245,10 @@ export function createConsultationsRouter(io: SocketIoServer) {
             body: `Dr. ${doctor.name} has been assigned to your consultation. You can now chat with your doctor in the app.`
           }))
         );
-        io.to(`user:${patient.id}`).emit('consultation:updated', { consultationId: consultation.id, status: consultation.status });
+        io.to(`user:${patient.id}`).emit('consultation:updated', {
+          consultationId: consultation.id,
+          status: consultation.status
+        });
       }
 
       emitConsultationAssigned(io, doctor.id, {
@@ -240,7 +269,9 @@ export function createConsultationsRouter(io: SocketIoServer) {
     authRequired,
     asyncRoute(async (req, res) => {
       const body = z.object({ body: z.string().min(1).max(2000) }).parse(req.body);
-      const consultation = await prisma.consultation.findUniqueOrThrow({ where: { id: routeParam(req, 'id') } });
+      const consultation = await prisma.consultation.findUniqueOrThrow({
+        where: { id: routeParam(req, 'id') }
+      });
 
       const canChat =
         req.user!.role === Role.ADMIN ||
@@ -271,15 +302,87 @@ export function createConsultationsRouter(io: SocketIoServer) {
     })
   );
 
+  router.get(
+    '/consultations/:id/session-notes',
+    authRequired,
+    allowRoles(Role.DOCTOR, Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const consultation = await prisma.consultation.findUniqueOrThrow({
+        where: { id: routeParam(req, 'id') },
+        select: { id: true, assignedDoctorId: true }
+      });
+
+      if (req.user!.role === Role.DOCTOR && consultation.assignedDoctorId !== req.user!.id) {
+        return res
+          .status(403)
+          .json({ message: 'Only the assigned doctor can view session notes.' });
+      }
+
+      const notes = await prisma.supportCaseNote.findMany({
+        where: { consultationId: consultation.id },
+        include: { author: { select: { id: true, name: true, role: true } } },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      res.json({ notes });
+    })
+  );
+
+  router.post(
+    '/consultations/:id/session-notes',
+    authRequired,
+    allowRoles(Role.DOCTOR, Role.ADMIN),
+    asyncRoute(async (req, res) => {
+      const body = z
+        .object({
+          note: z.string().trim().min(3).max(5000)
+        })
+        .parse(req.body);
+
+      const consultation = await prisma.consultation.findUniqueOrThrow({
+        where: { id: routeParam(req, 'id') },
+        select: { id: true, patientId: true, assignedDoctorId: true, status: true }
+      });
+
+      if (req.user!.role === Role.DOCTOR && consultation.assignedDoctorId !== req.user!.id) {
+        return res.status(403).json({ message: 'Only the assigned doctor can add session notes.' });
+      }
+
+      const note = await prisma.supportCaseNote.create({
+        data: {
+          patientId: consultation.patientId,
+          consultationId: consultation.id,
+          authorId: req.user!.id,
+          category: SupportNoteCategory.GENERAL,
+          body: body.note
+        },
+        include: { author: { select: { id: true, name: true, role: true } } }
+      });
+
+      if (consultation.status === ConsultationStatus.ASSIGNED) {
+        await prisma.consultation.update({
+          where: { id: consultation.id },
+          data: { status: ConsultationStatus.IN_PROGRESS }
+        });
+      }
+
+      res.status(201).json({ note });
+    })
+  );
+
   // POST /consultations/:id/complete
   router.post(
     '/consultations/:id/complete',
     authRequired,
     allowRoles(Role.DOCTOR, Role.ADMIN),
     asyncRoute(async (req, res) => {
-      const consultation = await prisma.consultation.findUniqueOrThrow({ where: { id: routeParam(req, 'id') } });
+      const consultation = await prisma.consultation.findUniqueOrThrow({
+        where: { id: routeParam(req, 'id') }
+      });
       if (req.user!.role === Role.DOCTOR && consultation.assignedDoctorId !== req.user!.id) {
-        return res.status(403).json({ message: 'Only the assigned doctor can complete consultation' });
+        return res
+          .status(403)
+          .json({ message: 'Only the assigned doctor can complete consultation' });
       }
 
       const updated = await prisma.consultation.update({
@@ -291,7 +394,11 @@ export function createConsultationsRouter(io: SocketIoServer) {
       if (consultation.consultationMode === 'INSTANT_ONLINE' && consultation.assignedDoctorId) {
         const { setDoctorLiveStatus } = await import('../services/online-doctor-presence.js');
         const { LivePresenceStatus } = await import('@prisma/client');
-        await setDoctorLiveStatus(consultation.assignedDoctorId, { liveStatus: LivePresenceStatus.ONLINE }, io);
+        await setDoctorLiveStatus(
+          consultation.assignedDoctorId,
+          { liveStatus: LivePresenceStatus.ONLINE },
+          io
+        );
       }
 
       res.json({ consultation: updated });

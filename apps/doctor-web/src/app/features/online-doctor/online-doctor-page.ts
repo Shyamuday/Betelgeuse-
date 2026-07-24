@@ -3,8 +3,11 @@ import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { form, FormField } from '@angular/forms/signals';
 import { ConsultationChatPanelComponent } from '../../shared/consultation-chat-panel/consultation-chat-panel';
+import { ConsultationApiService } from '../../core/services/consultation-api.service';
 import { ConsultationNavigationService } from '../../core/services/consultation-navigation.service';
 import { OnlineDoctorService } from '../../core/services/online-doctor.service';
+import { capabilitiesForDoctorType } from '../../core/constants/doctor-types.constants';
+import type { ConsultationSessionNote } from '../../core/types/consultation.types';
 
 type InstantConsult = {
   id: string;
@@ -24,6 +27,7 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly consultationNav = inject(ConsultationNavigationService);
+  private readonly consultationApi = inject(ConsultationApiService);
 
   readonly loading = signal(true);
   readonly saving = signal(false);
@@ -34,6 +38,10 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
   readonly instantConsults = signal<InstantConsult[]>([]);
   readonly selectedConsultId = signal('');
   readonly inboxLoading = signal(false);
+  readonly sessionNotes = signal<ConsultationSessionNote[]>([]);
+  readonly sessionNoteText = signal('');
+  readonly sessionNotesLoading = signal(false);
+  readonly sessionNoteSaving = signal(false);
 
   readonly settingsModel = signal({
     category: 'GENERALIST' as 'GENERALIST' | 'SPECIALIST',
@@ -87,7 +95,11 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
       this.instantConsults.set(res.consultations);
       const selected = this.selectedConsultId();
       if (!selected && res.consultations.length) {
-        this.selectedConsultId.set(res.consultations[0].id);
+        const firstId = res.consultations[0].id;
+        this.selectedConsultId.set(firstId);
+        void this.loadSessionNotes(firstId);
+      } else if (selected) {
+        void this.loadSessionNotes(selected);
       }
     } catch {
       this.instantConsults.set([]);
@@ -98,6 +110,9 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
 
   selectConsult(id: string) {
     this.selectedConsultId.set(id);
+    this.sessionNotes.set([]);
+    this.sessionNoteText.set('');
+    void this.loadSessionNotes(id);
     void this.router.navigate([], {
       queryParams: { consultationId: id },
       queryParamsHandling: 'merge',
@@ -111,6 +126,14 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
 
   isLive() {
     return ['ONLINE', 'BUSY', 'ON_CALL'].includes(this.profile()?.liveStatus ?? 'OFFLINE');
+  }
+
+  capabilities() {
+    return capabilitiesForDoctorType(this.profile()?.doctorType ?? null);
+  }
+
+  isPsychologist() {
+    return this.profile()?.doctorType === 'PSYCHOLOGIST';
   }
 
   async saveSettings() {
@@ -200,6 +223,37 @@ export class OnlineDoctorPage implements OnInit, OnDestroy {
 
   openPrescription(consultationId: string) {
     void this.consultationNav.openPrescription(consultationId);
+  }
+
+  async loadSessionNotes(consultationId = this.selectedConsultId()) {
+    if (!consultationId) return;
+    this.sessionNotesLoading.set(true);
+    try {
+      this.sessionNotes.set(await this.consultationApi.loadSessionNotes(consultationId));
+    } catch {
+      this.error.set('Could not load session notes.');
+    } finally {
+      this.sessionNotesLoading.set(false);
+    }
+  }
+
+  async saveSessionNote() {
+    const consultationId = this.selectedConsultId();
+    const note = this.sessionNoteText().trim();
+    if (!consultationId || note.length < 3) return;
+
+    this.sessionNoteSaving.set(true);
+    this.error.set('');
+    try {
+      const saved = await this.consultationApi.addSessionNote(consultationId, note);
+      this.sessionNotes.update((notes) => [saved, ...notes]);
+      this.sessionNoteText.set('');
+      this.message.set('Session note saved.');
+    } catch {
+      this.error.set('Could not save session note.');
+    } finally {
+      this.sessionNoteSaving.set(false);
+    }
   }
 
   ngOnDestroy() {
