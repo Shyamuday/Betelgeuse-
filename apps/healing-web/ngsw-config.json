@@ -8,7 +8,9 @@
       "updateMode": "prefetch",
       "resources": {
         "files": [
-          "/favicon.ico",
+          "/favicon-192x192.png",
+          "/favicon-512x512.png",
+          "/apple-touch-icon.png",
           "/index.csr.html",
           "/index.html",
           "/manifest.webmanifest",
@@ -22,9 +24,7 @@
       "installMode": "lazy",
       "updateMode": "prefetch",
       "resources": {
-        "files": [
-          "/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
-        ]
+        "files": ["/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"]
       }
     },
     {
@@ -32,21 +32,14 @@
       "installMode": "prefetch",
       "updateMode": "prefetch",
       "resources": {
-        "files": [
-          "/icons/*.png"
-        ]
+        "files": ["/icons/*.png"]
       }
     }
   ],
   "dataGroups": [
     {
       "name": "mental-health-content",
-      "urls": [
-        "/assessments/**",
-        "/exercises/**",
-        "/lifestyle-tips/**",
-        "/articles/**"
-      ],
+      "urls": ["/assessments/**", "/exercises/**", "/lifestyle-tips/**", "/articles/**"],
       "cacheConfig": {
         "strategy": "performance",
         "maxSize": 100,
@@ -56,10 +49,7 @@
     },
     {
       "name": "crisis-support",
-      "urls": [
-        "/crisis-support/**",
-        "/emergency/**"
-      ],
+      "urls": ["/crisis-support/**", "/emergency/**"],
       "cacheConfig": {
         "strategy": "freshness",
         "maxSize": 20,
@@ -68,10 +58,5 @@
       }
     }
   ],
-  "navigationUrls": [
-    "/**",
-    "!/**/*.*",
-    "!/**/*__*",
-    "!/**/*__*/**"
-  ]
+  "navigationUrls": ["/**", "!/**/*.*", "!/**/*__*", "!/**/*__*/**"]
 }

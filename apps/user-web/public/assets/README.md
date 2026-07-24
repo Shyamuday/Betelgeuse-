@@ -7,4 +7,4 @@ Use this folder for app-owned static files that Angular should copy into the web
 - `images/`: photos, illustrations, and other page media.
 - `documents/`: downloadable PDFs or public documents.
 
-Keep browser favicon files at `public/favicon.ico` when they must be served from `/favicon.ico`.
+Keep browser favicon files in root `public/` paths such as `/favicon-192x192.png` and `/favicon-512x512.png`.

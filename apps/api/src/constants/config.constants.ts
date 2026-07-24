@@ -12,6 +12,19 @@ const configuredOrigins = parseOriginList(
   process.env.CORS_ORIGINS
 );
 
+const defaultCorsOrigins = [
+  'https://hopehub.in',
+  'https://www.hopehub.in',
+  'https://mind.hopehub.in',
+  'http://localhost:4203',
+  'http://127.0.0.1:4203',
+  'http://localhost:4204',
+  'http://127.0.0.1:4204',
+  'http://localhost:4201',
+  'http://localhost:4202',
+  'http://localhost:5800'
+];
+
 export const SERVER_CONFIG = {
   DEFAULT_PORT: 4000,
   ORIGINS: {
@@ -22,13 +35,8 @@ export const SERVER_CONFIG = {
   },
   CORS_ORIGINS:
     configuredOrigins.length > 0
-      ? configuredOrigins
-      : [
-          'http://localhost:4203',
-          'http://localhost:4201',
-          'http://localhost:4202',
-          'http://localhost:5800'
-        ],
+      ? Array.from(new Set([...configuredOrigins, ...defaultCorsOrigins]))
+      : defaultCorsOrigins,
   API_PUBLIC_URL: process.env.API_PUBLIC_URL || process.env.API_URL || 'http://localhost:4000',
   SMTP: {
     DEFAULT_PORT: 587,

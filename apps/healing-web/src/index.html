@@ -25,7 +25,7 @@
   <meta property="og:title" content="Hope Hub - Professional Mental Health Services & Counseling">
   <meta property="og:description"
     content="Professional mental health services including breakup counseling, career counseling, anxiety therapy, depression support, and more. Join our supportive community.">
-  <meta property="og:image" content="https://mind.hopehub.in/assets/images/og-image.jpg">
+  <meta property="og:image" content="https://mind.hopehub.in/hopehublogo.png">
   <meta property="og:site_name" content="Hope Hub">
   <meta property="og:locale" content="en_US">
   
@@ -35,7 +35,7 @@
   <meta name="twitter:title" content="Hope Hub - Professional Mental Health Services & Counseling">
   <meta name="twitter:description"
     content="Professional mental health services including breakup counseling, career counseling, anxiety therapy, depression support, and more. Join our supportive community.">
-  <meta name="twitter:image" content="https://mind.hopehub.in/assets/images/og-image.jpg">
+  <meta name="twitter:image" content="https://mind.hopehub.in/hopehublogo.png">
   
   <!-- Additional SEO -->
   <meta name="geo.region" content="US">
@@ -66,7 +66,9 @@
       rel="stylesheet">
   </noscript>
 
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512x512.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <script type="application/ld+json">
     {
@@ -75,7 +77,7 @@
       "name": "Hope Hub",
       "url": "https://mind.hopehub.in/",
       "description": "Mental wellness support, anonymous-friendly community guidance, self-assessments, exercises, and paid psychologist support sessions.",
-      "image": "https://mind.hopehub.in/assets/images/og-image.jpg",
+      "image": "https://mind.hopehub.in/hopehublogo.png",
       "areaServed": {
         "@type": "Country",
         "name": "India"
@@ -94,54 +96,45 @@
 
 <body>
   <app-root>
-    <main style="font-family: Inter, Arial, sans-serif; line-height: 1.6; color: #102033; padding: 24px; max-width: 960px; margin: 0 auto;">
-      <header>
-        <p style="margin: 0 0 8px; color: #0f766e; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">Mental wellness support</p>
-        <h1 style="margin: 0 0 12px; font-size: 32px;">Hope Hub</h1>
-        <p style="margin: 0 0 20px; font-size: 18px;">
-          Anonymous-friendly mental health support, daily 9 PM Telegram voice circles, self-assessments,
-          calming exercises, and private psychologist support sessions.
-        </p>
-        <p>
-          <a href="/services">Explore services</a> ·
-          <a href="/assessments">Take an assessment</a> ·
-          <a href="/community">Join community</a> ·
-          <a href="/contact">Request support</a>
-        </p>
-      </header>
+    <style>
+      .app-shell-loading {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        font-family: Inter, Arial, sans-serif;
+        color: #0f172a;
+        background: #f8fafc;
+      }
 
-      <section>
-        <h2>Support options</h2>
-        <p>
-          Hope Hub helps with breakup stress, anxiety, overthinking, relationship concerns,
-          career pressure, grief, sleep stress, confidence, and emotional support needs.
-        </p>
-      </section>
-
-      <section>
-        <h2>Community and privacy</h2>
-        <p>
-          Join our Telegram community with a display name or username and participate at your own
-          comfort level. Avoid sharing sensitive personal details in public groups.
-        </p>
-      </section>
-
-      <section>
-        <h2>Payments and policies</h2>
-        <p>
-          Paid support sessions are verified securely before confirmation. Read our
-          <a href="/privacy">Privacy Policy</a>,
-          <a href="/terms">Terms of Service</a>,
-          <a href="/payment-policy">Payment Policy</a>,
-          <a href="/refund-policy">Cancellation & Refund Policy</a>, and
-          <a href="/shipping-policy">Service Delivery Policy</a>.
-        </p>
-      </section>
-    </main>
+      .app-shell-loading strong {
+        display: block;
+        font-size: 18px;
+      }
+    </style>
+    <div class="app-shell-loading" aria-label="Loading Hope Hub">
+      <strong>Hope Hub</strong>
+    </div>
   </app-root>
   <noscript>
-    Hope Hub is available with limited static content without JavaScript. Enable JavaScript for
-    assessments, booking forms, dashboard, login, and interactive support tools.
+    <main style="font-family: Inter, Arial, sans-serif; line-height: 1.6; color: #102033; padding: 24px; max-width: 960px; margin: 0 auto;">
+      <h1>Hope Hub</h1>
+      <h2>Mental wellness support</h2>
+      <p>
+        Anonymous-friendly mental health support, daily 9 PM Telegram voice circles,
+        self-assessments, calming exercises, and private psychologist support sessions.
+      </p>
+      <p>
+        <a href="/services">Explore services</a> ·
+        <a href="/assessments">Take an assessment</a> ·
+        <a href="/community">Join community</a> ·
+        <a href="/contact">Request support</a>
+      </p>
+      <h2>Support options</h2>
+      <p>
+        Hope Hub helps with breakup stress, anxiety, overthinking, relationship concerns,
+        career pressure, grief, sleep stress, confidence, and emotional support needs.
+      </p>
+    </main>
   </noscript>
   
   <!-- Font Loading Script - Non-blocking -->

@@ -45,9 +45,13 @@ import { User } from '../../core/models/auth.model';
               (click)="closeMobileMenu()"
               aria-label="Hope Hub - Go to homepage"
             >
-              <div class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
-                <span class="text-white font-bold text-sm">HH</span>
-              </div>
+              <img
+                src="/hopehublogo.png"
+                alt=""
+                class="h-9 w-9 rounded-full object-cover"
+                width="36"
+                height="36"
+              />
               <span class="text-xl font-bold text-gray-900">Hope Hub</span>
             </a>
           </div>

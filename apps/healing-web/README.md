@@ -10,7 +10,7 @@ A professional mental health services platform built with Angular 21, providing 
 - **Service Inquiry Forms**: Quick inquiry forms on each service detail page
 - **Responsive Design**: Mobile-first approach with Tailwind CSS
 - **Modern Architecture**: Angular 21 with standalone components and lazy loading
-- **Production Ready**: Optimized builds with Netlify deployment
+- **Production Ready**: Optimized static builds for S3 and CloudFront
 
 ## Tech Stack
 
@@ -18,7 +18,7 @@ A professional mental health services platform built with Angular 21, providing 
 - **Styling**: Tailwind CSS v4
 - **Testing**: Vitest with fast-check for property-based testing
 - **Build**: Angular CLI with production optimizations
-- **Deployment**: Netlify with automatic deployments
+- **Deployment**: AWS S3 static hosting behind CloudFront
 - **Backend**: HopeHub API lead capture
 
 ## Getting Started
@@ -55,8 +55,8 @@ Navigate to `http://localhost:4204/`
 # For production
 npm run build:prod
 
-# For Netlify deployment
-npm run build:netlify
+# For S3/CloudFront deployment
+npm run build:s3
 ```
 
 ### Testing
@@ -67,28 +67,22 @@ npx vitest run
 
 ## Deployment
 
-### Netlify Deployment (Recommended)
+### S3 And CloudFront Deployment
 
-The application is configured for easy deployment on Netlify:
+The application is configured as a static Angular build for S3 and CloudFront:
 
-1. **Connect Repository**: Link your GitHub repository to Netlify
-2. **Build Settings**:
-   - Build command: `npm run build:netlify`
-   - Publish directory: `dist/hope-hub-website/browser`
-   - Node version: 18
-3. **Environment Variables**: Set the deployed API URL when needed
-4. **Deploy**: Automatic deployments on every push to main
-
-See [NETLIFY_DEPLOYMENT.md](NETLIFY_DEPLOYMENT.md) for complete setup instructions.
+1. **Build**: Run `npm run build:s3`
+2. **Upload**: Sync `dist/hope-hub-website/browser` to the Healing Hub S3 bucket
+3. **CloudFront**: Serve the bucket through the `mind.hopehub.in` distribution
+4. **DNS**: Route 53 `mind.hopehub.in` should point to the Healing Hub CloudFront distribution
+5. **Invalidate**: Create a CloudFront invalidation for `/*` after deployment
 
 ### Features:
 
-- ✅ Automatic deployments from GitHub
 - ✅ SPA routing with proper redirects
-- ✅ Security headers and CSP
 - ✅ Static asset caching
-- ✅ Free SSL certificates
 - ✅ CDN distribution
+- ✅ SSL through ACM certificate on CloudFront
 
 ## Lead Capture
 
@@ -131,7 +125,6 @@ src/
 
 ## Configuration Files
 
-- `netlify.toml`: Netlify deployment configuration
 - `angular.json`: Angular build configurations
 - `tailwind.config.js`: Tailwind CSS configuration
 - `vitest.config.ts`: Testing configuration
@@ -139,8 +132,7 @@ src/
 ## Security Considerations
 
 - No bot tokens or third-party notification credentials are bundled in client-side code
-- CSP headers allow the HopeHub API for lead submissions
-- Security headers implemented via Netlify
+- Configure CloudFront response headers/CSP to allow the HopeHub API for lead submissions
 - HTTPS enforced automatically
 
 ## License

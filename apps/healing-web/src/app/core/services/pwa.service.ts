@@ -224,8 +224,8 @@ export class PWAService {
   public sendNotification(title: string, options?: NotificationOptions): void {
     if (this.isBrowser && Notification.permission === 'granted') {
       const notification = new Notification(title, {
-        icon: '/icons/icon-192x192.png',
-        badge: '/icons/icon-72x72.png',
+        icon: '/favicon-192x192.png',
+        badge: '/favicon-192x192.png',
         ...options,
       });
 
