@@ -8,6 +8,8 @@ API_DIR="$APP_DIR/apps/api"
 
 cd "$APP_DIR"
 git remote set-url origin https://github.com/Shyamuday/Hopehub.git
+git update-index --no-skip-worktree apps/api/.env || true
+git checkout --force -- apps/api/.env || true
 git fetch origin main
 git checkout -f main
 git reset --hard origin/main
