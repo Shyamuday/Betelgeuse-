@@ -311,6 +311,16 @@ button {
   color: #991b1b;
 }
 
+.status-partially_refunded {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-refunded {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
 /* ── Pagination ─────────────────────────────────────────────── */
 .pagination {
   display: flex;

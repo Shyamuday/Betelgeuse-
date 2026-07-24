@@ -216,17 +216,18 @@ export class PaymentsPage implements OnInit {
       return;
     }
 
-    const amountInPaise = amountText ? Math.round(Number(amountText) * 100) : undefined;
-    if (amountText && (!Number.isFinite(amountInPaise) || amountInPaise < 100)) {
+    const parsedAmountInPaise = amountText ? Math.round(Number(amountText) * 100) : null;
+    if (amountText && (!Number.isFinite(parsedAmountInPaise) || (parsedAmountInPaise ?? 0) < 100)) {
       this.toast.set('Enter a refund amount of at least ₹1.');
       setTimeout(() => this.toast.set(''), 2500);
       return;
     }
+    const amountInPaise = parsedAmountInPaise ?? undefined;
 
     this.refundSubmitting.set(true);
     this.toast.set('');
     try {
-      await this.api.refundPayment(payment.id, {
+      const result = await this.api.refundPayment(payment.id, {
         ...(amountInPaise ? { amountInPaise } : {}),
         reason,
         speed: this.refundSpeed(),
@@ -234,10 +235,7 @@ export class PaymentsPage implements OnInit {
       });
       this.toast.set('Refund initiated and tracked.');
       this.load();
-      await this.openDetails({
-        ...payment,
-        refundedAmountInPaise: payment.refundedAmountInPaise || 0,
-      });
+      await this.openDetails({ ...payment, ...result.payment });
     } catch (error: any) {
       this.toast.set(error?.error?.message || error?.message || 'Refund failed.');
     } finally {
