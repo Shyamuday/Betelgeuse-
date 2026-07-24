@@ -47,7 +47,7 @@
           <button class="primary" type="submit" [disabled]="isProcessing() || !canRequestPasswordReset()">Send reset link</button>
         </form>
       } @else if (authView() === 'signup') {
-        <h2>Create patient account</h2>
+        <h2>Sign up</h2>
         <p class="muted">
           @if (signupMode() === 'password') {
             Create your account with email and password.
@@ -207,7 +207,7 @@
           <button type="button" class="mode-switch" (click)="startForgotPassword()">Forgot password?</button>
         </p>
         <p class="mode-switch-wrap">
-          <button type="button" class="mode-switch" (click)="setAuthView('signup')">New patient? Create account</button>
+          <button type="button" class="mode-switch" (click)="setAuthView('signup')">New here? Sign up</button>
         </p>
       }
     </div>

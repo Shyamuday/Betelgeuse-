@@ -314,7 +314,7 @@ export class AuthFormOverlayComponent {
 
     const signup = this.signupModel();
     this.process(
-      'Creating patient account...',
+      'Signing up...',
       this.auth.patientLogin({
         name: signup.name.trim(),
         email: signup.email.trim().toLowerCase(),
@@ -352,7 +352,7 @@ export class AuthFormOverlayComponent {
     }
 
     this.process(
-      'Creating patient account...',
+      'Signing up...',
       this.auth.patientRegister({
         name: signup.name.trim(),
         email: signup.email.trim().toLowerCase(),

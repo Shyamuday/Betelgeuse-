@@ -243,7 +243,7 @@ export class ContactComponent implements OnInit {
       this.savePendingBooking(formData, appointment);
       this.waitingForAuthToBook.set(true);
       this.authModalService.openRegister();
-      throw new Error('Create a patient account or log in to continue to secure payment.');
+      throw new Error('Sign up or log in to continue to secure payment.');
     }
 
     const data = this.prefilledData();
