@@ -53,52 +53,39 @@ import { User } from '../../core/models/auth.model';
               Services
             </a>
 
-            <!-- Mental Health Tools Dropdown -->
-            <div class="relative group">
-              <button
-                class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center"
-              >
-                Mental Health Tools
-                <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-              <div
-                class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
-              >
-                <div class="py-1">
-                  <a
-                    routerLink="/assessments"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600"
-                  >
-                    Mental Health Assessments
-                  </a>
-                  <a
-                    routerLink="/exercises"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600"
-                  >
-                    Wellness Exercises
-                  </a>
-                  <a
-                    routerLink="/lifestyle-tips"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600"
-                  >
-                    Lifestyle Tips
-                  </a>
-                  <a
-                    routerLink="/articles"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600"
-                  >
-                    Educational Articles
-                  </a>
-                </div>
-              </div>
-            </div>
+            <!-- Tools Dropdown removed — flat nav links -->
+            <a
+              routerLink="/assessments"
+              routerLinkActive="text-primary-600 border-b-2 border-primary-600"
+              class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
+              [attr.aria-current]="isCurrentRoute('/assessments') ? 'page' : null"
+            >
+              Assessments
+            </a>
+            <a
+              routerLink="/exercises"
+              routerLinkActive="text-primary-600 border-b-2 border-primary-600"
+              class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
+              [attr.aria-current]="isCurrentRoute('/exercises') ? 'page' : null"
+            >
+              Exercises
+            </a>
+            <a
+              routerLink="/lifestyle-tips"
+              routerLinkActive="text-primary-600 border-b-2 border-primary-600"
+              class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
+              [attr.aria-current]="isCurrentRoute('/lifestyle-tips') ? 'page' : null"
+            >
+              Lifestyle
+            </a>
+            <a
+              routerLink="/articles"
+              routerLinkActive="text-primary-600 border-b-2 border-primary-600"
+              class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
+              [attr.aria-current]="isCurrentRoute('/articles') ? 'page' : null"
+            >
+              Articles
+            </a>
 
             <a
               routerLink="/community"
@@ -119,7 +106,7 @@ import { User } from '../../core/models/auth.model';
             <a
               routerLink="/donate"
               routerLinkActive="bg-green-600"
-              class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 inline-flex items-center gap-1"
+              class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 inline-flex items-center gap-1 whitespace-nowrap"
             >
               💚 Support Us
             </a>
@@ -266,47 +253,42 @@ import { User } from '../../core/models/auth.model';
                 Services
               </a>
 
-              <!-- Mental Health Tools Section -->
-              <div class="px-3 py-2">
-                <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  Mental Health Tools
-                </div>
-              </div>
+              <!-- Tools — flat links, no section label -->
               <a
                 routerLink="/assessments"
                 (click)="navigateAndClose('/assessments')"
                 routerLinkActive="text-primary-600 bg-primary-50"
-                class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 px-6 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
                 role="menuitem"
               >
-                Mental Health Assessments
+                Assessments
               </a>
               <a
                 routerLink="/exercises"
                 (click)="navigateAndClose('/exercises')"
                 routerLinkActive="text-primary-600 bg-primary-50"
-                class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 px-6 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
                 role="menuitem"
               >
-                Wellness Exercises
+                Exercises
               </a>
               <a
                 routerLink="/lifestyle-tips"
                 (click)="navigateAndClose('/lifestyle-tips')"
                 routerLinkActive="text-primary-600 bg-primary-50"
-                class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 px-6 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
                 role="menuitem"
               >
-                Lifestyle Tips
+                Lifestyle
               </a>
               <a
                 routerLink="/articles"
                 (click)="navigateAndClose('/articles')"
                 routerLinkActive="text-primary-600 bg-primary-50"
-                class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 px-6 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
                 role="menuitem"
               >
-                Educational Articles
+                Articles
               </a>
 
               <a
