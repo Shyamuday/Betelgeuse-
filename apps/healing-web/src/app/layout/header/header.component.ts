@@ -153,7 +153,7 @@ import { User } from '../../core/models/auth.model';
                 </svg>
               </button>
               <div
-                class="absolute left-0 mt-2 w-44 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
+                class="absolute left-0 mt-2 w-56 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
               >
                 <div class="py-1">
                   <a
@@ -167,6 +167,18 @@ import { User } from '../../core/models/auth.model';
                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600"
                   >
                     Terms of Service
+                  </a>
+                  <a
+                    routerLink="/refund-policy"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600"
+                  >
+                    Cancellation & Refunds
+                  </a>
+                  <a
+                    routerLink="/shipping-policy"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600"
+                  >
+                    Service Delivery
                   </a>
                 </div>
               </div>
@@ -419,6 +431,24 @@ import { User } from '../../core/models/auth.model';
                 role="menuitem"
               >
                 Terms of Service
+              </a>
+              <a
+                routerLink="/refund-policy"
+                (click)="navigateAndClose('/refund-policy')"
+                routerLinkActive="text-primary-600 bg-primary-50"
+                class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 px-6 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                role="menuitem"
+              >
+                Cancellation & Refunds
+              </a>
+              <a
+                routerLink="/shipping-policy"
+                (click)="navigateAndClose('/shipping-policy')"
+                routerLinkActive="text-primary-600 bg-primary-50"
+                class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 px-6 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                role="menuitem"
+              >
+                Service Delivery
               </a>
               <a
                 routerLink="/donate"

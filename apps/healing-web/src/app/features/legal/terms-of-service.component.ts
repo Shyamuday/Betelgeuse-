@@ -58,6 +58,25 @@ import { APP_CONSTANTS } from '../../core';
           </section>
 
           <section>
+            <h2 class="text-xl font-bold text-slate-950">Payments, Delivery, And Refunds</h2>
+            <p class="mt-3 leading-7">
+              Paid support sessions are delivered online as described in our
+              <a
+                class="font-semibold text-teal-700 hover:text-teal-800"
+                routerLink="/shipping-policy"
+              >
+                Service Delivery Policy </a
+              >. Cancellation and refund handling is described in our
+              <a
+                class="font-semibold text-teal-700 hover:text-teal-800"
+                routerLink="/refund-policy"
+              >
+                Cancellation & Refund Policy </a
+              >.
+            </p>
+          </section>
+
+          <section>
             <h2 class="text-xl font-bold text-slate-950">Contact</h2>
             <p class="mt-3 leading-7">
               For service questions, contact us at

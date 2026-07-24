@@ -61,6 +61,30 @@ ${urlEntries}
         changefreq: 'monthly',
         priority: 0.8,
       },
+      {
+        loc: '/privacy',
+        lastmod: this.currentDate,
+        changefreq: 'yearly',
+        priority: 0.5,
+      },
+      {
+        loc: '/terms',
+        lastmod: this.currentDate,
+        changefreq: 'yearly',
+        priority: 0.5,
+      },
+      {
+        loc: '/refund-policy',
+        lastmod: this.currentDate,
+        changefreq: 'yearly',
+        priority: 0.5,
+      },
+      {
+        loc: '/shipping-policy',
+        lastmod: this.currentDate,
+        changefreq: 'yearly',
+        priority: 0.5,
+      },
       // Content pages
       {
         loc: '/assessments',

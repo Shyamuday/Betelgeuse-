@@ -173,6 +173,30 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'refund-policy',
+    loadComponent: () =>
+      import('./features/legal/cancellation-refund-policy.component').then(
+        (m) => m.CancellationRefundPolicyComponent,
+      ),
+    title: 'Cancellation & Refund Policy - Hope Hub',
+    data: {
+      breadcrumb: 'Cancellation & Refund Policy',
+      description: 'Read the Hope Hub cancellation and refund policy for paid support sessions',
+      keywords: 'refund policy, cancellation policy, hope hub, mental health consultation refund',
+    },
+  },
+  {
+    path: 'shipping-policy',
+    loadComponent: () =>
+      import('./features/legal/shipping-policy.component').then((m) => m.ShippingPolicyComponent),
+    title: 'Service Delivery Policy - Hope Hub',
+    data: {
+      breadcrumb: 'Service Delivery Policy',
+      description: 'Read how Hope Hub delivers online support services and consultations',
+      keywords: 'shipping policy, service delivery, hope hub, online consultation delivery',
+    },
+  },
+  {
     path: 'dashboard',
     loadComponent: () =>
       import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),

@@ -165,6 +165,16 @@ import { APP_CONSTANTS } from '../../core';
               class="text-gray-300 hover:text-white text-xs sm:text-sm transition-colors duration-200 text-center"
               >Terms of Service</a
             >
+            <a
+              routerLink="/refund-policy"
+              class="text-gray-300 hover:text-white text-xs sm:text-sm transition-colors duration-200 text-center"
+              >Refund Policy</a
+            >
+            <a
+              routerLink="/shipping-policy"
+              class="text-gray-300 hover:text-white text-xs sm:text-sm transition-colors duration-200 text-center"
+              >Service Delivery</a
+            >
           </div>
         </div>
       </div>
