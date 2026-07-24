@@ -22,7 +22,7 @@
       type="search"
       [ngModel]="searchTerm()"
       (ngModelChange)="updateSearch($event)"
-      class="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+      class="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-500 focus:border-primary-600 focus:ring-2 focus:ring-primary-600"
       placeholder="Search breakup, anxiety, sleep, study pressure..."
     />
 
@@ -32,8 +32,8 @@
           type="button"
           (click)="setFilter(filter.id)"
           class="rounded-full border px-4 py-2 text-sm font-semibold transition"
-          [class.border-blue-700]="selectedFilter() === filter.id"
-          [class.bg-blue-700]="selectedFilter() === filter.id"
+          [class.border-primary-600]="selectedFilter() === filter.id"
+          [class.bg-primary-600]="selectedFilter() === filter.id"
           [class.text-white]="selectedFilter() === filter.id"
           [class.border-gray-300]="selectedFilter() !== filter.id"
           [class.bg-white]="selectedFilter() !== filter.id"

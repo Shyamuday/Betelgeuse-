@@ -88,7 +88,7 @@ import { PaymentService } from '../../core/services';
                 >
                 <button
                   (click)="copyUpiId()"
-                  class="ml-3 flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
+                  class="ml-3 flex items-center gap-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
                 >
                   @if (copied()) {
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,8 +124,8 @@ import { PaymentService } from '../../core/services';
                     (click)="selectAmount(amount)"
                     [class]="
                       selectedAmount() === amount
-                        ? 'bg-green-500 text-white border-green-500'
-                        : 'bg-white text-gray-700 border-gray-200 hover:border-green-400 hover:text-green-600'
+                        ? 'bg-primary-600 text-white border-primary-600'
+                        : 'bg-white text-gray-700 border-gray-200 hover:border-primary-500 hover:text-primary-700'
                     "
                     class="border rounded-xl py-2 text-sm font-semibold transition-colors"
                   >
@@ -140,7 +140,7 @@ import { PaymentService } from '../../core/services';
                 type="button"
                 (click)="paySelectedAmount()"
                 [disabled]="!selectedAmount() || isPaying()"
-                class="w-full rounded-xl bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                class="w-full rounded-xl bg-primary-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:bg-gray-300"
               >
                 @if (isPaying()) {
                   Opening secure payment...

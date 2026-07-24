@@ -23,7 +23,7 @@
             <button type="button" class="call-action bg-red-600 hover:bg-red-700" (click)="reject()">
               Decline
             </button>
-            <button type="button" class="call-action bg-green-600 hover:bg-green-700" (click)="accept()">
+            <button type="button" class="call-action bg-primary-600 hover:bg-primary-700" (click)="accept()">
               Accept
             </button>
           </div>
@@ -78,7 +78,7 @@
           </button>
         }
         @if (call.state() === 'ringing' && call.incomingCall()) {
-          <button type="button" class="call-btn bg-green-600 hover:bg-green-700" (click)="accept()">
+          <button type="button" class="call-btn bg-primary-600 hover:bg-primary-700" (click)="accept()">
             Accept
           </button>
           <button type="button" class="call-btn bg-red-600 hover:bg-red-700" (click)="reject()">

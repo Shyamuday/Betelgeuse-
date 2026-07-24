@@ -16,13 +16,18 @@ const defaultCorsOrigins = [
   'https://hopehub.in',
   'https://www.hopehub.in',
   'https://mind.hopehub.in',
+  'http://localhost:4200',
+  'http://127.0.0.1:4200',
+  'http://localhost:4201',
+  'http://127.0.0.1:4201',
+  'http://localhost:4202',
+  'http://127.0.0.1:4202',
   'http://localhost:4203',
   'http://127.0.0.1:4203',
   'http://localhost:4204',
   'http://127.0.0.1:4204',
-  'http://localhost:4201',
-  'http://localhost:4202',
-  'http://localhost:5800'
+  'http://localhost:5800',
+  'http://127.0.0.1:5800'
 ];
 
 export const SERVER_CONFIG = {

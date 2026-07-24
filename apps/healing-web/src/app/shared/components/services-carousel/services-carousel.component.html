@@ -64,7 +64,7 @@
                     (click)="bookService(service)"
                     (mouseenter)="pauseAutoPlay()"
                     (mouseleave)="resumeAutoPlay()"
-                    class="inline-flex items-center justify-center rounded-lg bg-teal-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-800"
+                    class="inline-flex items-center justify-center rounded-lg bg-primary-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-700"
                   >
                     Request consultation
                   </button>
@@ -74,7 +74,7 @@
                     rel="noopener"
                     (mouseenter)="pauseAutoPlay()"
                     (mouseleave)="resumeAutoPlay()"
-                    class="inline-flex items-center justify-center rounded-lg border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-emerald-500 hover:text-emerald-700"
+                    class="inline-flex items-center justify-center rounded-lg border border-primary-600 px-5 py-3 text-sm font-semibold text-primary-700 transition hover:bg-primary-50"
                   >
                     Ask on WhatsApp
                   </a>
@@ -119,7 +119,7 @@
           class="relative h-3 rounded-full transition-all duration-300"
           [class.w-12]="i === currentSlide()"
           [class.w-3]="i !== currentSlide()"
-          [class.bg-emerald-700]="i === currentSlide()"
+          [class.bg-primary-600]="i === currentSlide()"
           [class.bg-slate-300]="i !== currentSlide()"
           [attr.aria-label]="'Show ' + service.name"
         ></button>

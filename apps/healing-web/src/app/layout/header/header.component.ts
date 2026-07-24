@@ -195,8 +195,8 @@ import { User } from '../../core/models/auth.model';
             </div>
             <a
               routerLink="/donate"
-              routerLinkActive="bg-green-600"
-              class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 inline-flex items-center gap-1 whitespace-nowrap"
+              routerLinkActive="bg-primary-700"
+              class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 inline-flex items-center gap-1 whitespace-nowrap"
             >
               💚 Support Us
             </a>
@@ -472,7 +472,7 @@ import { User } from '../../core/models/auth.model';
               <a
                 routerLink="/donate"
                 (click)="navigateAndClose('/donate')"
-                class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-base font-semibold transition-colors duration-200 inline-flex items-center gap-1 mt-1"
+                class="bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded-md text-base font-semibold transition-colors duration-200 inline-flex items-center gap-1 mt-1"
                 role="menuitem"
               >
                 💚 Support Us

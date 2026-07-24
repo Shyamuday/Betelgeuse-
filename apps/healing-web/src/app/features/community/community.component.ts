@@ -109,7 +109,7 @@ import { APP_CONSTANTS } from '../../core';
             </ul>
             <button
               (click)="joinTelegramGroup()"
-              class="bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors duration-200 inline-flex items-center"
+              class="bg-primary-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-primary-700 transition-colors duration-200 inline-flex items-center"
             >
               <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                 <path
@@ -152,7 +152,7 @@ import { APP_CONSTANTS } from '../../core';
               [href]="APP_CONSTANTS.WHATSAPP.GROUP_URL"
               target="_blank"
               rel="noopener noreferrer"
-              class="bg-green-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-green-700 transition-colors duration-200 inline-flex items-center"
+              class="bg-primary-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-primary-700 transition-colors duration-200 inline-flex items-center"
             >
               <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                 <path
@@ -253,7 +253,7 @@ import { APP_CONSTANTS } from '../../core';
               }
               <button
                 (click)="handleMeetupAction()"
-                class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                class="bg-primary-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-primary-700 transition-colors duration-200"
               >
                 Ask in Telegram
               </button>
@@ -262,7 +262,7 @@ import { APP_CONSTANTS } from '../../core';
         </div>
 
         <div class="text-center mt-8">
-          <a routerLink="/contact" class="text-blue-700 font-semibold hover:text-blue-800">
+          <a routerLink="/contact" class="text-primary-700 font-semibold hover:text-primary-800">
             Need private support instead? Send a request
           </a>
         </div>

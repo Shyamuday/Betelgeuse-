@@ -36,7 +36,7 @@
       <div class="text-center">
         <button 
           (click)="startAssessment()"
-          class="bg-slate-800 text-white px-8 py-3 rounded-lg font-semibold hover:bg-slate-700 transition-colors duration-300">
+          class="bg-primary-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors duration-300">
           Start Assessment
         </button>
       </div>
@@ -54,7 +54,7 @@
           </div>
           <div class="w-full bg-slate-200 rounded-full h-2">
             <div 
-              class="bg-slate-800 h-2 rounded-full transition-all duration-300"
+              class="bg-primary-600 h-2 rounded-full transition-all duration-300"
               [style.width.%]="((currentQuestion() + 1) / questions().length) * 100">
             </div>
           </div>
@@ -69,15 +69,15 @@
           <div class="space-y-3">
             @for (option of responseOptions(); track option; let i = $index) {
               <label class="flex items-center p-4 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
-                     [class.bg-blue-50]="answers()[currentQuestion()] === i"
-                     [class.border-blue-500]="answers()[currentQuestion()] === i">
+                     [class.bg-primary-50]="answers()[currentQuestion()] === i"
+                     [class.border-primary-500]="answers()[currentQuestion()] === i">
                 <input 
                   type="radio" 
                   [value]="i" 
                   [checked]="answers()[currentQuestion()] === i"
                   (change)="selectAnswer(i)"
                   [name]="'question_' + currentQuestion()"
-                  class="mr-3 text-slate-800">
+                  class="mr-3 text-primary-600">
                 <span class="text-slate-700">{{ option }}</span>
               </label>
             }
@@ -99,14 +99,14 @@
             <button 
               (click)="nextQuestion()"
               [disabled]="answers()[currentQuestion()] === undefined"
-              class="bg-slate-800 text-white px-6 py-2 rounded-lg hover:bg-slate-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors">
+              class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors">
               Next
             </button>
           } @else {
             <button 
               (click)="calculateResults()"
               [disabled]="answers()[currentQuestion()] === undefined"
-              class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors">
+              class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors">
               Get Results
             </button>
           }
@@ -172,11 +172,11 @@
             Retake Assessment
           </button>
           <button 
-            class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+            class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors">
             Find Professional Help
           </button>
           <button 
-            class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
+            class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors">
             Book Consultation
           </button>
         </div>
