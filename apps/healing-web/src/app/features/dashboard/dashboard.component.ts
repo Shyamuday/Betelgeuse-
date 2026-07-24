@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/services/auth.service';
 import { BookingService } from '../../core/services/booking.service';
+import { PaymentService } from '../../core/services/payment.service';
 import { User } from '../../core/models/auth.model';
 import { ProgressDashboardComponent } from '../../shared/components/progress-dashboard/progress-dashboard.component';
 
@@ -64,6 +65,14 @@ type BookingTimelineStep = {
 
       <!-- Main Content -->
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        @if (notice()) {
+          <div
+            class="mb-6 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-900"
+          >
+            {{ notice() }}
+          </div>
+        }
+
         <!-- Quick Actions -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <a
@@ -244,6 +253,16 @@ type BookingTimelineStep = {
                       <p class="font-semibold">Next step</p>
                       <p class="mt-1">{{ nextStepFor(consultation) }}</p>
                     </div>
+                    @if (canRetryPayment(consultation)) {
+                      <button
+                        type="button"
+                        class="mt-3 inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                        [disabled]="isPaying()"
+                        (click)="retryPayment(consultation)"
+                      >
+                        {{ isPaying() ? 'Opening payment...' : 'Retry payment' }}
+                      </button>
+                    }
                     <div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                       @for (step of timelineSteps(consultation); track step.label) {
                         <div
@@ -332,8 +351,11 @@ type BookingTimelineStep = {
 export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private bookingService = inject(BookingService);
+  private paymentService = inject(PaymentService);
   user = signal<User | null>(null);
   isLoading = signal(false);
+  isPaying = signal(false);
+  notice = signal('');
   consultations = signal<HopeHubConsultation[]>([]);
   leads = signal<any[]>([]);
 
@@ -372,6 +394,31 @@ export class DashboardComponent implements OnInit {
     }
 
     return 'Your provider is assigned. The team will share the confirmed session instructions through your selected contact method.';
+  }
+
+  canRetryPayment(consultation: HopeHubConsultation): boolean {
+    const paymentStatus = consultation.payment?.status?.toUpperCase();
+    return Boolean(paymentStatus && paymentStatus !== 'CAPTURED' && paymentStatus !== 'PAID');
+  }
+
+  async retryPayment(consultation: HopeHubConsultation): Promise<void> {
+    this.isPaying.set(true);
+    this.notice.set('');
+    try {
+      await this.paymentService.payConsultation(consultation);
+      this.notice.set(
+        'Payment verified successfully. Your booking is now ready for provider confirmation.',
+      );
+      this.loadDashboard();
+    } catch (error) {
+      this.notice.set(
+        error instanceof Error
+          ? error.message
+          : 'Payment could not be completed. Please retry or contact support.',
+      );
+    } finally {
+      this.isPaying.set(false);
+    }
   }
 
   timelineSteps(consultation: HopeHubConsultation): BookingTimelineStep[] {

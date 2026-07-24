@@ -8,6 +8,7 @@ import {
   LeadService,
   LoadingService,
   AuthService,
+  AuthModalService,
   BookingService,
   PaymentService,
 } from '../../core/services';
@@ -32,6 +33,7 @@ export class ContactComponent implements OnInit {
   private loadingService = inject(LoadingService);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
+  private authModalService = inject(AuthModalService);
   private bookingService = inject(BookingService);
   private paymentService = inject(PaymentService);
 
@@ -43,6 +45,7 @@ export class ContactComponent implements OnInit {
   showErrorMessage = signal(false);
   errorMessage = signal('');
   selectedAppointment = signal<AppointmentSlot | null>(null);
+  waitingForAuthToBook = signal(false);
   prefilledData = signal<any>({});
   currentUser = signal<User | null>(null);
   services = getAllServices();
@@ -63,6 +66,10 @@ export class ContactComponent implements OnInit {
       // If form is already initialized, update it with user data
       if (this.contactForm) {
         this.updateFormWithUserData(user);
+      }
+      if (user && this.waitingForAuthToBook()) {
+        this.waitingForAuthToBook.set(false);
+        setTimeout(() => void this.onSubmit(), 0);
       }
     });
   }
@@ -231,7 +238,9 @@ export class ContactComponent implements OnInit {
   private async submitBooking(formData: ContactForm, appointment: AppointmentSlot): Promise<void> {
     const user = this.currentUser();
     if (!user) {
-      throw new Error('Please log in or create a patient account before booking an appointment.');
+      this.waitingForAuthToBook.set(true);
+      this.authModalService.openRegister();
+      throw new Error('Create a patient account or log in to continue to secure payment.');
     }
 
     const data = this.prefilledData();
