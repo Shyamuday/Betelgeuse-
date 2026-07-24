@@ -38,10 +38,10 @@
           <!-- Article Header -->
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
-              <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+              <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap">
                 Recommended
               </span>
-              <span class="text-slate-500 text-sm">{{ article.readingTime }}</span>
+              <span class="text-slate-500 text-sm whitespace-nowrap">{{ article.readingTime }}</span>
             </div>
 
             <h3 class="text-xl font-bold text-slate-800 mb-2">{{ article.title }}</h3>
@@ -73,10 +73,10 @@
 
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
-              <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">
+              <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap">
                 Featured
               </span>
-              <span class="text-slate-500 text-sm">{{ article.readingTime }}</span>
+              <span class="text-slate-500 text-sm whitespace-nowrap">{{ article.readingTime }}</span>
             </div>
 
             <h3 class="text-2xl font-bold text-slate-800 mb-2">{{ article.title }}</h3>
@@ -118,7 +118,7 @@
         <button (click)="setFilter('all')" [class.bg-slate-800]="currentFilter() === 'all'"
           [class.text-white]="currentFilter() === 'all'" [class.bg-white]="currentFilter() !== 'all'"
           [class.text-slate-700]="currentFilter() !== 'all'"
-          class="px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors text-sm">
+          class="px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors text-sm whitespace-nowrap">
           All Articles ({{ allArticles().length }})
         </button>
 
@@ -129,7 +129,7 @@
           [class.text-white]="currentFilter() === 'category:' + category"
           [class.bg-white]="currentFilter() !== 'category:' + category"
           [class.text-slate-700]="currentFilter() !== 'category:' + category"
-          class="px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors text-sm">
+          class="px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors text-sm whitespace-nowrap">
           {{ category }} ({{ getCategoryCount(category) }})
         </button>
         }
@@ -147,10 +147,10 @@
         <div class="p-6">
           <!-- Type and Reading Time -->
           <div class="flex items-center justify-between mb-4">
-            <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm font-semibold">
+            <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap">
               {{ article.type }}
             </span>
-            <span class="text-slate-500 text-sm">{{ article.readingTime }}</span>
+            <span class="text-slate-500 text-sm whitespace-nowrap">{{ article.readingTime }}</span>
           </div>
 
           <!-- Title and Description -->
@@ -166,7 +166,7 @@
           <!-- Categories -->
           <div class="flex flex-wrap gap-1">
             @for (category of article.category; track category) {
-            <span class="bg-slate-50 text-slate-600 px-2 py-1 rounded text-xs">
+            <span class="bg-slate-50 text-slate-600 px-2 py-1 rounded text-xs whitespace-nowrap">
               {{ category }}
             </span>
             }
@@ -182,7 +182,7 @@
     <div class="bg-white rounded-xl shadow-lg p-8 max-w-4xl mx-auto">
 
       <!-- Back Button -->
-      <button (click)="goBack()" class="mb-6 text-slate-600 hover:text-slate-800 flex items-center">
+      <button (click)="goBack()" class="mb-6 text-slate-600 hover:text-slate-800 flex items-center whitespace-nowrap">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
@@ -192,13 +192,13 @@
       <!-- Article Header -->
       <div class="mb-8">
         <div class="flex flex-wrap items-center gap-4 mb-4">
-          <span class="bg-slate-100 text-slate-700 px-4 py-2 rounded-full font-semibold">
+          <span class="bg-slate-100 text-slate-700 px-4 py-2 rounded-full font-semibold whitespace-nowrap">
             {{ selectedArticle()!.type }}
           </span>
-          <span class="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-semibold">
+          <span class="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-semibold whitespace-nowrap">
             {{ selectedArticle()!.difficulty }}
           </span>
-          <span class="text-slate-500">{{ selectedArticle()!.readingTime }}</span>
+          <span class="text-slate-500 whitespace-nowrap">{{ selectedArticle()!.readingTime }}</span>
         </div>
 
         <h1 class="text-4xl font-bold text-slate-800 mb-3">{{ selectedArticle()!.title }}</h1>
@@ -213,7 +213,7 @@
 
         <div class="flex flex-wrap gap-2 mb-6">
           @for (category of selectedArticle()!.category; track category) {
-          <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm">
+          <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm whitespace-nowrap">
             {{ category }}
           </span>
           }
@@ -341,15 +341,15 @@
       <!-- Action Buttons -->
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
         <button (click)="goBack()"
-          class="bg-slate-200 text-slate-700 px-6 py-3 rounded-lg hover:bg-slate-300 transition-colors">
+          class="bg-slate-200 text-slate-700 px-6 py-3 rounded-lg hover:bg-slate-300 transition-colors whitespace-nowrap">
           Browse More Articles
         </button>
         <button routerLink="/exercises"
-          class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors">
+          class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors whitespace-nowrap">
           View Exercises
         </button>
         <button routerLink="/lifestyle-tips"
-          class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
+          class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors whitespace-nowrap">
           View Lifestyle Tips
         </button>
       </div>

@@ -46,23 +46,22 @@ import { User } from '../../core/models/auth.model';
               aria-label="Hope Hub - Go to homepage"
             >
               <img
-                src="/hopehublogo.png"
+                src="/image/hopehublogo.png"
                 alt=""
-                class="h-9 w-9 rounded-full object-cover"
-                width="36"
-                height="36"
+                class="h-12 w-12 rounded-full object-cover"
+                width="48"
+                height="48"
               />
-              <span class="text-xl font-bold text-gray-900">Hope Hub</span>
             </a>
           </div>
 
           <!-- Desktop Navigation -->
-          <div class="hidden md:flex items-center space-x-8">
+          <div class="hidden md:flex items-center space-x-3 lg:space-x-4">
             <a
               routerLink="/"
               routerLinkActive="text-primary-600 border-b-2 border-primary-600"
               [routerLinkActiveOptions]="{ exact: true }"
-              class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
+              class="text-gray-700 hover:text-primary-600 px-2 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
               [attr.aria-current]="isCurrentRoute('/') ? 'page' : null"
             >
               Home
@@ -70,7 +69,7 @@ import { User } from '../../core/models/auth.model';
             <a
               routerLink="/services"
               routerLinkActive="text-primary-600 border-b-2 border-primary-600"
-              class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
+              class="text-gray-700 hover:text-primary-600 px-2 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
               [attr.aria-current]="isCurrentRoute('/services') ? 'page' : null"
             >
               Services
@@ -78,7 +77,7 @@ import { User } from '../../core/models/auth.model';
             <a
               routerLink="/psychologists"
               routerLinkActive="text-primary-600 border-b-2 border-primary-600"
-              class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
+              class="text-gray-700 hover:text-primary-600 px-2 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
               [attr.aria-current]="isCurrentRoute('/psychologists') ? 'page' : null"
             >
               Psychologists
@@ -88,7 +87,7 @@ import { User } from '../../core/models/auth.model';
             <a
               routerLink="/assessments"
               routerLinkActive="text-primary-600 border-b-2 border-primary-600"
-              class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
+              class="text-gray-700 hover:text-primary-600 px-2 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
               [attr.aria-current]="isCurrentRoute('/assessments') ? 'page' : null"
             >
               Assessments
@@ -96,7 +95,7 @@ import { User } from '../../core/models/auth.model';
             <a
               routerLink="/exercises"
               routerLinkActive="text-primary-600 border-b-2 border-primary-600"
-              class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
+              class="text-gray-700 hover:text-primary-600 px-2 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
               [attr.aria-current]="isCurrentRoute('/exercises') ? 'page' : null"
             >
               Exercises
@@ -104,7 +103,7 @@ import { User } from '../../core/models/auth.model';
             <a
               routerLink="/lifestyle-tips"
               routerLinkActive="text-primary-600 border-b-2 border-primary-600"
-              class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
+              class="text-gray-700 hover:text-primary-600 px-2 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
               [attr.aria-current]="isCurrentRoute('/lifestyle-tips') ? 'page' : null"
             >
               Lifestyle
@@ -112,7 +111,7 @@ import { User } from '../../core/models/auth.model';
             <a
               routerLink="/articles"
               routerLinkActive="text-primary-600 border-b-2 border-primary-600"
-              class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
+              class="text-gray-700 hover:text-primary-600 px-2 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
               [attr.aria-current]="isCurrentRoute('/articles') ? 'page' : null"
             >
               Articles
@@ -121,7 +120,7 @@ import { User } from '../../core/models/auth.model';
             <a
               routerLink="/community"
               routerLinkActive="text-primary-600 border-b-2 border-primary-600"
-              class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
+              class="text-gray-700 hover:text-primary-600 px-2 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
               [attr.aria-current]="isCurrentRoute('/community') ? 'page' : null"
             >
               Community
@@ -129,7 +128,7 @@ import { User } from '../../core/models/auth.model';
             <a
               routerLink="/careers"
               routerLinkActive="text-primary-600 border-b-2 border-primary-600"
-              class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
+              class="text-gray-700 hover:text-primary-600 px-2 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
               [attr.aria-current]="isCurrentRoute('/careers') ? 'page' : null"
             >
               Careers
@@ -137,14 +136,14 @@ import { User } from '../../core/models/auth.model';
             <a
               routerLink="/contact"
               routerLinkActive="text-primary-600 border-b-2 border-primary-600"
-              class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
+              class="text-gray-700 hover:text-primary-600 px-2 py-2 text-sm font-medium transition-colors duration-200"
               [attr.aria-current]="isCurrentRoute('/contact') ? 'page' : null"
             >
               Contact
             </a>
             <div class="relative group">
               <button
-                class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center"
+                class="text-gray-700 hover:text-primary-600 px-2 py-2 text-sm font-medium transition-colors duration-200 flex items-center whitespace-nowrap"
               >
                 Legal
                 <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -196,13 +195,13 @@ import { User } from '../../core/models/auth.model';
             <a
               routerLink="/donate"
               routerLinkActive="bg-primary-700"
-              class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 inline-flex items-center gap-1 whitespace-nowrap"
+              class="bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 inline-flex items-center gap-1 whitespace-nowrap"
             >
               💚 Support Us
             </a>
 
             <!-- Authentication Section -->
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
               <!-- Authenticated User -->
               @if (user()) {
                 <div class="relative group">
@@ -259,13 +258,13 @@ import { User } from '../../core/models/auth.model';
                 <div class="flex items-center space-x-2">
                   <button
                     (click)="openLogin()"
-                    class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                    class="text-gray-700 hover:text-primary-600 px-2 py-2 text-sm font-medium transition-colors duration-200"
                   >
                     Sign In
                   </button>
                   <button
                     (click)="openRegister()"
-                    class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                    class="bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                   >
                     Get Started
                   </button>

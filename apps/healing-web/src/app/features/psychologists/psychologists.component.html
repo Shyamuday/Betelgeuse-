@@ -11,7 +11,7 @@
       </div>
       <a
         routerLink="/contact"
-        class="inline-flex items-center justify-center rounded-lg bg-primary-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-700"
+        class="inline-flex items-center justify-center rounded-lg bg-primary-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-700 whitespace-nowrap"
       >
         Request support
       </a>
@@ -57,7 +57,7 @@
                   {{ provider.designation || provider.specialty || 'Psychologist' }}
                 </p>
                 @if (provider.yearsOfExperience) {
-                  <p class="mt-1 text-xs font-medium text-gray-500">{{ provider.yearsOfExperience }}+ years experience</p>
+                  <p class="mt-1 text-xs font-medium text-gray-500 whitespace-nowrap">{{ provider.yearsOfExperience }}+ years experience</p>
                 }
               </div>
             </div>
@@ -67,13 +67,13 @@
             @if (provider.focusAreas.length) {
               <div class="mt-4 flex flex-wrap gap-2">
                 @for (focus of provider.focusAreas.slice(0, 4); track focus) {
-                  <span class="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-800">{{ focus }}</span>
+                  <span class="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-800 whitespace-nowrap">{{ focus }}</span>
                 }
               </div>
             }
             <a
               routerLink="/contact"
-              class="mt-5 inline-flex items-center justify-center rounded-lg border border-primary-600 px-4 py-2 text-sm font-semibold text-primary-700 transition hover:bg-primary-50"
+              class="mt-5 inline-flex items-center justify-center rounded-lg border border-primary-600 px-4 py-2 text-sm font-semibold text-primary-700 transition hover:bg-primary-50 whitespace-nowrap"
             >
               Request support
             </a>
@@ -84,7 +84,7 @@
       <div class="mt-8 flex flex-wrap items-center justify-center gap-2">
         <button
           type="button"
-          class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:opacity-40"
+          class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:opacity-40 whitespace-nowrap"
           [disabled]="page() <= 1"
           (click)="setPage(page() - 1)"
         >
@@ -93,7 +93,7 @@
         @for (p of pages(); track p) {
           <button
             type="button"
-            class="rounded-lg border px-4 py-2 text-sm font-semibold"
+            class="rounded-lg border px-4 py-2 text-sm font-semibold whitespace-nowrap"
             [class.border-primary-600]="page() === p"
             [class.bg-primary-600]="page() === p"
             [class.text-white]="page() === p"
@@ -107,7 +107,7 @@
         }
         <button
           type="button"
-          class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:opacity-40"
+          class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:opacity-40 whitespace-nowrap"
           [disabled]="page() >= totalPages()"
           (click)="setPage(page() + 1)"
         >

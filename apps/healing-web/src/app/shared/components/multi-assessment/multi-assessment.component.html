@@ -19,14 +19,14 @@
         <button (click)="filterByCategory(category)" [class.bg-primary-600]="selectedCategory() === category"
           [class.text-white]="selectedCategory() === category" [class.bg-white]="selectedCategory() !== category"
           [class.text-slate-700]="selectedCategory() !== category"
-          class="px-6 py-2 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
+          class="px-6 py-2 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors whitespace-nowrap">
           {{ category }}
         </button>
         }
         <button (click)="showAllAssessments()" [class.bg-primary-600]="!selectedCategory()"
           [class.text-white]="!selectedCategory()" [class.bg-white]="selectedCategory()"
           [class.text-slate-700]="selectedCategory()"
-          class="px-6 py-2 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
+          class="px-6 py-2 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors whitespace-nowrap">
           All Assessments
         </button>
       </div>
@@ -38,10 +38,10 @@
 
           <!-- Assessment Type Badge -->
           <div class="flex items-center justify-between mb-4">
-            <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm font-semibold">
+            <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap">
               {{ assessment.type }}
             </span>
-            <span class="text-slate-500 text-sm">{{ assessment.duration }}</span>
+            <span class="text-slate-500 text-sm whitespace-nowrap">{{ assessment.duration }}</span>
           </div>
 
           <!-- Title and Description -->
@@ -51,12 +51,12 @@
           <!-- Category -->
           <div class="flex items-center justify-between">
             <span class="text-sm text-slate-500">{{ assessment.category }}</span>
-            <span class="text-sm font-semibold text-slate-700">{{ assessment.questions.length }} questions</span>
+            <span class="text-sm font-semibold text-slate-700 whitespace-nowrap">{{ assessment.questions.length }} questions</span>
           </div>
 
           <!-- Start Button -->
           <button (click)="selectAssessment(assessment)"
-            class="w-full mt-4 bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors">
+            class="w-full mt-4 bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors whitespace-nowrap">
             Start Assessment
           </button>
         </div>
@@ -70,7 +70,7 @@
     <div class="bg-white rounded-xl shadow-lg p-8">
 
       <!-- Back Button -->
-      <button (click)="goBack()" class="mb-6 text-slate-600 hover:text-slate-800 flex items-center">
+      <button (click)="goBack()" class="mb-6 text-slate-600 hover:text-slate-800 flex items-center whitespace-nowrap">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
@@ -80,10 +80,10 @@
       <!-- Assessment Info -->
       <div class="mb-8">
         <div class="flex items-center gap-4 mb-4">
-          <span class="bg-slate-100 text-slate-700 px-4 py-2 rounded-full font-semibold">
+          <span class="bg-slate-100 text-slate-700 px-4 py-2 rounded-full font-semibold whitespace-nowrap">
             {{ selectedAssessment()!.type }}
           </span>
-          <span class="text-slate-500">{{ selectedAssessment()!.duration }}</span>
+          <span class="text-slate-500 whitespace-nowrap">{{ selectedAssessment()!.duration }}</span>
         </div>
 
         <h2 class="text-3xl font-bold text-slate-800 mb-4">{{ selectedAssessment()!.title }}</h2>
@@ -128,7 +128,7 @@
       <!-- Start Button -->
       <div class="text-center">
         <button (click)="startAssessment()"
-          class="bg-primary-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-primary-700 transition-colors">
+          class="bg-primary-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-primary-700 transition-colors whitespace-nowrap">
           Begin {{ selectedAssessment()!.type }} Assessment
         </button>
       </div>
@@ -177,7 +177,7 @@
       <div class="flex justify-between">
         @if (currentQuestion() > 0) {
         <button (click)="previousQuestion()"
-          class="bg-slate-200 text-slate-700 px-6 py-3 rounded-lg hover:bg-slate-300 transition-colors">
+          class="bg-slate-200 text-slate-700 px-6 py-3 rounded-lg hover:bg-slate-300 transition-colors whitespace-nowrap">
           Previous
         </button>
         } @else {
@@ -185,12 +185,12 @@
         }
         @if (currentQuestion() < selectedAssessment()!.questions.length - 1) { <button (click)="nextQuestion()"
           [disabled]="answers()[currentQuestion()] === undefined"
-          class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors">
+          class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors whitespace-nowrap">
           Next
           </button>
           } @else {
           <button (click)="calculateResults()" [disabled]="answers()[currentQuestion()] === undefined"
-            class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors">
+            class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors whitespace-nowrap">
             Get Results
           </button>
           }
@@ -247,11 +247,11 @@
 
         <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
           <button (click)="openRegister()"
-            class="rounded-lg bg-primary-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-primary-700">
+            class="rounded-lg bg-primary-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-primary-700 whitespace-nowrap">
             Create patient account
           </button>
           <button (click)="openLogin()"
-            class="rounded-lg border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-800 transition-colors hover:border-primary-500 hover:text-primary-700">
+            class="rounded-lg border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-800 transition-colors hover:border-primary-500 hover:text-primary-700 whitespace-nowrap">
             Login
           </button>
         </div>
@@ -364,27 +364,27 @@
       <!-- Action Buttons -->
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
         <button (click)="retakeAssessment()"
-          class="bg-slate-200 text-slate-700 px-6 py-3 rounded-lg hover:bg-slate-300 transition-colors">
+          class="bg-slate-200 text-slate-700 px-6 py-3 rounded-lg hover:bg-slate-300 transition-colors whitespace-nowrap">
           Retake Assessment
         </button>
         <button (click)="takeAnotherAssessment()"
-          class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors">
+          class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors whitespace-nowrap">
           Take Another Assessment
         </button>
         <button (click)="viewExercises()"
-          class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors">
+          class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors whitespace-nowrap">
           View Recommended Exercises
         </button>
         <button (click)="viewLifestyleTips()"
-          class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors">
+          class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors whitespace-nowrap">
           View Lifestyle Tips
         </button>
         <button (click)="viewArticles()"
-          class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors">
+          class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors whitespace-nowrap">
           Read Articles
         </button>
         <button routerLink="/contact"
-          class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors">
+          class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors whitespace-nowrap">
           Book Professional Consultation
         </button>
       </div>

@@ -22,7 +22,7 @@
                 <div class="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
                   <div class="max-w-2xl">
                     @if (service.badge) {
-                    <span class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-200">
+                    <span class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-200 whitespace-nowrap">
                       {{ service.badge }}
                     </span>
                     }
@@ -64,7 +64,7 @@
                     (click)="bookService(service)"
                     (mouseenter)="pauseAutoPlay()"
                     (mouseleave)="resumeAutoPlay()"
-                    class="inline-flex items-center justify-center rounded-lg bg-primary-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-700"
+                    class="inline-flex items-center justify-center rounded-lg bg-primary-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-700 whitespace-nowrap"
                   >
                     Request consultation
                   </button>
@@ -74,7 +74,7 @@
                     rel="noopener"
                     (mouseenter)="pauseAutoPlay()"
                     (mouseleave)="resumeAutoPlay()"
-                    class="inline-flex items-center justify-center rounded-lg border border-primary-600 px-5 py-3 text-sm font-semibold text-primary-700 transition hover:bg-primary-50"
+                    class="inline-flex items-center justify-center rounded-lg border border-primary-600 px-5 py-3 text-sm font-semibold text-primary-700 transition hover:bg-primary-50 whitespace-nowrap"
                   >
                     Ask on WhatsApp
                   </a>

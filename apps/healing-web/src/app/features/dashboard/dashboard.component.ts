@@ -46,7 +46,7 @@ type BookingTimelineStep = {
             <div class="flex items-center space-x-4">
               <button
                 (click)="logout()"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 whitespace-nowrap"
               >
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -217,7 +217,7 @@ type BookingTimelineStep = {
               <h2 class="text-lg font-semibold text-gray-900">Recent Bookings</h2>
               <a
                 routerLink="/contact"
-                class="text-sm font-medium text-blue-600 hover:text-blue-700"
+                class="text-sm font-medium text-blue-600 hover:text-blue-700 whitespace-nowrap"
               >
                 Book consultation
               </a>
@@ -236,7 +236,7 @@ type BookingTimelineStep = {
                         </p>
                       </div>
                       <span
-                        class="text-xs font-semibold px-2 py-1 rounded-full bg-blue-50 text-blue-700"
+                        class="text-xs font-semibold px-2 py-1 rounded-full bg-blue-50 text-blue-700 whitespace-nowrap"
                       >
                         {{ consultation.status }}
                       </span>
@@ -256,7 +256,7 @@ type BookingTimelineStep = {
                     @if (canRetryPayment(consultation)) {
                       <button
                         type="button"
-                        class="mt-3 inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
+                        class="mt-3 inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60 whitespace-nowrap"
                         [disabled]="isPaying()"
                         (click)="retryPayment(consultation)"
                       >
@@ -317,7 +317,7 @@ type BookingTimelineStep = {
                         {{ lead.visitorName || 'Hope Hub request' }}
                       </p>
                       <span
-                        class="text-xs font-semibold px-2 py-1 rounded-full bg-green-50 text-green-700"
+                        class="text-xs font-semibold px-2 py-1 rounded-full bg-green-50 text-green-700 whitespace-nowrap"
                       >
                         {{ lead.followUpStatus }}
                       </span>
