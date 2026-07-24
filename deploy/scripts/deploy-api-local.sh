@@ -31,6 +31,7 @@ SMTP_FROM="$(sudo cat /etc/hopehub-smtp-from 2>/dev/null || echo noreply@hopehub
 TURN_URL="$(sudo cat /etc/hopehub-turn-url 2>/dev/null || true)"
 TURN_USERNAME="$(sudo cat /etc/hopehub-turn-username 2>/dev/null || true)"
 TURN_CREDENTIAL="$(sudo cat /etc/hopehub-turn-credential 2>/dev/null || true)"
+GOOGLE_CLIENT_ID="$(sudo cat /etc/hopehub-google-client-id 2>/dev/null || true)"
 
 cat > .env <<ENV
 DATABASE_URL="postgresql://hopehub_app:${DB_PASS}@localhost:5432/hopehub_clinic?schema=public"
@@ -59,6 +60,7 @@ NOTIFICATION_CHANNELS="IN_APP,EMAIL"
 TURN_URL="${TURN_URL}"
 TURN_USERNAME="${TURN_USERNAME}"
 TURN_CREDENTIAL="${TURN_CREDENTIAL}"
+GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID}"
 OOREP_BASE_URL="https://www.oorep.com"
 OOREP_TIMEOUT_MS="15000"
 ENV

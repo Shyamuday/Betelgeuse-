@@ -3,4 +3,5 @@ export const environment = {
   apiUrl: 'https://api.hopehub.in',
   enableAnalytics: true,
   enableErrorReporting: true,
+  googleClientId: '',  // set via CI/CD or server env — never commit real value
 };

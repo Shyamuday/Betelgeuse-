@@ -183,6 +183,7 @@ jobs:
           ADMIN_ORIGIN: ${{ secrets.ADMIN_ORIGIN }}
           DOCTOR_ORIGIN: ${{ secrets.DOCTOR_ORIGIN }}
           OPERATIONS_ORIGIN: ${{ secrets.OPERATIONS_ORIGIN }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
         run: bash deploy/scripts/configure-production-urls.sh
 
       - name: Build static frontends

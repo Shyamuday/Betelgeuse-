@@ -54,6 +54,20 @@ patch_app_constants "$ROOT/apps/admin-web/src/environments/production-url.consta
 patch_app_constants "$ROOT/apps/operations-web/src/environments/production-url.constants.ts" "$API_URL" "$OPS_URL" "$DOCTOR_URL"
 patch_app_constants "$ROOT/apps/healing-web/src/environments/production-url.constants.ts" "$API_URL" "$HEALING_URL"
 
+# Inject Google Client ID into healing-web environment files
+GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID:-}"
+if [ -n "$GOOGLE_CLIENT_ID" ]; then
+  for env_file in \
+    "$ROOT/apps/healing-web/src/environments/environment.ts" \
+    "$ROOT/apps/healing-web/src/environments/environment.prod.ts"; do
+    if [ -f "$env_file" ]; then
+      sed -i.bak "s|googleClientId: ''|googleClientId: '${GOOGLE_CLIENT_ID}'|g" "$env_file"
+      rm -f "${env_file}.bak"
+      echo "Patched googleClientId in $env_file"
+    fi
+  done
+fi
+
 echo "Production URLs configured:"
 echo "  API:        $API_URL"
 echo "  Patient:    $PATIENT_URL"
