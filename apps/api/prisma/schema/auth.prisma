@@ -185,6 +185,7 @@ model User {
   blogPostsAuthored    BlogPost[]             @relation("BlogPostAuthor")
   blogComments         BlogComment[]          @relation("BlogCommentAuthor")
   doctorOnlineSession  DoctorOnlineSession?
+  hopeHubAssessmentAttempts HopeHubAssessmentAttempt[] @relation("UserHopeHubAssessmentAttempts")
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
 

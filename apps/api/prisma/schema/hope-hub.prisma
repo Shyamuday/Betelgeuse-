@@ -1,0 +1,33 @@
+model HopeHubAssessmentAttempt {
+  id             String   @id @default(cuid())
+  userId         String
+  assessmentId   String
+  assessmentType String
+  category       String?
+  title          String
+  version        String   @default("v1")
+  answers        Json
+  totalScore     Int
+  maxScore       Int
+  level          String
+  color          String?
+  description    String?  @db.Text
+  suggestions    Json?
+  safetyFlag     Boolean  @default(false)
+  retakeNumber   Int      @default(1)
+  previousId     String?
+  source         String?
+  entryPage      String?
+  completedAt    DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user           User     @relation("UserHopeHubAssessmentAttempts", fields: [userId], references: [id], onDelete: Cascade)
+  previous       HopeHubAssessmentAttempt? @relation("HopeHubAssessmentRetakes", fields: [previousId], references: [id], onDelete: SetNull)
+  retakes        HopeHubAssessmentAttempt[] @relation("HopeHubAssessmentRetakes")
+
+  @@index([userId, assessmentId, completedAt])
+  @@index([userId, completedAt])
+  @@index([assessmentId])
+  @@index([safetyFlag])
+}

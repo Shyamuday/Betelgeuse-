@@ -61,12 +61,60 @@ const hopeHubBookingSchema = z.object({
   entryPage: z.string().trim().max(500).optional().or(z.literal(''))
 });
 
+const hopeHubAssessmentAttemptSchema = z.object({
+  assessmentId: z.string().trim().min(1).max(120),
+  assessmentType: z.string().trim().min(1).max(120),
+  category: z.string().trim().max(120).optional().or(z.literal('')),
+  title: z.string().trim().min(1).max(200),
+  version: z.string().trim().min(1).max(40).optional(),
+  answers: z.array(z.number().int().min(0).max(10)).min(1).max(120),
+  totalScore: z.number().int().min(0).max(1000),
+  maxScore: z.number().int().min(1).max(1000),
+  level: z.string().trim().min(1).max(160),
+  color: z.string().trim().max(40).optional().or(z.literal('')),
+  description: z.string().trim().max(3000).optional().or(z.literal('')),
+  suggestions: z.array(z.string().trim().min(1).max(500)).max(30).optional(),
+  safetyFlag: z.boolean().optional(),
+  source: z.string().trim().max(120).optional().or(z.literal('')),
+  entryPage: z.string().trim().max(500).optional().or(z.literal('')),
+  completedAt: z.string().datetime().optional()
+});
+
 function slugify(value: string) {
   return value
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
+}
+
+function serializeAssessmentAttempt(attempt: {
+  id: string;
+  assessmentId: string;
+  assessmentType: string;
+  category: string | null;
+  title: string;
+  version: string;
+  answers: unknown;
+  totalScore: number;
+  maxScore: number;
+  level: string;
+  color: string | null;
+  description: string | null;
+  suggestions: unknown;
+  safetyFlag: boolean;
+  retakeNumber: number;
+  previousId: string | null;
+  source: string | null;
+  entryPage: string | null;
+  completedAt: Date;
+  createdAt: Date;
+}) {
+  return {
+    ...attempt,
+    completedAt: attempt.completedAt.toISOString(),
+    createdAt: attempt.createdAt.toISOString()
+  };
 }
 
 function defaultDescription(serviceName: string) {
@@ -208,6 +256,135 @@ hopeHubRouter.get(
         totalPages: Math.max(1, Math.ceil(total / pageSize))
       }
     });
+  })
+);
+
+hopeHubRouter.post(
+  '/hope-hub/assessments',
+  authRequired,
+  allowRoles(Role.PATIENT),
+  asyncRoute(async (req, res) => {
+    const body = hopeHubAssessmentAttemptSchema.parse(req.body);
+    const normalizedAnswers = body.answers.map((answer) => Number(answer || 0));
+    const computedTotal = normalizedAnswers.reduce((sum, answer) => sum + answer, 0);
+    if (computedTotal !== body.totalScore) {
+      return res.status(400).json({ message: 'Assessment score does not match answers.' });
+    }
+
+    const previous = await prisma.hopeHubAssessmentAttempt.findFirst({
+      where: {
+        userId: req.user!.id,
+        assessmentId: body.assessmentId
+      },
+      orderBy: { completedAt: 'desc' },
+      select: { id: true, retakeNumber: true, totalScore: true, level: true, completedAt: true }
+    });
+
+    const attempt = await prisma.hopeHubAssessmentAttempt.create({
+      data: {
+        userId: req.user!.id,
+        assessmentId: body.assessmentId,
+        assessmentType: body.assessmentType,
+        category: body.category || null,
+        title: body.title,
+        version: body.version || 'v1',
+        answers: normalizedAnswers,
+        totalScore: computedTotal,
+        maxScore: body.maxScore,
+        level: body.level,
+        color: body.color || null,
+        description: body.description || null,
+        suggestions: body.suggestions ?? [],
+        safetyFlag: Boolean(body.safetyFlag),
+        retakeNumber: (previous?.retakeNumber ?? 0) + 1,
+        previousId: previous?.id ?? null,
+        source: body.source || null,
+        entryPage: body.entryPage || null,
+        completedAt: body.completedAt ? new Date(body.completedAt) : new Date()
+      }
+    });
+
+    void trackProductEvent({
+      name: 'hope_hub_assessment_completed',
+      actorId: req.user!.id,
+      actorRole: req.user!.role,
+      properties: {
+        source: 'hope-hub',
+        attemptId: attempt.id,
+        assessmentId: attempt.assessmentId,
+        assessmentType: attempt.assessmentType,
+        totalScore: attempt.totalScore,
+        level: attempt.level,
+        safetyFlag: attempt.safetyFlag,
+        retakeNumber: attempt.retakeNumber,
+        previousScore: previous?.totalScore ?? null
+      }
+    });
+
+    res.status(201).json({
+      attempt: serializeAssessmentAttempt(attempt),
+      previous: previous
+        ? {
+            ...previous,
+            completedAt: previous.completedAt.toISOString()
+          }
+        : null
+    });
+  })
+);
+
+hopeHubRouter.get(
+  '/hope-hub/assessments',
+  authRequired,
+  allowRoles(Role.PATIENT),
+  asyncRoute(async (req, res) => {
+    const page = queryPositiveInt(req, 'page', 1);
+    const pageSize = Math.max(1, Math.min(50, queryPositiveInt(req, 'pageSize', 20)));
+    const assessmentId = queryText(req, 'assessmentId').trim();
+
+    const where = {
+      userId: req.user!.id,
+      ...(assessmentId ? { assessmentId } : {})
+    };
+
+    const [attempts, total] = await Promise.all([
+      prisma.hopeHubAssessmentAttempt.findMany({
+        where,
+        orderBy: { completedAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize
+      }),
+      prisma.hopeHubAssessmentAttempt.count({ where })
+    ]);
+
+    res.json({
+      attempts: attempts.map(serializeAssessmentAttempt),
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / pageSize))
+      }
+    });
+  })
+);
+
+hopeHubRouter.get(
+  '/hope-hub/assessments/latest',
+  authRequired,
+  allowRoles(Role.PATIENT),
+  asyncRoute(async (req, res) => {
+    const assessmentId = queryText(req, 'assessmentId').trim();
+    if (!assessmentId) {
+      return res.status(400).json({ message: 'assessmentId is required.' });
+    }
+
+    const latest = await prisma.hopeHubAssessmentAttempt.findFirst({
+      where: { userId: req.user!.id, assessmentId },
+      orderBy: { completedAt: 'desc' }
+    });
+
+    res.json({ attempt: latest ? serializeAssessmentAttempt(latest) : null });
   })
 );
 

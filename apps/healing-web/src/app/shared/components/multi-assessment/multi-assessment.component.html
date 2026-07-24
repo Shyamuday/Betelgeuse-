@@ -198,6 +198,71 @@
     </div>
     }
 
+    <!-- Result Login Gate -->
+    @if (resultLocked() && result()) {
+    <div class="bg-white rounded-xl shadow-lg p-8">
+      @if (result()!.safetyFlag) {
+      <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
+        <div class="flex items-start space-x-3">
+          <svg class="w-6 h-6 text-red-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd" />
+          </svg>
+          <div>
+            <h3 class="font-semibold text-red-800 mb-2">Immediate Support Available</h3>
+            <p class="text-red-700 text-sm mb-3">
+              Your responses indicate you may need support now. Please reach out to someone you trust or contact emergency support.
+            </p>
+            <div class="space-y-1 text-sm text-red-700">
+              @for (helpline of selectedAssessment()!.emergencyHelplines; track helpline.name) {
+              <div>
+                <strong>{{ helpline.name }}:</strong> {{ helpline.number }}
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+
+      <div class="mx-auto max-w-2xl text-center">
+        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-teal-50 text-teal-700">
+          <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        </div>
+        <p class="text-sm font-semibold uppercase tracking-wide text-teal-700">Your result is ready</p>
+        <h3 class="mt-3 text-3xl font-bold text-slate-800">Login or create a patient account to view it</h3>
+        <p class="mt-4 text-slate-600">
+          We save your test privately so you can compare retests, track changes over time, and get better support without repeating everything.
+        </p>
+
+        @if (saveError()) {
+        <div class="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {{ saveError() }}
+        </div>
+        }
+
+        <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+          <button (click)="openRegister()"
+            class="rounded-lg bg-teal-700 px-6 py-3 font-semibold text-white transition-colors hover:bg-teal-800">
+            Create patient account
+          </button>
+          <button (click)="openLogin()"
+            class="rounded-lg border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-800 transition-colors hover:border-teal-500 hover:text-teal-700">
+            Login
+          </button>
+        </div>
+
+        @if (savingResult()) {
+        <p class="mt-5 text-sm font-medium text-slate-600">Saving your result securely...</p>
+        }
+      </div>
+    </div>
+    }
+
     <!-- Results -->
     @if (showResults() && result()) {
     <div class="bg-white rounded-xl shadow-lg p-8">
@@ -248,7 +313,7 @@
 
       <!-- Assessment Info -->
       <div class="bg-slate-50 rounded-lg p-6 mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
           <div>
             <div class="text-2xl font-bold text-slate-800">{{ result()!.assessmentType }}</div>
             <div class="text-slate-600 text-sm">Assessment Type</div>
@@ -261,8 +326,23 @@
             <div class="text-2xl font-bold text-slate-800">{{ selectedAssessment()!.questions.length }}</div>
             <div class="text-slate-600 text-sm">Questions</div>
           </div>
+          <div>
+            <div class="text-2xl font-bold text-slate-800">#{{ savedAttempt()?.retakeNumber || 1 }}</div>
+            <div class="text-slate-600 text-sm">Attempt</div>
+          </div>
         </div>
       </div>
+
+      @if (previousAttempt()) {
+      <div class="mb-8 rounded-lg border border-teal-100 bg-teal-50 p-5">
+        <p class="text-sm font-semibold uppercase tracking-wide text-teal-700">Retest comparison</p>
+        <p class="mt-2 text-slate-700">
+          Previous score was <strong>{{ previousAttempt()!.totalScore }}</strong>
+          with level <strong>{{ previousAttempt()!.level }}</strong>.
+          Current score is <strong>{{ result()!.total }}</strong>.
+        </p>
+      </div>
+      }
 
       <!-- Suggestions -->
       <div class="mb-8">
