@@ -9,6 +9,7 @@ export const ROUTE_PATHS = {
   PRIVACY: 'privacy-policy',
   LEGAL: 'legal',
   TERMS: 'terms-and-conditions',
+  CANCELLATION_REFUND: 'cancellation-and-refund-policy',
   RETURN_EXCHANGE: 'return-and-exchange-policy',
   SHIPPING: 'shipping-policy',
   PAYMENT: 'payment-policy',

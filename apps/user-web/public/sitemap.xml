@@ -88,6 +88,11 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://hopehub.in/cancellation-and-refund-policy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://hopehub.in/return-and-exchange-policy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>

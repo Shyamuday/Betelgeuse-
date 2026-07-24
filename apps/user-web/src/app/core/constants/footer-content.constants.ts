@@ -35,7 +35,7 @@ export const FOOTER_CONTENT = {
       links: [
         { label: 'Home', href: '/' },
         { label: 'We Are Hiring', href: '/careers' },
-        { label: 'Partial Payment Refund Policy', href: '/payment-policy' },
+        { label: 'Cancellation & Refund Policy', href: '/cancellation-and-refund-policy' },
         { label: 'Contact Us', href: '/contact' },
         { label: 'About HopeHub Care', href: '/about' },
         { label: 'Our Doctors', href: '/our-doctors' },
@@ -60,6 +60,7 @@ export const FOOTER_CONTENT = {
       title: 'Policies',
       links: [
         { label: 'Privacy Policy', href: '/privacy-policy' },
+        { label: 'Cancellation & Refund Policy', href: '/cancellation-and-refund-policy' },
         { label: 'Payment Policy', href: '/payment-policy' },
         { label: 'Shipping Policy', href: '/shipping-policy' },
         { label: 'Terms And Conditions', href: '/terms-and-conditions' },

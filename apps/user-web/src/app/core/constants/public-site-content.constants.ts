@@ -432,7 +432,7 @@ export const ROUTE_SEO_CONTENT = {
   legal: {
     seoTitle: 'Legal & Policies | HopeHub Care',
     seoDescription:
-      'Privacy policy, terms and conditions, return and exchange, shipping, and payment policies for HopeHub Care.',
+      'Privacy policy, terms and conditions, cancellation and refund, return and exchange, shipping, and payment policies for HopeHub Care.',
   },
   'privacy-policy': {
     seoTitle: 'Privacy Policy | HopeHub Care',
@@ -443,6 +443,11 @@ export const ROUTE_SEO_CONTENT = {
     seoTitle: 'Terms & Conditions | HopeHub Care',
     seoDescription:
       'Terms for using HopeHub Care online consultations, prescriptions, and medicine orders.',
+  },
+  'cancellation-and-refund-policy': {
+    seoTitle: 'Cancellation & Refund Policy | HopeHub Care',
+    seoDescription:
+      'Cancellation, reschedule, failed payment, duplicate payment, and refund rules for HopeHub Care.',
   },
   'return-and-exchange-policy': {
     seoTitle: 'Return & Exchange Policy | HopeHub Care',

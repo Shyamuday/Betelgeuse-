@@ -105,6 +105,15 @@ export const routes: Routes = [
     data: { legalKey: 'terms', ...ROUTE_SEO_CONTENT['terms-and-conditions'] },
   },
   {
+    path: 'cancellation-and-refund-policy',
+    loadComponent: () =>
+      import('./legal-page/legal-page.component').then((m) => m.LegalPageComponent),
+    data: {
+      legalKey: 'cancellationRefund',
+      ...ROUTE_SEO_CONTENT['cancellation-and-refund-policy'],
+    },
+  },
+  {
     path: 'return-and-exchange-policy',
     loadComponent: () =>
       import('./legal-page/legal-page.component').then((m) => m.LegalPageComponent),

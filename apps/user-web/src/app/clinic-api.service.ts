@@ -18,6 +18,7 @@ import {
 import type {
   RazorpayCheckoutResponse,
   RazorpayOrderResponse,
+  RazorpayPaymentFailedResponse,
   RealtimeSubscription,
 } from './clinic-api/clinic-api.types';
 
@@ -301,6 +302,13 @@ export class ClinicApiService {
         return;
       }
 
+      let settled = false;
+      const fail = (message: string) => {
+        if (settled) return;
+        settled = true;
+        reject(new Error(message));
+      };
+
       const checkout = new window.Razorpay({
         key: order.razorpayKeyId,
         amount: order.amountInPaise,
@@ -313,8 +321,21 @@ export class ClinicApiService {
           contact: consultation.patient.mobile || '',
         },
         theme: { color: RAZORPAY_CHECKOUT.THEME_COLOR },
-        handler: (response: RazorpayCheckoutResponse) => resolve(response),
-        modal: { ondismiss: () => reject(new Error('Payment was cancelled.')) },
+        handler: (response: RazorpayCheckoutResponse) => {
+          if (settled) return;
+          settled = true;
+          resolve(response);
+        },
+        modal: { ondismiss: () => fail('Payment was cancelled.') },
+      });
+
+      checkout.on?.('payment.failed', (response: unknown) => {
+        const failure = response as RazorpayPaymentFailedResponse;
+        fail(
+          failure.error?.description ||
+            failure.error?.reason ||
+            'Payment failed. Please retry or use another payment method.',
+        );
       });
 
       checkout.open();

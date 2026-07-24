@@ -7,7 +7,10 @@ import { RAZORPAY_CHECKOUT } from '../core/constants/branding.constants';
 
 declare global {
   interface Window {
-    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+      on?: (event: string, callback: (response: unknown) => void) => void;
+    };
   }
 }
 

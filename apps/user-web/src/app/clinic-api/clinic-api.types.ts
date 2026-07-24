@@ -11,6 +11,20 @@ export type RazorpayCheckoutResponse = {
   razorpay_signature: string;
 };
 
+export type RazorpayPaymentFailedResponse = {
+  error?: {
+    code?: string;
+    description?: string;
+    source?: string;
+    step?: string;
+    reason?: string;
+    metadata?: {
+      order_id?: string;
+      payment_id?: string;
+    };
+  };
+};
+
 import type { Socket } from 'socket.io-client';
 
 export interface RealtimeSubscription {

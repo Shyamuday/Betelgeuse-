@@ -40,6 +40,7 @@ export const PUBLIC_HEADER_NAV_GROUPS: PublicNavGroup[] = [
       { label: 'Careers', path: `/${ROUTE_PATHS.CAREERS}` },
       { label: 'Contact', path: `/${ROUTE_PATHS.CONTACT}` },
       { label: 'FAQ', path: `/${ROUTE_PATHS.FAQ}` },
+      { label: 'Policies', path: `/${ROUTE_PATHS.LEGAL}` },
     ],
   },
   // Patient app navigation kept for future mobile launch.
