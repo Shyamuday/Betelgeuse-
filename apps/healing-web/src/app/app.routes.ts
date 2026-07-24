@@ -186,6 +186,17 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'payment-policy',
+    loadComponent: () =>
+      import('./features/legal/payment-policy.component').then((m) => m.PaymentPolicyComponent),
+    title: 'Payment Policy - Hope Hub',
+    data: {
+      breadcrumb: 'Payment Policy',
+      description: 'Read the Hope Hub payment policy for paid support sessions and donations',
+      keywords: 'payment policy, razorpay, hope hub, mental health consultation payment',
+    },
+  },
+  {
     path: 'shipping-policy',
     loadComponent: () =>
       import('./features/legal/shipping-policy.component').then((m) => m.ShippingPolicyComponent),

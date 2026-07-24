@@ -83,10 +83,45 @@ export class PatientAccountConsultationDetailPageComponent implements OnInit, On
     });
   }
 
+  formatInr(paise?: number | null): string {
+    return ((paise ?? 0) / 100).toLocaleString('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+    });
+  }
+
+  paymentStatusLabel(status?: string | null): string {
+    if (status === 'CREATED') return 'Payment pending';
+    if (status === 'PAID') return 'Payment verified';
+    if (status === 'FAILED') return 'Payment failed';
+    if (status === 'PARTIALLY_REFUNDED') return 'Partially refunded';
+    if (status === 'REFUNDED') return 'Refund completed';
+    return 'Not available';
+  }
+
+  paymentStatusMessage(status?: string | null): string {
+    if (status === 'CREATED') {
+      return 'Complete payment from your consultations list to move this request forward.';
+    }
+    if (status === 'PAID') {
+      return 'Your payment was verified securely and the consultation is active for assignment or care.';
+    }
+    if (status === 'FAILED') {
+      return 'The payment did not complete. You can retry from the consultations list or contact support if money was debited.';
+    }
+    if (status === 'PARTIALLY_REFUNDED') {
+      return 'A partial refund has been recorded against this payment. Bank or UPI timelines may vary.';
+    }
+    if (status === 'REFUNDED') {
+      return 'The approved refund has been recorded against the original payment.';
+    }
+    return 'Payment details will appear here after a payment record is created.';
+  }
+
   private loadIceServers() {
     this.api.fetchIceServers().subscribe({
       next: ({ iceServers }) => this.iceServers.set(iceServers),
-      error: () => undefined
+      error: () => undefined,
     });
   }
 

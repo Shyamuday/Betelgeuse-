@@ -175,6 +175,12 @@ import { User } from '../../core/models/auth.model';
                     Cancellation & Refunds
                   </a>
                   <a
+                    routerLink="/payment-policy"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600"
+                  >
+                    Payment Policy
+                  </a>
+                  <a
                     routerLink="/shipping-policy"
                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600"
                   >
@@ -440,6 +446,15 @@ import { User } from '../../core/models/auth.model';
                 role="menuitem"
               >
                 Cancellation & Refunds
+              </a>
+              <a
+                routerLink="/payment-policy"
+                (click)="navigateAndClose('/payment-policy')"
+                routerLinkActive="text-primary-600 bg-primary-50"
+                class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 px-6 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                role="menuitem"
+              >
+                Payment Policy
               </a>
               <a
                 routerLink="/shipping-policy"

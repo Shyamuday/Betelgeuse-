@@ -72,6 +72,12 @@ import { APP_CONSTANTS } from '../../core';
                 routerLink="/refund-policy"
               >
                 Cancellation & Refund Policy </a
+              >. Payment processing and verification are described in our
+              <a
+                class="font-semibold text-teal-700 hover:text-teal-800"
+                routerLink="/payment-policy"
+              >
+                Payment Policy </a
               >.
             </p>
           </section>

@@ -80,6 +80,12 @@ ${urlEntries}
         priority: 0.5,
       },
       {
+        loc: '/payment-policy',
+        lastmod: this.currentDate,
+        changefreq: 'yearly',
+        priority: 0.5,
+      },
+      {
         loc: '/shipping-policy',
         lastmod: this.currentDate,
         changefreq: 'yearly',

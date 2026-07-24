@@ -171,6 +171,11 @@ import { APP_CONSTANTS } from '../../core';
               >Refund Policy</a
             >
             <a
+              routerLink="/payment-policy"
+              class="text-gray-300 hover:text-white text-xs sm:text-sm transition-colors duration-200 text-center"
+              >Payment Policy</a
+            >
+            <a
               routerLink="/shipping-policy"
               class="text-gray-300 hover:text-white text-xs sm:text-sm transition-colors duration-200 text-center"
               >Service Delivery</a

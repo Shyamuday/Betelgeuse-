@@ -12,6 +12,8 @@
   <div class="summary-cards">
     <div class="card"><div class="val">₹{{ formatPaise(summary().total) }}</div><div class="lbl">Gross billed</div></div>
     <div class="card paid"><div class="val">₹{{ formatPaise(summary().paid) }}</div><div class="lbl">Collected</div></div>
+    <div class="card refund"><div class="val">₹{{ formatPaise(summary().refunded ?? 0) }}</div><div class="lbl">Refunded</div></div>
+    <div class="card net"><div class="val">₹{{ formatPaise(summary().netPaid ?? summary().paid) }}</div><div class="lbl">Net paid</div></div>
     <div class="card pending"><div class="val">{{ summary().pendingCount }}</div><div class="lbl">Pending</div></div>
     <div class="card failed"><div class="val">{{ summary().failedCount }}</div><div class="lbl">Failed</div></div>
   </div>
@@ -46,6 +48,8 @@
             <th>Doctor</th>
             <th>Status</th>
             <th class="num">Amount (₹)</th>
+            <th class="num">Refunded (₹)</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -61,6 +65,13 @@
                 </span>
               </td>
               <td class="num">₹{{ formatPaise(p.amountInPaise) }}</td>
+              <td class="num">₹{{ formatPaise(p.refundedAmountInPaise || 0) }}</td>
+              <td>
+                <div class="row-actions">
+                  <button type="button" class="btn-clear" (click)="openDetails(p)">Details</button>
+                  <button type="button" class="btn-apply" [disabled]="!canRefund(p)" (click)="openDetails(p)">Refund</button>
+                </div>
+              </td>
             </tr>
           }
         </tbody>
@@ -80,7 +91,12 @@
             </span>
           </div>
           <div class="card-row"><span>{{ p.consultation?.disease?.name ?? '—' }}</span><strong>₹{{ formatPaise(p.amountInPaise) }}</strong></div>
+          <div class="card-row"><span>Refunded</span><span>₹{{ formatPaise(p.refundedAmountInPaise || 0) }}</span></div>
           <div class="card-row"><span>Doctor</span><span>{{ p.consultation?.assignedDoctor?.name ?? 'Unassigned' }}</span></div>
+          <div class="row-actions">
+            <button type="button" class="btn-clear" (click)="openDetails(p)">Details</button>
+            <button type="button" class="btn-apply" [disabled]="!canRefund(p)" (click)="openDetails(p)">Refund</button>
+          </div>
         </article>
       }
     </div>
@@ -92,4 +108,114 @@
     </div>
   }
 </div>
+@if (selectedPayment(); as selected) {
+  <section class="detail-backdrop" (click)="closeDetails()">
+    <article class="detail-panel" (click)="$event.stopPropagation()">
+      <div class="detail-head">
+        <div>
+          <p class="eyebrow">Payment Detail</p>
+          <h3>{{ selected.consultation?.patient?.name ?? 'Patient' }}</h3>
+          <p>{{ selected.consultation?.disease?.name ?? 'Consultation' }}</p>
+        </div>
+        <button type="button" class="icon-btn" (click)="closeDetails()" aria-label="Close">×</button>
+      </div>
+
+      <div class="detail-grid">
+        <div><span>Status</span><strong>{{ selected.status }}</strong></div>
+        <div><span>Amount</span><strong>₹{{ formatPaise(selected.amountInPaise) }}</strong></div>
+        <div><span>Refunded</span><strong>₹{{ formatPaise(selected.refundedAmountInPaise || 0) }}</strong></div>
+        <div><span>Refundable</span><strong>₹{{ formatPaise(refundableAmount(selected)) }}</strong></div>
+        <div><span>Order</span><strong>{{ selected.providerOrderId || '—' }}</strong></div>
+        <div><span>Payment</span><strong>{{ selected.providerPaymentId || '—' }}</strong></div>
+      </div>
+
+      @if (canRefund(selected)) {
+        <form class="refund-form" (submit)="$event.preventDefault(); submitRefund()">
+          <h4>Issue refund</h4>
+          <label>
+            Amount in rupees
+            <input
+              type="number"
+              min="1"
+              step="0.01"
+              [value]="refundAmountRupees()"
+              (input)="onRefundAmountInput($event)"
+            />
+          </label>
+          <label>
+            Reason
+            <textarea
+              rows="3"
+              [value]="refundReason()"
+              (input)="onRefundReasonInput($event)"
+              placeholder="Duplicate payment, cancellation before review, technical issue..."
+            ></textarea>
+          </label>
+          <label>
+            Speed
+            <select [value]="refundSpeed()" (change)="onRefundSpeedChange($event)">
+              <option value="normal">Normal</option>
+              <option value="optimum">Optimum</option>
+            </select>
+          </label>
+          <label class="check-row">
+            <input
+              type="checkbox"
+              [checked]="refundCancelConsultation()"
+              (change)="onRefundCancelChange($event)"
+            />
+            Cancel consultation if fully refunded
+          </label>
+          <button type="submit" class="btn-primary" [disabled]="refundSubmitting()">
+            {{ refundSubmitting() ? 'Submitting…' : 'Submit refund' }}
+          </button>
+        </form>
+      } @else {
+        <p class="muted-panel">Refund action is available only for paid payments with refundable balance.</p>
+      }
+
+      <div class="detail-section">
+        <h4>Refunds</h4>
+        @if (detailsLoading()) {
+          <p class="loading-text">Loading history…</p>
+        } @else if (selectedRefunds().length) {
+          <div class="mini-list">
+            @for (refund of selectedRefunds(); track refund.id) {
+              <div class="mini-row">
+                <div>
+                  <strong>{{ refund.status }}</strong>
+                  <span>{{ refund.providerRefundId || 'Refund' }}</span>
+                </div>
+                <div class="num">₹{{ formatPaise(refund.amountInPaise) }}</div>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="muted-panel">No refunds recorded.</p>
+        }
+      </div>
+
+      <div class="detail-section">
+        <h4>Gateway events</h4>
+        @if (detailsError()) {
+          <p class="error">{{ detailsError() }}</p>
+        } @else if (selectedEvents().length) {
+          <div class="mini-list">
+            @for (event of selectedEvents(); track event.id) {
+              <div class="mini-row">
+                <div>
+                  <strong>{{ event.eventType }}</strong>
+                  <span>{{ event.source }} · {{ event.status || 'received' }} · {{ event.receivedAt | date:'short' }}</span>
+                </div>
+                <div class="num">{{ event.signatureVerified ? 'Verified' : 'Internal' }}</div>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="muted-panel">No gateway events recorded yet.</p>
+        }
+      </div>
+    </article>
+  </section>
+}
 @if (toast()) { <div class="toast">{{ toast() }}</div> }

@@ -38,6 +38,14 @@ export class AdminApi {
   getPayments(...args: Parameters<AdminReportsApi['getPayments']>) {
     return this.reports.getPayments(...(args as Parameters<AdminReportsApi['getPayments']>));
   }
+  getPaymentEvents(...args: Parameters<AdminReportsApi['getPaymentEvents']>) {
+    return this.reports.getPaymentEvents(
+      ...(args as Parameters<AdminReportsApi['getPaymentEvents']>),
+    );
+  }
+  refundPayment(...args: Parameters<AdminReportsApi['refundPayment']>) {
+    return this.reports.refundPayment(...(args as Parameters<AdminReportsApi['refundPayment']>));
+  }
   exportPaymentsCsv(...args: Parameters<AdminReportsApi['exportPaymentsCsv']>) {
     return this.reports.exportPaymentsCsv(
       ...(args as Parameters<AdminReportsApi['exportPaymentsCsv']>),

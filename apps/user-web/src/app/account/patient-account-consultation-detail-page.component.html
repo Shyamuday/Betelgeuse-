@@ -19,6 +19,28 @@
       </div>
     </div>
 
+    <section class="payment-panel">
+      <div>
+        <p class="eyebrow">Payment</p>
+        <h2>{{ paymentStatusLabel(active.payment?.status) }}</h2>
+        <p>{{ paymentStatusMessage(active.payment?.status) }}</p>
+      </div>
+      <div class="payment-grid">
+        <div>
+          <span>Amount</span>
+          <strong>{{ formatInr(active.payment?.amountInPaise) }}</strong>
+        </div>
+        <div>
+          <span>Refunded</span>
+          <strong>{{ formatInr(active.payment?.refundedAmountInPaise) }}</strong>
+        </div>
+        <div>
+          <span>Order reference</span>
+          <strong>{{ active.payment?.providerOrderId || 'Created after checkout starts' }}</strong>
+        </div>
+      </div>
+    </section>
+
     <app-consultation-detail
       [consultation]="active"
       userRole="PATIENT"

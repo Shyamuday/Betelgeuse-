@@ -2,11 +2,13 @@
 .pay-hdr { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1.25rem; }
 .pay-hdr h2 { margin: 0; }
 .pay-hdr p { margin: 0.25rem 0 0; color: #64748b; }
-.summary-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+.summary-cards { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
 .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; }
 .card .val { font-size: 1.5rem; font-weight: 700; }
 .card .lbl { color: #64748b; font-size: 0.85rem; }
 .card.paid .val { color: #166534; }
+.card.refund .val { color: #1d4ed8; }
+.card.net .val { color: #0f766e; }
 .card.pending .val { color: #92400e; }
 .card.failed .val { color: #991b1b; }
 .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; align-items: center; }
@@ -27,10 +29,82 @@ th, td { padding: 0.75rem; border-bottom: 1px solid #f1f5f9; text-align: left; }
 .error-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; }
 .error-row .error { color: #b91c1c; margin: 0; }
 .retry-btn { border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; padding: 0.45rem 0.7rem; cursor: pointer; }
+.row-actions { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+.detail-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(15, 23, 42, 0.38);
+}
+.detail-panel {
+  width: min(720px, 100%);
+  height: 100%;
+  overflow: auto;
+  background: #f8fafc;
+  border-left: 1px solid #e2e8f0;
+  padding: 1.25rem;
+  box-shadow: -20px 0 60px rgba(15, 23, 42, 0.22);
+}
+.detail-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+.detail-head h3 { margin: 0.15rem 0; color: #0f172a; }
+.detail-head p { margin: 0; color: #64748b; }
+.eyebrow { margin: 0; color: #0f766e; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; }
+.icon-btn { width: 36px; height: 36px; border-radius: 999px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 1.25rem; line-height: 1; }
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+.detail-grid div, .refund-form, .detail-section {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.85rem;
+}
+.detail-grid span, .mini-row span { display: block; color: #64748b; font-size: 0.78rem; }
+.detail-grid strong { display: block; margin-top: 0.2rem; color: #0f172a; overflow-wrap: anywhere; }
+.refund-form, .detail-section { margin-top: 0.85rem; }
+.refund-form h4, .detail-section h4 { margin: 0 0 0.75rem; color: #0f172a; }
+.refund-form label { display: grid; gap: 0.35rem; margin-bottom: 0.65rem; color: #334155; font-weight: 700; font-size: 0.88rem; }
+.refund-form input, .refund-form textarea, .refund-form select {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+}
+.refund-form textarea { resize: vertical; }
+.check-row { display: flex !important; grid-template-columns: none; align-items: center; gap: 0.5rem !important; }
+.check-row input { width: auto; }
+.mini-list { display: grid; gap: 0.5rem; }
+.mini-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: start;
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+  padding: 0.65rem;
+  background: #f8fafc;
+}
+.mini-row strong { color: #0f172a; }
+.muted-panel { margin: 0.5rem 0 0; color: #64748b; }
 .toast { position: fixed; bottom: 1rem; right: 1rem; background: #0f172a; color: #fff; padding: 0.75rem 1rem; border-radius: 8px; }
+@media (max-width: 1100px) { .summary-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 900px) { .summary-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 768px) {
   .pay-hdr { flex-direction: column; align-items: stretch; }
   .filters { flex-direction: column; align-items: stretch; }
+  .detail-panel { width: 100%; }
+  .detail-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) { .summary-cards { grid-template-columns: 1fr; } }
