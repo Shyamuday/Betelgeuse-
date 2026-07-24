@@ -38,6 +38,19 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'psychologists',
+    loadComponent: () =>
+      import('./features/psychologists/psychologists.component').then(
+        (m) => m.PsychologistsComponent,
+      ),
+    title: 'Psychologists - Hope Hub',
+    data: {
+      breadcrumb: 'Psychologists',
+      description: 'Meet Hope Hub psychologists available for mental wellness support',
+      keywords: 'psychologists, mental wellness providers, hope hub support, counseling',
+    },
+  },
+  {
     path: 'community',
     loadComponent: () =>
       import('./features/community/community.component').then((m) => m.CommunityComponent),

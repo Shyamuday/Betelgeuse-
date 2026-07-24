@@ -5,12 +5,18 @@ export const HOMEOPATHIC_DOCTOR_TYPES = [
   'VISITING_DOCTOR',
   'TELEMEDICINE_DOCTOR',
   'MEDICAL_INTERN',
-  'RESIDENT_MEDICAL_OFFICER'
+  'RESIDENT_MEDICAL_OFFICER',
+  'PSYCHOLOGIST'
 ] as const;
 
 export type HomeopathicDoctorType = (typeof HOMEOPATHIC_DOCTOR_TYPES)[number];
 
-export const HOMEOPATHIC_SPECIALTY_FOCUSES = ['SKIN', 'CHILD', 'WOMENS_HEALTH', 'CHRONIC_DISEASES'] as const;
+export const HOMEOPATHIC_SPECIALTY_FOCUSES = [
+  'SKIN',
+  'CHILD',
+  'WOMENS_HEALTH',
+  'CHRONIC_DISEASES'
+] as const;
 
 export type HomeopathicSpecialtyFocus = (typeof HOMEOPATHIC_SPECIALTY_FOCUSES)[number];
 
@@ -21,7 +27,8 @@ export const DOCTOR_TYPE_LABELS: Record<HomeopathicDoctorType, string> = {
   VISITING_DOCTOR: 'Visiting Doctor',
   TELEMEDICINE_DOCTOR: 'Telemedicine Doctor',
   MEDICAL_INTERN: 'Medical Intern',
-  RESIDENT_MEDICAL_OFFICER: 'Resident Medical Officer (RMO)'
+  RESIDENT_MEDICAL_OFFICER: 'Resident Medical Officer (RMO)',
+  PSYCHOLOGIST: 'Psychologist'
 };
 
 export const SPECIALTY_FOCUS_LABELS: Record<HomeopathicSpecialtyFocus, string> = {

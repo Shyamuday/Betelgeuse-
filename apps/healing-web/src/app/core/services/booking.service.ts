@@ -23,6 +23,29 @@ export type HopeHubBookingPayload = {
   entryPage?: string;
 };
 
+export type HopeHubProvider = {
+  id: string;
+  userId: string;
+  name: string;
+  profileImageUrl?: string | null;
+  specialty?: string | null;
+  designation?: string | null;
+  department?: string | null;
+  bio?: string | null;
+  yearsOfExperience?: number | null;
+  focusAreas: string[];
+};
+
+export type HopeHubProviderResponse = {
+  providers: HopeHubProvider[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -37,6 +60,19 @@ export class BookingService {
   dashboard(): Observable<{ consultations: any[]; leads: any[] }> {
     return this.http.get<{ consultations: any[]; leads: any[] }>(
       `${this.apiUrl}/hope-hub/dashboard`,
+    );
+  }
+
+  providers(
+    params: { page?: number; pageSize?: number; q?: string } = {},
+  ): Observable<HopeHubProviderResponse> {
+    const searchParams = new URLSearchParams({
+      page: String(params.page ?? 1),
+      pageSize: String(params.pageSize ?? 20),
+      q: params.q ?? '',
+    });
+    return this.http.get<HopeHubProviderResponse>(
+      `${this.apiUrl}/hope-hub/providers?${searchParams.toString()}`,
     );
   }
 

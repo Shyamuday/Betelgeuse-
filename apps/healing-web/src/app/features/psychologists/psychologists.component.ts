@@ -1,0 +1,75 @@
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { environment } from '../../../environments/environment';
+import { BookingService, HopeHubProvider } from '../../core/services/booking.service';
+
+@Component({
+  selector: 'app-psychologists',
+  standalone: true,
+  imports: [FormsModule, RouterLink],
+  templateUrl: './psychologists.component.html',
+})
+export class PsychologistsComponent implements OnInit {
+  private readonly bookingService = inject(BookingService);
+
+  readonly providers = signal<HopeHubProvider[]>([]);
+  readonly loading = signal(false);
+  readonly error = signal('');
+  readonly q = signal('');
+  readonly page = signal(1);
+  readonly pageSize = 20;
+  readonly total = signal(0);
+  readonly totalPages = signal(1);
+
+  ngOnInit(): void {
+    this.load();
+  }
+
+  load(): void {
+    this.loading.set(true);
+    this.error.set('');
+    this.bookingService
+      .providers({ page: this.page(), pageSize: this.pageSize, q: this.q() })
+      .subscribe({
+        next: (res) => {
+          this.providers.set(res.providers);
+          this.total.set(res.pagination.total);
+          this.totalPages.set(res.pagination.totalPages);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.error.set('Could not load psychologists right now.');
+          this.loading.set(false);
+        },
+      });
+  }
+
+  search(value: string): void {
+    this.q.set(value);
+    this.page.set(1);
+    this.load();
+  }
+
+  setPage(page: number): void {
+    if (page < 1 || page > this.totalPages() || page === this.page()) {
+      return;
+    }
+    this.page.set(page);
+    this.load();
+  }
+
+  pages(): number[] {
+    return Array.from({ length: this.totalPages() }, (_, index) => index + 1);
+  }
+
+  providerImageUrl(provider: HopeHubProvider): string | null {
+    if (!provider.profileImageUrl) {
+      return null;
+    }
+    if (provider.profileImageUrl.startsWith('http')) {
+      return provider.profileImageUrl;
+    }
+    return `${environment.apiUrl}${provider.profileImageUrl}`;
+  }
+}

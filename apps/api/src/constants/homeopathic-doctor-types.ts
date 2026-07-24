@@ -8,12 +8,13 @@ export const HOMEOPATHIC_DOCTOR_TYPE_LABELS: Record<HomeopathicDoctorType, strin
   VISITING_DOCTOR: 'Visiting Doctor',
   TELEMEDICINE_DOCTOR: 'Telemedicine Doctor',
   MEDICAL_INTERN: 'Medical Intern',
-  RESIDENT_MEDICAL_OFFICER: 'Resident Medical Officer (RMO)'
+  RESIDENT_MEDICAL_OFFICER: 'Resident Medical Officer (RMO)',
+  PSYCHOLOGIST: 'Psychologist'
 };
 
 export const HOMEOPATHIC_SPECIALTY_FOCUS_LABELS: Record<HomeopathicSpecialtyFocus, string> = {
-  SKIN: "Skin",
-  CHILD: "Child",
+  SKIN: 'Skin',
+  CHILD: 'Child',
   WOMENS_HEALTH: "Women's Health",
   CHRONIC_DISEASES: 'Chronic Diseases'
 };
@@ -35,7 +36,8 @@ export const DOCTOR_TYPE_CAPABILITIES: Record<HomeopathicDoctorType, DoctorTypeC
   VISITING_DOCTOR: { slots: false, earnings: false, prescribe: true, caseAnalysis: true },
   TELEMEDICINE_DOCTOR: { slots: true, earnings: true, prescribe: true, caseAnalysis: true },
   MEDICAL_INTERN: { slots: false, earnings: false, prescribe: false, caseAnalysis: true },
-  RESIDENT_MEDICAL_OFFICER: { slots: true, earnings: true, prescribe: true, caseAnalysis: true }
+  RESIDENT_MEDICAL_OFFICER: { slots: true, earnings: true, prescribe: true, caseAnalysis: true },
+  PSYCHOLOGIST: { slots: true, earnings: true, prescribe: false, caseAnalysis: false }
 };
 
 export const doctorProfileSelect = {
@@ -69,6 +71,9 @@ export function resolveDoctorSpecialty(input: {
 }) {
   if (input.doctorType === HomeopathicDoctorType.SPECIALIST_CONSULTANT && input.specialtyFocus) {
     return `${HOMEOPATHIC_SPECIALTY_FOCUS_LABELS[input.specialtyFocus]} Specialist`;
+  }
+  if (input.doctorType === HomeopathicDoctorType.PSYCHOLOGIST) {
+    return input.specialty?.trim() || 'Psychology';
   }
   return input.specialty?.trim() || 'Homeopathy';
 }
@@ -104,7 +109,9 @@ export function doctorProfileSchema() {
 export function toDoctorProfilePayload(body: z.infer<ReturnType<typeof doctorProfileSchema>>) {
   const doctorType = body.doctorType ?? HomeopathicDoctorType.JUNIOR_DOCTOR;
   const specialtyFocus =
-    doctorType === HomeopathicDoctorType.SPECIALIST_CONSULTANT ? body.specialtyFocus ?? null : null;
+    doctorType === HomeopathicDoctorType.SPECIALIST_CONSULTANT
+      ? (body.specialtyFocus ?? null)
+      : null;
 
   return {
     doctorType,

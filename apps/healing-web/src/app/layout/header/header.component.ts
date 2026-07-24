@@ -71,6 +71,14 @@ import { User } from '../../core/models/auth.model';
             >
               Services
             </a>
+            <a
+              routerLink="/psychologists"
+              routerLinkActive="text-primary-600 border-b-2 border-primary-600"
+              class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
+              [attr.aria-current]="isCurrentRoute('/psychologists') ? 'page' : null"
+            >
+              Psychologists
+            </a>
 
             <!-- Tools Dropdown removed — flat nav links -->
             <a
@@ -311,6 +319,16 @@ import { User } from '../../core/models/auth.model';
                 role="menuitem"
               >
                 Services
+              </a>
+              <a
+                routerLink="/psychologists"
+                (click)="navigateAndClose('/psychologists')"
+                routerLinkActive="text-primary-600 bg-primary-50"
+                class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                [attr.aria-current]="isCurrentRoute('/psychologists') ? 'page' : null"
+                role="menuitem"
+              >
+                Psychologists
               </a>
 
               <!-- Tools — flat links, no section label -->

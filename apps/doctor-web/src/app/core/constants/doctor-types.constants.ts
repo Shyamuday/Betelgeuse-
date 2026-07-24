@@ -6,6 +6,7 @@ export const HOMEOPATHIC_DOCTOR_TYPES = [
   'TELEMEDICINE_DOCTOR',
   'MEDICAL_INTERN',
   'RESIDENT_MEDICAL_OFFICER',
+  'PSYCHOLOGIST',
 ] as const;
 
 export type HomeopathicDoctorType = (typeof HOMEOPATHIC_DOCTOR_TYPES)[number];
@@ -27,6 +28,7 @@ export const DOCTOR_TYPE_LABELS: Record<HomeopathicDoctorType, string> = {
   TELEMEDICINE_DOCTOR: 'Telemedicine Doctor',
   MEDICAL_INTERN: 'Medical Intern',
   RESIDENT_MEDICAL_OFFICER: 'Resident Medical Officer (RMO)',
+  PSYCHOLOGIST: 'Psychologist',
 };
 
 export const SPECIALTY_FOCUS_LABELS: Record<HomeopathicSpecialtyFocus, string> = {
@@ -68,6 +70,7 @@ export const DOCTOR_TYPE_CAPABILITIES: Record<HomeopathicDoctorType, DoctorCapab
   TELEMEDICINE_DOCTOR: { slots: true, earnings: true, prescribe: true, caseAnalysis: true },
   MEDICAL_INTERN: { slots: false, earnings: false, prescribe: false, caseAnalysis: true },
   RESIDENT_MEDICAL_OFFICER: { slots: true, earnings: true, prescribe: true, caseAnalysis: true },
+  PSYCHOLOGIST: { slots: true, earnings: true, prescribe: false, caseAnalysis: false },
 };
 
 export function capabilitiesForDoctorType(type?: HomeopathicDoctorType | null): DoctorCapabilities {

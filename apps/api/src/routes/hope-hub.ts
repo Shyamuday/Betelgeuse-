@@ -1,12 +1,18 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { PaymentStatus, Role } from '@prisma/client';
+import { HomeopathicDoctorType, PaymentStatus, Role } from '@prisma/client';
 import { authRequired, allowRoles } from '../auth.js';
 import { prisma } from '../db.js';
-import { asyncRoute, includeConsultationRelations, queryText } from '../utils/helpers.js';
+import {
+  asyncRoute,
+  includeConsultationRelations,
+  queryPositiveInt,
+  queryText
+} from '../utils/helpers.js';
 import { ensureBillingPlans } from './catalog.js';
 import { resolveConsultationCheckout } from '../services/checkout-pricing.js';
 import { PRODUCT_EVENTS, trackProductEvent } from '../services/product-analytics.js';
+import { enrichWithProfileImageUrl, userProfileImagePath } from '../utils/profile-image-url.js';
 
 export const hopeHubRouter = Router();
 
@@ -97,6 +103,92 @@ hopeHubRouter.get(
         available: !isWeekend && !bookedTimes.has(slot.time),
         booked: bookedTimes.has(slot.time)
       }))
+    });
+  })
+);
+
+hopeHubRouter.get(
+  '/hope-hub/providers',
+  asyncRoute(async (req, res) => {
+    const page = queryPositiveInt(req, 'page', 1);
+    const pageSize = Math.max(1, Math.min(50, queryPositiveInt(req, 'pageSize', 20)));
+    const q = queryText(req, 'q').trim();
+
+    const psychologyWhere = {
+      showOnWebsite: true,
+      user: { isActive: true },
+      OR: [
+        { doctorType: HomeopathicDoctorType.PSYCHOLOGIST },
+        { specialty: { contains: 'psycholog', mode: 'insensitive' as const } },
+        { designation: { contains: 'psycholog', mode: 'insensitive' as const } },
+        { department: { contains: 'mental', mode: 'insensitive' as const } },
+        { department: { contains: 'wellness', mode: 'insensitive' as const } },
+        {
+          focusAreas: {
+            hasSome: ['Psychology', 'Anxiety support', 'Stress management', 'Counselling']
+          }
+        }
+      ],
+      ...(q
+        ? {
+            AND: [
+              {
+                OR: [
+                  { user: { name: { contains: q, mode: 'insensitive' as const } } },
+                  { specialty: { contains: q, mode: 'insensitive' as const } },
+                  { designation: { contains: q, mode: 'insensitive' as const } },
+                  { department: { contains: q, mode: 'insensitive' as const } },
+                  { bio: { contains: q, mode: 'insensitive' as const } }
+                ]
+              }
+            ]
+          }
+        : {})
+    };
+
+    const [providers, total] = await Promise.all([
+      prisma.doctor.findMany({
+        where: psychologyWhere,
+        select: {
+          id: true,
+          specialty: true,
+          designation: true,
+          department: true,
+          bio: true,
+          yearsOfExperience: true,
+          focusAreas: true,
+          websiteOrder: true,
+          user: { select: { id: true, name: true, profileImageKey: true } }
+        },
+        orderBy: [{ websiteOrder: { sort: 'asc', nulls: 'last' } }, { user: { name: 'asc' } }],
+        skip: (page - 1) * pageSize,
+        take: pageSize
+      }),
+      prisma.doctor.count({ where: psychologyWhere })
+    ]);
+
+    res.json({
+      providers: providers.map((provider) => {
+        const user = enrichWithProfileImageUrl(provider.user, userProfileImagePath);
+        return {
+          id: provider.id,
+          userId: user.id,
+          name: user.name,
+          profileImageUrl: user.profileImageUrl,
+          specialty: provider.specialty,
+          designation: provider.designation,
+          department: provider.department,
+          bio: provider.bio,
+          yearsOfExperience: provider.yearsOfExperience,
+          focusAreas: provider.focusAreas
+        };
+      }),
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / pageSize))
+      }
     });
   })
 );
