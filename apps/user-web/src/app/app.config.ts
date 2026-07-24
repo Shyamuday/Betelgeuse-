@@ -2,6 +2,7 @@ import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
+  isDevMode,
 } from '@angular/core';
 import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import {
@@ -9,6 +10,7 @@ import {
   withExperimentalAutoCleanupInjectors,
   withExperimentalPlatformNavigation,
 } from '@angular/router';
+import { provideServiceWorker } from '@angular/service-worker';
 import { CLINIC_API_BASE_URL, CLINIC_AUTH_TOKEN_KEY } from '@hopehub/clinic-api';
 
 import { routes } from './app.routes';
@@ -28,5 +30,9 @@ export const appConfig: ApplicationConfig = {
       withExperimentalAutoCleanupInjectors(),
     ),
     provideHttpClient(withXhr(), withInterceptors([authInterceptor])),
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000',
+    }),
   ],
 };
