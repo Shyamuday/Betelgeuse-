@@ -13,7 +13,7 @@
           "/favicon-192x192.png",
           "/favicon-512x512.png",
           "/apple-touch-icon.png",
-          "/hopehublogo.png",
+          "/image/hopehublogo.png",
           "/*.css",
           "/*.js"
         ]

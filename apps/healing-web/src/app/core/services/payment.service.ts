@@ -135,14 +135,14 @@ export class PaymentService {
         amount: order.amountInPaise,
         currency: order.currency,
         name: 'Hope Hub',
-        description: 'Donation',
+        description: donor.donorName || donor.donorEmail ? 'Hope Hub payment' : 'Hope Hub support',
         order_id: order.orderId,
         prefill: {
           name: donor.donorName || '',
           email: donor.donorEmail || '',
           contact: donor.donorPhone || '',
         },
-        theme: { color: '#16a34a' },
+        theme: { color: '#0284c7' },
         handler: (response: RazorpayCheckoutResponse) => {
           if (settled) return;
           settled = true;

@@ -28,7 +28,7 @@ export class SeoService {
   private readonly siteUrl = SEO_DEFAULTS.SITE_URL;
   private readonly defaultTitle = SEO_DEFAULTS.DEFAULT_TITLE;
   private readonly defaultDescription = SEO_DEFAULTS.DEFAULT_DESCRIPTION;
-  private readonly defaultImage = `${this.siteUrl}/hopehublogo.png`;
+  private readonly defaultImage = `${this.siteUrl}/image/hopehublogo.png`;
 
   init() {
     this.router.events

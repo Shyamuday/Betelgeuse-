@@ -7,6 +7,10 @@ import { BookingService } from '../../core/services/booking.service';
 import { PaymentService } from '../../core/services/payment.service';
 import { User } from '../../core/models/auth.model';
 import { ProgressDashboardComponent } from '../../shared/components/progress-dashboard/progress-dashboard.component';
+import {
+  PaymentFlowState,
+  PaymentStatusOverlayComponent,
+} from '../../shared/components/payment-status-overlay/payment-status-overlay.component';
 
 type HopeHubConsultation = {
   id: string;
@@ -28,7 +32,7 @@ type BookingTimelineStep = {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, ProgressDashboardComponent],
+  imports: [CommonModule, RouterModule, ProgressDashboardComponent, PaymentStatusOverlayComponent],
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Header -->
@@ -345,6 +349,15 @@ type BookingTimelineStep = {
           </div>
         }
       </div>
+
+      <app-payment-status-overlay
+        [state]="paymentFlowState()"
+        [title]="paymentFlowTitle()"
+        [message]="paymentFlowMessage()"
+        [canRetry]="!!paymentFlowConsultation()"
+        (retry)="retrySelectedPayment()"
+        (close)="closePaymentOverlay()"
+      />
     </div>
   `,
 })
@@ -356,6 +369,9 @@ export class DashboardComponent implements OnInit {
   isLoading = signal(false);
   isPaying = signal(false);
   notice = signal('');
+  paymentFlowState = signal<PaymentFlowState>('IDLE');
+  paymentFlowError = signal('');
+  paymentFlowConsultation = signal<HopeHubConsultation | null>(null);
   consultations = signal<HopeHubConsultation[]>([]);
   leads = signal<any[]>([]);
 
@@ -402,23 +418,71 @@ export class DashboardComponent implements OnInit {
   }
 
   async retryPayment(consultation: HopeHubConsultation): Promise<void> {
+    this.paymentFlowConsultation.set(consultation);
+    this.paymentFlowError.set('');
+    this.paymentFlowState.set('CREATING_ORDER');
     this.isPaying.set(true);
     this.notice.set('');
     try {
+      this.paymentFlowState.set('OPENING_CHECKOUT');
       await this.paymentService.payConsultation(consultation);
+      this.paymentFlowState.set('SUCCESS');
       this.notice.set(
         'Payment verified successfully. Your booking is now ready for provider confirmation.',
       );
       this.loadDashboard();
     } catch (error) {
-      this.notice.set(
+      const message =
         error instanceof Error
           ? error.message
-          : 'Payment could not be completed. Please retry or contact support.',
-      );
+          : 'Payment could not be completed. Please retry or contact support.';
+      this.paymentFlowError.set(message);
+      this.paymentFlowState.set('ERROR');
+      this.notice.set(message);
     } finally {
       this.isPaying.set(false);
     }
+  }
+
+  retrySelectedPayment(): void {
+    const consultation = this.paymentFlowConsultation();
+    if (!consultation || this.isPaying()) return;
+    void this.retryPayment(consultation);
+  }
+
+  closePaymentOverlay(): void {
+    if (this.paymentFlowState() === 'SUCCESS' || this.paymentFlowState() === 'ERROR') {
+      this.paymentFlowState.set('IDLE');
+      this.paymentFlowError.set('');
+      this.paymentFlowConsultation.set(null);
+    }
+  }
+
+  paymentFlowTitle(): string {
+    const state = this.paymentFlowState();
+    if (state === 'CREATING_ORDER') return 'Preparing payment';
+    if (state === 'OPENING_CHECKOUT') return 'Opening secure checkout';
+    if (state === 'VERIFYING') return 'Verifying payment';
+    if (state === 'SUCCESS') return 'Payment successful';
+    if (state === 'ERROR') return 'Payment failed';
+    return '';
+  }
+
+  paymentFlowMessage(): string {
+    const state = this.paymentFlowState();
+    if (state === 'CREATING_ORDER') return 'Creating a secure Razorpay order for your session.';
+    if (state === 'OPENING_CHECKOUT') return 'Complete the payment in the Razorpay popup.';
+    if (state === 'VERIFYING') return 'Please wait while we verify your payment securely.';
+    if (state === 'SUCCESS') {
+      return 'Your payment was verified. The Hope Hub team can now confirm your provider and session instructions.';
+    }
+    if (state === 'ERROR') {
+      return (
+        this.paymentFlowError() ||
+        'Payment could not be completed. You can retry or contact support if money was debited.'
+      );
+    }
+    return '';
   }
 
   timelineSteps(consultation: HopeHubConsultation): BookingTimelineStep[] {
