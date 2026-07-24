@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import {
+  AnnouncementBannerComponent,
   FeedbackSectionComponent,
   ServicesCarouselComponent,
   StatsSectionComponent,
@@ -15,6 +16,7 @@ import { ServicesOverviewComponent } from './components/services-overview/servic
   selector: 'app-home',
   standalone: true,
   imports: [
+    AnnouncementBannerComponent,
     FeedbackSectionComponent,
     HomeCommunityComponent,
     HomeHeroComponent,
@@ -29,4 +31,11 @@ import { ServicesOverviewComponent } from './components/services-overview/servic
 })
 export class HomeComponent {
   readonly APP_CONSTANTS = APP_CONSTANTS;
+
+  readonly announcementMessage =
+    'Join our daily 9 PM Telegram voice circle with Hope Hub experts - anonymous-friendly support, guidance, and calm conversation.';
+
+  onAnnouncementDismiss() {
+    console.log('Announcement dismissed');
+  }
 }
