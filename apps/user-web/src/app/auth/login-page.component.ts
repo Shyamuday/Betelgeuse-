@@ -26,7 +26,7 @@ export class LoginPageComponent implements OnInit {
 
     // Open the auth overlay automatically
     const ref = this.overlayService.open(AuthFormOverlayComponent, {
-      width: '440px',
+      width: '480px',
       panelClass: 'app-overlay-panel',
     });
 

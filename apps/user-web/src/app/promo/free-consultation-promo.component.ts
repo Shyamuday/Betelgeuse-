@@ -41,7 +41,7 @@ export class FreeConsultationPromoComponent {
     event.preventDefault();
     this.hostRef.close();
     this.overlayService.open(AuthFormOverlayComponent, {
-      width: '440px',
+      width: '480px',
       panelClass: 'app-overlay-panel',
     });
   }

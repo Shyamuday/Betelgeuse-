@@ -12,10 +12,6 @@ type Testimonial = {
   quote: string;
   stars: number;
   isPublished: boolean;
-  isAnonymous: boolean;
-  consentToPublish: boolean;
-  submitterEmail?: string | null;
-  source?: string | null;
   sortOrder?: number | null;
   createdAt: string;
 };
@@ -29,10 +25,7 @@ function emptyModel() {
     quote: '',
     stars: 5,
     isPublished: false,
-    isAnonymous: false,
-    consentToPublish: true,
-    submitterEmail: '',
-    sortOrder: '' as number | '',
+    sortOrder: '' as number | ''
   };
 }
 
@@ -40,7 +33,7 @@ function emptyModel() {
   selector: 'app-testimonials-page',
   imports: [CommonModule, FormField],
   templateUrl: './testimonials-page.html',
-  styleUrl: './testimonials-page.scss',
+  styleUrl: './testimonials-page.scss'
 })
 export class TestimonialsPage {
   readonly testimonials = signal<Testimonial[]>([]);
@@ -80,7 +73,7 @@ export class TestimonialsPage {
     try {
       await this.api.createTestimonial({
         ...m,
-        sortOrder: m.sortOrder !== '' ? Number(m.sortOrder) : null,
+        sortOrder: m.sortOrder !== '' ? Number(m.sortOrder) : null
       });
       this.message.set('Testimonial added.');
       this.createModel.set(emptyModel());
@@ -102,16 +95,11 @@ export class TestimonialsPage {
       quote: t.quote,
       stars: t.stars,
       isPublished: t.isPublished,
-      isAnonymous: t.isAnonymous,
-      consentToPublish: t.consentToPublish,
-      submitterEmail: t.submitterEmail || '',
-      sortOrder: t.sortOrder ?? '',
+      sortOrder: t.sortOrder ?? ''
     });
   }
 
-  cancelEdit() {
-    this.editingId.set(null);
-  }
+  cancelEdit() { this.editingId.set(null); }
 
   async saveEdit() {
     const id = this.editingId();
@@ -122,7 +110,7 @@ export class TestimonialsPage {
     try {
       await this.api.updateTestimonial(id, {
         ...m,
-        sortOrder: m.sortOrder !== '' ? Number(m.sortOrder) : null,
+        sortOrder: m.sortOrder !== '' ? Number(m.sortOrder) : null
       });
       this.message.set('Testimonial updated.');
       this.editingId.set(null);
@@ -138,10 +126,7 @@ export class TestimonialsPage {
     this.mutating.set(true);
     this.message.set('');
     try {
-      await this.api.updateTestimonial(t.id, {
-        isPublished: !t.isPublished,
-        ...(!t.isPublished ? { consentToPublish: true } : {}),
-      });
+      await this.api.updateTestimonial(t.id, { isPublished: !t.isPublished });
       this.message.set(t.isPublished ? 'Unpublished.' : 'Published.');
       await this.load();
     } catch {
@@ -165,12 +150,5 @@ export class TestimonialsPage {
     }
   }
 
-  stars(n: number) {
-    return Array.from({ length: n }, (_, i) => i + 1);
-  }
-
-  statusLabel(t: Testimonial) {
-    if (t.isPublished) return 'Published';
-    return t.source === 'public-feedback' ? 'Pending review' : 'Draft';
-  }
+  stars(n: number) { return Array.from({ length: n }, (_, i) => i + 1); }
 }

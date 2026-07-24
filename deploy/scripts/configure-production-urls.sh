@@ -4,8 +4,7 @@
 #   bash deploy/scripts/configure-production-urls.sh
 #
 # Override any value from deploy/config/production.env by exporting the matching
-# API_PUBLIC_URL / WEB_ORIGIN / ADMIN_ORIGIN / DOCTOR_ORIGIN / OPERATIONS_ORIGIN /
-# HEALING_ORIGIN / CORS_ORIGINS.
+# API_PUBLIC_URL / WEB_ORIGIN / ADMIN_ORIGIN / DOCTOR_ORIGIN / OPERATIONS_ORIGIN.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -23,8 +22,7 @@ PATIENT_URL="${WEB_ORIGIN:-${HOPEHUB_WEB_ORIGIN:-https://hopehub.in}}"
 ADMIN_URL="${ADMIN_ORIGIN:-${HOPEHUB_ADMIN_ORIGIN:-https://admin.hopehub.in}}"
 DOCTOR_URL="${DOCTOR_ORIGIN:-${HOPEHUB_DOCTOR_ORIGIN:-https://doctor.hopehub.in}}"
 OPS_URL="${OPERATIONS_ORIGIN:-${HOPEHUB_OPERATIONS_ORIGIN:-https://ops.hopehub.in}}"
-HEALING_URL="${HEALING_ORIGIN:-${HOPEHUB_HEALING_ORIGIN:-https://mind.hopehub.in}}"
-CORS_URLS="${CORS_ORIGINS:-${HOPEHUB_CORS_ORIGINS:-$PATIENT_URL,$HEALING_URL,$ADMIN_URL,$DOCTOR_URL,$OPS_URL}}"
+HEALING_URL="${HEALING_ORIGIN:-${HOPEHUB_HEALING_ORIGIN:-https://healing.hopehub.in}}"
 
 patch_app_constants() {
   local file="$1"
@@ -61,4 +59,3 @@ echo "  Admin:      $ADMIN_URL"
 echo "  Doctor:     $DOCTOR_URL"
 echo "  Operations: $OPS_URL"
 echo "  Healing:    $HEALING_URL"
-echo "  CORS:       $CORS_URLS"

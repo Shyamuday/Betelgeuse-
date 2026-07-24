@@ -495,7 +495,7 @@ export class AuthFormOverlayComponent {
     this.closeActiveOverlay();
   }
 
-  isEmail(value: string) {
+  private isEmail(value: string) {
     return /.+@.+\..+/.test(value.trim());
   }
 

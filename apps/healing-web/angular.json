@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "hope-hub-website": {
+    "healing-hub-website": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -125,15 +125,12 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
-          "options": {
-            "port": 4204
-          },
           "configurations": {
             "production": {
-              "buildTarget": "hope-hub-website:build:production"
+              "buildTarget": "healing-hub-website:build:production"
             },
             "development": {
-              "buildTarget": "hope-hub-website:build:development"
+              "buildTarget": "healing-hub-website:build:development"
             }
           },
           "defaultConfiguration": "development"

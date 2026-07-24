@@ -17,7 +17,7 @@ export class HomeFinalCtaSectionComponent {
   openAuthOverlay(event: Event) {
     event.preventDefault();
     this.overlayService.open(AuthFormOverlayComponent, {
-      width: '440px',
+      width: '480px',
       panelClass: 'app-overlay-panel',
     });
   }
